@@ -1,0 +1,126 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang='en-US'>
+<head>
+    <title>LayoutTest</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link type="text/css" rel="stylesheet" xmlns="http://www.w3.org/1999/xhtml" />
+
+    <meta name="description" content="This is a test page" />
+    <link href="Content/mycss2.css" rel="stylesheet" />
+    <link href="Content/css/foundation.min.css" rel="stylesheet" />
+    <link href="Content/css/foundation.css" rel="stylesheet" />
+    <link href="Content/css/app.css" rel="stylesheet" />
+    <!-- <link href="Content/mycss.css" rel="stylesheet" /> -->
+
+</head>
+<body class="mainbody">
+    <div class="TitleBar"style="color: white;vertical-align:middle;">
+        <h1>Inspection Scheduler</h1>
+    </div>
+    <div id="SearchContainer"class="input-group SearchGroup">
+        <input id="PermitSearch" type="search" class="input-group-field SearchField" placeholder="Enter Permit Number" aria-describedby="basic-addon2" />
+        <span class="input-group-button" id="button">
+            <button  onmousedown="(InspSched.UI.Search(document.getElementById('PermitSearch').value));" class="button SearchButton" type="submit" value="Search">Search</button>
+        </span>
+    </div>
+    <article id="MainArticle">
+
+        <div class="large-12 div-separator" style="height:3rem"></div>
+
+        <section id="tablediv" class="tablediv">
+            <table id="InspectionTable" class="noborder" style="border-collapse:collapse">
+
+                <thead width="100%" class="noborder" style="background-color:black; color:white; font-size: 1.25rem;">
+                    <tr>
+                        <th width="auto">Permit Number</th>
+                        <th width="46%"class="Address-1-span">Project Street Address</th>
+                        <th width="46%" class="Address-2-span" colspan="2">Project Street Address</th>
+                        <th width="38%"class="City-1-span">City / Municipality</th>
+                        <th width="38%" class="City-2-span" colspan="2">City / Municipality</th>
+                    </tr>
+                </thead>
+                <tbody class="noborder" width="100%">
+                    <tr id="CurrentPermit" width="100%">
+                        <td id="PermitSelectID">
+                            <div class="form-group" style="margin:0; height:30px">
+                                <select id="PermitSelect" onchange="( InspSched.UI.GetInspList( this.value ) );" class="form-control" style="color: black;padding-top:3px;padding-bottom: 0;font-size:18px; width: 120px; height:32px;font-weight:bold;">
+                                </select>
+                            </div>
+                        </td>
+                        <td id="ProjAddrCombined" class="Address-2-span" colspan="2" style="padding-left: 2rem; font-weight:bold;" value="ProjAddrCombined"></td>
+                        <td id="ProjCity" class="City-2-span"colspan="2" style="padding-left: 2rem;font-weight:bold;" value="ProjCity"></td>
+
+                    </tr>
+                    <tr class="noborder tr-Seperator" style="height:2rem"></tr>
+                </tbody>
+
+                <thead id="InspListHeader" class="noborder" style="background-color:black; color:white; font-size: 1.25rem; border:none;">
+                    <tr>
+                        <th class="InspReqID">Inspection ID</th>
+                        <th class="inspDate">Inspection Date</th>
+                        <th class="inspCD">Inspection Code</th>
+                        <th class="inspType">Inspection Type</th>
+                        <th class="inspResult">Result</th>
+                    </tr>
+                </thead>
+                <tbody id="InspListData" class="noborder">
+
+                    <!--<tr class="noborder">
+                        <td style="padding-left: 2rem">two one
+                        <td style="padding-left: 2rem">two two</td>
+                        <td style="padding-left: 2rem">two three</td>
+                        <td style="padding-left: 2rem">12/09/2016</td>
+                        <td style="padding-left: 2rem"><a>D</a></td>
+                    </tr>-->
+
+
+                </tbody>
+                <tbody class="noborder" width="100%">
+
+                <thead id="InspSchedHeader" class="noborder" style="background-color:black; color:white; font-size: 1.25rem">
+                    <tr>
+                        <th>Inspection Code</th>
+                        <th>Inspection Type</th>
+                        <th>Scheduled Inspection Date</th>
+                        <th colspan="2" style="text-align:center;">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="InspSchedBody" class="noborder">
+
+                    <!--<tr class="noborder" style="border-width: 0px;">
+                        <td style="padding-left: 2rem">two one</td>
+                        <td style="padding-left: 2rem">two two</td>
+                        <td colspan="2" style="padding-left: 2rem">02/09/2017</td>
+                        <td style="padding-left: 2rem; text-align:center;" ><a>Cancel</a>/<a>Reschedule</a></td>
+                    </tr>-->
+
+                </tbody>
+
+            </table>
+        </section>
+        <section id="Searching" class="Searching">Searching...</section>
+        <section id="SearchFailed" class="SearchFailed"></section>
+        <section id="NoPermit" class="NoPermit">No permit found</section>
+        <section id="Scheduler" class="Scheduler"></section>
+        <section id="NoSchedule" class="NoSchedule"></section>
+        <section id="SearchFailed" class="SearchFailed"></section>
+
+
+
+    </article>
+    <section style="height:5.5rem;"> </section>
+    <script src="Scripts/app/app.js"></script>
+    <script src="Scripts/app/XHR.js"></script>
+    <script src="Scripts/app/transport.js"></script>
+    <script src="Scripts/app/es6-promise.min.js"></script>
+    <script src="Scripts/app/UI.js"></script>
+
+    <script>
+        document.addEventListener( "DOMContentLoaded", function ( event )
+        {
+            InspSched.start();
+        });</script>
+</body>
+</html>
