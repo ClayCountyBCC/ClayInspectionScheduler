@@ -401,21 +401,22 @@ namespace InspSched.UI
       
     if ( canSchedule )
     {
-      GetInspType( key );
+      
       transport.CheckContractorPermitStatus( key ).then( function ( contractors: Array<Contractor> )
       {
         CurrentContractor = contractors;
         let fail: HTMLElement = ( <HTMLElement>document.getElementById( key + "FAIL" ) );
         let pass: HTMLElement = ( <HTMLElement>document.getElementById( key+ "PASS" ) );
 
+        // Populate Inspection Type Select list
+        GetInspType( key );
 
         // if contractor IS ALLOWED to schedule, the contractor id will be on the list
         if ( CurrentContractor.length > 0 && pass )
         {
-
+          
           BuildSchdeuleCalendar();
           document.getElementById( 'InspectionScheduler' ).style.removeProperty( "display" );
-
 
         }
 
@@ -427,7 +428,7 @@ namespace InspSched.UI
           let e: HTMLElement = document.getElementById( 'SuspendedPermit' );
           clearElement( e );
           let message: HTMLHeadingElement = ( <HTMLHeadingElement>document.createElement( "h5" ) );
-          message.appendChild( document.createTextNode( "An inspection cannot be scheduled for permit #" + inspections[0].PermitNo + "." ) );
+          message.appendChild( document.createTextNode( "An inspection cannot be scheduled for permit #" + key + "." ) );
           message.appendChild( document.createElement( "br" ) );
           message.appendChild( document.createElement( "br" ) );
           message.appendChild( document.createTextNode( "\nPlease contact the permit department to " +

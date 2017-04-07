@@ -30,8 +30,7 @@ namespace InspectionScheduler.Models
     public string Phone { get; set; } = " ";
 
     public string InspectorName { get; set; } = "Unassigned";
-
-
+    
 
     public string DisplayInspDateTime
     {
@@ -48,9 +47,7 @@ namespace InspectionScheduler.Models
         return SchedDateTime == DateTime.MinValue ? "" : SchedDateTime.ToShortDateString ( );
       }
     }
-
-
-
+    
     public Inspection()
     {
 

@@ -254,11 +254,12 @@ var InspSched;
             if (inspections.length > 0)
                 key = inspections[0].PermitNo;
             if (canSchedule) {
-                GetInspType(key);
                 InspSched.transport.CheckContractorPermitStatus(key).then(function (contractors) {
                     CurrentContractor = contractors;
                     var fail = document.getElementById(key + "FAIL");
                     var pass = document.getElementById(key + "PASS");
+                    // Populate Inspection Type Select list
+                    GetInspType(key);
                     // if contractor IS ALLOWED to schedule, the contractor id will be on the list
                     if (CurrentContractor.length > 0 && pass) {
                         BuildSchdeuleCalendar();
@@ -269,7 +270,7 @@ var InspSched;
                         var e = document.getElementById('SuspendedPermit');
                         clearElement(e);
                         var message = document.createElement("h5");
-                        message.appendChild(document.createTextNode("An inspection cannot be scheduled for permit #" + inspections[0].PermitNo + "."));
+                        message.appendChild(document.createTextNode("An inspection cannot be scheduled for permit #" + key + "."));
                         message.appendChild(document.createElement("br"));
                         message.appendChild(document.createElement("br"));
                         message.appendChild(document.createTextNode("\nPlease contact the permit department to " +
