@@ -531,7 +531,7 @@ namespace InspSched.UI
     }
 
     optionLabel.label += " Inspections:";
-
+    optionLabel.innerText = optionLabel.label;
     optionLabel.className = "selectPlaceholder";
     optionLabel.selected;
     optionLabel.value = "";
@@ -544,10 +544,14 @@ namespace InspSched.UI
       for ( let type of insptypes )
       {
 
+
         let option = document.createElement( "option" );
         option.label = type.InsDesc;
         option.value = type.InspCd;
+        option.className = "TypeSelectOption";
         InspTypeList.appendChild( option );
+        option.innerText = type.InsDesc;
+
       }
 
 

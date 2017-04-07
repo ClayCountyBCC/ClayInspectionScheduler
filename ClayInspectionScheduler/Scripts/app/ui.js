@@ -333,8 +333,10 @@ var InspSched;
                     break;
             }
             optionLabel.label += " Inspections:";
+            optionLabel.innerText = optionLabel.label;
             optionLabel.className = "selectPlaceholder";
             optionLabel.selected;
+            optionLabel.setAttribute("disabled", "disabled");
             optionLabel.value = "";
             InspTypeList.appendChild(optionLabel);
             InspSched.transport.GetInspType(key).then(function (insptypes) {
@@ -344,7 +346,9 @@ var InspSched;
                     var option = document.createElement("option");
                     option.label = type.InsDesc;
                     option.value = type.InspCd;
+                    option.className = "TypeSelectOption";
                     InspTypeList.appendChild(option);
+                    option.innerText = type.InsDesc;
                 }
                 InspTypeList.required;
                 return true;

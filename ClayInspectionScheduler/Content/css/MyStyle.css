@@ -189,4 +189,7 @@ table tbody, table tfoot, table thead {
   min-height: 54rem;
   min-width: 300px;
 }
+.TypeSelectOption{
+  margin-left:2rem;
+}
 
