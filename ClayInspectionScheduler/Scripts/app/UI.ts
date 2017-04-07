@@ -15,8 +15,6 @@ namespace InspSched.UI
   let InspTypeList: Array<InspType> = [];
 
 
-
-
   export function Search( key: string ): boolean
   {
 

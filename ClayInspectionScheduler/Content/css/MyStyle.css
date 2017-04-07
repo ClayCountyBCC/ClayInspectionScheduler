@@ -16,9 +16,8 @@
   min-width: 8rem;
   padding-right: 28px;
 }
-.App-Container {
-  min-height: 54rem;
-}
+
+
 .button {
   font-weight: bold;
   background-color: #3e9571;
@@ -184,6 +183,10 @@ table tbody, table tfoot, table thead {
 }
 
 .datepicker-inline{
-  width:90%;
+  width:100%;
+}
+.App-Container {
+  min-height: 54rem;
+  min-width: 300px;
 }
 

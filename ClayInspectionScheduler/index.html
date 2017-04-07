@@ -65,7 +65,7 @@
         <label class="row large-12 MyLabel " style="padding-left:1rem;padding-top:.5rem;">
           <h5>Search Results</h5>
         </label>
-        <div class="valign-middle infoDiv large-flex-child-grow">
+        <div class="valign-middle infoDiv large-flex-child-grow" style="text-align:center;" >
           <select id="PermitSelect" onchange="( InspSched.UI.GetInspList( this.value, this.id ) ); ( $( dp.datepicker( 'clearDates' ) ) );" on class="large-12"></select>
         </div>
       </div>
@@ -101,7 +101,7 @@
               <label class="small-12">Select a Date</label>
 
               <div class="flec-containerr align-center" id="sandbox-container" ">
-                <div class="column " ></div>
+                <div class="column "></div>
               </div>
 
             </div>
@@ -109,12 +109,14 @@
 
             <!--Scheduling Inspection Type Selector / Save button-->
 
-            <div class="large-6 medium-4 small-12 column ">
+            <div class="large-6 medium-6 small-12 column ">
               <label>Inspection Type:</label>
-              <select id="InspTypeSelect"></select>
+              <div class="infoDiv large-12 medium-12 small-12 " style="text-align:center;">
 
-              <button class="button column" id="SaveSchedule" type="button">Save Inspection</button>
+                <select id="InspTypeSelect"></select>
 
+                <button class="button column" id="SaveSchedule" type="button">Save Inspection</button>
+              </div>
             </div>
           </div>
         </div>
