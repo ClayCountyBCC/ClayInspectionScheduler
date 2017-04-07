@@ -53,12 +53,14 @@ namespace InspectionScheduler.Models
             WHERE m.PermitNo = @PermitNo
           )
           AND Status = 'A'
-    
-          AND clc.LiabInsExpDt > '01/01/2015'
-          AND clc.WC_ExpDt > '01/01/2015'
 
-          --AND clc.LiabInsExpDt > SYSUTCDATETIME()
-          --AND clc.WC_ExpDt > SYSUTCDATETIME()
+          --Uncomment next two lines for testing
+          --AND clc.LiabInsExpDt > '01/01/2015'
+          --AND clc.WC_ExpDt > '01/01/2015'
+
+          --Comment next two lines for testing
+          AND clc.LiabInsExpDt > SYSUTCDATETIME()
+          AND clc.WC_ExpDt > SYSUTCDATETIME()
 
           GROUP BY ContractorCd";
 
