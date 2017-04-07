@@ -336,7 +336,6 @@ var InspSched;
             optionLabel.innerText = optionLabel.label;
             optionLabel.className = "selectPlaceholder";
             optionLabel.selected;
-            optionLabel.setAttribute("disabled", "disabled");
             optionLabel.value = "";
             InspTypeList.appendChild(optionLabel);
             InspSched.transport.GetInspType(key).then(function (insptypes) {
