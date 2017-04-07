@@ -258,10 +258,10 @@ var InspSched;
                     CurrentContractor = contractors;
                     var fail = document.getElementById(key + "FAIL");
                     var pass = document.getElementById(key + "PASS");
-                    // Populate Inspection Type Select list
-                    GetInspType(key);
                     // if contractor IS ALLOWED to schedule, the contractor id will be on the list
                     if (CurrentContractor.length > 0 && pass) {
+                        // Populate Inspection Type Select list
+                        GetInspType(key);
                         BuildSchdeuleCalendar();
                         document.getElementById('InspectionScheduler').style.removeProperty("display");
                     }

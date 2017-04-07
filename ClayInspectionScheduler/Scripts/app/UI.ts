@@ -396,7 +396,8 @@ namespace InspSched.UI
 
   function BuildScheduler( inspections: Array<Inspection>, canSchedule: boolean, completed: number, key?: string)
   {
-    if ( inspections.length > 0 )
+    
+    if ( inspections.length > 0)
       key = inspections[0].PermitNo;
       
     if ( canSchedule )
@@ -408,13 +409,15 @@ namespace InspSched.UI
         let fail: HTMLElement = ( <HTMLElement>document.getElementById( key + "FAIL" ) );
         let pass: HTMLElement = ( <HTMLElement>document.getElementById( key+ "PASS" ) );
 
-        // Populate Inspection Type Select list
-        GetInspType( key );
+        
 
         // if contractor IS ALLOWED to schedule, the contractor id will be on the list
         if ( CurrentContractor.length > 0 && pass )
         {
-          
+
+          // Populate Inspection Type Select list
+          GetInspType( key );
+
           BuildSchdeuleCalendar();
           document.getElementById( 'InspectionScheduler' ).style.removeProperty( "display" );
 
