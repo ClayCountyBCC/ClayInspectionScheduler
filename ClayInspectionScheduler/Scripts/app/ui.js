@@ -15,7 +15,6 @@ var InspSched;
         var InspTypeList = [];
         function Search(key) {
             clearElement(document.getElementById('SearchFailed'));
-            clearElement(document.getElementById('Scheduler'));
             Hide('PermitSelectContainer');
             Hide('CurrentPermitData');
             Hide('InspectionScheduler');
@@ -159,17 +158,15 @@ var InspSched;
             Hide('SuspendedContractor');
             document.getElementById('FutureInspRow').removeAttribute("value");
             clearElement(document.getElementById('InspListData'));
-            clearElement(document.getElementById('Scheduler'));
-            clearElement(document.getElementById('InspectionType'));
-            clearElement(document.getElementById('Scheduler'));
+            //clearElement( document.getElementById( 'InspectionType' ) );
             InspSched.transport.GetInspections(key).then(function (inspections) {
                 if (inspections.length > 0) {
                     CurrentInspections = inspections;
                     BuildInspectionList(inspections, permit);
                 }
                 else {
-                    document.getElementById('PermitScreen').style.display = "flex";
                     BuildScheduler(inspections, canSchedule, completed, key);
+                    document.getElementById('PermitScreen').style.display = "flex";
                 }
                 return true;
             }, function () {
@@ -180,25 +177,31 @@ var InspSched;
         UI.GetInspList = GetInspList;
         function BuildInspectionList(inspections, permit) {
             var completed = 0;
+            var NumFutureInsp = 0;
             var canSchedule = true;
             // Initialize element variable for list container 'InspListData'
             var InspList = document.getElementById('InspListData');
             var InspHeader = document.getElementById('InspListHeader');
             var empty = document.createElement("tr");
+            clearElement(document.getElementById('FutureInspRow'));
             // TODO: add Try/Catch
             if (inspections.length > 0) {
                 // create (call BuildInspectioN()) and add inspection row to container InspList
                 for (var _i = 0, inspections_1 = inspections; _i < inspections_1.length; _i++) {
                     var inspection = inspections_1[_i];
-                    if (inspection.ResultADC && inspection.InspDateTime) {
-                        InspList.appendChild(BuildCompletedInspection(inspection));
-                        completed++;
+                    if (inspection.ResultADC) {
+                        if (completed < 5) {
+                            InspList.appendChild(BuildCompletedInspection(inspection));
+                            completed++;
+                        }
                     }
                     else if (!inspection.ResultADC) {
-                        clearElement(document.getElementById('Scheduler'));
-                        BuildFutureInspRow(inspection);
-                        canSchedule = false;
+                        NumFutureInsp++;
+                        BuildFutureInspRow(inspection, NumFutureInsp);
                     }
+                }
+                if (NumFutureInsp) {
+                    document.getElementById('FutureInspRow').setAttribute("value", inspections[0].PermitNo);
                 }
                 if (completed > 0) {
                     InspHeader.style.removeProperty("display");
@@ -232,16 +235,37 @@ var InspSched;
             }
             return inspRow;
         }
-        function BuildFutureInspRow(inspection) {
+        function BuildFutureInspRow(inspection, numFutureInsp) {
             var schedBody = document.getElementById('InspSchedBody');
-            document.getElementById('InspSched').setAttribute("value", inspection.PermitNo);
-            document.getElementById('FutureInspRow').setAttribute("value", inspection.InspReqID);
-            document.getElementById('ScheduledDate').innerText = inspection.DisplaySchedDateTime;
-            document.getElementById('InspectionType').innerText = inspection.InsDesc;
-            document.getElementById('InspectorName').innerText = inspection.InspectorName;
-            document.getElementById('CancelButton').setAttribute("value", inspection.PermitNo);
+            var futureRow = document.getElementById('FutureInspRow');
+            var thisinsp = document.createElement("div");
+            var dateName = document.createElement("div");
+            var thisinspDate = document.createElement("div");
+            var thisinspType = document.createElement("div");
+            var thisinspInspector = document.createElement("div");
+            var thisinspCancelDiv = document.createElement("div");
+            var thisinspCancelButton = document.createElement("button");
+            thisinsp.setAttribute("id", inspection.InspReqID + "_" + numFutureInsp);
+            thisinsp.className = "InspBorderBottom large-12 medium-12 small-12 row";
+            thisinspDate.className = "large-2 medium-2 small-4 column align-center column";
+            thisinspType.className = "large-5 medium-4 small-8 column align-center column ";
+            thisinspInspector.className = "large-3 medium-4 hide-for-small-only end column align-center";
+            thisinspCancelDiv.className = "large-2 medium-2 small-12 column flex-container align-center";
+            thisinspCancelButton.className = " button";
+            thisinspDate.innerText = inspection.DisplaySchedDateTime;
+            thisinspType.innerText = inspection.InsDesc;
+            thisinspInspector.innerText = inspection.InspectorName;
+            thisinspCancelButton.innerText = "Cancel";
             document.getElementById('InspSched').style.removeProperty("display");
             document.getElementById('FutureInspRow').style.removeProperty("display");
+            thisinspCancelButton.setAttribute("onclick", "( InspSched.UI.CancelInspection(\"" + inspection.InspReqID + "\", \"" + inspection.PermitNo + "\" ) )");
+            //thisinspCancelButton.setAttribute( "type", "button" );
+            thisinspCancelDiv.appendChild(thisinspCancelButton);
+            thisinsp.appendChild(thisinspDate);
+            thisinsp.appendChild(thisinspType);
+            thisinsp.appendChild(thisinspInspector);
+            thisinsp.appendChild(thisinspCancelDiv);
+            futureRow.appendChild(thisinsp);
             schedBody.style.removeProperty("display");
         }
         /**********************************************
@@ -270,11 +294,14 @@ var InspSched;
                         var e = document.getElementById('SuspendedPermit');
                         clearElement(e);
                         var message = document.createElement("h5");
-                        message.appendChild(document.createTextNode("An inspection cannot be scheduled for permit #" + key + "."));
+                        message.appendChild(document.createTextNode("A new inspection cannot be scheduled for permit #" + key + "."));
                         message.appendChild(document.createElement("br"));
                         message.appendChild(document.createElement("br"));
-                        message.appendChild(document.createTextNode("\nPlease contact the permit department to " +
-                            "determine what steps can be taken to allow inspection scheduling"));
+                        message.appendChild(document.createTextNode("\nIf you are unable to schedule your inspection " +
+                            "through this site please call the Building Department " +
+                            "for assistance at 904-284-6307.  Inspections may not " +
+                            "be able to be scheduled on line due to many reasons " +
+                            "(fees due, permit problems, holds, or licensing issues)."));
                         e.appendChild(message);
                         document.getElementById('SuspendedContractor').style.removeProperty("display");
                     }
@@ -437,11 +464,12 @@ var InspSched;
             if (InspID && key) {
                 //Hide( 'FutureInspRow' );
                 // TODO: Add function to not allow cancel if scheduled date of insp is current date 
-                var isDeleted = InspSched.transport.CancelInspection(key, InspID);
+                var isDeleted = InspSched.transport.CancelInspection(InspID, key);
                 // TODO: ADD code to inform user if the inspection has been deleted 
                 // Reload inspection list after delete
-                if (isDeleted)
+                if (isDeleted) {
                     GetInspList(key);
+                }
                 else {
                 }
             }

@@ -2,7 +2,28 @@
 <ArrayOfArrayOfArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <ArrayOfArrayOfString>
     <ArrayOfString>
-      <string>C:\Users\westje\Documents\Visual Studio 2017\Projects\ClayInspectionScheduler\ClayInspectionScheduler\Web.config</string>
+      <string>C:\Users\westje\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Scripts\app\UI.ts</string>
+    </ArrayOfString>
+  </ArrayOfArrayOfString>
+  <ArrayOfArrayOfString>
+    <ArrayOfString>
+      <string>C:\Users\westje\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\index.html</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>C:\Users\westje\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Scripts\app\transport.ts</string>
+    </ArrayOfString>
+  </ArrayOfArrayOfString>
+  <ArrayOfArrayOfString>
+    <ArrayOfString>
+      <string>C:\Users\westje\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Models\Inspection.cs</string>
+    </ArrayOfString>
+  </ArrayOfArrayOfString>
+  <ArrayOfArrayOfString>
+    <ArrayOfString>
+      <string>C:\Users\westje\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Controllers\InspectionController.cs</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>C:\Users\westje\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Models\Constants.cs</string>
     </ArrayOfString>
   </ArrayOfArrayOfString>
 </ArrayOfArrayOfArrayOfString>

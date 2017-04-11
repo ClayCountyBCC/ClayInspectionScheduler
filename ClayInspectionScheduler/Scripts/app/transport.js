@@ -46,8 +46,8 @@ var InspSched;
             });
         }
         transport.GetInspections = GetInspections;
-        function CancelInspection(key, InspReqID) {
-            var x = XHR.Delete("API/Inspection/" + key + "/" + InspReqID);
+        function CancelInspection(InspID, key) {
+            var x = XHR.Delete("API/Inspection/" + key + "/" + InspID);
             return new Promise(function (resolve, reject) {
                 x.then(function (response) {
                     var di = JSON.parse(response.Text);

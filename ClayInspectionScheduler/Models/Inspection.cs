@@ -69,7 +69,6 @@ namespace InspectionScheduler.Models
             USE WATSC;
 
             select 
-	            top (5)
 	            i.InspReqID,
 	            i.PermitNo, 
 	            i.InspectionCode, 
@@ -89,7 +88,7 @@ namespace InspectionScheduler.Models
 		            bp_INSPECTORS ip 
 		            on i.Inspector = ip.Intl 
             where i.PermitNo = @PermitNo
-            order by i.InspDateTime desc";
+            order by i.InspDateTime desc, i.ResultADC ";
 
         var li = Constants.Get_Data<Inspection> ( sql, dbArgs );
         return li;
@@ -105,18 +104,18 @@ namespace InspectionScheduler.Models
 
     }
     
-    public static bool Delete( string PermitNo, string InspReqID )
+    public static bool Delete( string PermitNo, string InspID )
     {
-      if( PermitNo != null && InspReqID != null )
+      if( PermitNo != null && InspID != null )
       {
         var testNum = new double();
         testNum = 0.0;
 
         var dbArgs = new Dapper.DynamicParameters();
         dbArgs.Add( "@PermitNo", PermitNo );
-        dbArgs.Add( "@ID", InspReqID );
+        dbArgs.Add( "@ID", InspID );
 
-        if( PermitNo.Length == 8 && InspReqID.Length > 0 && double.TryParse( PermitNo, out testNum ) && double.TryParse( InspReqID, out testNum ) )
+        if( PermitNo.Length == 8 && InspID.Length > 0 && double.TryParse( PermitNo, out testNum ) && double.TryParse( InspID, out testNum ) )
         {
           string sql = @"
 

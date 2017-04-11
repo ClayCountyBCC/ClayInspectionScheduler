@@ -48,10 +48,9 @@
 
 
     <div class="flex-container small-12 align-center">
-      <div id="Searching"><h3>Searching...<i class="fi-loop spin-cw spin-ccw"></i></h3></div>
+      <div id="Searching"><h3>Searching...<i class="fi-loop spin-cw"></i></h3></div>
       <div id="SearchFailed"></div>
       <div id="NoPermit" class="large-12 medium-12 small-12 row">No permit found</div>
-      <div id="Scheduler" class="large-12 medium-12 small-12 row"></div>
       <div id="NoSchedule" class="large-12 medium-12 small-12 row"></div>
       <div id="SearchFailed" class="large-12 medium-12 small-12 row"></div>
     </div>
@@ -61,7 +60,7 @@
     <div class="large-12 align-center row flex-container  flex-child-grow" style="padding-top:1rem; padding-bottom:2rem; max-width:1200px;" id="PermitScreen">
 
       <!--Permit Selector-->
-      <div class="large-4 medium-6 small-12 column" id="PermitSelectContainer">
+      <div class="large-5 medium-6 small-12 column" id="PermitSelectContainer">
         <label class="row large-12 MyLabel " style="padding-left:1rem;padding-top:.5rem;">
           <h5>Search Results</h5>
         </label>
@@ -71,7 +70,7 @@
       </div>
 
       <!--Project Address:  Static labels-->
-      <div class="large-4 medium-6 small-12 end column" id="CurrentPermitData">
+      <div class="large-5 medium-6 small-12 end column" id="CurrentPermitData">
 
         <label class="row large-12  MyLabel" style="background-color:#890ACC;padding-left:1rem;padding-top:.5rem;">
           <h5>Project Address</h5>
@@ -87,7 +86,7 @@
       </div>
 
       <!-- Inspection Shceduler Container -->
-      <div class="large-8 medium-12 small-12" id="InspectionScheduler">
+      <div class="large-10 medium-12 small-12" id="InspectionScheduler">
         <div class="large-12 small-12 medium-12 column">
           <label class="large-12 medium-12 small-12 row MyLabel" style="padding-left:1rem;padding-top:.5rem;">
             <h5>Schedule Inspection</h5>
@@ -123,7 +122,7 @@
       </div>    
 
       <!--Suspended Contractor Container -->
-      <div class="large-8 medium-12 small-12 row" id="SuspendedContractor">
+      <div class="large-10 medium-12 small-12 row" id="SuspendedContractor">
       <div class="large-12 small-12 medium-12 column">
         <label class="large-12 row MyLabel" style="padding-left:1rem;padding-top:.5rem;">
           <h5>Suspended Contractor</h5>
@@ -137,12 +136,12 @@
       </div>
 
       <!--Past Inspection Information Container-->
-      <div class="large-8 medium-12 small-12" id="InspectionTable">
+      <div class="large-10 medium-12 small-12" id="InspectionTable">
 
         <div class="large-12 medium-12 small-12 column" id="InspSched">
 
           <label class="row large-12 MyLabel" id="InspSchedHeader" style="padding-left:1rem;padding-top:.5rem;">
-            <h5>Scheduled Inspection</h5>
+            <h5>Scheduled Inspections</h5>
           </label>
 
 
@@ -150,40 +149,34 @@
 
 
 
+            
+
+              <div class="large-12 medium-12 small-12 InspBorderBottom" id="inspid"  >
+
+
+                <div class="large-2 medium-2 hide-for-small-only column" style="margin-bottom:1rem">
+                  <h5>Date</h5>
+                </div>
+
+
+                <div class="large-5 medium-4 hide-for-small-only end column" style="margin-bottom:1rem">
+                  <h5>Insp. Type</h5>
+                </div>
+
+
+
+                <div class="large-3 medium-4 hide-for-small-only end column" style="margin-bottom:1rem">
+                  <h5>Insp. Name</h5>
+                </div>
+
+                
+
+                </div>
             <div class="large-12 medium-12 small-12 row" id="FutureInspRow" label="" value="">
 
 
-              <div class="large-3 medium-2 small-3 column" style="margin-bottom:1rem;text-align:center;">
-                <h5>Date</h5>
-                <div class="large-12" id="ScheduledDate"></div>
-              </div>
-
-
-
-
-
-              <div class="large-5 medium-6 small-12 column " style="margin-bottom:1rem;text-align:center;">
-                <h5>Insp. Type</h5>
-                <div class="large-12" id="InspectionType"></div>
-              </div>
-
-
-
-              <div class="large-2 medium-5 small-12 column" style="margin-bottom:1rem;text-align:center;">
-                <h5>Insp. Name</h5>
-                <div class="large-12" id="InspectorName" style="margin-bottom:1rem;text-align:center;"></div>
-              </div>
 
             </div>
-
-
-
-            <div class="large-8 medium-6 small-12 row flex-container align-spaced" style="padding-top:1rem;">
-              <button class="button" onclick="( InspSched.UI.CancelInspection( document.getElementById( 'FutureInspRow' ).getAttribute('value'), document.getElementById( 'InspSched' ).getAttribute('value') ) )" id="CancelButton" type="button">Cancel</button>
-            </div>
-
-
-
           </div>                  
 
 
@@ -213,6 +206,7 @@
     </div>     <!--End Permit Information-->
 
   </div>   <!--End Inspection Scheduler-->
+
 
 
   <script src="Scripts/app/UI.js"></script>

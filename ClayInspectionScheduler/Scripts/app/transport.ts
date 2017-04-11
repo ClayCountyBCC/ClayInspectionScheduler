@@ -56,8 +56,8 @@ namespace InspSched.transport
         });
     }
 
-    export function CancelInspection(key: string, InspReqID: string) {
-        var x = XHR.Delete("API/Inspection/" + key + "/" + InspReqID);
+    export function CancelInspection(InspID: string, key: string) {
+        var x = XHR.Delete("API/Inspection/" + key + "/" + InspID);
         return new Promise(function(resolve, reject) {
             x.then(function(response) {
                 var di = JSON.parse(response.Text);
