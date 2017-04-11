@@ -415,7 +415,7 @@ namespace InspSched.UI
   /**********************************************
    *
    * Build Scheduler
-   * Get and build select list of inspections
+   * Get and build select list of inspections@
    * 
    *********************************************/
 
@@ -535,6 +535,7 @@ namespace InspSched.UI
 
     let thistype: string = key[0];
 
+
     let InspTypeList: HTMLSelectElement = ( <HTMLSelectElement>document.getElementById( 'InspTypeSelect' ) );
 
     clearElement( InspTypeList );
@@ -547,6 +548,7 @@ namespace InspSched.UI
       case '0':
       case '9':
         optionLabel.label = "Building";
+        thistype = "1";
         break;
       case '2':
         optionLabel.label = "Electrical";
@@ -571,20 +573,21 @@ namespace InspSched.UI
     InspTypeList.appendChild( optionLabel );
 
 
-    transport.GetInspType( key ).then( function ( insptypes: Array<InspType> )
+    transport.GetInspType().then( function ( insptypes: Array<InspType> )
     {
       CurrentInspTypes = insptypes;
       for ( let type of insptypes )
       {
+        if ( type.InspCd[0] == thistype )
+        {
+          let option = document.createElement( "option" );
+          option.label = type.InsDesc;
+          option.value = type.InspCd;
+          option.className = "TypeSelectOption";
+          InspTypeList.appendChild( option );
+          option.innerText = type.InsDesc;
 
-
-        let option = document.createElement( "option" );
-        option.label = type.InsDesc;
-        option.value = type.InspCd;
-        option.className = "TypeSelectOption";
-        InspTypeList.appendChild( option );
-        option.innerText = type.InsDesc;
-
+        }
       }
 
 

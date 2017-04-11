@@ -271,7 +271,7 @@ var InspSched;
         /**********************************************
          *
          * Build Scheduler
-         * Get and build select list of inspections
+         * Get and build select list of inspections@
          *
          *********************************************/
         function BuildScheduler(inspections, canSchedule, completed, key) {
@@ -345,6 +345,7 @@ var InspSched;
                 case '0':
                 case '9':
                     optionLabel.label = "Building";
+                    thistype = "1";
                     break;
                 case '2':
                     optionLabel.label = "Electrical";
@@ -365,16 +366,18 @@ var InspSched;
             optionLabel.selected;
             optionLabel.value = "";
             InspTypeList.appendChild(optionLabel);
-            InspSched.transport.GetInspType(key).then(function (insptypes) {
+            InspSched.transport.GetInspType().then(function (insptypes) {
                 CurrentInspTypes = insptypes;
                 for (var _i = 0, insptypes_1 = insptypes; _i < insptypes_1.length; _i++) {
                     var type = insptypes_1[_i];
-                    var option = document.createElement("option");
-                    option.label = type.InsDesc;
-                    option.value = type.InspCd;
-                    option.className = "TypeSelectOption";
-                    InspTypeList.appendChild(option);
-                    option.innerText = type.InsDesc;
+                    if (type.InspCd[0] == thistype) {
+                        var option = document.createElement("option");
+                        option.label = type.InsDesc;
+                        option.value = type.InspCd;
+                        option.className = "TypeSelectOption";
+                        InspTypeList.appendChild(option);
+                        option.innerText = type.InsDesc;
+                    }
                 }
                 InspTypeList.required;
                 return true;

@@ -66,29 +66,24 @@ namespace InspectionScheduler.Models
       {
         string sql = @"
         
-            USE WATSC;
-
-            select 
-	            i.InspReqID,
-	            i.PermitNo, 
-	            i.InspectionCode, 
-	            ir.InsDesc, 
-	            i.InspDateTime, 
-	            i.ResultADC,
-	            i.SchecDateTime SchedDateTime,
-	            i.Remarks,
-	            i.inspector Initials,
-	            ip.name InspectorName,
-	            ip.PhoneNbr PhoneNumber
-            from bpINS_REQUEST i
-	            join bpINS_REF ir 
-		            on 
-			            ir.InspCd = i.InspectionCode
-	            left outer join 
-		            bp_INSPECTORS ip 
-		            on i.Inspector = ip.Intl 
-            where i.PermitNo = @PermitNo
-            order by i.InspDateTime desc, i.ResultADC ";
+        USE WATSC;
+          select 
+                 i.InspReqID,
+                 i.PermitNo, 
+                 i.InspectionCode, 
+                 ir.InsDesc, 
+                 i.InspDateTime, 
+                 i.ResultADC,
+                 i.SchecDateTime SchedDateTime,
+                 i.Remarks,
+                 i.inspector Initials,
+                 ip.name InspectorName,
+                 ip.PhoneNbr PhoneNumber
+          from bpINS_REQUEST i
+               INNER JOIN bpINS_REF ir ON ir.InspCd = i.InspectionCode
+               LEFT OUTER JOIN bp_INSPECTORS ip ON i.Inspector = ip.Intl 
+          WHERE i.PermitNo = @PermitNo
+          order by i.InspDateTime DESC, i.ResultADC desc ";
 
         var li = Constants.Get_Data<Inspection> ( sql, dbArgs );
         return li;
