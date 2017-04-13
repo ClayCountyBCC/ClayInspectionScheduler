@@ -20,8 +20,8 @@ var InspSched;
             });
         }
         transport.GetPermit = GetPermit;
-        function GetInspType() {
-            var x = XHR.Get("API/InspType/");
+        function GetInspType(key) {
+            var x = XHR.Get("API/InspType/" + key);
             return new Promise(function (resolve, reject) {
                 x.then(function (response) {
                     var pl = JSON.parse(response.Text);
@@ -46,6 +46,21 @@ var InspSched;
             });
         }
         transport.GetInspections = GetInspections;
+        function SaveInspection(key, InspId, date) {
+            var x = XHR.Post("API/Inspection/" + key + "/" + InspId + "/" + date);
+            return new Promise(function (resolve, reject) {
+                x.then(function (response) {
+                    var di = JSON.parse(response.Text);
+                    InspSched.UI.GetInspList(key);
+                    resolve(di);
+                }).catch(function () {
+                    console.log("error in GetInspections");
+                    InspSched.UI.GetInspList(key);
+                    reject(null);
+                });
+            });
+        }
+        transport.SaveInspection = SaveInspection;
         function CancelInspection(InspID, key) {
             var x = XHR.Delete("API/Inspection/" + key + "/" + InspID);
             return new Promise(function (resolve, reject) {
@@ -72,7 +87,7 @@ var InspSched;
             });
         }
         transport.CheckContractorPermitStatus = CheckContractorPermitStatus;
-        function generateDates() {
+        function GenerateDates() {
             var x = XHR.Get("API/Dates/");
             return new Promise(function (resolve, reject) {
                 x.then(function (response) {
@@ -84,7 +99,7 @@ var InspSched;
                 });
             });
         }
-        transport.generateDates = generateDates;
+        transport.GenerateDates = GenerateDates;
     })(transport = InspSched.transport || (InspSched.transport = {}));
 })(InspSched || (InspSched = {}));
 //# sourceMappingURL=transport.js.map

@@ -108,8 +108,9 @@ namespace InspectionScheduler.Models
 
     }
 
-    public static List<DateTime> generateDates( bool isExternal)
+    public static List<DateTime> GenerateDates( bool isExternal = false)
     {
+
       var dTmp = DateTime.Today;
 
       // external rules: 

@@ -149,6 +149,10 @@ var InspSched;
         
         ***********************************/
         function GetInspList(key, permit) {
+            document.getElementById('InspectionScheduler').removeAttribute("value");
+            var saveButton = document.getElementById('SaveSchedule');
+            if (saveButton != undefined)
+                saveButton.removeAttribute("value");
             var completed = 0;
             var canSchedule = true;
             Hide('InspSched');
@@ -288,6 +292,7 @@ var InspSched;
                         GetInspType(key);
                         BuildSchdeuleCalendar();
                         document.getElementById('InspectionScheduler').style.removeProperty("display");
+                        document.getElementById('InspectionScheduler').setAttribute("value", key);
                     }
                     else if (CurrentContractor.length <= 0 || fail) {
                         // TODO Add code to display suspended contractor
@@ -313,7 +318,7 @@ var InspSched;
             }
         }
         function BuildSchdeuleCalendar() {
-            InspSched.transport.generateDates().then(function (dates) {
+            InspSched.transport.GenerateDates().then(function (dates) {
                 var datesDisabled = "[";
                 var minDate = dates[0];
                 if (dates.length > 2) {
@@ -322,24 +327,27 @@ var InspSched;
                     }
                     datesDisabled += dates[dates.length - 2] + "]";
                 }
+                else
+                    datesDisabled += "]";
                 var maxDate = dates[dates.length - 1];
-                return true;
+                return dates;
             }, function () {
                 console.log('error in generateDates');
                 // do something with the error here
                 // need to figure out how to detect if something wasn't found
                 // versus an error.
                 Hide('Searching');
-                return false;
+                return null;
             });
-            var element = document.getElementById('CalendarScriptLocation');
+            //let element: HTMLScriptElement = ( <HTMLScriptElement>document.getElementById( 'CalendarScriptLocation' ) );
             //clearElement( element );
         }
+        UI.BuildSchdeuleCalendar = BuildSchdeuleCalendar;
         function GetInspType(key) {
             var thistype = key[0];
             var InspTypeList = document.getElementById('InspTypeSelect');
-            clearElement(InspTypeList);
             var optionLabel = document.createElement("option");
+            clearElement(InspTypeList);
             switch (thistype) {
                 case '1':
                 case '0':
@@ -366,7 +374,7 @@ var InspSched;
             optionLabel.selected;
             optionLabel.value = "";
             InspTypeList.appendChild(optionLabel);
-            InspSched.transport.GetInspType().then(function (insptypes) {
+            InspSched.transport.GetInspType(key).then(function (insptypes) {
                 CurrentInspTypes = insptypes;
                 for (var _i = 0, insptypes_1 = insptypes; _i < insptypes_1.length; _i++) {
                     var type = insptypes_1[_i];
@@ -482,8 +490,13 @@ var InspSched;
             }
         }
         UI.CancelInspection = CancelInspection;
-        function SaveInspection() {
-            return true;
+        function SaveInspection(PermitNo, InspCd, date) {
+            InspSched.transport.SaveInspection(PermitNo, InspCd, date).then(function (isSaved) {
+                return true;
+            }, function () {
+                console.log("Error in SaveInspection");
+                GetInspType(PermitNo);
+            });
         }
         UI.SaveInspection = SaveInspection;
     })(UI = InspSched.UI || (InspSched.UI = {}));

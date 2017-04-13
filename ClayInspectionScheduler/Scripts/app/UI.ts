@@ -221,6 +221,12 @@ namespace InspSched.UI
 
   export function GetInspList( key: string, permit?: Permit )
   {
+    document.getElementById( 'InspectionScheduler' ).removeAttribute( "value" );
+    var saveButton: HTMLElement = ( <HTMLElement>document.getElementById( 'SaveSchedule' ) );
+    if ( saveButton != undefined )
+      saveButton.removeAttribute( "value" );
+
+
     let completed: number = 0;
     let canSchedule: boolean = true;
     Hide( 'InspSched' );
@@ -443,6 +449,7 @@ namespace InspSched.UI
 
           BuildSchdeuleCalendar();
           document.getElementById( 'InspectionScheduler' ).style.removeProperty( "display" );
+          document.getElementById( 'InspectionScheduler' ).setAttribute( "value", key );
 
         }
 
@@ -486,10 +493,10 @@ namespace InspSched.UI
 
   }
 
-  function BuildSchdeuleCalendar()
+  export function BuildSchdeuleCalendar()
   {
 
-    transport.generateDates().then( function ( dates: Array<Dates> )
+    transport.GenerateDates().then( function ( dates: Array<Dates> ): Array<Dates>
     {
       let datesDisabled: string = "[";
 
@@ -503,12 +510,14 @@ namespace InspSched.UI
         }
         datesDisabled += dates[dates.length - 2] + "]";
       }
+      else
+        datesDisabled += "]";
 
       let maxDate: Dates = dates[dates.length - 1];
 
 
 
-      return true;
+      return dates;
     },
       function ()
       {
@@ -519,28 +528,24 @@ namespace InspSched.UI
         // versus an error.
         Hide( 'Searching' );
 
-        return false;
+        return null;
       });
 
 
-    let element: HTMLScriptElement = ( <HTMLScriptElement>document.getElementById( 'CalendarScriptLocation' ) );
+    //let element: HTMLScriptElement = ( <HTMLScriptElement>document.getElementById( 'CalendarScriptLocation' ) );
     //clearElement( element );
-
-
-
+    
   }
 
   function GetInspType( key: string )
   {
 
     let thistype: string = key[0];
-
-
+    
     let InspTypeList: HTMLSelectElement = ( <HTMLSelectElement>document.getElementById( 'InspTypeSelect' ) );
+    let optionLabel: HTMLOptionElement = ( <HTMLOptionElement>document.createElement( "option" ) );
 
     clearElement( InspTypeList );
-
-    let optionLabel: HTMLOptionElement = ( <HTMLOptionElement>document.createElement( "option" ) );
 
     switch ( thistype )
     {
@@ -571,9 +576,8 @@ namespace InspSched.UI
     optionLabel.selected;
     optionLabel.value = "";
     InspTypeList.appendChild( optionLabel );
-
-
-    transport.GetInspType().then( function ( insptypes: Array<InspType> )
+    
+    transport.GetInspType(key).then( function ( insptypes: Array<InspType> )
     {
       CurrentInspTypes = insptypes;
       for ( let type of insptypes )
@@ -589,8 +593,7 @@ namespace InspSched.UI
 
         }
       }
-
-
+      
       InspTypeList.required;
 
       return true;
@@ -747,10 +750,20 @@ namespace InspSched.UI
     }
   }
 
-  export function SaveInspection()
+  export function SaveInspection( PermitNo: string, InspCd: string, date: Date )
   {
+    
+    
+    transport.SaveInspection( PermitNo, InspCd, date).then( function ( isSaved: boolean )
+    {
 
-    return true;
+      return true;
+    }, function ()
+      {
+        console.log( "Error in SaveInspection" );
+
+        GetInspType( PermitNo );
+      });
   }
 
 }

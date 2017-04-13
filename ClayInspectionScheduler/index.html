@@ -41,7 +41,7 @@
       <div class="large-4 medium-6 input-group">
         <input id="PermitSearch" type="search" class="input-group-field columns" placeholder="   Permit Number" />
         <span class="input-group-button" id="button">
-          <button onclick="( InspSched.UI.Search( document.getElementById( 'PermitSearch' ).value ) ); " type="button" class="button fi-magnifying-glass end" value="Search" />
+          <button id="PermitSearchButton" onclick="( InspSched.UI.Search( document.getElementById( 'PermitSearch' ).value ) ); " type="button" class="button fi-magnifying-glass end" value="Search" required />
         </span>
       </div>
     </div>
@@ -99,7 +99,7 @@
             <div class="column large-6 medium-6 small-12 align-center datepicker-box" style="margin-bottom:20px;" label="Select a date:">
               <label class="small-12">Select a Date</label>
 
-              <div class="flec-containerr align-center" id="sandbox-container" ">
+              <div class="flec-containerr align-center" id="sandbox-container">
                 <div class="column "></div>
               </div>
 
@@ -114,7 +114,7 @@
 
                 <select id="InspTypeSelect"></select>
 
-                <button class="button column" id="SaveSchedule" type="button">Save Inspection</button>
+                <button class="button column" id="SaveSchedule" type="button"  onclick="( UI.SaveInspection )" >Save Inspection</button>
               </div>
             </div>
           </div>
@@ -222,13 +222,20 @@
   <script src="Scripts/foundation.min.js"></script>
   <script src="Scripts/foundation.js"></script>
   
-
   <script>
+    var typeSelect = document.getElementById( "InspTypeSelect" );
+    var saveButton = document.getElementById( "SaveSchedule" );
+    var searchButton = document.getElementById( "PermitSearch" )
+    
+
     document.addEventListener( "DOMContentLoaded", function ( event )
     {
-      
+
       InspSched.start();
 
+      var inspScheduler = document.getElementById( "InspectionScheduler" );
+      typeSelect.onchange = function () { saveButton.setAttribute( "value", inspScheduler.getAttribute( "value" ) + "/" + typeSelect.value + "/" ) }
+      console.log( "value changed to: " + this.value );
 
     });</script>
 
@@ -236,18 +243,23 @@
 
   <script>
 
+    
+    
 
+    var dp = $( '#sandbox-container div' ).datepicker( {
+      maxViewMode: 0,
+      toggleActive: true,
 
-      var dp = $( '#sandbox-container div' ).datepicker( {
-        maxViewMode: 0,
-        toggleActive: true,
     });
 
-
-
-
+      function getDate()
+      {
+      
+        return dp.value;
+      }
 
   </script>
+
 </body>
 
 </html>

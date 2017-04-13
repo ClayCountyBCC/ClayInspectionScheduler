@@ -12,7 +12,7 @@ namespace InspectionScheduler.Controllers
   {
     public IHttpActionResult Get()
     {
-      List<string> lat = (List<string>)MyCache.GetItem(/* checkExternal()*/ false );
+      List<string> lat = ( List<string> )MyCache.GetItem(true);
       if ( lat == null )
       {
         return InternalServerError ( );

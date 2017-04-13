@@ -22,7 +22,7 @@ namespace InspectionScheduler.Models
 
         SELECT
           DISTINCT I.InsDesc,
-          I.InspCd
+          LTRIM(RTRIM(I.InspCd)) InspCd
         FROM
                 bpINS_REF I
         WHERE
