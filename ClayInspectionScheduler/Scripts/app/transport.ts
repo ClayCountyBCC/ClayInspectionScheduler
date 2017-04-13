@@ -38,7 +38,7 @@ namespace InspSched.transport
             });
         });
     }
-     
+ 
     export function GetInspections(key: string): Promise<Array<Inspection>> {
 
         var x = XHR.Get("API/Inspection/" + key);
@@ -56,8 +56,33 @@ namespace InspSched.transport
         });
     }
 
-    export function CancelInspection(key: string, InspReqID: string) {
-        var x = XHR.Delete("API/Inspection/" + key + "/" + InspReqID);
+    export function SaveInspection( key: string, InspId: string, date: Date )
+    {
+
+      var x = XHR.Post( "API/Inspection/" + key + "/" + InspId + "/" + date );
+      return new Promise( function ( resolve, reject )
+      {
+        x.then( function ( response )
+        {
+          var di = JSON.parse( response.Text );
+          UI.GetInspList( key );
+          resolve( di );
+
+        }).catch( function ()
+        {
+          console.log( "error in GetInspections" );
+          UI.GetInspList( key );
+          reject( null );
+        });
+
+
+
+      });
+
+    }
+
+    export function CancelInspection(InspID: string, key: string) {
+        var x = XHR.Delete("API/Inspection/" + key + "/" + InspID);
         return new Promise(function(resolve, reject) {
             x.then(function(response) {
                 var di = JSON.parse(response.Text);
@@ -85,7 +110,7 @@ namespace InspSched.transport
         });
     }
 
-    export function generateDates() {
+    export function GenerateDates() {
         var x = XHR.Get("API/Dates/");
         return new Promise(function(resolve, reject) {
             x.then(function(response) {

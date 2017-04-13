@@ -66,10 +66,10 @@ namespace InspectionScheduler.Models
       };
     }
 
-    public static List<DateTime> getDateList(bool isExternal = true)
+    public static List<DateTime> getDateList(bool isExternal = true/*code checkExternal()*/)
     {
 
-      return Dates.generateDates (isExternal);
+      return Dates.GenerateDates (isExternal);
 
     }
 

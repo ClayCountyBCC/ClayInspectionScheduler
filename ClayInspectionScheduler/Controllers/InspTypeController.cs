@@ -10,9 +10,9 @@ namespace InspectionScheduler.Controllers
 {
     public class InspTypeController : ApiController
     {
-    public IHttpActionResult Get(string id)
+    public IHttpActionResult Get()
     {
-      List<InspType> lp = InspType.Get( id );
+      List<InspType> lp = InspType.Get();
       if(lp == null)
       {
         return InternalServerError();

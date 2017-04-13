@@ -13,47 +13,26 @@ namespace InspectionScheduler.Models
 
     public string InspCd{ get; set; }
 
-    public static List<InspType> Get( string key )
+    public static List<InspType> Get( )
     {
-      var dbArgs = new Dapper.DynamicParameters();
-      dbArgs.Add( "@PermitNo", key );
      
       string sql = @"
         
         USE WATSC;
 
-        DECLARE 
-        @InspType CHAR(1) = 
-          (SELECT PermitType 
-          FROM 
-            bpASSOC_PERMIT 
-          WHERE 
-            PermitNo = @PermitNo 
-            
-        UNION 
-        
-          SELECT 
-            PermitType 
-          FROM 
-            bpMASTER_PERMIT 
-          WHERE 
-            PermitNo = @PermitNo )
-
-        SELECT 
-	        DISTINCT I.InsDesc InsDesc,
-	        I.TYPE TYPE,
-          I.InspCd
-        FROM 
-	        bpINS_REF I
-        WHERE 
-	        I.TYPE = @InspType AND 
-	        I.Retired != 1 AND
-	        I.InspCd != (@InspType + '00')
+        SELECT
+          DISTINCT I.InsDesc,
+          LTRIM(RTRIM(I.InspCd)) InspCd
+        FROM
+                bpINS_REF I
+        WHERE
+                I.Retired != 1
+          AND RIGHT(RTRIM(InspCd),2) != '00'
         ORDER BY 
-	        I.InsDesc
+          I.InsDesc
         ";
 
-      var lp = Constants.Get_Data<InspType>( sql, dbArgs );
+      var lp = Constants.Get_Data<InspType>( sql );
       return lp;
     }
 
