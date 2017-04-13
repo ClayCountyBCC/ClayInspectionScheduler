@@ -515,7 +515,7 @@ var InspSched;
                 return true;
             }, function () {
                 console.log("Error in SaveInspection");
-                GetInspType(PermitNo);
+                //GetInspType( PermitNo );
             });
         }
         UI.SaveInspection = SaveInspection;

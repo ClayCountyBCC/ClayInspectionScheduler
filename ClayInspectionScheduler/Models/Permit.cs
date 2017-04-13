@@ -100,6 +100,32 @@ namespace InspectionScheduler.Models
                     AND HldDate IS NULL
                     AND PermitNo NOT IN (SELECT PermitNo FROM #Fail);
 
+                INSERT INTO #Fail 
+                  SELECT 
+                    PermitNo, 
+                    FailType FROM (
+                  SELECT 
+                    A.PermitNo,
+                    'F' AS FailType
+                  FROM bpASSOC_PERMIT A
+                  INNER JOIN clContractor C ON A.ContractorId = C.ContractorCd
+                  WHERE (A.PermitNo = @PermitNo 
+                    OR A.MPermitNo = @MPermitNo)    
+                  UNION ALL
+                  SELECT M.PermitNo,
+                    'F' AS FailType
+                  FROM bpMASTER_PERMIT M
+                  INNER JOIN bpBASE_PERMIT B 
+                  INNER JOIN clContractor C ON B.ContractorId = C.ContractorCd
+                  ON M.BaseID = B.BaseID
+                  WHERE M.PermitNo = @PermitNo
+                  AND (C.Status <> 'A' 
+                    OR C.LiabInsExpDt < GETDATE()
+                    OR C.WC_ExpDt < GETDATE())
+                  ) AS M
+                  WHERE PermitNo NOT IN (SELECT PermitNo FROM #Fail);
+
+
                 SELECT TMP.*, ISNULL(F.FailType, '') FailType
                 FROM (
                     SELECT 
