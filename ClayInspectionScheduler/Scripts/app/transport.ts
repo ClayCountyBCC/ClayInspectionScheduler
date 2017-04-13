@@ -25,9 +25,9 @@ namespace InspSched.transport
         });
     }
 
-    export function GetInspType(key)
+    export function GetInspType()
     {
-        var x = XHR.Get("API/InspType/" + key);
+        var x = XHR.Get("API/InspType/");
         return new Promise<Array<InspType>>(function(resolve, reject) {
             x.then(function(response) {
                 let pl: Array<InspType> = JSON.parse(response.Text);

@@ -20,8 +20,8 @@ var InspSched;
             });
         }
         transport.GetPermit = GetPermit;
-        function GetInspType(key) {
-            var x = XHR.Get("API/InspType/" + key);
+        function GetInspType() {
+            var x = XHR.Get("API/InspType/");
             return new Promise(function (resolve, reject) {
                 x.then(function (response) {
                     var pl = JSON.parse(response.Text);

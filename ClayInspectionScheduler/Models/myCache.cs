@@ -11,24 +11,21 @@ namespace InspectionScheduler.Models
   {
     private static MemoryCache _cache = new MemoryCache("myCache");
 
-    public static object GetItem(bool isExternal)
+    public static object GetItem(string key)
     {
-      string key = isExternal.ToString ( );
-
-      return GetOrAddExisting (key, isExternal,() => getDateString()) ;
+      return GetOrAddExisting(key, () => InitItem(key));
     }
 
-    public static object GetItem(bool isExternal, CacheItemPolicy CIP )
+    public static object GetItem(string key, CacheItemPolicy CIP)
     {
-      string key = isExternal.ToString ( );
-      return GetOrAddExisting(key,isExternal, () => getDateString(), CIP);
+      return GetOrAddExisting(key, () => InitItem(key), CIP);
     }
 
-    private static T GetOrAddExisting<T>(string key,bool isExternal, Func<T> valueFactory, CacheItemPolicy CIP)
+    private static T GetOrAddExisting<T>(string key, Func<T> valueFactory, CacheItemPolicy CIP)
     {
 
       Lazy<T> newValue = new Lazy<T>(valueFactory);
-      var oldValue = _cache.AddOrGetExisting( key, newValue, CIP) as Lazy<T>;
+      var oldValue = _cache.AddOrGetExisting(key, newValue, CIP) as Lazy<T>;
       try
       {
         return (oldValue ?? newValue).Value;
@@ -36,12 +33,12 @@ namespace InspectionScheduler.Models
       catch
       {
         // Handle cached lazy exception by evicting from cache. Thanks to Denis Borovnev for pointing this out!
-        _cache.Remove( key );
+        _cache.Remove(key);
         throw;
       }
     }
-                                       
-    private static T GetOrAddExisting<T>(string key, bool isExternal, Func<T> valueFactory)
+
+    private static T GetOrAddExisting<T>(string key, Func<T> valueFactory)
     {
 
       Lazy<T> newValue = new Lazy<T>(valueFactory);
@@ -62,24 +59,30 @@ namespace InspectionScheduler.Models
     {
       return new CacheItemPolicy()
       {
-        AbsoluteExpiration = DateTime.Now.AddHours(12)
+        AbsoluteExpiration = DateTime.Today.AddDays(1)
       };
     }
 
-    public static List<DateTime> getDateList(bool isExternal = true/*code checkExternal()*/)
+    private static object InitItem(string key)
     {
+      string[] s = key.Split(new[] { "," }, StringSplitOptions.None);
 
-      return Dates.GenerateDates (isExternal);
+      switch (s[0].ToLower())
+      {
+        case "inspectiondates":
+          bool bIU = Boolean.Parse(s[1]);
+          return Dates.GenerateDates(bIU);
 
+        case "inspectionshortdates":
+          bool bIUShort = Boolean.Parse(s[1]);
+          return Dates.GenerateShortDates(bIUShort);
+
+        case "inspectiontypes":
+          return InspType.Get();
+
+        default:
+          return null;
+      }
     }
-
-    public static List<string> getDateString()
-    {
-      //TODO: code function checkIfExternal();  currently showing External dates only
-      var realDates = getDateList (/* checkIfExternal()*/);
-
-      return ( from d in realDates select d.ToShortDateString ( ) ).ToList ( );
-    }
-
   }
 }

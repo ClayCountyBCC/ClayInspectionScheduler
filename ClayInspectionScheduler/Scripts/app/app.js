@@ -9,7 +9,10 @@ var InspSched;
 (function (InspSched) {
     "use strict";
     InspSched.dpCalendar = null;
+    InspSched.InspectionDates = [];
+    InspSched.InspectionTypes = [];
     function start() {
+        LoadData();
         var typeSelect = document.getElementById("InspTypeSelect");
         var saveButton = document.getElementById("SaveSchedule");
         var searchButton = document.getElementById("PermitSearch");
@@ -25,6 +28,50 @@ var InspSched;
         });
     }
     InspSched.start = start;
+    function LoadData() {
+        LoadInspectionDates();
+        LoadInspectionTypes();
+    }
+    function LoadInspectionTypes() {
+        InspSched.transport.GetInspType().then(function (insptypes) {
+            InspSched.InspectionTypes = insptypes;
+            console.log('InspectionTypes', InspSched.InspectionTypes);
+        }, function () {
+            console.log('error in LoadInspectionTypes');
+            // do something with the error here
+            // need to figure out how to detect if something wasn't found
+            // versus an error.
+            //Hide('Searching');
+            InspSched.InspectionTypes = [];
+        });
+    }
+    function LoadInspectionDates() {
+        InspSched.transport.GenerateDates().then(function (dates) {
+            InspSched.InspectionDates = dates;
+            console.log('InspectionDates', InspSched.InspectionDates);
+            //let datesDisabled: string = "[";
+            //let minDate: Dates = dates[0];
+            //if (dates.length > 2)
+            //{
+            //  for (let i: number = 1; (i < dates.length - 2); i++)
+            //  {
+            //    datesDisabled += dates[i] + ", ";
+            //  }
+            //  datesDisabled += dates[dates.length - 2] + "]";
+            //}
+            //else
+            //  datesDisabled += "]";
+            //let maxDate: Dates = dates[dates.length - 1];
+            //return dates;
+        }, function () {
+            console.log('error in LoadInspectionDates');
+            // do something with the error here
+            // need to figure out how to detect if something wasn't found
+            // versus an error.
+            //Hide('Searching');
+            InspSched.InspectionDates = [];
+        });
+    }
     //export function toggleNavDisplay(element: string): void
     //{
     //  UI.toggleNav("navTopMenu", element);
