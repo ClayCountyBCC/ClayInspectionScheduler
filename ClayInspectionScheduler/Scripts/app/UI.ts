@@ -28,7 +28,6 @@ namespace InspSched.UI
     Hide( 'SearchFailed' );
     Hide( 'SuspendedContractor' );
 
-
     let k: string = key.trim().toUpperCase();
     document.getElementById( 'PermitSearch' ).setAttribute( "value", k );
 

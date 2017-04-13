@@ -420,12 +420,15 @@
     <Content Include="Content\fonts\foundation-icons.woff" />
     <None Include="Scripts\jquery-3.1.1.intellisense.js" />
     <Content Include="index.html" />
+    <Content Include="Scripts\bootstrap-datepicker.js" />
     <Content Include="Scripts\foundation.js" />
     <Content Include="Scripts\foundation.min.js" />
     <Content Include="Scripts\jquery-3.1.1.js" />
     <Content Include="Scripts\jquery-3.1.1.min.js" />
     <Content Include="Scripts\jquery-3.1.1.slim.js" />
     <Content Include="Scripts\jquery-3.1.1.slim.min.js" />
+    <Content Include="Scripts\moment.js" />
+    <Content Include="Scripts\moment.min.js" />
     <Content Include="Scripts\plugins\foundation.abide.js" />
     <Content Include="Scripts\plugins\foundation.abide.min.js" />
     <Content Include="Scripts\plugins\foundation.accordion.js" />
@@ -484,6 +487,7 @@
     <Content Include="Scripts\plugins\foundation.util.triggers.min.js" />
     <Content Include="Scripts\plugins\foundation.zf.responsiveAccordionTabs.js" />
     <Content Include="Scripts\plugins\foundation.zf.responsiveAccordionTabs.min.js" />
+    <Content Include="Scripts\what-input.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -591,6 +595,9 @@
     <TypeScriptCompile Include="Scripts\app\UI.ts" />
     <TypeScriptCompile Include="Scripts\app\XHR.ts" />
     <TypeScriptCompile Include="Scripts\foundation.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\bootstrap.datepicker\bootstrap.datepicker.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\foundation\foundation.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
