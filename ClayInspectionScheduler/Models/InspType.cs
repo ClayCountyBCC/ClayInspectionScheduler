@@ -11,11 +11,10 @@ namespace InspectionScheduler.Models
 
     public string TYPE { get; set; }
 
-    public string InspCd{ get; set; }
+    public string InspCd { get; set; }
 
-    public static List<InspType> Get( )
+    public static List<InspType> Get()
     {
-     
       string sql = @"
         
         USE WATSC;
@@ -32,7 +31,7 @@ namespace InspectionScheduler.Models
           I.InsDesc
         ";
 
-      var lp = Constants.Get_Data<InspType>( sql );
+      var lp = Constants.Get_Data<InspType>(sql);
       return lp;
     }
 

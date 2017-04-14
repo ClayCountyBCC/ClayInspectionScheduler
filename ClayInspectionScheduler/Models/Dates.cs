@@ -108,65 +108,80 @@ namespace InspectionScheduler.Models
 
     }
 
-    public static List<DateTime> GenerateDates( bool isExternal = false)
+    public static List<DateTime> GenerateDates(bool IsExternalUser = true)
     {
-
-      var dTmp = DateTime.Today;
-
-      // external rules: 
-      // can't schedule same day
-      // can't schedule on weekends
-      // can't schedule on holidays
-
-      // internal rules
-      // can't schedule on holidays
-      var datesToReturn = new List<DateTime> ( );
-      var badDates = new List<DateTime> ( );
-      var goodDates = new List<DateTime> ( );
-      var holidays = getHolidayList ( dTmp.Year );
-      if ( dTmp.Year != dTmp.AddDays ( 8 ).Year )
+      try
       {
-        holidays.AddRange ( getHolidayList ( dTmp.Year + 1 ) );
-      }
 
-      badDates = ( from h in holidays
-                   where h >= dTmp &&
-                   h <= dTmp.AddDays ( 8 )
-                   select h ).ToList ( );
 
-      for ( int i = ( isExternal ? 1 : 0 ); i < 9; i++ )
-      {
-        var t = dTmp.AddDays ( i );
-        if ( !badDates.Contains ( t ) )
+        var dTmp = DateTime.Today;
+
+        // external rules: 
+        // can't schedule same day
+        // can't schedule on weekends
+        // can't schedule on holidays
+
+        // internal rules
+        // can't schedule on holidays
+        var datesToReturn = new List<DateTime>();
+        var badDates = new List<DateTime>();
+        var goodDates = new List<DateTime>();
+        var holidays = getHolidayList(dTmp.Year);
+        if (dTmp.Year != dTmp.AddDays(8).Year)
         {
-          if ( isExternal )
+          holidays.AddRange(getHolidayList(dTmp.Year + 1));
+        }
+
+        badDates = (from h in holidays
+                    where h >= dTmp &&
+                    h <= dTmp.AddDays(8)
+                    select h).ToList();
+        
+        for (int i = (IsExternalUser ? 1 : 0); i < 9; i++)
+        {
+          var t = dTmp.AddDays(i);
+          if (!badDates.Contains(t))
           {
-            if ( t.DayOfWeek == DayOfWeek.Saturday ||
-              t.DayOfWeek == DayOfWeek.Sunday )
+            if (IsExternalUser)
             {
-              badDates.Add ( t );
+              if (t.DayOfWeek == DayOfWeek.Saturday ||
+                t.DayOfWeek == DayOfWeek.Sunday)
+              {
+                badDates.Add(t);
+              }
+              else
+              {
+                goodDates.Add(t);
+              }
             }
             else
             {
-              goodDates.Add ( t );
+              goodDates.Add(t);
             }
           }
-          else
-          {
-            goodDates.Add ( t );
-          }
         }
-      }
 
-      var minDate = ( from d in goodDates orderby d select d ).First ( );
-      var maxDate = ( from d in goodDates orderby d descending select d ).First ( );
-      datesToReturn.Add ( minDate );
-      datesToReturn.AddRange ( ( from d in badDates
-                                 where d >= minDate &&
-                                 d <= maxDate
-                                 select d ).ToList ( ) );
-      datesToReturn.Add ( maxDate );
-      return datesToReturn;
+        var minDate = (from d in goodDates orderby d select d).First();
+        var maxDate = (from d in goodDates orderby d descending select d).First();
+        datesToReturn.Add(minDate);
+        datesToReturn.AddRange((from d in badDates
+                                where d >= minDate &&
+                                d <= maxDate
+                                select d).ToList());
+        datesToReturn.Add(maxDate);
+        return datesToReturn;
+      }
+      catch (Exception ex)
+      {
+        Constants.Log(ex);
+        return null;
+      }
+    }
+
+    public static List<string> GenerateShortDates(bool IsExternalUser)
+    {
+      return (from d in GenerateDates(IsExternalUser)
+              select d.ToShortDateString()).ToList();
     }
 
     //public static string disabledDatesString()

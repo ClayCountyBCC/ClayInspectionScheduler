@@ -16,117 +16,117 @@ namespace InspectionScheduler.Models
 
     public enum Users : int
     {
-        Prod_User = 41222,
-        Test_User = 10776
+      Prod_User = 41222,
+      Test_User = 10776
     }
-    
+
     public static bool UseProduction()
     {
-        switch (Environment.MachineName.ToUpper())
-        {
+      switch (Environment.MachineName.ToUpper())
+      {
 
 
-            case "MISLL03":
-            case "CLAYBCCDV10":
-            case "MISDW08":
-                // Test Environment Machines
-                Console.WriteLine("MachineName = " + Environment.MachineName.ToUpper());
-                return false;
+        case "CLAYBCCDV10":
+        case "MISML01":
+        case "MISDW08":
+          // Test Environment Machines
+          Console.WriteLine("MachineName = " + Environment.MachineName.ToUpper());
+          return false;
 
-            case "CLAYBCCIIS01":
-            case "CLAYBCCDMZIIS01":
-                Console.WriteLine("MachineName = " + Environment.MachineName.ToUpper());
-                // TODO: will need to add the DMZ machine name(s) here.
-                return false;
+        case "CLAYBCCIIS01":
+        case "CLAYBCCDMZIIS01":
+          Console.WriteLine("MachineName = " + Environment.MachineName.ToUpper());
+          // TODO: will need to add the DMZ machine name(s) here.
+          return false;
 
-            default:
-                Console.WriteLine("MachineName = " + Environment.MachineName.ToUpper());
-                // we'll return false for any machinenames we don't know.
-                return false;
-        }
+        default:
+          Console.WriteLine("MachineName = " + Environment.MachineName.ToUpper());
+          // we'll return false for any machinenames we don't know.
+          return false;
+      }
     }
 
     public static List<T> Get_Data<T>(string query)
     {
-        try
+      try
+      {
+        using (IDbConnection db =
+          new SqlConnection(
+            Get_ConnStr("WATSC" + (UseProduction() ? "Prod" : "QA"))))
         {
-            using (IDbConnection db =
-              new SqlConnection(
-                Get_ConnStr("WATSC" + (UseProduction() ? "Prod" : "QA"))))
-            {
-                return (List<T>)db.Query<T>(query);
-            }
+          return (List<T>)db.Query<T>(query);
         }
-        catch (Exception ex)
-        {
-            Log(ex, query);
-            return null;
-        }
+      }
+      catch (Exception ex)
+      {
+        Log(ex, query);
+        return null;
+      }
     }
 
     public static List<T> Get_Data<T>(string query, DynamicParameters dbA)
     {
 
-        try
+      try
+      {
+        using (IDbConnection db =
+          new SqlConnection(
+            Get_ConnStr("WATSC" + (UseProduction() ? "Prod" : "QA"))))
         {
-            using (IDbConnection db =
-              new SqlConnection(
-                Get_ConnStr("WATSC" + (UseProduction() ? "Prod" : "QA"))))
-            {
-                return (List<T>)db.Query<T>(query, dbA);
-            }
+          return (List<T>)db.Query<T>(query, dbA);
         }
-        catch (Exception ex)
-        {
+      }
+      catch (Exception ex)
+      {
         // TODO: no connection alert
 
 
         Log(ex, query);
-            return null;
+        return null;
 
-        }
+      }
     }
 
     public static bool Save_Data<T>(string insertQuery, T item)
     {
-        try
+      try
+      {
+        using (IDbConnection db = new SqlConnection(Get_ConnStr("Printing")))
         {
-            using (IDbConnection db = new SqlConnection(Get_ConnStr("Printing")))
-            {
-                db.Execute(insertQuery, item);
-                return true;
-            }
+          db.Execute(insertQuery, item);
+          return true;
         }
-        catch (Exception ex)
-        {
-            Log(ex, insertQuery);
-            return false;
-        }
+      }
+      catch (Exception ex)
+      {
+        Log(ex, insertQuery);
+        return false;
+      }
     }
 
-    public static bool Delete_Data<T>( string query, DynamicParameters dbA )
+    public static bool Delete_Data<T>(string query, DynamicParameters dbA)
     {
       {
         try
         {
-          using ( IDbConnection db = new SqlConnection ( Get_ConnStr ( "WATSC" + ( UseProduction ( ) ? "Prod" : "QA" ) ) ) )
+          using (IDbConnection db = new SqlConnection(Get_ConnStr("WATSC" + (UseProduction() ? "Prod" : "QA"))))
           {
-            db.Execute ( query, dbA );
+            db.Execute(query, dbA);
             return true;
           }
         }
-        catch ( Exception ex )
+        catch (Exception ex)
         {
-          Log ( ex, query );
+          Log(ex, query);
           return false;
         }
       }
     }
 
     public static string Get_ConnStr(string cs)
-      {
-          return ConfigurationManager.ConnectionStrings[cs].ConnectionString;
-      }
+    {
+      return ConfigurationManager.ConnectionStrings[cs].ConnectionString;
+    }
 
     #region Log Code
 
@@ -153,10 +153,10 @@ namespace InspectionScheduler.Models
       @errorStacktrace, @errorSource, @query);";
 
 
-        using( IDbConnection db = new SqlConnection( Get_ConnStr( "Log" ) ) )
-        {
-          db.Execute( sql, el );
-        }
+      using (IDbConnection db = new SqlConnection(Get_ConnStr("Log")))
+      {
+        db.Execute(sql, el);
+      }
 
     }
 

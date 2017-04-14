@@ -290,7 +290,7 @@ var InspSched;
                     if (CurrentContractor.length > 0 && pass) {
                         // Populate Inspection Type Select list
                         GetInspType(key);
-                        BuildSchdeuleCalendar();
+                        //BuildSchdeuleCalendar();
                         document.getElementById('InspectionScheduler').style.removeProperty("display");
                         document.getElementById('InspectionScheduler').setAttribute("value", key);
                     }
@@ -317,32 +317,37 @@ var InspSched;
                 });
             }
         }
-        function BuildSchdeuleCalendar() {
-            InspSched.transport.GenerateDates().then(function (dates) {
-                var datesDisabled = "[";
-                var minDate = dates[0];
-                if (dates.length > 2) {
-                    for (var i = 1; (i < dates.length - 2); i++) {
-                        datesDisabled += dates[i] + ", ";
-                    }
-                    datesDisabled += dates[dates.length - 2] + "]";
-                }
-                else
-                    datesDisabled += "]";
-                var maxDate = dates[dates.length - 1];
-                return dates;
-            }, function () {
-                console.log('error in generateDates');
-                // do something with the error here
-                // need to figure out how to detect if something wasn't found
-                // versus an error.
-                Hide('Searching');
-                return null;
-            });
+        function BuildScheduleCalendar() {
+            //transport.GenerateDates().then( function ( dates: Array<Dates> ): Array<Dates>
+            //{
+            //  let datesDisabled: string = "[";
+            //  let minDate: Dates = dates[0];
+            //  if ( dates.length > 2 )
+            //  {
+            //    for ( let i: number = 1; ( i < dates.length - 2 ); i++ )
+            //    {
+            //      datesDisabled += dates[i] + ", ";
+            //    }
+            //    datesDisabled += dates[dates.length - 2] + "]";
+            //  }
+            //  else
+            //    datesDisabled += "]";
+            //  let maxDate: Dates = dates[dates.length - 1];
+            //  return dates;
+            //},
+            //  function ()
+            //  {
+            //    console.log( 'error in generateDates' );
+            //    // do something with the error here
+            //    // need to figure out how to detect if something wasn't found
+            //    // versus an error.
+            //    Hide( 'Searching' );
+            //    return null;
+            //  });
             //let element: HTMLScriptElement = ( <HTMLScriptElement>document.getElementById( 'CalendarScriptLocation' ) );
             //clearElement( element );
         }
-        UI.BuildSchdeuleCalendar = BuildSchdeuleCalendar;
+        UI.BuildScheduleCalendar = BuildScheduleCalendar;
         function GetInspType(key) {
             var thistype = key[0];
             var InspTypeList = document.getElementById('InspTypeSelect');
@@ -374,25 +379,40 @@ var InspSched;
             optionLabel.selected;
             optionLabel.value = "";
             InspTypeList.appendChild(optionLabel);
-            InspSched.transport.GetInspType(key).then(function (insptypes) {
-                CurrentInspTypes = insptypes;
-                for (var _i = 0, insptypes_1 = insptypes; _i < insptypes_1.length; _i++) {
-                    var type = insptypes_1[_i];
-                    if (type.InspCd[0] == thistype) {
-                        var option = document.createElement("option");
-                        option.label = type.InsDesc;
-                        option.value = type.InspCd;
-                        option.className = "TypeSelectOption";
-                        InspTypeList.appendChild(option);
-                        option.innerText = type.InsDesc;
-                    }
+            for (var _i = 0, InspectionTypes_1 = InspSched.InspectionTypes; _i < InspectionTypes_1.length; _i++) {
+                var type = InspectionTypes_1[_i];
+                if (type.InspCd[0] == thistype) {
+                    var option = document.createElement("option");
+                    option.label = type.InsDesc;
+                    option.value = type.InspCd;
+                    option.className = "TypeSelectOption";
+                    InspTypeList.appendChild(option);
+                    option.innerText = type.InsDesc;
                 }
-                InspTypeList.required;
-                return true;
-            }, function () {
-                console.log('error getting inspection types');
-                return false;
-            });
+            }
+            //transport.GetInspType().then( function ( insptypes: Array<InspType> )
+            //{
+            //  CurrentInspTypes = insptypes;
+            //  for ( let type of insptypes )
+            //  {
+            //    if ( type.InspCd[0] == thistype )
+            //    {
+            //      let option = document.createElement( "option" );
+            //      option.label = type.InsDesc;
+            //      option.value = type.InspCd;
+            //      option.className = "TypeSelectOption";
+            //      InspTypeList.appendChild( option );
+            //      option.innerText = type.InsDesc;
+            //    }
+            //  }
+            //  InspTypeList.required;
+            //  return true;
+            //},
+            //  function ()
+            //  {
+            //    console.log( 'error getting inspection types' );
+            //    return false;
+            //  });
         }
         /**********************************
         
@@ -495,7 +515,7 @@ var InspSched;
                 return true;
             }, function () {
                 console.log("Error in SaveInspection");
-                GetInspType(PermitNo);
+                //GetInspType( PermitNo );
             });
         }
         UI.SaveInspection = SaveInspection;

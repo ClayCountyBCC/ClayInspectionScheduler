@@ -28,7 +28,6 @@ namespace InspSched.UI
     Hide( 'SearchFailed' );
     Hide( 'SuspendedContractor' );
 
-
     let k: string = key.trim().toUpperCase();
     document.getElementById( 'PermitSearch' ).setAttribute( "value", k );
 
@@ -447,7 +446,7 @@ namespace InspSched.UI
           // Populate Inspection Type Select list
           GetInspType( key );
 
-          BuildSchdeuleCalendar();
+          //BuildSchdeuleCalendar();
           document.getElementById( 'InspectionScheduler' ).style.removeProperty( "display" );
           document.getElementById( 'InspectionScheduler' ).setAttribute( "value", key );
 
@@ -493,43 +492,43 @@ namespace InspSched.UI
 
   }
 
-  export function BuildSchdeuleCalendar()
+  export function BuildScheduleCalendar()
   {
 
-    transport.GenerateDates().then( function ( dates: Array<Dates> ): Array<Dates>
-    {
-      let datesDisabled: string = "[";
+    //transport.GenerateDates().then( function ( dates: Array<Dates> ): Array<Dates>
+    //{
+    //  let datesDisabled: string = "[";
 
-      let minDate: Dates = dates[0];
+    //  let minDate: Dates = dates[0];
 
-      if ( dates.length > 2 )
-      {
-        for ( let i: number = 1; ( i < dates.length - 2 ); i++ )
-        {
-          datesDisabled += dates[i] + ", ";
-        }
-        datesDisabled += dates[dates.length - 2] + "]";
-      }
-      else
-        datesDisabled += "]";
+    //  if ( dates.length > 2 )
+    //  {
+    //    for ( let i: number = 1; ( i < dates.length - 2 ); i++ )
+    //    {
+    //      datesDisabled += dates[i] + ", ";
+    //    }
+    //    datesDisabled += dates[dates.length - 2] + "]";
+    //  }
+    //  else
+    //    datesDisabled += "]";
 
-      let maxDate: Dates = dates[dates.length - 1];
+    //  let maxDate: Dates = dates[dates.length - 1];
 
 
 
-      return dates;
-    },
-      function ()
-      {
+    //  return dates;
+    //},
+    //  function ()
+    //  {
 
-        console.log( 'error in generateDates' );
-        // do something with the error here
-        // need to figure out how to detect if something wasn't found
-        // versus an error.
-        Hide( 'Searching' );
+    //    console.log( 'error in generateDates' );
+    //    // do something with the error here
+    //    // need to figure out how to detect if something wasn't found
+    //    // versus an error.
+    //    Hide( 'Searching' );
 
-        return null;
-      });
+    //    return null;
+    //  });
 
 
     //let element: HTMLScriptElement = ( <HTMLScriptElement>document.getElementById( 'CalendarScriptLocation' ) );
@@ -537,17 +536,17 @@ namespace InspSched.UI
     
   }
 
-  function GetInspType( key: string )
+  function GetInspType(key: string)
   {
 
     let thistype: string = key[0];
-    
-    let InspTypeList: HTMLSelectElement = ( <HTMLSelectElement>document.getElementById( 'InspTypeSelect' ) );
-    let optionLabel: HTMLOptionElement = ( <HTMLOptionElement>document.createElement( "option" ) );
 
-    clearElement( InspTypeList );
+    let InspTypeList: HTMLSelectElement = (<HTMLSelectElement>document.getElementById('InspTypeSelect'));
+    let optionLabel: HTMLOptionElement = (<HTMLOptionElement>document.createElement("option"));
 
-    switch ( thistype )
+    clearElement(InspTypeList);
+
+    switch (thistype)
     {
       case '1':
       case '0':
@@ -575,35 +574,47 @@ namespace InspSched.UI
     optionLabel.className = "selectPlaceholder";
     optionLabel.selected;
     optionLabel.value = "";
-    InspTypeList.appendChild( optionLabel );
-    
-    transport.GetInspType(key).then( function ( insptypes: Array<InspType> )
+    InspTypeList.appendChild(optionLabel);
+
+    for (let type of InspectionTypes)
     {
-      CurrentInspTypes = insptypes;
-      for ( let type of insptypes )
+      if (type.InspCd[0] == thistype)
       {
-        if ( type.InspCd[0] == thistype )
-        {
-          let option = document.createElement( "option" );
-          option.label = type.InsDesc;
-          option.value = type.InspCd;
-          option.className = "TypeSelectOption";
-          InspTypeList.appendChild( option );
-          option.innerText = type.InsDesc;
-
-        }
+        let option: HTMLOptionElement = <HTMLOptionElement>document.createElement("option");        
+        option.label = type.InsDesc;
+        option.value = type.InspCd;
+        option.className = "TypeSelectOption";
+        InspTypeList.appendChild(option);
+        option.innerText = type.InsDesc;
       }
-      
-      InspTypeList.required;
+    }
+    //transport.GetInspType().then( function ( insptypes: Array<InspType> )
+    //{
+    //  CurrentInspTypes = insptypes;
+    //  for ( let type of insptypes )
+    //  {
+    //    if ( type.InspCd[0] == thistype )
+    //    {
+    //      let option = document.createElement( "option" );
+    //      option.label = type.InsDesc;
+    //      option.value = type.InspCd;
+    //      option.className = "TypeSelectOption";
+    //      InspTypeList.appendChild( option );
+    //      option.innerText = type.InsDesc;
 
-      return true;
-    },
-      function ()
-      {
-        console.log( 'error getting inspection types' );
-        return false;
+    //    }
+    //  }
 
-      });
+    //  InspTypeList.required;
+
+    //  return true;
+    //},
+    //  function ()
+    //  {
+    //    console.log( 'error getting inspection types' );
+    //    return false;
+
+    //  });
 
 
   }
@@ -762,7 +773,7 @@ namespace InspSched.UI
       {
         console.log( "Error in SaveInspection" );
 
-        GetInspType( PermitNo );
+        //GetInspType( PermitNo );
       });
   }
 

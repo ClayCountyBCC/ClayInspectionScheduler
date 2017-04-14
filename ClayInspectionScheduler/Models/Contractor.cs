@@ -11,7 +11,7 @@ namespace InspectionScheduler.Models
   {
 
     public string ContractorId { get; }
-    
+
     public DateTime SuspendGraceDt { get; }
 
     public Contractor()
@@ -20,19 +20,19 @@ namespace InspectionScheduler.Models
 
     }
 
-    public static List<Contractor> Get( string PermitNo )
+    public static List<Contractor> Get(string PermitNo)
     {
-      var testNum = new double ( );
+      var testNum = new double();
       bool myBool = false;
       int newNum = -1;
       testNum = 0.0;
 
-      var dbArgs = new Dapper.DynamicParameters ( );
-      dbArgs.Add ( "@PermitNo", PermitNo );
-      dbArgs.Add ( "@MyBool", myBool );
-      dbArgs.Add ( "@MyNum", newNum );
+      var dbArgs = new Dapper.DynamicParameters();
+      dbArgs.Add("@PermitNo", PermitNo);
+      dbArgs.Add("@MyBool", myBool);
+      dbArgs.Add("@MyNum", newNum);
 
-      if ( PermitNo.Length == 8 && double.TryParse ( PermitNo, out testNum ) )
+      if (PermitNo.Length == 8 && double.TryParse(PermitNo, out testNum))
       {
         string sql = @"
           USE WATSC;
@@ -64,16 +64,23 @@ namespace InspectionScheduler.Models
 
           GROUP BY ContractorCd";
 
-
-        var li = Constants.Get_Data<Contractor> ( sql, dbArgs );
-        return li; 
+        try
+        {
+          var li = Constants.Get_Data<Contractor>(sql, dbArgs);
+          return li;
+        }
+        catch (Exception ex)
+        {
+          Constants.Log(ex);
+          return null;
+        }
 
       }
       else
       {
 
         string sql = @"";
-        var li = Constants.Get_Data<Contractor> ( sql, dbArgs );
+        var li = Constants.Get_Data<Contractor>(sql, dbArgs);
         return li;
 
       }

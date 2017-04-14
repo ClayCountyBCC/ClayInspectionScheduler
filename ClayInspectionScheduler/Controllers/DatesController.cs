@@ -12,16 +12,15 @@ namespace InspectionScheduler.Controllers
   {
     public IHttpActionResult Get()
     {
-      List<string> lat = ( List<string> )MyCache.GetItem(true);
-      if ( lat == null )
+      List<string> lat = (List<string>)MyCache.GetItem("inspectionshortdates,true");
+      if (lat == null)
       {
-        return InternalServerError ( );
+        return InternalServerError();
       }
       else
       {
-        return Ok ( lat );
+        return Ok(lat);
       }
-
     }
   }
 }
