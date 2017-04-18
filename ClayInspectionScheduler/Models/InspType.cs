@@ -9,8 +9,6 @@ namespace InspectionScheduler.Models
   {
     public string InsDesc { get; set; }
 
-    public string TYPE { get; set; }
-
     public string InspCd { get; set; }
 
     public static List<InspType> Get()

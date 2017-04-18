@@ -1,7 +1,6 @@
 /// <reference path="XHR.ts" />
 /// <reference path="Permit.ts" />
 /// <reference path="Inspection.ts" />
-/// <reference path="Contractor.ts" />
 var InspSched;
 (function (InspSched) {
     var transport;
@@ -74,19 +73,6 @@ var InspSched;
             });
         }
         transport.CancelInspection = CancelInspection;
-        function CheckContractorPermitStatus(key) {
-            var x = XHR.Get("API/Contractor/" + key);
-            return new Promise(function (resolve, reject) {
-                x.then(function (response) {
-                    var di = JSON.parse(response.Text);
-                    resolve(di);
-                }).catch(function () {
-                    console.log("error in CheckContractorPermitStatus");
-                    reject(null);
-                });
-            });
-        }
-        transport.CheckContractorPermitStatus = CheckContractorPermitStatus;
         function GenerateDates() {
             var x = XHR.Get("API/Dates/");
             return new Promise(function (resolve, reject) {
