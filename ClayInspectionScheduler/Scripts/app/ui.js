@@ -9,10 +9,6 @@ var InspSched;
         var CurrentPermits = [];
         var InspectionList = [];
         var CurrentInspections = [];
-        var ContractorList = [];
-        var CurrentContractor = [];
-        var CurrentInspTypes = [];
-        var InspTypeList = [];
         function Search(key) {
             clearElement(document.getElementById('SearchFailed'));
             Hide('PermitSelectContainer');
@@ -166,7 +162,8 @@ var InspSched;
             InspSched.transport.GetInspections(key).then(function (inspections) {
                 if (inspections.length > 0) {
                     CurrentInspections = inspections;
-                    BuildInspectionList(inspections, permit);
+                    BuildInspectionList(CurrentInspections, permit);
+                    console.log("List of inspections: ", CurrentInspections);
                 }
                 else {
                     BuildScheduler(inspections, canSchedule, completed, key);
@@ -282,39 +279,31 @@ var InspSched;
             if (inspections.length > 0)
                 key = inspections[0].PermitNo;
             if (canSchedule) {
-                InspSched.transport.CheckContractorPermitStatus(key).then(function (contractors) {
-                    CurrentContractor = contractors;
-                    var fail = document.getElementById(key + "FAIL");
-                    var pass = document.getElementById(key + "PASS");
-                    // if contractor IS ALLOWED to schedule, the contractor id will be on the list
-                    if (CurrentContractor.length > 0 && pass) {
-                        // Populate Inspection Type Select list
-                        GetInspType(key);
-                        //BuildSchdeuleCalendar();
-                        document.getElementById('InspectionScheduler').style.removeProperty("display");
-                        document.getElementById('InspectionScheduler').setAttribute("value", key);
-                    }
-                    else if (CurrentContractor.length <= 0 || fail) {
-                        // TODO Add code to display suspended contractor
-                        var e = document.getElementById('SuspendedPermit');
-                        clearElement(e);
-                        var message = document.createElement("h5");
-                        message.appendChild(document.createTextNode("A new inspection cannot be scheduled for permit #" + key + "."));
-                        message.appendChild(document.createElement("br"));
-                        message.appendChild(document.createElement("br"));
-                        message.appendChild(document.createTextNode("\nIf you are unable to schedule your inspection " +
-                            "through this site please call the Building Department " +
-                            "for assistance at 904-284-6307.  Inspections may not " +
-                            "be able to be scheduled on line due to many reasons " +
-                            "(fees due, permit problems, holds, or licensing issues)."));
-                        e.appendChild(message);
-                        document.getElementById('SuspendedContractor').style.removeProperty("display");
-                    }
-                    return true;
-                }, function () {
-                    console.log('error in Scheduler');
-                    return false;
-                });
+                var fail = document.getElementById(key + "FAIL");
+                var pass = document.getElementById(key + "PASS");
+                // if contractor IS ALLOWED to schedule, the contractor id will be on the list
+                if (pass) {
+                    // Populate Inspection Type Select list
+                    GetInspType(key);
+                    //BuildSchdeuleCalendar();
+                    document.getElementById('InspectionScheduler').style.removeProperty("display");
+                    document.getElementById('InspectionScheduler').setAttribute("value", key);
+                }
+                else {
+                    // TODO Add code to display suspended contractor
+                    var e = document.getElementById('SuspendedPermit');
+                    clearElement(e);
+                    var message = document.createElement("h5");
+                    message.appendChild(document.createTextNode("A new inspection cannot be scheduled for permit #" + key + "."));
+                    message.appendChild(document.createElement("br"));
+                    message.appendChild(document.createElement("br"));
+                    message.appendChild(document.createTextNode("\nPlease contact the Building Department " +
+                        "for assistance at 904-284-6307.  Inspections may not " +
+                        "be able to be scheduled on line due to many reasons " +
+                        "(fees due, permit problems, holds, or licensing issues)."));
+                    e.appendChild(message);
+                    document.getElementById('SuspendedContractor').style.removeProperty("display");
+                }
             }
         }
         function BuildScheduleCalendar() {
@@ -379,8 +368,8 @@ var InspSched;
             optionLabel.selected;
             optionLabel.value = "";
             InspTypeList.appendChild(optionLabel);
-            for (var _i = 0, InspectionTypes_1 = InspSched.InspectionTypes; _i < InspectionTypes_1.length; _i++) {
-                var type = InspectionTypes_1[_i];
+            for (var _i = 0, _a = InspSched.InspectionTypes; _i < _a.length; _i++) {
+                var type = _a[_i];
                 if (type.InspCd[0] == thistype) {
                     var option = document.createElement("option");
                     option.label = type.InsDesc;
@@ -419,23 +408,24 @@ var InspSched;
           Do Somethings
         
         ***********************************/
-        function createNewElement(elementType, classname, value, id) {
-            var element = document.createElement(elementType);
-            if (classname !== undefined)
-                element.className = classname;
-            else
-                element.className = "";
-            if (value !== undefined)
-                element.nodeValue = value;
-            else
-                element.nodeValue = "";
-            if (id !== undefined)
-                element.id = id;
-            else
-                element.id = "";
-            element.appendChild(document.createTextNode(value));
-            return element;
-        }
+        //function createNewElement( elementType: string, classname?: string, value?: string, id?: string ): HTMLElement
+        //{
+        //  let element = document.createElement( elementType );
+        //  if ( classname !== undefined )
+        //    element.className = classname;
+        //  else
+        //    element.className = "";
+        //  if ( value !== undefined )
+        //    element.nodeValue = value;
+        //  else
+        //    element.nodeValue = "";
+        //  if ( id !== undefined )
+        //    element.id = id;
+        //  else
+        //    element.id = "";
+        //  element.appendChild( document.createTextNode( value ) );
+        //  return element;
+        //}
         function Show(id, element, displayType) {
             if (!element) {
                 var e = document.getElementById(id);

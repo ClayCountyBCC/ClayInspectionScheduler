@@ -29,6 +29,7 @@ interface DatepickerOptions {
     calendarWeeks?: boolean;
     clearBtn?: boolean;
     daysOfWeekDisabled?: number[];
+    datesDisabled?: string[];
     forceParse?: boolean;
     inputs?: any[];
     maxViewMode?: any;

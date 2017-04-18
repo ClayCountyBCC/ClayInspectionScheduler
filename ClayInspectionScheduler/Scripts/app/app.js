@@ -1,6 +1,7 @@
 /// <reference path="transport.ts" />
 /// <reference path="UI.ts" />
 /// <reference path="Permit.ts" />
+/// <reference path="dates.ts" />
 /// <reference path="Inspection.ts" />
 /// <reference path="../typings/jquery/jquery.d.ts" />
 /// <reference path="../typings/foundation/foundation.d.ts" />
@@ -8,24 +9,30 @@
 var InspSched;
 (function (InspSched) {
     "use strict";
-    InspSched.dpCalendar = null;
+    var dpCalendar = null;
     InspSched.InspectionDates = [];
     InspSched.InspectionTypes = [];
     function start() {
         LoadData();
-        var typeSelect = document.getElementById("InspTypeSelect");
-        var saveButton = document.getElementById("SaveSchedule");
-        var searchButton = document.getElementById("PermitSearch");
+        var InspectionTypeSelect = document.getElementById("InspTypeSelect");
+        var SaveInspectionButton = document.getElementById("SaveSchedule");
+        var PermitSearchButton = document.getElementById("PermitSearchButton");
+        var PermitSearchField = document.getElementById("PermitSearch");
+        var permitNumSelect = document.getElementById("PermitSelect");
         var inspScheduler = document.getElementById("InspectionScheduler");
-        typeSelect.onchange = function () {
-            saveButton.setAttribute("value", inspScheduler.getAttribute("value") + "/" + typeSelect.value + "/");
+        InspectionTypeSelect.onchange = function () {
+            SaveInspectionButton.setAttribute("value", inspScheduler.getAttribute("value") + "/" + InspectionTypeSelect.value + "/");
+            SaveInspectionButton.removeAttribute("disabled");
         };
-        console.log("value changed to: " + this.value);
-        $(document).foundation();
-        InspSched.dpCalendar = $('#sandbox-container div').datepicker({
-            maxViewMode: 0,
-            toggleActive: true,
-        });
+        permitNumSelect.onchange = function () {
+            // TODO: Add code to check if there is a selected date;
+            SaveInspectionButton.setAttribute("disabled", "disabled");
+            InspSched.UI.GetInspList(permitNumSelect.value);
+            $(dpCalendar.datepicker('clearDates'));
+        };
+        PermitSearchButton.onclick = function () {
+            InspSched.UI.Search(PermitSearchField.value);
+        };
     }
     InspSched.start = start;
     function LoadData() {
@@ -46,8 +53,12 @@ var InspSched;
         });
     }
     function LoadInspectionDates() {
+        var myDisabledDates = [];
         InspSched.transport.GenerateDates().then(function (dates) {
             InspSched.InspectionDates = dates;
+            InspSched.firstDay = InspSched.InspectionDates[0];
+            InspSched.lastDay = InspSched.InspectionDates[dates.length - 1];
+            BuildCalendar(dates);
             console.log('InspectionDates', InspSched.InspectionDates);
             //let datesDisabled: string = "[";
             //let minDate: Dates = dates[0];
@@ -71,6 +82,37 @@ var InspSched;
             //Hide('Searching');
             InspSched.InspectionDates = [];
         });
+    }
+    function GetAdditionalDisabledDates(dates) {
+        var AdditionalDisabledDates = [];
+        if (dates.length > 2) {
+            for (var d = 1; d < dates.length - 1; d++) {
+                AdditionalDisabledDates.push(dates[d]);
+            }
+        }
+        return AdditionalDisabledDates;
+    }
+    function BuildCalendar(dates) {
+        $(document).foundation();
+        //
+        var additionalDisabledDates = GetAdditionalDisabledDates(dates);
+        //if ( InspSched.firstDay == null )
+        //{
+        //  FirstAvailableDate.setDate( FirstAvailableDate.getDate() + 1 );
+        //}
+        //else
+        //{
+        //  let FirstAvailableDate = InspSched.firstDay;
+        //}
+        //let
+        var first = '4/1/2017';
+        dpCalendar = $('#sandbox-container div').datepicker({
+            startDate: InspSched.firstDay,
+            datesDisabled: additionalDisabledDates,
+            endDate: InspSched.lastDay,
+            maxViewMode: 0,
+        });
+        console.log;
     }
     //export function toggleNavDisplay(element: string): void
     //{

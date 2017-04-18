@@ -9,10 +9,7 @@ namespace InspSched.UI
   let CurrentPermits: Array<Permit> = [];
   let InspectionList: Array<Inspection> = [];
   let CurrentInspections: Array<Inspection> = [];
-  let ContractorList: Array<Contractor> = [];
-  let CurrentContractor: Array<Contractor> = [];
-  let CurrentInspTypes: Array<InspType> = [];
-  let InspTypeList: Array<InspType> = [];
+
 
 
   export function Search( key: string ): boolean
@@ -182,6 +179,7 @@ namespace InspSched.UI
   function buildPermitSelectOption( permit: Permit, key: string ): HTMLElement
   {
 
+
     let option: HTMLOptionElement = ( <HTMLOptionElement>document.createElement( "option" ) );
 
     option.setAttribute( "value", permit.PermitNo.trim() );
@@ -247,7 +245,9 @@ namespace InspSched.UI
       {
         
         CurrentInspections = inspections;
-        BuildInspectionList( inspections, permit );
+        BuildInspectionList( CurrentInspections, permit );
+        console.log( "List of inspections: ",  CurrentInspections );
+
 
       }
       else
@@ -432,61 +432,47 @@ namespace InspSched.UI
       
     if ( canSchedule )
     {
-      
-      transport.CheckContractorPermitStatus( key ).then( function ( contractors: Array<Contractor> )
+      let fail: HTMLElement = ( <HTMLElement>document.getElementById( key + "FAIL" ) );
+      let pass: HTMLElement = ( <HTMLElement>document.getElementById( key + "PASS" ) );
+
+      // if contractor IS ALLOWED to schedule, the contractor id will be on the list
+      if (pass )
       {
-        CurrentContractor = contractors;
-        let fail: HTMLElement = ( <HTMLElement>document.getElementById( key + "FAIL" ) );
-        let pass: HTMLElement = ( <HTMLElement>document.getElementById( key+ "PASS" ) );
 
-        // if contractor IS ALLOWED to schedule, the contractor id will be on the list
-        if ( CurrentContractor.length > 0 && pass )
-        {
+        // Populate Inspection Type Select list
+        GetInspType( key );
 
-          // Populate Inspection Type Select list
-          GetInspType( key );
+        //BuildSchdeuleCalendar();
+        document.getElementById( 'InspectionScheduler' ).style.removeProperty( "display" );
+        document.getElementById( 'InspectionScheduler' ).setAttribute( "value", key );
 
-          //BuildSchdeuleCalendar();
-          document.getElementById( 'InspectionScheduler' ).style.removeProperty( "display" );
-          document.getElementById( 'InspectionScheduler' ).setAttribute( "value", key );
+      }
 
-        }
+      // if contractor IS NOT ALLOWED to schedule inspection, the list will be empty
+      else
+      {
+        // TODO Add code to display suspended contractor
 
-        // if contractor IS NOT ALLOWED to schedule inspection, the list will be empty
-        else if ( CurrentContractor.length <= 0 || fail )
-        {
-          // TODO Add code to display suspended contractor
+        let e: HTMLElement = document.getElementById( 'SuspendedPermit' );
+        clearElement( e );
+        let message: HTMLHeadingElement = ( <HTMLHeadingElement>document.createElement( "h5" ) );
+        message.appendChild( document.createTextNode( "A new inspection cannot be scheduled for permit #" + key + "." ) );
+        message.appendChild( document.createElement( "br" ) );
+        message.appendChild( document.createElement( "br" ) );
+        message.appendChild( document.createTextNode(
 
-          let e: HTMLElement = document.getElementById( 'SuspendedPermit' );
-          clearElement( e );
-          let message: HTMLHeadingElement = ( <HTMLHeadingElement>document.createElement( "h5" ) );
-          message.appendChild( document.createTextNode( "A new inspection cannot be scheduled for permit #" + key + "." ) );
-          message.appendChild( document.createElement( "br" ) );
-          message.appendChild( document.createElement( "br" ) );
-          message.appendChild( document.createTextNode( 
+          "\nPlease contact the Building Department " +
+          "for assistance at 904-284-6307.  Inspections may not " +
+          "be able to be scheduled on line due to many reasons " +
+          "(fees due, permit problems, holds, or licensing issues)."
 
-            "\nIf you are unable to schedule your inspection " +
-            "through this site please call the Building Department " +
-            "for assistance at 904-284-6307.  Inspections may not " +
-            "be able to be scheduled on line due to many reasons " +
-            "(fees due, permit problems, holds, or licensing issues)."
-          
-          ) );
+        ) );
 
-          e.appendChild( message );
-          document.getElementById( 'SuspendedContractor' ).style.removeProperty( "display" );
+        e.appendChild( message );
+        document.getElementById( 'SuspendedContractor' ).style.removeProperty( "display" );
 
 
-        }
-        return true
-
-      }, function ()
-        {
-          console.log( 'error in Scheduler' );
-          return false;
-
-        });
-
+      }
 
     }
 
@@ -576,7 +562,7 @@ namespace InspSched.UI
     optionLabel.value = "";
     InspTypeList.appendChild(optionLabel);
 
-    for (let type of InspectionTypes)
+    for (let type of InspSched.InspectionTypes)
     {
       if (type.InspCd[0] == thistype)
       {
@@ -625,32 +611,32 @@ namespace InspSched.UI
   
   ***********************************/
 
-  function createNewElement( elementType: string, classname?: string, value?: string, id?: string ): HTMLElement
-  {
-    let element = document.createElement( elementType );
+  //function createNewElement( elementType: string, classname?: string, value?: string, id?: string ): HTMLElement
+  //{
+  //  let element = document.createElement( elementType );
 
 
-    if ( classname !== undefined )
-      element.className = classname;
-    else
-      element.className = "";
+  //  if ( classname !== undefined )
+  //    element.className = classname;
+  //  else
+  //    element.className = "";
 
 
-    if ( value !== undefined )
-      element.nodeValue = value;
-    else
-      element.nodeValue = "";
+  //  if ( value !== undefined )
+  //    element.nodeValue = value;
+  //  else
+  //    element.nodeValue = "";
 
 
-    if ( id !== undefined )
-      element.id = id;
-    else
-      element.id = "";
+  //  if ( id !== undefined )
+  //    element.id = id;
+  //  else
+  //    element.id = "";
 
-    element.appendChild( document.createTextNode( value ) );
+  //  element.appendChild( document.createTextNode( value ) );
 
-    return element;
-  }
+  //  return element;
+  //}
 
   function Show( id?: string, element?: HTMLElement, displayType?: string ): void
   {

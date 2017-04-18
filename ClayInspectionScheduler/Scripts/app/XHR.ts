@@ -47,7 +47,7 @@ module XHR {
                 headers.forEach(header =>
                     jsXHR.setRequestHeader(header.header, header.data));
 
-            jsXHR.onload = (ev) => {
+           jsXHR.onload = (ev) => {
                 if (jsXHR.status < 200 || jsXHR.status >= 300) {
                     reject(DataFromJSXHR(jsXHR));
                 }

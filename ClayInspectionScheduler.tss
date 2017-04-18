@@ -2,79 +2,40 @@
 <ArrayOfArrayOfArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <ArrayOfArrayOfString>
     <ArrayOfString>
-      <string>C:\Users\mccartneyd\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Controllers\PermitController.cs</string>
+      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\scripts\app\app.ts</string>
     </ArrayOfString>
     <ArrayOfString>
-      <string>C:\Users\mccartneyd\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Controllers\InspTypeController.cs</string>
+      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\index.html</string>
     </ArrayOfString>
     <ArrayOfString>
-      <string>C:\Users\mccartneyd\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Controllers\InspectionController.cs</string>
+      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\scripts\app\ui.ts</string>
     </ArrayOfString>
     <ArrayOfString>
-      <string>C:\Users\mccartneyd\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Controllers\DatesController.cs</string>
+      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\scripts\app\insptype.ts</string>
     </ArrayOfString>
     <ArrayOfString>
-      <string>C:\Users\mccartneyd\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Controllers\ContractorController.cs</string>
+      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\models\insptype.cs</string>
     </ArrayOfString>
     <ArrayOfString>
-      <string>C:\Users\mccartneyd\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Models\Permit.cs</string>
+      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\controllers\insptypecontroller.cs</string>
     </ArrayOfString>
     <ArrayOfString>
-      <string>C:\Users\mccartneyd\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Models\myCache.cs</string>
+      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\models\permit.cs</string>
     </ArrayOfString>
     <ArrayOfString>
-      <string>C:\Users\mccartneyd\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Models\InspType.cs</string>
+      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\scripts\app\xhr.ts</string>
     </ArrayOfString>
     <ArrayOfString>
-      <string>C:\Users\mccartneyd\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Models\Inspection.cs</string>
+      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\scripts\app\transport.ts</string>
     </ArrayOfString>
     <ArrayOfString>
-      <string>C:\Users\mccartneyd\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Models\ErrorLog.cs</string>
+      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\scripts\app\dates.ts</string>
     </ArrayOfString>
     <ArrayOfString>
-      <string>C:\Users\mccartneyd\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Models\Dates.cs</string>
+      <string>C:\Users\westje\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Models\Dates.cs</string>
     </ArrayOfString>
     <ArrayOfString>
-      <string>C:\Users\mccartneyd\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Models\Contractor.cs</string>
-    </ArrayOfString>
-    <ArrayOfString>
-      <string>C:\Users\mccartneyd\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Models\Constants.cs</string>
-    </ArrayOfString>
-    <ArrayOfString>
-      <string>C:\Users\mccartneyd\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\index.html</string>
-    </ArrayOfString>
-    <ArrayOfString>
-      <string>C:\Users\mccartneyd\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Web.config</string>
-    </ArrayOfString>
-    <ArrayOfString>
-      <string>C:\Users\mccartneyd\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Scripts\app\app.ts</string>
-    </ArrayOfString>
-    <ArrayOfString>
-      <string>C:\Users\mccartneyd\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Scripts\app\Contractor.ts</string>
-    </ArrayOfString>
-    <ArrayOfString>
-      <string>C:\Users\mccartneyd\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Scripts\app\Dates.ts</string>
-    </ArrayOfString>
-    <ArrayOfString>
-      <string>C:\Users\mccartneyd\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Scripts\app\Inspection.ts</string>
-    </ArrayOfString>
-    <ArrayOfString>
-      <string>C:\Users\mccartneyd\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Scripts\app\Permit.ts</string>
-    </ArrayOfString>
-    <ArrayOfString>
-      <string>C:\Users\mccartneyd\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Scripts\app\InspType.ts</string>
-    </ArrayOfString>
-    <ArrayOfString>
-      <string>C:\Users\mccartneyd\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Scripts\app\transport.ts</string>
-    </ArrayOfString>
-    <ArrayOfString>
-      <string>C:\Users\mccartneyd\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Scripts\app\UI.ts</string>
-    </ArrayOfString>
-    <ArrayOfString>
-      <string>C:\Users\mccartneyd\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Scripts\app\XHR.ts</string>
-    </ArrayOfString>
-    <ArrayOfString>
-      <string>ClayInspectionScheduler\ClayInspectionScheduler.csproj</string>
+      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\controllers\datescontroller.cs</string>
     </ArrayOfString>
   </ArrayOfArrayOfString>
 </ArrayOfArrayOfArrayOfString>

@@ -93,7 +93,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
-    <Compile Include="Controllers\ContractorController.cs" />
     <Compile Include="Controllers\DatesController.cs" />
     <Compile Include="Controllers\InspectionController.cs" />
     <Compile Include="Controllers\InspTypeController.cs" />
@@ -102,7 +101,6 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Constants.cs" />
-    <Compile Include="Models\Contractor.cs" />
     <Compile Include="Models\Dates.cs" />
     <Compile Include="Models\ErrorLog.cs" />
     <Compile Include="Models\Inspection.cs" />
@@ -585,7 +583,6 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Scripts\app\app.ts" />
-    <TypeScriptCompile Include="Scripts\app\Contractor.ts" />
     <TypeScriptCompile Include="Scripts\app\Dates.ts" />
     <TypeScriptCompile Include="Scripts\app\Inspection.ts" />
     <TypeScriptCompile Include="Scripts\app\InspType.ts" />

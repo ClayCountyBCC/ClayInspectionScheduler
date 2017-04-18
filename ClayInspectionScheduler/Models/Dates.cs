@@ -137,7 +137,7 @@ namespace InspectionScheduler.Models
                     h <= dTmp.AddDays(8)
                     select h).ToList();
         
-        for (int i = (IsExternalUser ? 1 : 0); i < 9; i++)
+        for (int i = (IsExternalUser ? 1 : 0); i < ( IsExternalUser ? 9: 18); i++)
         {
           var t = dTmp.AddDays(i);
           if (!badDates.Contains(t))
