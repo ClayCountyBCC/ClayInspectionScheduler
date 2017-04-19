@@ -13,9 +13,11 @@ namespace InspectionScheduler.Models
 
     public string SchecDateTime { get; set; }
 
-    public NewInspection()
+    public NewInspection( string PermitNo, string InspectionCd, string SchecDateTime)
     {
-
+      this.PermitNo = PermitNo;
+      this.InspectionCd = InspectionCd;
+      this.SchecDateTime = SchecDateTime;
     }
 
     public static bool Post(NewInspection thisInspection)

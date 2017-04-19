@@ -21,9 +21,8 @@ var InspSched;
         var permitNumSelect = document.getElementById("PermitSelect");
         var inspScheduler = document.getElementById("InspectionScheduler");
         SaveInspectionButton.setAttribute("disabled", "disabled");
-        InspectionTypeSelect.onchange = function () {
-            SaveInspectionButton.setAttribute("value", inspScheduler.getAttribute("value") + "/" + InspectionTypeSelect.value + "/");
-            SaveInspectionButton.removeAttribute("disabled");
+        PermitSearchButton.onclick = function () {
+            InspSched.UI.Search(PermitSearchField.value);
         };
         permitNumSelect.onchange = function () {
             // TODO: Add code to check if there is a selected date;
@@ -31,8 +30,12 @@ var InspSched;
             InspSched.UI.GetInspList(permitNumSelect.value);
             $(dpCalendar.datepicker('clearDates'));
         };
-        PermitSearchButton.onclick = function () {
-            InspSched.UI.Search(PermitSearchField.value);
+        InspectionTypeSelect.onchange = function () {
+            SaveInspectionButton.setAttribute("value", inspScheduler.getAttribute("value") + "/" + InspectionTypeSelect.value + "/");
+            SaveInspectionButton.removeAttribute("disabled");
+        };
+        SaveInspectionButton.onclick = function () {
+            InspSched.UI.SaveInspection();
         };
     }
     InspSched.start = start;

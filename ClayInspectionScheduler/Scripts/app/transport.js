@@ -45,16 +45,19 @@ var InspSched;
             });
         }
         transport.GetInspections = GetInspections;
-        function SaveInspection(key, InspId, date) {
-            var x = XHR.Post("API/Inspection/" + key + "/" + InspId + "/" + date);
+        function SaveInspection(thisInspection) {
+            var data = thisInspection.PermitNo + "," +
+                thisInspection.InspectionCd + "," +
+                thisInspection.SchecDateTime;
+            var x = XHR.Post("API/NewInspection/", data);
             return new Promise(function (resolve, reject) {
                 x.then(function (response) {
                     var di = JSON.parse(response.Text);
-                    InspSched.UI.GetInspList(key);
+                    InspSched.UI.GetInspList(thisInspection.PermitNo);
                     resolve(di);
                 }).catch(function () {
                     console.log("error in GetInspections");
-                    InspSched.UI.GetInspList(key);
+                    InspSched.UI.GetInspList(thisInspection.PermitNo);
                     reject(null);
                 });
             });

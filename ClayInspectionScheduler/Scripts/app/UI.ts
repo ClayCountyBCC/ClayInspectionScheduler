@@ -1,4 +1,5 @@
 ﻿/// <reference path="Permit.ts" />
+/// <reference path="newinspection.ts" />
 /// <reference path="Inspection.ts" />
 
 namespace InspSched.UI
@@ -574,33 +575,7 @@ namespace InspSched.UI
         option.innerText = type.InsDesc;
       }
     }
-    //transport.GetInspType().then( function ( insptypes: Array<InspType> )
-    //{
-    //  CurrentInspTypes = insptypes;
-    //  for ( let type of insptypes )
-    //  {
-    //    if ( type.InspCd[0] == thistype )
-    //    {
-    //      let option = document.createElement( "option" );
-    //      option.label = type.InsDesc;
-    //      option.value = type.InspCd;
-    //      option.className = "TypeSelectOption";
-    //      InspTypeList.appendChild( option );
-    //      option.innerText = type.InsDesc;
-
-    //    }
-    //  }
-
-    //  InspTypeList.required;
-
-    //  return true;
-    //},
-    //  function ()
-    //  {
-    //    console.log( 'error getting inspection types' );
-    //    return false;
-
-    //  });
+    
 
 
   }
@@ -611,32 +586,6 @@ namespace InspSched.UI
   
   ***********************************/
 
-  //function createNewElement( elementType: string, classname?: string, value?: string, id?: string ): HTMLElement
-  //{
-  //  let element = document.createElement( elementType );
-
-
-  //  if ( classname !== undefined )
-  //    element.className = classname;
-  //  else
-  //    element.className = "";
-
-
-  //  if ( value !== undefined )
-  //    element.nodeValue = value;
-  //  else
-  //    element.nodeValue = "";
-
-
-  //  if ( id !== undefined )
-  //    element.id = id;
-  //  else
-  //    element.id = "";
-
-  //  element.appendChild( document.createTextNode( value ) );
-
-  //  return element;
-  //}
 
   function Show( id?: string, element?: HTMLElement, displayType?: string ): void
   {
@@ -747,6 +696,27 @@ namespace InspSched.UI
     }
   }
 
+  export function SaveInspection( )
+  {
 
+    let thisInspection: NewInspection;
+    thisInspection.PermitNo = "23456789";
+    // when save button is pressed, it goes here to send thisInspection to the server.
+    // Can't seem to get thisInspection to instantiate. thisInspection still undefined;
+    transport.SaveInspection( thisInspection ).then( function ( isSaved: boolean )
+    {
+      isSaved = true;
+      GetInspList( thisInspection.PermitNo )
+      return true;
+    }, function ()
+      {
+        console.log( "Error in SaveInspection" );
+        
+        //GetInspType( PermitNo );
+    });
+
+    return false;
+
+  }
 
 }

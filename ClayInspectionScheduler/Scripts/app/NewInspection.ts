@@ -1,14 +1,26 @@
 ﻿/// <reference path="transport.ts" />
 /// <reference path="ui.ts" />
 
-namespace InspSched
 
+namespace InspSched
 {
   interface INewInspection
   {
     PermitNo: string;
     InspectionCd: string;
-    SchecDatetime: string;
+    SchecDateTime: string;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   }
@@ -18,14 +30,14 @@ namespace InspSched
 
     public PermitNo: string;
     public InspectionCd: string;
-    public SchecDatetime: string;
+    public SchecDateTime: string;
 
-    constructor()
+
+
+
+    constructor( )
     {
 
-
     }
-
   }
-
 }

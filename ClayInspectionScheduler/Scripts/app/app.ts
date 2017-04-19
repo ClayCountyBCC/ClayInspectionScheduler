@@ -32,11 +32,10 @@ namespace InspSched
 
     SaveInspectionButton.setAttribute( "disabled", "disabled" );
 
-    
-    InspectionTypeSelect.onchange = function ()
+    PermitSearchButton.onclick = function ()
     {
-      SaveInspectionButton.setAttribute( "value", inspScheduler.getAttribute( "value" ) + "/" + InspectionTypeSelect.value + "/" );
-      SaveInspectionButton.removeAttribute( "disabled" );
+
+      InspSched.UI.Search( PermitSearchField.value );
     }
 
     permitNumSelect.onchange = function ()
@@ -47,11 +46,23 @@ namespace InspSched
       $( dpCalendar.datepicker( 'clearDates' ) );
 
     }
-        PermitSearchButton.onclick = function ()
+
+
+    InspectionTypeSelect.onchange = function ()
+    {
+      SaveInspectionButton.setAttribute( "value", inspScheduler.getAttribute( "value" ) + "/" + InspectionTypeSelect.value + "/" );
+      SaveInspectionButton.removeAttribute( "disabled" );
+    }
+
+    SaveInspectionButton.onclick = function ()
     {
 
-      InspSched.UI.Search( PermitSearchField.value );
+
+      InspSched.UI.SaveInspection( );
+
     }
+
+
 
   }
 

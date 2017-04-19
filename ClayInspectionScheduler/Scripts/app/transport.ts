@@ -55,22 +55,26 @@ namespace InspSched.transport
         });
     }
 
-    export function SaveInspection( key: string, InspId: string, date: Date )
+    export function SaveInspection( thisInspection: NewInspection )
     {
+      let data: string =
+        thisInspection.PermitNo + "," +
+        thisInspection.InspectionCd + "," +
+        thisInspection.SchecDateTime;
 
-      var x = XHR.Post( "API/Inspection/" + key + "/" + InspId + "/" + date );
+      var x = XHR.Post( "API/NewInspection/", data );
       return new Promise( function ( resolve, reject )
       {
         x.then( function ( response )
         {
           var di = JSON.parse( response.Text );
-          UI.GetInspList( key );
+          UI.GetInspList( thisInspection.PermitNo );
           resolve( di );
 
         }).catch( function ()
         {
           console.log( "error in GetInspections" );
-          UI.GetInspList( key );
+          UI.GetInspList( thisInspection.PermitNo );
           reject( null );
         });
 
