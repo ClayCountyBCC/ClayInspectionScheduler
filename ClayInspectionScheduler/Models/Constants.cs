@@ -104,6 +104,25 @@ namespace InspectionScheduler.Models
       }
     }
 
+    public static bool Save_Data<T>( string query, DynamicParameters dbA )
+    {
+      {
+        try
+        {
+          using( IDbConnection db = new SqlConnection( Get_ConnStr( "WATSC" + ( UseProduction() ? "Prod" : "QA" ) ) ) )
+          {
+            db.Execute( query, dbA );
+            return true;
+          }
+        }
+        catch( Exception ex )
+        {
+          Log( ex, query );
+          return false;
+        }
+      }
+    }
+
     public static bool Delete_Data<T>(string query, DynamicParameters dbA)
     {
       {

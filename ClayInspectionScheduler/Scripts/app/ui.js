@@ -500,15 +500,6 @@ var InspSched;
             }
         }
         UI.CancelInspection = CancelInspection;
-        function SaveInspection(PermitNo, InspCd, date) {
-            InspSched.transport.SaveInspection(PermitNo, InspCd, date).then(function (isSaved) {
-                return true;
-            }, function () {
-                console.log("Error in SaveInspection");
-                //GetInspType( PermitNo );
-            });
-        }
-        UI.SaveInspection = SaveInspection;
     })(UI = InspSched.UI || (InspSched.UI = {}));
 })(InspSched || (InspSched = {}));
 //# sourceMappingURL=ui.js.map

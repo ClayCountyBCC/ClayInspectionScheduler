@@ -20,6 +20,7 @@ var InspSched;
         var PermitSearchField = document.getElementById("PermitSearch");
         var permitNumSelect = document.getElementById("PermitSelect");
         var inspScheduler = document.getElementById("InspectionScheduler");
+        SaveInspectionButton.setAttribute("disabled", "disabled");
         InspectionTypeSelect.onchange = function () {
             SaveInspectionButton.setAttribute("value", inspScheduler.getAttribute("value") + "/" + InspectionTypeSelect.value + "/");
             SaveInspectionButton.removeAttribute("disabled");

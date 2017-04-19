@@ -7,8 +7,6 @@
 /// <reference path="../typings/foundation/foundation.d.ts" />
 /// <reference path="../typings/bootstrap.datepicker/bootstrap.datepicker.d.ts" />
 
-
-
 namespace InspSched
 {
   "use strict";
@@ -32,6 +30,7 @@ namespace InspSched
     var permitNumSelect = <HTMLSelectElement>document.getElementById( "PermitSelect" );
     var inspScheduler = document.getElementById( "InspectionScheduler" );
 
+    SaveInspectionButton.setAttribute( "disabled", "disabled" );
 
     
     InspectionTypeSelect.onchange = function ()
