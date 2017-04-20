@@ -1,6 +1,10 @@
-﻿/// <reference path="Permit.ts" />
-/// <reference path="newinspection.ts" />
+﻿/// <reference path="newinspection.ts" />
+/// <reference path="Permit.ts" />
+/// <reference path="dates.ts" />
 /// <reference path="Inspection.ts" />
+/// <reference path="transport.ts" />
+/// <reference path="app.ts" />
+
 
 namespace InspSched.UI
 {
@@ -222,7 +226,11 @@ namespace InspSched.UI
     document.getElementById( 'InspectionScheduler' ).removeAttribute( "value" );
     var saveButton: HTMLElement = ( <HTMLElement>document.getElementById( 'SaveSchedule' ) );
     if ( saveButton != undefined )
+    {
+      saveButton.setAttribute( "disabled", "disabled" );
+
       saveButton.removeAttribute( "value" );
+    }
 
 
     let completed: number = 0;

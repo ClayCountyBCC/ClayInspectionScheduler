@@ -65,13 +65,13 @@ namespace InspSched.transport
         x.then( function ( response )
         {
           var di = JSON.parse( response.Text );
-          //UI.GetInspList( thisInspection.PermitNo );
+          UI.GetInspList( thisInspection.PermitNo );
           resolve( di );
 
         }).catch( function ()
         {
           console.log( "error in SaveInspections" );
-          //UI.GetInspList( thisInspection.PermitNo );
+          UI.GetInspList( thisInspection.PermitNo );
           reject( null );
         });
 

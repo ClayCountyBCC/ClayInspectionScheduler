@@ -31,9 +31,9 @@ namespace InspectionScheduler.Models
       {
 
 
-        string sql = @"";
+        //string sql = @"";
 
-        var li = Constants.Save_Data<NewInspection>( sql, dbArgs );
+        //var li = Constants.Save_Data<NewInspection>( sql, dbArgs );
         return true;
       }
       else 

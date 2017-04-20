@@ -1,9 +1,9 @@
-/// <reference path="transport.ts" />
-/// <reference path="UI.ts" />
+/// <reference path="newinspection.ts" />
 /// <reference path="Permit.ts" />
 /// <reference path="dates.ts" />
-/// <reference path="newinspection.ts" />
 /// <reference path="Inspection.ts" />
+/// <reference path="transport.ts" />
+/// <reference path="UI.ts" />
 /// <reference path="../typings/jquery/jquery.d.ts" />
 /// <reference path="../typings/foundation/foundation.d.ts" />
 /// <reference path="../typings/bootstrap.datepicker/bootstrap.datepicker.d.ts" />
@@ -36,8 +36,11 @@ var InspSched;
             SaveInspectionButton.removeAttribute("disabled");
         };
         SaveInspectionButton.onclick = function () {
-            var thisInspection;
-            InspSched.transport.SaveInspection(thisInspection).then(function (isSaved) {
+            var newInsp = new InspSched.NewInspection;
+            //InspSched.newInspection.PermitNo = "23456789";
+            //InspSched.newInspection.InspectionCd = "106";
+            //InspSched.newInspection.SchecDateTime = "04/25/2017";
+            InspSched.transport.SaveInspection(newInsp).then(function (isSaved) {
                 return true;
             }, function () {
                 console.log('error getting inspections');
@@ -63,6 +66,12 @@ var InspSched;
             InspSched.InspectionTypes = [];
         });
     }
+    //export function thisInspection( PermitNo, InspectionCd, SchecDateTime )
+    //{
+    //  this.PermitNo = PermitNo;
+    //  this.InspectionCd = InspectionCd;
+    //  this.SchecDateTime = SchecDateTime;
+    //}
     function LoadInspectionDates() {
         var myDisabledDates = [];
         InspSched.transport.GenerateDates().then(function (dates) {
