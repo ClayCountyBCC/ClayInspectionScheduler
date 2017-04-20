@@ -7,21 +7,21 @@ namespace InspectionScheduler.Models
 {
   public class NewInspection
   {
-    public string PermitNo { get; set; }
+    public string PermitNo { get; set; } = "";
 
-    public string InspectionCd { get; set; }
+    public string InspectionCd { get; set; } = "";
 
-    public string SchecDateTime { get; set; }
+    public string SchecDateTime { get; set; } = "";
 
-    public NewInspection( string PermitNo, string InspectionCd, string SchecDateTime)
+    public NewInspection( )
     {
-      this.PermitNo = PermitNo;
-      this.InspectionCd = InspectionCd;
-      this.SchecDateTime = SchecDateTime;
+
     }
 
     public static bool Post(NewInspection thisInspection)
     {
+      //var data = ThisInspectionDataString.Split( ',' );
+
       var dbArgs = new Dapper.DynamicParameters();
       dbArgs.Add( "@PermitNo", thisInspection.PermitNo );
       dbArgs.Add( "@InspCd", thisInspection.InspectionCd );

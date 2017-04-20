@@ -9,4 +9,4 @@ var InspSched;
     }());
     InspSched.NewInspection = NewInspection;
 })(InspSched || (InspSched = {}));
-//# sourceMappingURL=NewInspection.js.map
+//# sourceMappingURL=newinspection.js.map

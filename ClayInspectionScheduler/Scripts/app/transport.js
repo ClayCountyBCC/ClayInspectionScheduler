@@ -1,5 +1,6 @@
 /// <reference path="XHR.ts" />
 /// <reference path="Permit.ts" />
+/// <reference path="newinspection.ts" />
 /// <reference path="Inspection.ts" />
 var InspSched;
 (function (InspSched) {
@@ -46,18 +47,15 @@ var InspSched;
         }
         transport.GetInspections = GetInspections;
         function SaveInspection(thisInspection) {
-            var data = thisInspection.PermitNo + "," +
-                thisInspection.InspectionCd + "," +
-                thisInspection.SchecDateTime;
-            var x = XHR.Post("API/NewInspection/", data);
+            var x = XHR.Post("API/NewInspection/" + thisInspection);
             return new Promise(function (resolve, reject) {
                 x.then(function (response) {
                     var di = JSON.parse(response.Text);
-                    InspSched.UI.GetInspList(thisInspection.PermitNo);
+                    //UI.GetInspList( thisInspection.PermitNo );
                     resolve(di);
                 }).catch(function () {
-                    console.log("error in GetInspections");
-                    InspSched.UI.GetInspList(thisInspection.PermitNo);
+                    console.log("error in SaveInspections");
+                    //UI.GetInspList( thisInspection.PermitNo );
                     reject(null);
                 });
             });

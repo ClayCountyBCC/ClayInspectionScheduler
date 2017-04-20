@@ -3,25 +3,25 @@
 
 namespace InspSched
 {
-    interface IInspType
+  interface IInspType
+  {
+    InsDesc: string;
+    InspCd: string;
+
+
+
+  }
+
+  export class InspType implements IInspType
+  {
+
+    public InsDesc: string;
+    public InspCd: string;
+
+
+    constructor()
     {
-        InsDesc: string;
-        TYPE: string;
-        InspCd: string;
 
     }
-
-    export class InspType implements IInspType
-    {
-
-        public InsDesc: string;
-        public TYPE: string;
-        public InspCd: string;
-
-
-        constructor()
-        {
-
-        }
-    }
+  }
 }

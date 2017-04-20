@@ -586,9 +586,9 @@
   <ItemGroup>
     <TypeScriptCompile Include="Scripts\app\app.ts" />
     <TypeScriptCompile Include="Scripts\app\Dates.ts" />
+    <TypeScriptCompile Include="Scripts\app\NewInspection.ts" />
     <TypeScriptCompile Include="Scripts\app\Inspection.ts" />
     <TypeScriptCompile Include="Scripts\app\InspType.ts" />
-    <TypeScriptCompile Include="Scripts\app\NewInspection.ts" />
     <TypeScriptCompile Include="Scripts\app\Permit.ts" />
     <TypeScriptCompile Include="Scripts\app\transport.ts" />
     <TypeScriptCompile Include="Scripts\app\typings\es6-promise\es6-promise.d.ts" />

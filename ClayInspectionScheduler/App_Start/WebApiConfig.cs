@@ -18,8 +18,14 @@ namespace ClayInspectionScheduler
 
       config.Routes.MapHttpRoute(
           name: "DefaultApi",
-          routeTemplate: "API/{controller}/{id}/{InspId}/{date}", 
+          routeTemplate: "API/{controller}/{id}/{InspId}/{date}",
           defaults: new { id = RouteParameter.Optional, InspId = RouteParameter.Optional, date = RouteParameter.Optional }
+      );
+
+      config.Routes.MapHttpRoute(
+        name: "NewInspectionApi",
+        routeTemplate: "API/NewInspection/{thisInspection}",
+        defaults: new { thisInspection = RouteParameter.Optional}
       );
     }
   }

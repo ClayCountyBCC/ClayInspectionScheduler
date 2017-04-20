@@ -1,1 +1,1 @@
-{"version":3,"file":"NewInspection.js","sourceRoot":"","sources":["NewInspection.ts"],"names":[],"mappings":"AAAA,qCAAqC;AACrC,8BAA8B;AAG9B,IAAU,SAAS,CAsClB;AAtCD,WAAU,SAAS;IAuBjB;QAUE;QAGA,CAAC;QACH,oBAAC;IAAD,CAAC,AAdD,IAcC;IAdY,uBAAa,gBAczB,CAAA;AACH,CAAC,EAtCS,SAAS,KAAT,SAAS,QAsClB"}
+{"version":3,"file":"newinspection.js","sourceRoot":"","sources":["newinspection.ts"],"names":[],"mappings":"AAAA,qCAAqC;AACrC,8BAA8B;AAE9B,IAAU,SAAS,CAuBlB;AAvBD,WAAU,SAAS;IAWjB;QAOE;QAGA,CAAC;QACH,oBAAC;IAAD,CAAC,AAXD,IAWC;IAXY,uBAAa,gBAWzB,CAAA;AACH,CAAC,EAvBS,SAAS,KAAT,SAAS,QAuBlB"}

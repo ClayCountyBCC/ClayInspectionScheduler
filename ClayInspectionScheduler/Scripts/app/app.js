@@ -2,6 +2,7 @@
 /// <reference path="UI.ts" />
 /// <reference path="Permit.ts" />
 /// <reference path="dates.ts" />
+/// <reference path="newinspection.ts" />
 /// <reference path="Inspection.ts" />
 /// <reference path="../typings/jquery/jquery.d.ts" />
 /// <reference path="../typings/foundation/foundation.d.ts" />
@@ -35,7 +36,13 @@ var InspSched;
             SaveInspectionButton.removeAttribute("disabled");
         };
         SaveInspectionButton.onclick = function () {
-            InspSched.UI.SaveInspection();
+            var thisInspection;
+            InspSched.transport.SaveInspection(thisInspection).then(function (isSaved) {
+                return true;
+            }, function () {
+                console.log('error getting inspections');
+                return false;
+            });
         };
     }
     InspSched.start = start;

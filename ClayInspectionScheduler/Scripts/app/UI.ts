@@ -696,27 +696,6 @@ namespace InspSched.UI
     }
   }
 
-  export function SaveInspection( )
-  {
 
-    let thisInspection: NewInspection;
-    thisInspection.PermitNo = "23456789";
-    // when save button is pressed, it goes here to send thisInspection to the server.
-    // Can't seem to get thisInspection to instantiate. thisInspection still undefined;
-    transport.SaveInspection( thisInspection ).then( function ( isSaved: boolean )
-    {
-      isSaved = true;
-      GetInspList( thisInspection.PermitNo )
-      return true;
-    }, function ()
-      {
-        console.log( "Error in SaveInspection" );
-        
-        //GetInspType( PermitNo );
-    });
-
-    return false;
-
-  }
 
 }

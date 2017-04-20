@@ -2,6 +2,7 @@
 /// <reference path="UI.ts" />
 /// <reference path="Permit.ts" />
 /// <reference path="dates.ts" />
+/// <reference path="newinspection.ts" />
 /// <reference path="Inspection.ts" />
 /// <reference path="../typings/jquery/jquery.d.ts" />
 /// <reference path="../typings/foundation/foundation.d.ts" />
@@ -56,9 +57,20 @@ namespace InspSched
 
     SaveInspectionButton.onclick = function ()
     {
+      var thisInspection: NewInspection;
 
+      transport.SaveInspection( thisInspection ).then( function ( isSaved: boolean )
+      {
 
-      InspSched.UI.SaveInspection( );
+        
+        return true;
+
+      }, function ()
+        {
+          console.log( 'error getting inspections' );
+          return false;
+        });
+
 
     }
 
