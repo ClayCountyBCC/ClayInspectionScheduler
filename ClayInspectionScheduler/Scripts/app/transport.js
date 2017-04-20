@@ -51,11 +51,11 @@ var InspSched;
             return new Promise(function (resolve, reject) {
                 x.then(function (response) {
                     var di = JSON.parse(response.Text);
-                    InspSched.UI.GetInspList(thisInspection.PermitNo);
+                    //UI.GetInspList( thisInspection.PermitNo );
                     resolve(di);
                 }).catch(function () {
                     console.log("error in SaveInspections");
-                    InspSched.UI.GetInspList(thisInspection.PermitNo);
+                    //UI.GetInspList( thisInspection.PermitNo );
                     reject(null);
                 });
             });

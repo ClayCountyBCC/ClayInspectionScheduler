@@ -22,7 +22,6 @@ namespace InspSched
     constructor()
     {
 
-
     }
   }
 }

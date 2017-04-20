@@ -8,26 +8,25 @@ using InspectionScheduler.Models;
 
 namespace InspectionScheduler.Controllers
 {
-  public class NewInspectionController :ApiController
-  {
-    public IHttpActionResult Post( NewInspection thisInspection )
+    public class NewInspectionController : ApiController
     {
-      var secInspection = new NewInspection();
-      NewInspection newInspection = new NewInspection();
-
-      secInspection.PermitNo = "23456789";
-      secInspection.SchecDateTime = "04/25/2017";
-      secInspection.InspectionCd = "106";
-      bool lp = NewInspection.Post( secInspection );
-      if( !lp )
+      public IHttpActionResult Post(NewInspection thisInspection )
       {
-        return InternalServerError();
-      }
-      else
-      {
-        return Ok( lp );
-      }
+        var secInspection = new NewInspection();
+        secInspection.PermitNo = "23456789";
+        secInspection.InspectionCd = "106";
+        secInspection.SchecDateTime = "04/25/2017";
 
-    }
+        bool lp = NewInspection.Post( secInspection );
+        if( !lp )
+        {
+          return InternalServerError();
+        }
+        else
+        {
+          return Ok( lp );
+        }
+
+      }
   }
 }

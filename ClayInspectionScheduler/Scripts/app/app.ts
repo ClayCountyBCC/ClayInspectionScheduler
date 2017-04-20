@@ -1,14 +1,12 @@
-﻿
-/// <reference path="newinspection.ts" />
+﻿/// <reference path="transport.ts" />
+/// <reference path="UI.ts" />
 /// <reference path="Permit.ts" />
 /// <reference path="dates.ts" />
+/// <reference path="newinspection.ts" />
 /// <reference path="Inspection.ts" />
-/// <reference path="transport.ts" />
-/// <reference path="UI.ts" />
 /// <reference path="../typings/jquery/jquery.d.ts" />
 /// <reference path="../typings/foundation/foundation.d.ts" />
 /// <reference path="../typings/bootstrap.datepicker/bootstrap.datepicker.d.ts" />
-
 
 namespace InspSched
 {
@@ -59,17 +57,9 @@ namespace InspSched
 
     SaveInspectionButton.onclick = function ()
     {
-      let newInsp = new NewInspection;
+      var thisInspection: NewInspection;
 
-
-      //InspSched.newInspection.PermitNo = "23456789";
-      //InspSched.newInspection.InspectionCd = "106";
-      //InspSched.newInspection.SchecDateTime = "04/25/2017";
-
-      
-
-
-      transport.SaveInspection( newInsp).then( function ( isSaved: boolean )
+      transport.SaveInspection( thisInspection ).then( function ( isSaved: boolean )
       {
 
         
@@ -111,13 +101,6 @@ namespace InspSched
         InspectionTypes = [];
       });
   }
-
-  //export function thisInspection( PermitNo, InspectionCd, SchecDateTime )
-  //{
-  //  this.PermitNo = PermitNo;
-  //  this.InspectionCd = InspectionCd;
-  //  this.SchecDateTime = SchecDateTime;
-  //}
 
   function LoadInspectionDates()
   {
