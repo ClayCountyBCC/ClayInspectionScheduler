@@ -58,20 +58,20 @@ namespace InspSched.transport
 
     export function SaveInspection(thisInspection: NewInspection )
     {
-      
+
       var x = XHR.Post( "API/NewInspection/" + thisInspection );
       return new Promise( function ( resolve, reject )
       {
         x.then( function ( response )
         {
           var di = JSON.parse( response.Text );
-          //UI.GetInspList( thisInspection.PermitNo );
+          UI.GetInspList("11502283");
           resolve( di );
 
         }).catch( function ()
         {
           console.log( "error in SaveInspections" );
-          //UI.GetInspList( thisInspection.PermitNo );
+          UI.GetInspList( "11502283");
           reject( null );
         });
 
@@ -94,7 +94,6 @@ namespace InspSched.transport
             });
         });
     }
-
 
     export function GenerateDates() {
         var x = XHR.Get("API/Dates/");

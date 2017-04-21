@@ -17,6 +17,7 @@ namespace InspSched
   export let InspectionTypes: Array<InspType> = [];
   export let firstDay: string;
   export let lastDay: string;
+  export let newInsp: NewInspection;
 
 
   export function start(): void
@@ -57,12 +58,13 @@ namespace InspSched
 
     SaveInspectionButton.onclick = function ()
     {
-      var thisInspection: NewInspection;
 
-      transport.SaveInspection( thisInspection ).then( function ( isSaved: boolean )
+      newInsp = new NewInspection( "23456789", "106", Date.parse("04/25/2017") );
+      newInsp.PermitNo = "34567890";
+
+      transport.SaveInspection( newInsp ).then( function ( isSaved: boolean )
       {
-
-        
+        // Will do something here when I am able to get this to my Controller
         return true;
 
       }, function ()
@@ -73,9 +75,6 @@ namespace InspSched
 
 
     }
-
-
-
   }
 
   function LoadData()

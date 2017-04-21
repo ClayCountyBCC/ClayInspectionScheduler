@@ -1,4 +1,5 @@
-﻿/// <reference path="transport.ts" />
+﻿/// <reference path="app.ts" />
+/// <reference path="transport.ts" />
 /// <reference path="ui.ts" />
 
 namespace InspSched
@@ -7,7 +8,7 @@ namespace InspSched
   {
    PermitNo: string;
    InspectionCd: string;
-   SchecDateTime: string;
+   SchecDateTime: Date;
 
 
   }
@@ -16,12 +17,15 @@ namespace InspSched
   {
     public PermitNo: string;
     public InspectionCd: string;
-    public SchecDateTime: string;
-    
+    public SchecDateTime: Date;
 
-    constructor()
+    constructor( PermitNo, InspectionCd, SchecDateTime)
     {
-
+      this.PermitNo = PermitNo;
+      this.InspectionCd = InspectionCd;
+      this.SchecDateTime = SchecDateTime;
     }
+
   }
+
 }

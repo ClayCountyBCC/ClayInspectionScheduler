@@ -103,27 +103,47 @@ namespace InspectionScheduler.Models
 
                 INSERT INTO #Fail 
                 SELECT 
-                  PermitNo, 
-                  FailType FROM (
+                    PermitNo, 
+                    FailType FROM (
                 SELECT 
-                  A.PermitNo,
-                  'F' AS FailType
+                    A.PermitNo,
+                    'F' AS FailType
                 FROM bpASSOC_PERMIT A
                 INNER JOIN clContractor C ON A.ContractorId = C.ContractorCd
                 WHERE (A.PermitNo = @PermitNo 
-                  OR A.MPermitNo = @MPermitNo
-                  OR PermitNo IN (SELECT PermitNo FROM bpASSOC_PERMIT WHERE MPermitNo = @PermitNo))       
+	                  OR A.MPermitNo = @MPermitNo
+                      OR PermitNo IN 
+	                  (SELECT 
+		                PermitNo 
+	                  FROM 
+		                bpASSOC_PERMIT 
+	                  WHERE MPermitNo = @PermitNo 
+	                    AND MPermitNo IN 
+			                (SELECT PermitNo
+    		                 FROM 
+				                bpMASTER_PERMIT 
+			                 WHERE
+				                CoClosed = 1 AND 
+				                PermitNo LIKE '1%')))     
                 UNION ALL
                 SELECT M.PermitNo,
-                  'F' AS FailType
+                    'F' AS FailType
                 FROM bpMASTER_PERMIT M
                 INNER JOIN bpBASE_PERMIT B 
                 INNER JOIN clContractor C ON B.ContractorId = C.ContractorCd
                 ON M.BaseID = B.BaseID
-                WHERE M.PermitNo = @PermitNo
+                WHERE (M.PermitNo = @PermitNo
+                AND M.PermitNo IN 
+	                (SELECT 
+		                PermitNo
+	                FROM 
+		                bpMASTER_PERMIT 
+	                WHERE 
+		                CoClosed = 1))
+                OR (M.PermitNo = @PermitNo
                 AND (C.Status <> 'A' 
-                  OR C.LiabInsExpDt < GETDATE()
-                  OR C.WC_ExpDt < GETDATE())
+                    OR C.LiabInsExpDt < GETDATE()
+                    OR C.WC_ExpDt < GETDATE()))
                 ) AS M
                 WHERE PermitNo NOT IN (SELECT PermitNo FROM #Fail);
 

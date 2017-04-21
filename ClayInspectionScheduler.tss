@@ -2,7 +2,7 @@
 <ArrayOfArrayOfArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <ArrayOfArrayOfString>
     <ArrayOfString>
-      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\controllers\newinspectioncontroller.cs</string>
+      <string>C:\Users\westje\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Controllers\NewInspectionController.cs</string>
     </ArrayOfString>
     <ArrayOfString>
       <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\controllers\inspectioncontroller.cs</string>
@@ -13,36 +13,8 @@
   </ArrayOfArrayOfString>
   <ArrayOfArrayOfString>
     <ArrayOfString>
-      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\models\insptype.cs</string>
-    </ArrayOfString>
-    <ArrayOfString>
-      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\models\inspection.cs</string>
-    </ArrayOfString>
-    <ArrayOfString>
-      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\models\newinspection.cs</string>
-    </ArrayOfString>
-    <ArrayOfString>
-      <string>C:\Users\westje\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Models\Constants.cs</string>
-    </ArrayOfString>
-    <ArrayOfString>
       <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\scripts\app\inspection.ts</string>
     </ArrayOfString>
-  </ArrayOfArrayOfString>
-  <ArrayOfArrayOfString>
-    <ArrayOfString>
-      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\index.html</string>
-    </ArrayOfString>
-    <ArrayOfString>
-      <string>C:\Users\westje\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Scripts\app\app.ts</string>
-    </ArrayOfString>
-    <ArrayOfString>
-      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\scripts\app\ui.ts</string>
-    </ArrayOfString>
-    <ArrayOfString>
-      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\app_start\webapiconfig.cs</string>
-    </ArrayOfString>
-  </ArrayOfArrayOfString>
-  <ArrayOfArrayOfString>
     <ArrayOfString>
       <string>C:\Users\westje\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Scripts\app\transport.ts</string>
     </ArrayOfString>
@@ -57,6 +29,37 @@
     </ArrayOfString>
     <ArrayOfString>
       <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\scripts\app\insptype.ts</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\scripts\app\newinspection.ts</string>
+    </ArrayOfString>
+  </ArrayOfArrayOfString>
+  <ArrayOfArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\index.html</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\scripts\app\app.ts</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>C:\Users\westje\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Scripts\app\UI.ts</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\app_start\webapiconfig.cs</string>
+    </ArrayOfString>
+  </ArrayOfArrayOfString>
+  <ArrayOfArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\models\insptype.cs</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\models\inspection.cs</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>C:\Users\westje\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Models\NewInspection.cs</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\models\constants.cs</string>
     </ArrayOfString>
   </ArrayOfArrayOfString>
 </ArrayOfArrayOfArrayOfString>

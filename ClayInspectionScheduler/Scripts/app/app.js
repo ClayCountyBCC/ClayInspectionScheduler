@@ -36,8 +36,10 @@ var InspSched;
             SaveInspectionButton.removeAttribute("disabled");
         };
         SaveInspectionButton.onclick = function () {
-            var thisInspection;
-            InspSched.transport.SaveInspection(thisInspection).then(function (isSaved) {
+            InspSched.newInsp = new InspSched.NewInspection("23456789", "106", Date.parse("04/25/2017"));
+            InspSched.newInsp.PermitNo = "34567890";
+            InspSched.transport.SaveInspection(InspSched.newInsp).then(function (isSaved) {
+                // Will do something here when I am able to get this to my Controller
                 return true;
             }, function () {
                 console.log('error getting inspections');

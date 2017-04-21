@@ -1,3 +1,4 @@
+/// <reference path="app.ts" />
 /// <reference path="Permit.ts" />
 /// <reference path="newinspection.ts" />
 /// <reference path="Inspection.ts" />
@@ -148,8 +149,10 @@ var InspSched;
         function GetInspList(key, permit) {
             document.getElementById('InspectionScheduler').removeAttribute("value");
             var saveButton = document.getElementById('SaveSchedule');
-            if (saveButton != undefined)
+            if (saveButton != undefined) {
+                saveButton.setAttribute("disabled", "disabled");
                 saveButton.removeAttribute("value");
+            }
             var completed = 0;
             var canSchedule = true;
             Hide('InspSched');

@@ -10,14 +10,13 @@ namespace InspectionScheduler.Controllers
 {
     public class NewInspectionController : ApiController
     {
-      public IHttpActionResult Post(NewInspection thisInspection )
+      public IHttpActionResult Post( NewInspection thisInspection)
       {
-        var secInspection = new NewInspection();
-        secInspection.PermitNo = "23456789";
-        secInspection.InspectionCd = "106";
-        secInspection.SchecDateTime = "04/25/2017";
 
-        bool lp = NewInspection.Post( secInspection );
+      var secInspection = new NewInspection( "19876543", "107", DateTime.Parse("04/26/2017") );
+
+
+      bool lp = NewInspection.Post( secInspection );
         if( !lp )
         {
           return InternalServerError();
