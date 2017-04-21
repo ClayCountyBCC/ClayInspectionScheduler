@@ -132,18 +132,14 @@ namespace InspectionScheduler.Models
                 INNER JOIN bpBASE_PERMIT B 
                 INNER JOIN clContractor C ON B.ContractorId = C.ContractorCd
                 ON M.BaseID = B.BaseID
-                WHERE (M.PermitNo = @PermitNo
-                AND M.PermitNo IN 
-	                (SELECT 
-		                PermitNo
-	                FROM 
-		                bpMASTER_PERMIT 
-	                WHERE 
-		                CoClosed = 1))
-                OR (M.PermitNo = @PermitNo
-                AND (C.Status <> 'A' 
+                WHERE M.CoClosed = 1
+	                and( (M.PermitNo = @PermitNo 
+		                OR M.PermitNo = @MPermitNo)
+	                OR(C.Status <> 'A' 
                     OR C.LiabInsExpDt < GETDATE()
-                    OR C.WC_ExpDt < GETDATE()))
+                    OR C.WC_ExpDt < GETDATE())	
+		                and( (M.PermitNo = @PermitNo 
+			                OR M.PermitNo = @MPermitNo) ))
                 ) AS M
                 WHERE PermitNo NOT IN (SELECT PermitNo FROM #Fail);
 

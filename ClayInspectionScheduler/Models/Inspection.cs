@@ -38,7 +38,7 @@ namespace InspectionScheduler.Models
     {
       get
       {
-        return InspDateTime == DateTime.MaxValue ? "" : InspDateTime.ToShortDateString ( );
+        return InspDateTime == DateTime.MaxValue || DateTime.Parse(InspDateTime.ToShortDateString()) == DateTime.Parse("01/01/0001") ? "" : InspDateTime.ToShortDateString ( );
       }
     }
 

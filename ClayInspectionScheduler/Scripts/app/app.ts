@@ -18,20 +18,17 @@ namespace InspSched
   export let firstDay: string;
   export let lastDay: string;
   export let newInsp: NewInspection;
-
-
+ 
   export function start(): void
   {
     LoadData();
 
     var InspectionTypeSelect = <HTMLSelectElement>document.getElementById("InspTypeSelect");
-    var SaveInspectionButton = document.getElementById("SaveSchedule");
     var PermitSearchButton = <HTMLButtonElement>document.getElementById( "PermitSearchButton" );
     var PermitSearchField = <HTMLInputElement>document.getElementById( "PermitSearch" );
-
     var permitNumSelect = <HTMLSelectElement>document.getElementById( "PermitSelect" );
     var inspScheduler = document.getElementById( "InspectionScheduler" );
-
+    var SaveInspectionButton = document.getElementById( "SaveSchedule" );
     SaveInspectionButton.setAttribute( "disabled", "disabled" );
 
     PermitSearchButton.onclick = function ()
@@ -49,18 +46,19 @@ namespace InspSched
 
     }
 
-
     InspectionTypeSelect.onchange = function ()
     {
-      SaveInspectionButton.setAttribute( "value", inspScheduler.getAttribute( "value" ) + "/" + InspectionTypeSelect.value + "/" );
+      SaveInspectionButton.setAttribute("value",  InspectionTypeSelect.value);
       SaveInspectionButton.removeAttribute( "disabled" );
     }
 
     SaveInspectionButton.onclick = function ()
     {
+      let thisPermit: string = permitNumSelect.value;
+      let thisInspCd: string = SaveInspectionButton.getAttribute( "value" );
 
-      newInsp = new NewInspection( "23456789", "106", Date.parse("04/25/2017") );
-      newInsp.PermitNo = "34567890";
+      newInsp = new NewInspection( thisPermit, thisInspCd, Date.parse( "04/25/2017" ) );
+      
 
       transport.SaveInspection( newInsp ).then( function ( isSaved: boolean )
       {
@@ -75,8 +73,8 @@ namespace InspSched
 
 
     }
-  }
-
+  } //  END start()
+  
   function LoadData()
   {
     LoadInspectionDates();
@@ -113,20 +111,7 @@ namespace InspSched
       BuildCalendar(dates);
 
       console.log('InspectionDates', InspSched.InspectionDates);
-      //let datesDisabled: string = "[";
-      //let minDate: Dates = dates[0];
-      //if (dates.length > 2)
-      //{
-      //  for (let i: number = 1; (i < dates.length - 2); i++)
-      //  {
-      //    datesDisabled += dates[i] + ", ";
-      //  }
-      //  datesDisabled += dates[dates.length - 2] + "]";
-      //}
-      //else
-      //  datesDisabled += "]";
-      //let maxDate: Dates = dates[dates.length - 1];
-      //return dates;
+
 
     },
       function ()
@@ -158,22 +143,13 @@ namespace InspSched
   }
 
   function BuildCalendar(dates: Array<string>)
-
   {
+
     $( document ).foundation();
 
     //
     let additionalDisabledDates: string []= GetAdditionalDisabledDates( dates );
-    //if ( InspSched.firstDay == null )
-    //{
-    //  FirstAvailableDate.setDate( FirstAvailableDate.getDate() + 1 );
-    //}
-    //else
-    //{
-    //  let FirstAvailableDate = InspSched.firstDay;
-    //}
-    //let
-    let first = '4/1/2017';
+
       dpCalendar = $( '#sandbox-container div' ).datepicker(
       <DatepickerOptions>
         {
@@ -186,19 +162,6 @@ namespace InspSched
 
       console.log
   }
-  //export function toggleNavDisplay(element: string): void
-  //{
-  //  UI.toggleNav("navTopMenu", element);
 
-  //  let section = document.getElementsByTagName("section");
-  //  for (var i = 0; i < section.length; i++)
-  //  {
-  //    if (section[i].style.display !== "none")
-  //    {
-  //      section[i].style.display = "none";
-  //    }
-  //  }
-  //  document.getElementById(element).style.display = "block";
-  //}
 
 }

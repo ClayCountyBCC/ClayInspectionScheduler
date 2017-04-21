@@ -13,8 +13,6 @@ namespace InspSched.UI
   let InspectionList: Array<Inspection> = [];
   let CurrentInspections: Array<Inspection> = [];
 
-
-
   export function Search( key: string ): boolean
   {
 
@@ -405,9 +403,13 @@ namespace InspSched.UI
 
 
 
+
     thisinspCancelButton.setAttribute( "onclick", "( InspSched.UI.CancelInspection(\"" + inspection.InspReqID + "\", \"" + inspection.PermitNo + "\" ) )" );
     //thisinspCancelButton.setAttribute( "type", "button" );
-    thisinspCancelDiv.appendChild( thisinspCancelButton );
+
+
+    if ( IsGoodCancelDate( inspection ) )
+      thisinspCancelDiv.appendChild( thisinspCancelButton );
 
 
     thisinsp.appendChild( thisinspDate );
@@ -483,50 +485,6 @@ namespace InspSched.UI
 
   }
 
-  export function BuildScheduleCalendar()
-  {
-
-    //transport.GenerateDates().then( function ( dates: Array<Dates> ): Array<Dates>
-    //{
-    //  let datesDisabled: string = "[";
-
-    //  let minDate: Dates = dates[0];
-
-    //  if ( dates.length > 2 )
-    //  {
-    //    for ( let i: number = 1; ( i < dates.length - 2 ); i++ )
-    //    {
-    //      datesDisabled += dates[i] + ", ";
-    //    }
-    //    datesDisabled += dates[dates.length - 2] + "]";
-    //  }
-    //  else
-    //    datesDisabled += "]";
-
-    //  let maxDate: Dates = dates[dates.length - 1];
-
-
-
-    //  return dates;
-    //},
-    //  function ()
-    //  {
-
-    //    console.log( 'error in generateDates' );
-    //    // do something with the error here
-    //    // need to figure out how to detect if something wasn't found
-    //    // versus an error.
-    //    Hide( 'Searching' );
-
-    //    return null;
-    //  });
-
-
-    //let element: HTMLScriptElement = ( <HTMLScriptElement>document.getElementById( 'CalendarScriptLocation' ) );
-    //clearElement( element );
-
-  }
-
   function GetInspType( key: string )
   {
 
@@ -589,7 +547,6 @@ namespace InspSched.UI
     Do Somethings
   
   ***********************************/
-
 
   function Show( id?: string, element?: HTMLElement, displayType?: string ): void
   {
@@ -700,6 +657,18 @@ namespace InspSched.UI
     }
   }
 
+  function IsGoodCancelDate(inspection: Inspection): boolean
+  {
+    let tomorrow = new Date();
+    let inspDate = new Date( inspection.DisplaySchedDateTime );
+    var dayOfMonth = tomorrow.getDate()+1;
+    //today.setDate( dayOfMonth - 20 );
+    console.log( "today: " + tomorrow + "\nSchedDateTime: " + inspDate );
 
+    if ( inspDate < tomorrow )
+      return false
+
+    return true;
+  }
 
 }

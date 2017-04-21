@@ -16,7 +16,7 @@ namespace InspectionScheduler.Controllers
       var secInspection = new NewInspection( "19876543", "107", DateTime.Parse("04/26/2017") );
 
 
-      bool lp = NewInspection.Post( secInspection );
+      bool lp = NewInspection.Post( thisInspection );
         if( !lp )
         {
           return InternalServerError();

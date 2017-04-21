@@ -59,24 +59,21 @@ namespace InspSched.transport
     export function SaveInspection(thisInspection: NewInspection )
     {
 
-      var x = XHR.Post( "API/NewInspection/" + thisInspection );
+      var x = XHR.Post( "API/NewInspection/"+ thisInspection );
       return new Promise( function ( resolve, reject )
       {
         x.then( function ( response )
         {
           var di = JSON.parse( response.Text );
-          UI.GetInspList("11502283");
+          UI.GetInspList( thisInspection.PermitNo );
           resolve( di );
 
         }).catch( function ()
         {
           console.log( "error in SaveInspections" );
-          UI.GetInspList( "11502283");
+          UI.GetInspList( thisInspection.PermitNo);
           reject( null );
         });
-
-
-
       });
 
     }
