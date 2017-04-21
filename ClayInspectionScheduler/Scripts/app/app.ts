@@ -56,9 +56,11 @@ namespace InspSched
     {
       let thisPermit: string = permitNumSelect.value;
       let thisInspCd: string = SaveInspectionButton.getAttribute( "value" );
+      let thisDate: string = document.getElementById( "date" ).getAttribute( "value");
 
-      newInsp = new NewInspection( thisPermit, thisInspCd, Date.parse( "04/25/2017" ) );
-      
+
+      newInsp = new NewInspection( thisPermit, thisInspCd, Date.parse( thisDate ) );
+
 
       transport.SaveInspection( newInsp ).then( function ( isSaved: boolean )
       {
@@ -73,6 +75,10 @@ namespace InspSched
 
 
     }
+
+    
+
+
   } //  END start()
   
   function LoadData()
@@ -144,24 +150,40 @@ namespace InspSched
 
   function BuildCalendar(dates: Array<string>)
   {
-
+    
     $( document ).foundation();
 
     //
     let additionalDisabledDates: string []= GetAdditionalDisabledDates( dates );
 
       dpCalendar = $( '#sandbox-container div' ).datepicker(
-      <DatepickerOptions>
+        <DatepickerOptions>
         {
           startDate: InspSched.firstDay,
           datesDisabled: additionalDisabledDates,
           endDate: InspSched.lastDay,
           maxViewMode: 0,
+          
+      })
+      {
+        $( dpCalendar ).on( 'changeDate', function ()
+        {
+          let date = $( 'dates.get' ).toArray().toString();
+          console.log( "In calendar onchangedate: " + date );
+          //return false;
+          $( 'change-date' ).submit();
 
-      });
+        });
+
+      };
+    
 
       console.log
   }
+  function setDateValue( date: Date ): void
+  {
+    console.log( date );
 
+  }
 
 }

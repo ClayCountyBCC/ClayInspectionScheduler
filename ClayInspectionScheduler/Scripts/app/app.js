@@ -38,7 +38,8 @@ var InspSched;
         SaveInspectionButton.onclick = function () {
             var thisPermit = permitNumSelect.value;
             var thisInspCd = SaveInspectionButton.getAttribute("value");
-            InspSched.newInsp = new InspSched.NewInspection(thisPermit, thisInspCd, Date.parse("04/25/2017"));
+            var thisDate = document.getElementById("date").getAttribute("value");
+            InspSched.newInsp = new InspSched.NewInspection(thisPermit, thisInspCd, Date.parse(thisDate));
             InspSched.transport.SaveInspection(InspSched.newInsp).then(function (isSaved) {
                 // Will do something here when I am able to get this to my Controller
                 return true;
@@ -102,7 +103,19 @@ var InspSched;
             endDate: InspSched.lastDay,
             maxViewMode: 0,
         });
+        {
+            $(dpCalendar).on('changeDate', function () {
+                var date = $('dates.get').toArray().toString();
+                console.log("In calendar onchangedate: " + date);
+                //return false;
+                $('change-date').submit();
+            });
+        }
+        ;
         console.log;
+    }
+    function setDateValue(date) {
+        console.log(date);
     }
 })(InspSched || (InspSched = {}));
 //# sourceMappingURL=app.js.map

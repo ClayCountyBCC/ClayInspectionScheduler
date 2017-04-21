@@ -22,12 +22,7 @@ namespace InspectionScheduler.Models
 
     public static bool Post(NewInspection thisInspection)//string newInspData)
     {
-      //var data = newInspData.Split( ',' );
-      //var dbArgs = new Dapper.DynamicParameters();
-      //dbArgs.Add( "@PermitNo", data[ 0 ] );
-      //dbArgs.Add( "@InspCd", data[ 1 ] );
-      //dbArgs.Add( "@SelectedDate", data[ 2 ] );
-      //if( data[ 0 ] != null && data[ 1 ] != null && data[ 2 ] != null )
+
 
       var dbArgs = new Dapper.DynamicParameters();
       dbArgs.Add( "@PermitNo", thisInspection.PermitNo );
