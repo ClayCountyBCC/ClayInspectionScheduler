@@ -58,8 +58,9 @@ namespace InspSched.transport
 
     export function SaveInspection(thisInspection: NewInspection )
     {
+      console.log( "In transport.SaveInspection: " + JSON.stringify( thisInspection ) );
 
-      var x = XHR.Post( "API/NewInspection/"+ thisInspection );
+      var x = XHR.Post( "API/NewInspection/", JSON.stringify( thisInspection ) );
       return new Promise( function ( resolve, reject )
       {
         x.then( function ( response )

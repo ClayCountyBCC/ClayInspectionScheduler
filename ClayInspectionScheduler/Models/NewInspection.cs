@@ -20,16 +20,18 @@ namespace InspectionScheduler.Models
       this.SchecDateTime = SchecDateTime;
     }
 
-    public static bool Post(NewInspection thisInspection)//string newInspData)
+    public static bool Post( NewInspection  thisInspection )
     {
-
+      // thisInspection.SchecDateTime was being changed to local UTC Date via JSON.request.
+      // This statement fixes that issue and is now reformatted to the expected date at 12:00:00 AM
+      DateTime selectedDate = DateTime.Parse(thisInspection.SchecDateTime.ToShortDateString());
 
       var dbArgs = new Dapper.DynamicParameters();
       dbArgs.Add( "@PermitNo", thisInspection.PermitNo );
       dbArgs.Add( "@InspCd", thisInspection.InspectionCd );
-      dbArgs.Add( "@SelectedDate", thisInspection.SchecDateTime );
+      dbArgs.Add( "@SelectedDate", selectedDate );
 
-      if(thisInspection.PermitNo != null && thisInspection.InspectionCd != null && thisInspection.SchecDateTime != null &&thisInspection.PermitNo[0]==thisInspection.InspectionCd[0])
+      if(thisInspection.PermitNo != null && thisInspection.InspectionCd != null && selectedDate != null)
       {
 
 

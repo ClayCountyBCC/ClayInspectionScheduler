@@ -39,7 +39,8 @@ var InspSched;
             var thisPermit = permitNumSelect.value;
             var thisInspCd = SaveInspectionButton.getAttribute("value");
             var thisDate = document.getElementById("date").getAttribute("value");
-            InspSched.newInsp = new InspSched.NewInspection(thisPermit, thisInspCd, Date.parse(thisDate));
+            InspSched.newInsp = new InspSched.NewInspection(thisPermit, thisInspCd, $(dpCalendar).data('datepicker').getDate());
+            console.log("In SaveInspection onchangedate: \"" + $(dpCalendar).data('datepicker').getDate() + "\"");
             InspSched.transport.SaveInspection(InspSched.newInsp).then(function (isSaved) {
                 // Will do something here when I am able to get this to my Controller
                 return true;
@@ -102,10 +103,11 @@ var InspSched;
             datesDisabled: additionalDisabledDates,
             endDate: InspSched.lastDay,
             maxViewMode: 0,
+            toggleActive: true,
         });
         {
             $(dpCalendar).on('changeDate', function () {
-                var date = $('dates.get').toArray().toString();
+                var date = $(dpCalendar).data('datepicker').getDate();
                 console.log("In calendar onchangedate: " + date);
                 //return false;
                 $('change-date').submit();

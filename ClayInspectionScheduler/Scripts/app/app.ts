@@ -58,8 +58,10 @@ namespace InspSched
       let thisInspCd: string = SaveInspectionButton.getAttribute( "value" );
       let thisDate: string = document.getElementById( "date" ).getAttribute( "value");
 
-
-      newInsp = new NewInspection( thisPermit, thisInspCd, Date.parse( thisDate ) );
+      
+      newInsp = new NewInspection( thisPermit, thisInspCd, $( dpCalendar ).data( 'datepicker' ).getDate());
+      
+      console.log( "In SaveInspection onchangedate: \"" + $( dpCalendar ).data( 'datepicker' ).getDate() +"\"" );
 
 
       transport.SaveInspection( newInsp ).then( function ( isSaved: boolean )
@@ -163,12 +165,13 @@ namespace InspSched
           datesDisabled: additionalDisabledDates,
           endDate: InspSched.lastDay,
           maxViewMode: 0,
+          toggleActive: true,
           
       })
       {
         $( dpCalendar ).on( 'changeDate', function ()
         {
-          let date = $( 'dates.get' ).toArray().toString();
+          let date = $( dpCalendar).data('datepicker').getDate();
           console.log( "In calendar onchangedate: " + date );
           //return false;
           $( 'change-date' ).submit();

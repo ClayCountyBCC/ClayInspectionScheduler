@@ -47,7 +47,8 @@ var InspSched;
         }
         transport.GetInspections = GetInspections;
         function SaveInspection(thisInspection) {
-            var x = XHR.Post("API/NewInspection/" + thisInspection);
+            console.log("In transport.SaveInspection: " + JSON.stringify(thisInspection));
+            var x = XHR.Post("API/NewInspection/", JSON.stringify(thisInspection));
             return new Promise(function (resolve, reject) {
                 x.then(function (response) {
                     var di = JSON.parse(response.Text);
