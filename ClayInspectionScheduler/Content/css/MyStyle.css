@@ -199,5 +199,6 @@ table tbody, table tfoot, table thead {
   border-bottom: 2px solid;
   border-bottom-color: rgba(0,0,0,.1);
   margin-bottom: 1rem;
+  padding-bottom: 1rem;
 }
 

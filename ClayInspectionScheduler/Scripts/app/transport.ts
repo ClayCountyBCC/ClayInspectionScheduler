@@ -1,5 +1,6 @@
 ﻿/// <reference path="XHR.ts" />
 /// <reference path="Permit.ts" />
+/// <reference path="newinspection.ts" />
 /// <reference path="Inspection.ts" />
 
 namespace InspSched.transport
@@ -55,27 +56,25 @@ namespace InspSched.transport
         });
     }
 
-    export function SaveInspection( key: string, InspId: string, date: Date )
+    export function SaveInspection(thisInspection: NewInspection )
     {
+      console.log( "In transport.SaveInspection: " + JSON.stringify( thisInspection ) );
 
-      var x = XHR.Post( "API/Inspection/" + key + "/" + InspId + "/" + date );
+      var x = XHR.Post( "API/NewInspection/", JSON.stringify( thisInspection ) );
       return new Promise( function ( resolve, reject )
       {
         x.then( function ( response )
         {
           var di = JSON.parse( response.Text );
-          UI.GetInspList( key );
+          UI.GetInspList( thisInspection.PermitNo );
           resolve( di );
 
         }).catch( function ()
         {
-          console.log( "error in GetInspections" );
-          UI.GetInspList( key );
+          console.log( "error in SaveInspections" );
+          UI.GetInspList( thisInspection.PermitNo);
           reject( null );
         });
-
-
-
       });
 
     }
@@ -93,7 +92,6 @@ namespace InspSched.transport
             });
         });
     }
-
 
     export function GenerateDates() {
         var x = XHR.Get("API/Dates/");

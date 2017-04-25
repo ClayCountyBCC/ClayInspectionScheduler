@@ -1,4 +1,6 @@
+/// <reference path="app.ts" />
 /// <reference path="Permit.ts" />
+/// <reference path="newinspection.ts" />
 /// <reference path="Inspection.ts" />
 var InspSched;
 (function (InspSched) {
@@ -147,8 +149,10 @@ var InspSched;
         function GetInspList(key, permit) {
             document.getElementById('InspectionScheduler').removeAttribute("value");
             var saveButton = document.getElementById('SaveSchedule');
-            if (saveButton != undefined)
+            if (saveButton != undefined) {
+                saveButton.setAttribute("disabled", "disabled");
                 saveButton.removeAttribute("value");
+            }
             var completed = 0;
             var canSchedule = true;
             Hide('InspSched');
@@ -261,7 +265,8 @@ var InspSched;
             document.getElementById('FutureInspRow').style.removeProperty("display");
             thisinspCancelButton.setAttribute("onclick", "( InspSched.UI.CancelInspection(\"" + inspection.InspReqID + "\", \"" + inspection.PermitNo + "\" ) )");
             //thisinspCancelButton.setAttribute( "type", "button" );
-            thisinspCancelDiv.appendChild(thisinspCancelButton);
+            if (IsGoodCancelDate(inspection))
+                thisinspCancelDiv.appendChild(thisinspCancelButton);
             thisinsp.appendChild(thisinspDate);
             thisinsp.appendChild(thisinspType);
             thisinsp.appendChild(thisinspInspector);
@@ -306,37 +311,6 @@ var InspSched;
                 }
             }
         }
-        function BuildScheduleCalendar() {
-            //transport.GenerateDates().then( function ( dates: Array<Dates> ): Array<Dates>
-            //{
-            //  let datesDisabled: string = "[";
-            //  let minDate: Dates = dates[0];
-            //  if ( dates.length > 2 )
-            //  {
-            //    for ( let i: number = 1; ( i < dates.length - 2 ); i++ )
-            //    {
-            //      datesDisabled += dates[i] + ", ";
-            //    }
-            //    datesDisabled += dates[dates.length - 2] + "]";
-            //  }
-            //  else
-            //    datesDisabled += "]";
-            //  let maxDate: Dates = dates[dates.length - 1];
-            //  return dates;
-            //},
-            //  function ()
-            //  {
-            //    console.log( 'error in generateDates' );
-            //    // do something with the error here
-            //    // need to figure out how to detect if something wasn't found
-            //    // versus an error.
-            //    Hide( 'Searching' );
-            //    return null;
-            //  });
-            //let element: HTMLScriptElement = ( <HTMLScriptElement>document.getElementById( 'CalendarScriptLocation' ) );
-            //clearElement( element );
-        }
-        UI.BuildScheduleCalendar = BuildScheduleCalendar;
         function GetInspType(key) {
             var thistype = key[0];
             var InspTypeList = document.getElementById('InspTypeSelect');
@@ -379,53 +353,12 @@ var InspSched;
                     option.innerText = type.InsDesc;
                 }
             }
-            //transport.GetInspType().then( function ( insptypes: Array<InspType> )
-            //{
-            //  CurrentInspTypes = insptypes;
-            //  for ( let type of insptypes )
-            //  {
-            //    if ( type.InspCd[0] == thistype )
-            //    {
-            //      let option = document.createElement( "option" );
-            //      option.label = type.InsDesc;
-            //      option.value = type.InspCd;
-            //      option.className = "TypeSelectOption";
-            //      InspTypeList.appendChild( option );
-            //      option.innerText = type.InsDesc;
-            //    }
-            //  }
-            //  InspTypeList.required;
-            //  return true;
-            //},
-            //  function ()
-            //  {
-            //    console.log( 'error getting inspection types' );
-            //    return false;
-            //  });
         }
         /**********************************
         
           Do Somethings
         
         ***********************************/
-        //function createNewElement( elementType: string, classname?: string, value?: string, id?: string ): HTMLElement
-        //{
-        //  let element = document.createElement( elementType );
-        //  if ( classname !== undefined )
-        //    element.className = classname;
-        //  else
-        //    element.className = "";
-        //  if ( value !== undefined )
-        //    element.nodeValue = value;
-        //  else
-        //    element.nodeValue = "";
-        //  if ( id !== undefined )
-        //    element.id = id;
-        //  else
-        //    element.id = "";
-        //  element.appendChild( document.createTextNode( value ) );
-        //  return element;
-        //}
         function Show(id, element, displayType) {
             if (!element) {
                 var e = document.getElementById(id);
@@ -500,15 +433,16 @@ var InspSched;
             }
         }
         UI.CancelInspection = CancelInspection;
-        function SaveInspection(PermitNo, InspCd, date) {
-            InspSched.transport.SaveInspection(PermitNo, InspCd, date).then(function (isSaved) {
-                return true;
-            }, function () {
-                console.log("Error in SaveInspection");
-                //GetInspType( PermitNo );
-            });
+        function IsGoodCancelDate(inspection) {
+            var tomorrow = new Date();
+            var inspDate = new Date(inspection.DisplaySchedDateTime);
+            var dayOfMonth = tomorrow.getDate() + 1;
+            //today.setDate( dayOfMonth - 20 );
+            console.log("today: " + tomorrow + "\nSchedDateTime: " + inspDate);
+            if (inspDate < tomorrow)
+                return false;
+            return true;
         }
-        UI.SaveInspection = SaveInspection;
     })(UI = InspSched.UI || (InspSched.UI = {}));
 })(InspSched || (InspSched = {}));
 //# sourceMappingURL=ui.js.map

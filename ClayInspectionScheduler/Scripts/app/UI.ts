@@ -1,5 +1,8 @@
-﻿/// <reference path="Permit.ts" />
+﻿/// <reference path="app.ts" />
+/// <reference path="Permit.ts" />
+/// <reference path="newinspection.ts" />
 /// <reference path="Inspection.ts" />
+
 
 namespace InspSched.UI
 {
@@ -9,8 +12,6 @@ namespace InspSched.UI
   let CurrentPermits: Array<Permit> = [];
   let InspectionList: Array<Inspection> = [];
   let CurrentInspections: Array<Inspection> = [];
-
-
 
   export function Search( key: string ): boolean
   {
@@ -221,8 +222,10 @@ namespace InspSched.UI
     document.getElementById( 'InspectionScheduler' ).removeAttribute( "value" );
     var saveButton: HTMLElement = ( <HTMLElement>document.getElementById( 'SaveSchedule' ) );
     if ( saveButton != undefined )
+    {
+      saveButton.setAttribute( "disabled", "disabled" );
       saveButton.removeAttribute( "value" );
-
+    }
 
     let completed: number = 0;
     let canSchedule: boolean = true;
@@ -243,10 +246,10 @@ namespace InspSched.UI
 
       if ( inspections.length > 0 )
       {
-        
+
         CurrentInspections = inspections;
         BuildInspectionList( CurrentInspections, permit );
-        console.log( "List of inspections: ",  CurrentInspections );
+        console.log( "List of inspections: ", CurrentInspections );
 
 
       }
@@ -278,7 +281,7 @@ namespace InspSched.UI
     let InspList: HTMLTableElement = ( <HTMLTableElement>document.getElementById( 'InspListData' ) );
     let InspHeader: HTMLTableElement = ( <HTMLTableElement>document.getElementById( 'InspListHeader' ) );
     let empty: HTMLElement = ( <HTMLElement>document.createElement( "tr" ) );
-    clearElement( document.getElementById('FutureInspRow') );
+    clearElement( document.getElementById( 'FutureInspRow' ) );
 
 
     // TODO: add Try/Catch
@@ -290,17 +293,17 @@ namespace InspSched.UI
         if ( inspection.ResultADC )
         {
           if ( completed < 5 )
-          { 
+          {
             InspList.appendChild( BuildCompletedInspection( inspection ) );
             completed++;
-          }      
+          }
         }
         else if ( !inspection.ResultADC )
         {
 
           NumFutureInsp++;
           BuildFutureInspRow( inspection, NumFutureInsp );
-          
+
         }
 
       }
@@ -384,12 +387,12 @@ namespace InspSched.UI
     thisinsp.className = "InspBorderBottom large-12 medium-12 small-12 row";
 
     thisinspDate.className = "large-2 medium-2 small-4 column align-center column";
-    thisinspType.className = "large-5 medium-4 small-8 column align-center column ";           
+    thisinspType.className = "large-5 medium-4 small-8 column align-center column ";
     thisinspInspector.className = "large-3 medium-4 hide-for-small-only end column align-center";
 
     thisinspCancelDiv.className = "large-2 medium-2 small-12 column flex-container align-center";
     thisinspCancelButton.className = " button";
-    
+
     thisinspDate.innerText = inspection.DisplaySchedDateTime;
     thisinspType.innerText = inspection.InsDesc;
     thisinspInspector.innerText = inspection.InspectorName;
@@ -398,11 +401,15 @@ namespace InspSched.UI
     document.getElementById( 'InspSched' ).style.removeProperty( "display" );
     document.getElementById( 'FutureInspRow' ).style.removeProperty( "display" );
 
-    
+
+
 
     thisinspCancelButton.setAttribute( "onclick", "( InspSched.UI.CancelInspection(\"" + inspection.InspReqID + "\", \"" + inspection.PermitNo + "\" ) )" );
     //thisinspCancelButton.setAttribute( "type", "button" );
-    thisinspCancelDiv.appendChild( thisinspCancelButton );
+
+
+    if ( IsGoodCancelDate( inspection ) )
+      thisinspCancelDiv.appendChild( thisinspCancelButton );
 
 
     thisinsp.appendChild( thisinspDate );
@@ -424,19 +431,19 @@ namespace InspSched.UI
    * 
    *********************************************/
 
-  function BuildScheduler( inspections: Array<Inspection>, canSchedule: boolean, completed: number, key?: string)
+  function BuildScheduler( inspections: Array<Inspection>, canSchedule: boolean, completed: number, key?: string )
   {
-    
-    if ( inspections.length > 0)
+
+    if ( inspections.length > 0 )
       key = inspections[0].PermitNo;
-      
+
     if ( canSchedule )
     {
       let fail: HTMLElement = ( <HTMLElement>document.getElementById( key + "FAIL" ) );
       let pass: HTMLElement = ( <HTMLElement>document.getElementById( key + "PASS" ) );
 
       // if contractor IS ALLOWED to schedule, the contractor id will be on the list
-      if (pass )
+      if ( pass )
       {
 
         // Populate Inspection Type Select list
@@ -478,61 +485,17 @@ namespace InspSched.UI
 
   }
 
-  export function BuildScheduleCalendar()
-  {
-
-    //transport.GenerateDates().then( function ( dates: Array<Dates> ): Array<Dates>
-    //{
-    //  let datesDisabled: string = "[";
-
-    //  let minDate: Dates = dates[0];
-
-    //  if ( dates.length > 2 )
-    //  {
-    //    for ( let i: number = 1; ( i < dates.length - 2 ); i++ )
-    //    {
-    //      datesDisabled += dates[i] + ", ";
-    //    }
-    //    datesDisabled += dates[dates.length - 2] + "]";
-    //  }
-    //  else
-    //    datesDisabled += "]";
-
-    //  let maxDate: Dates = dates[dates.length - 1];
-
-
-
-    //  return dates;
-    //},
-    //  function ()
-    //  {
-
-    //    console.log( 'error in generateDates' );
-    //    // do something with the error here
-    //    // need to figure out how to detect if something wasn't found
-    //    // versus an error.
-    //    Hide( 'Searching' );
-
-    //    return null;
-    //  });
-
-
-    //let element: HTMLScriptElement = ( <HTMLScriptElement>document.getElementById( 'CalendarScriptLocation' ) );
-    //clearElement( element );
-    
-  }
-
-  function GetInspType(key: string)
+  function GetInspType( key: string )
   {
 
     let thistype: string = key[0];
 
-    let InspTypeList: HTMLSelectElement = (<HTMLSelectElement>document.getElementById('InspTypeSelect'));
-    let optionLabel: HTMLOptionElement = (<HTMLOptionElement>document.createElement("option"));
+    let InspTypeList: HTMLSelectElement = ( <HTMLSelectElement>document.getElementById( 'InspTypeSelect' ) );
+    let optionLabel: HTMLOptionElement = ( <HTMLOptionElement>document.createElement( "option" ) );
 
-    clearElement(InspTypeList);
+    clearElement( InspTypeList );
 
-    switch (thistype)
+    switch ( thistype )
     {
       case '1':
       case '0':
@@ -560,47 +523,21 @@ namespace InspSched.UI
     optionLabel.className = "selectPlaceholder";
     optionLabel.selected;
     optionLabel.value = "";
-    InspTypeList.appendChild(optionLabel);
+    InspTypeList.appendChild( optionLabel );
 
-    for (let type of InspSched.InspectionTypes)
+    for ( let type of InspSched.InspectionTypes )
     {
-      if (type.InspCd[0] == thistype)
+      if ( type.InspCd[0] == thistype )
       {
-        let option: HTMLOptionElement = <HTMLOptionElement>document.createElement("option");        
+        let option: HTMLOptionElement = <HTMLOptionElement>document.createElement( "option" );
         option.label = type.InsDesc;
         option.value = type.InspCd;
         option.className = "TypeSelectOption";
-        InspTypeList.appendChild(option);
+        InspTypeList.appendChild( option );
         option.innerText = type.InsDesc;
       }
     }
-    //transport.GetInspType().then( function ( insptypes: Array<InspType> )
-    //{
-    //  CurrentInspTypes = insptypes;
-    //  for ( let type of insptypes )
-    //  {
-    //    if ( type.InspCd[0] == thistype )
-    //    {
-    //      let option = document.createElement( "option" );
-    //      option.label = type.InsDesc;
-    //      option.value = type.InspCd;
-    //      option.className = "TypeSelectOption";
-    //      InspTypeList.appendChild( option );
-    //      option.innerText = type.InsDesc;
-
-    //    }
-    //  }
-
-    //  InspTypeList.required;
-
-    //  return true;
-    //},
-    //  function ()
-    //  {
-    //    console.log( 'error getting inspection types' );
-    //    return false;
-
-    //  });
+    
 
 
   }
@@ -610,33 +547,6 @@ namespace InspSched.UI
     Do Somethings
   
   ***********************************/
-
-  //function createNewElement( elementType: string, classname?: string, value?: string, id?: string ): HTMLElement
-  //{
-  //  let element = document.createElement( elementType );
-
-
-  //  if ( classname !== undefined )
-  //    element.className = classname;
-  //  else
-  //    element.className = "";
-
-
-  //  if ( value !== undefined )
-  //    element.nodeValue = value;
-  //  else
-  //    element.nodeValue = "";
-
-
-  //  if ( id !== undefined )
-  //    element.id = id;
-  //  else
-  //    element.id = "";
-
-  //  element.appendChild( document.createTextNode( value ) );
-
-  //  return element;
-  //}
 
   function Show( id?: string, element?: HTMLElement, displayType?: string ): void
   {
@@ -724,7 +634,7 @@ namespace InspSched.UI
       //Hide( 'FutureInspRow' );
       // TODO: Add function to not allow cancel if scheduled date of insp is current date 
 
-      var isDeleted = transport.CancelInspection(InspID, key );
+      var isDeleted = transport.CancelInspection( InspID, key );
 
       // TODO: ADD code to inform user if the inspection has been deleted 
 
@@ -747,20 +657,18 @@ namespace InspSched.UI
     }
   }
 
-  export function SaveInspection( PermitNo: string, InspCd: string, date: Date )
+  function IsGoodCancelDate(inspection: Inspection): boolean
   {
-    
-    
-    transport.SaveInspection( PermitNo, InspCd, date).then( function ( isSaved: boolean )
-    {
+    let tomorrow = new Date();
+    let inspDate = new Date( inspection.DisplaySchedDateTime );
+    var dayOfMonth = tomorrow.getDate()+1;
+    //today.setDate( dayOfMonth - 20 );
+    console.log( "today: " + tomorrow + "\nSchedDateTime: " + inspDate );
 
-      return true;
-    }, function ()
-      {
-        console.log( "Error in SaveInspection" );
+    if ( inspDate < tomorrow )
+      return false
 
-        //GetInspType( PermitNo );
-      });
+    return true;
   }
 
 }

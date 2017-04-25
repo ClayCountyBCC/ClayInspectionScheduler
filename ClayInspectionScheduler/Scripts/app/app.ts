@@ -2,12 +2,11 @@
 /// <reference path="UI.ts" />
 /// <reference path="Permit.ts" />
 /// <reference path="dates.ts" />
+/// <reference path="newinspection.ts" />
 /// <reference path="Inspection.ts" />
 /// <reference path="../typings/jquery/jquery.d.ts" />
 /// <reference path="../typings/foundation/foundation.d.ts" />
 /// <reference path="../typings/bootstrap.datepicker/bootstrap.datepicker.d.ts" />
-
-
 
 namespace InspSched
 {
@@ -18,26 +17,24 @@ namespace InspSched
   export let InspectionTypes: Array<InspType> = [];
   export let firstDay: string;
   export let lastDay: string;
-
-
+  export let newInsp: NewInspection;
+ 
   export function start(): void
   {
     LoadData();
 
     var InspectionTypeSelect = <HTMLSelectElement>document.getElementById("InspTypeSelect");
-    var SaveInspectionButton = document.getElementById("SaveSchedule");
     var PermitSearchButton = <HTMLButtonElement>document.getElementById( "PermitSearchButton" );
     var PermitSearchField = <HTMLInputElement>document.getElementById( "PermitSearch" );
-
     var permitNumSelect = <HTMLSelectElement>document.getElementById( "PermitSelect" );
     var inspScheduler = document.getElementById( "InspectionScheduler" );
+    var SaveInspectionButton = document.getElementById( "SaveSchedule" );
+    SaveInspectionButton.setAttribute( "disabled", "disabled" );
 
-
-    
-    InspectionTypeSelect.onchange = function ()
+    PermitSearchButton.onclick = function ()
     {
-      SaveInspectionButton.setAttribute( "value", inspScheduler.getAttribute( "value" ) + "/" + InspectionTypeSelect.value + "/" );
-      SaveInspectionButton.removeAttribute( "disabled" );
+
+      InspSched.UI.Search( PermitSearchField.value );
     }
 
     permitNumSelect.onchange = function ()
@@ -48,14 +45,44 @@ namespace InspSched
       $( dpCalendar.datepicker( 'clearDates' ) );
 
     }
-        PermitSearchButton.onclick = function ()
-    {
 
-      InspSched.UI.Search( PermitSearchField.value );
+    InspectionTypeSelect.onchange = function ()
+    {
+      SaveInspectionButton.setAttribute("value",  InspectionTypeSelect.value);
+      SaveInspectionButton.removeAttribute( "disabled" );
     }
 
-  }
+    SaveInspectionButton.onclick = function ()
+    {
+      let thisPermit: string = permitNumSelect.value;
+      let thisInspCd: string = SaveInspectionButton.getAttribute( "value" );
+      let thisDate: string = document.getElementById( "date" ).getAttribute( "value");
 
+      
+      newInsp = new NewInspection( thisPermit, thisInspCd, $( dpCalendar ).data( 'datepicker' ).getDate());
+      
+      console.log( "In SaveInspection onchangedate: \"" + $( dpCalendar ).data( 'datepicker' ).getDate() +"\"" );
+
+
+      transport.SaveInspection( newInsp ).then( function ( isSaved: boolean )
+      {
+        // Will do something here when I am able to get this to my Controller
+        return true;
+
+      }, function ()
+        {
+          console.log( 'error getting inspections' );
+          return false;
+        });
+
+
+    }
+
+    
+
+
+  } //  END start()
+  
   function LoadData()
   {
     LoadInspectionDates();
@@ -92,20 +119,7 @@ namespace InspSched
       BuildCalendar(dates);
 
       console.log('InspectionDates', InspSched.InspectionDates);
-      //let datesDisabled: string = "[";
-      //let minDate: Dates = dates[0];
-      //if (dates.length > 2)
-      //{
-      //  for (let i: number = 1; (i < dates.length - 2); i++)
-      //  {
-      //    datesDisabled += dates[i] + ", ";
-      //  }
-      //  datesDisabled += dates[dates.length - 2] + "]";
-      //}
-      //else
-      //  datesDisabled += "]";
-      //let maxDate: Dates = dates[dates.length - 1];
-      //return dates;
+
 
     },
       function ()
@@ -137,47 +151,43 @@ namespace InspSched
   }
 
   function BuildCalendar(dates: Array<string>)
-
   {
+    
     $( document ).foundation();
 
     //
     let additionalDisabledDates: string []= GetAdditionalDisabledDates( dates );
-    //if ( InspSched.firstDay == null )
-    //{
-    //  FirstAvailableDate.setDate( FirstAvailableDate.getDate() + 1 );
-    //}
-    //else
-    //{
-    //  let FirstAvailableDate = InspSched.firstDay;
-    //}
-    //let
-    let first = '4/1/2017';
+
       dpCalendar = $( '#sandbox-container div' ).datepicker(
-      <DatepickerOptions>
+        <DatepickerOptions>
         {
           startDate: InspSched.firstDay,
           datesDisabled: additionalDisabledDates,
           endDate: InspSched.lastDay,
           maxViewMode: 0,
+          toggleActive: true,
+          
+      })
+      {
+        $( dpCalendar ).on( 'changeDate', function ()
+        {
+          let date = $( dpCalendar).data('datepicker').getDate();
+          console.log( "In calendar onchangedate: " + date );
+          //return false;
+          $( 'change-date' ).submit();
 
-      });
+        });
+
+      };
+    
 
       console.log
   }
-  //export function toggleNavDisplay(element: string): void
-  //{
-  //  UI.toggleNav("navTopMenu", element);
 
-  //  let section = document.getElementsByTagName("section");
-  //  for (var i = 0; i < section.length; i++)
-  //  {
-  //    if (section[i].style.display !== "none")
-  //    {
-  //      section[i].style.display = "none";
-  //    }
-  //  }
-  //  document.getElementById(element).style.display = "block";
-  //}
+  function setDateValue( date: Date ): void
+  {
+    console.log( date );
+
+  }
 
 }

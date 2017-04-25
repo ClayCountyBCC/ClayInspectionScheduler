@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Web.Http;
 using System.Web;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+using Dapper;
 
 namespace InspectionScheduler.Models
 {
@@ -36,7 +38,7 @@ namespace InspectionScheduler.Models
     {
       get
       {
-        return InspDateTime == DateTime.MaxValue ? "" : InspDateTime.ToShortDateString ( );
+        return InspDateTime == DateTime.MaxValue || DateTime.Parse(InspDateTime.ToShortDateString()) == DateTime.Parse("01/01/0001") ? "" : InspDateTime.ToShortDateString ( );
       }
     }
 
@@ -80,7 +82,7 @@ namespace InspectionScheduler.Models
                  ip.name InspectorName,
                  ip.PhoneNbr PhoneNumber
           from bpINS_REQUEST i
-               INNER JOIN bpINS_REF ir ON ir.InspCd = i.InspectionCode
+               LEFT OUTER JOIN bpINS_REF ir ON ir.InspCd = i.InspectionCode
                LEFT OUTER JOIN bp_INSPECTORS ip ON i.Inspector = ip.Intl 
           WHERE i.PermitNo = @PermitNo
           order by i.InspDateTime DESC, i.ResultADC desc ";

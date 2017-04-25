@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web.Http;
 using System.Net.Http;
 using Newtonsoft.Json.Serialization;
+using InspectionScheduler.Models;
 
 namespace ClayInspectionScheduler
 {
@@ -18,8 +19,13 @@ namespace ClayInspectionScheduler
 
       config.Routes.MapHttpRoute(
           name: "DefaultApi",
-          routeTemplate: "API/{controller}/{id}/{InspId}/{date}", 
+          routeTemplate: "API/{controller}/{id}/{InspId}/{date}",
           defaults: new { id = RouteParameter.Optional, InspId = RouteParameter.Optional, date = RouteParameter.Optional }
+      );
+      config.Routes.MapHttpRoute(
+        name: "NewInspectionApi",
+        routeTemplate: "API/NewInspection/ ",
+        defaults: new { thisInspection = RouteParameter.Optional}
       );
     }
   }
