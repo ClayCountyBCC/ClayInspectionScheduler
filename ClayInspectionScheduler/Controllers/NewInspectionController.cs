@@ -13,7 +13,7 @@ namespace InspectionScheduler.Controllers
       public IHttpActionResult Post( NewInspection thisInspection)
       {
 
-      //var secInspection = new NewInspection( "19876543", "107", DateTime.Parse("04/26/2017") );
+
 
 
       bool lp = NewInspection.Post( thisInspection );

@@ -31,7 +31,10 @@ namespace InspectionScheduler.Models
       dbArgs.Add( "@InspCd", thisInspection.InspectionCd );
       dbArgs.Add( "@SelectedDate", selectedDate );
 
-      if(thisInspection.PermitNo != null && thisInspection.InspectionCd != null && selectedDate != null)
+      if(thisInspection.PermitNo != null && 
+         thisInspection.InspectionCd != null && 
+         selectedDate != null &&  
+         thisInspection.PermitNo[0] == thisInspection.InspectionCd[0])
       {
 
 
@@ -42,7 +45,8 @@ namespace InspectionScheduler.Models
       }
       else 
       {
-
+        
+        
         return false;
       }
 

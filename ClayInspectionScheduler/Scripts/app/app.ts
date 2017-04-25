@@ -183,6 +183,7 @@ namespace InspSched
 
       console.log
   }
+
   function setDateValue( date: Date ): void
   {
     console.log( date );

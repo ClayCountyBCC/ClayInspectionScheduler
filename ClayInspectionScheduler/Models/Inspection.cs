@@ -82,7 +82,7 @@ namespace InspectionScheduler.Models
                  ip.name InspectorName,
                  ip.PhoneNbr PhoneNumber
           from bpINS_REQUEST i
-               INNER JOIN bpINS_REF ir ON ir.InspCd = i.InspectionCode
+               LEFT OUTER JOIN bpINS_REF ir ON ir.InspCd = i.InspectionCode
                LEFT OUTER JOIN bp_INSPECTORS ip ON i.Inspector = ip.Intl 
           WHERE i.PermitNo = @PermitNo
           order by i.InspDateTime DESC, i.ResultADC desc ";
