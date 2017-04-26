@@ -13,14 +13,17 @@ var InspSched;
     var dpCalendar = null;
     InspSched.InspectionDates = [];
     InspSched.InspectionTypes = [];
+    var InspectionTypeSelect = document.getElementById("InspTypeSelect");
+    var PermitSearchButton = document.getElementById("PermitSearchButton");
+    var PermitSearchField = document.getElementById("PermitSearch");
+    var permitNumSelect = document.getElementById("PermitSelect");
+    var inspScheduler = document.getElementById("InspectionScheduler");
+    var SaveInspectionButton = document.getElementById("SaveSchedule");
+    var IssuesDiv = document.getElementById('NotScheduled');
     function start() {
+        SaveInspectionButton.setAttribute("disabled", "disabled");
         LoadData();
-        var InspectionTypeSelect = document.getElementById("InspTypeSelect");
-        var PermitSearchButton = document.getElementById("PermitSearchButton");
-        var PermitSearchField = document.getElementById("PermitSearch");
-        var permitNumSelect = document.getElementById("PermitSelect");
-        var inspScheduler = document.getElementById("InspectionScheduler");
-        var SaveInspectionButton = document.getElementById("SaveSchedule");
+        IssuesDiv.style.display = "none";
         SaveInspectionButton.setAttribute("disabled", "disabled");
         PermitSearchButton.onclick = function () {
             InspSched.UI.Search(PermitSearchField.value);
@@ -33,19 +36,40 @@ var InspSched;
         };
         InspectionTypeSelect.onchange = function () {
             SaveInspectionButton.setAttribute("value", InspectionTypeSelect.value);
-            SaveInspectionButton.removeAttribute("disabled");
+            if ($(dpCalendar).data('datepicker').getDate() != null) {
+                SaveInspectionButton.removeAttribute("disabled");
+            }
         };
         SaveInspectionButton.onclick = function () {
             var thisPermit = permitNumSelect.value;
             var thisInspCd = SaveInspectionButton.getAttribute("value");
-            var thisDate = document.getElementById("date").getAttribute("value");
+            var IssuesDiv = document.getElementById('NotScheduled');
+            IssuesDiv.style.display = "none";
+            InspSched.UI.clearElement(IssuesDiv);
             InspSched.newInsp = new InspSched.NewInspection(thisPermit, thisInspCd, $(dpCalendar).data('datepicker').getDate());
+            $(dpCalendar).data('datepicker').clearDates();
             console.log("In SaveInspection onchangedate: \"" + $(dpCalendar).data('datepicker').getDate() + "\"");
-            InspSched.transport.SaveInspection(InspSched.newInsp).then(function (isSaved) {
+            InspSched.transport.SaveInspection(InspSched.newInsp).then(function (issues) {
+                if (issues.length > 0) {
+                    var thisHeading = document.createElement('h5');
+                    thisHeading.innerText = "The following issue(s) prevented scheduling the requested inspection:";
+                    thisHeading.className = "large-12 medium-12 small-12 row";
+                    IssuesDiv.appendChild(thisHeading);
+                    var IssueList = document.createElement('ul');
+                    for (var i in issues) {
+                        var thisIssue = document.createElement('li');
+                        thisIssue.textContent = issues[i];
+                        thisIssue.style.marginLeft = "2rem;";
+                        console.log(issues[i]);
+                        IssueList.appendChild(thisIssue);
+                    }
+                    IssuesDiv.appendChild(IssueList);
+                    IssuesDiv.style.removeProperty("display");
+                }
                 // Will do something here when I am able to get this to my Controller
                 return true;
             }, function () {
-                console.log('error getting inspections');
+                console.log('error Saving Inspection');
                 return false;
             });
         };
@@ -111,13 +135,21 @@ var InspSched;
                 console.log("In calendar onchangedate: " + date);
                 //return false;
                 $('change-date').submit();
+                EnableSaveButton();
             });
         }
         ;
         console.log;
     }
-    function setDateValue(date) {
-        console.log(date);
+    function EnableSaveButton() {
+        {
+            if (InspectionTypeSelect.value != "" && $(dpCalendar).data('datepicker').getDate() != null) {
+                SaveInspectionButton.removeAttribute("disabled");
+            }
+            else {
+                SaveInspectionButton.setAttribute("disabled", "disabled");
+            }
+        }
     }
 })(InspSched || (InspSched = {}));
 //# sourceMappingURL=app.js.map

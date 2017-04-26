@@ -401,13 +401,19 @@ namespace InspSched.UI
     document.getElementById( 'InspSched' ).style.removeProperty( "display" );
     document.getElementById( 'FutureInspRow' ).style.removeProperty( "display" );
 
+    thisinspCancelButton.setAttribute( "onclick",
 
 
+      // cancels inspection and re-fetch inspections
+      "InspSched.UI.CancelInspection(\"" + inspection.InspReqID + "\", \"" + inspection.PermitNo + "\");" + 
+      
+      // clears Calendar of any chosen dates
+      "$( '#sandbox-container div' ).data( 'datepicker' ).clearDates();" + 
 
-    thisinspCancelButton.setAttribute( "onclick", "( InspSched.UI.CancelInspection(\"" + inspection.InspReqID + "\", \"" + inspection.PermitNo + "\" ) )" );
-    //thisinspCancelButton.setAttribute( "type", "button" );
+      // Hide scheduling issue div
+      "document.getElementById(\"NotScheduled\").style.display = \"none\"");
 
-
+                                       
     if ( IsGoodCancelDate( inspection ) )
       thisinspCancelDiv.appendChild( thisinspCancelButton );
 

@@ -18,17 +18,23 @@ namespace InspSched
   export let firstDay: string;
   export let lastDay: string;
   export let newInsp: NewInspection;
- 
+  var InspectionTypeSelect = <HTMLSelectElement>document.getElementById( "InspTypeSelect" );
+  var PermitSearchButton = <HTMLButtonElement>document.getElementById( "PermitSearchButton" );
+  var PermitSearchField = <HTMLInputElement>document.getElementById( "PermitSearch" );
+  var permitNumSelect = <HTMLSelectElement>document.getElementById( "PermitSelect" );
+  var inspScheduler = document.getElementById( "InspectionScheduler" );
+  var SaveInspectionButton = document.getElementById( "SaveSchedule" );
+  let IssuesDiv: HTMLDivElement = ( <HTMLDivElement>document.getElementById( 'NotScheduled' ) );
+  
+
   export function start(): void
   {
+    SaveInspectionButton.setAttribute( "disabled", "disabled" );
+
     LoadData();
 
-    var InspectionTypeSelect = <HTMLSelectElement>document.getElementById("InspTypeSelect");
-    var PermitSearchButton = <HTMLButtonElement>document.getElementById( "PermitSearchButton" );
-    var PermitSearchField = <HTMLInputElement>document.getElementById( "PermitSearch" );
-    var permitNumSelect = <HTMLSelectElement>document.getElementById( "PermitSelect" );
-    var inspScheduler = document.getElementById( "InspectionScheduler" );
-    var SaveInspectionButton = document.getElementById( "SaveSchedule" );
+    IssuesDiv.style.display = "none";
+
     SaveInspectionButton.setAttribute( "disabled", "disabled" );
 
     PermitSearchButton.onclick = function ()
@@ -48,38 +54,62 @@ namespace InspSched
 
     InspectionTypeSelect.onchange = function ()
     {
-      SaveInspectionButton.setAttribute("value",  InspectionTypeSelect.value);
-      SaveInspectionButton.removeAttribute( "disabled" );
+      SaveInspectionButton.setAttribute( "value", InspectionTypeSelect.value );
+      if ( $( dpCalendar ).data( 'datepicker' ).getDate() != null )
+      {
+        SaveInspectionButton.removeAttribute( "disabled" );
+      }
     }
 
     SaveInspectionButton.onclick = function ()
     {
+
       let thisPermit: string = permitNumSelect.value;
       let thisInspCd: string = SaveInspectionButton.getAttribute( "value" );
-      let thisDate: string = document.getElementById( "date" ).getAttribute( "value");
-
-      
-      newInsp = new NewInspection( thisPermit, thisInspCd, $( dpCalendar ).data( 'datepicker' ).getDate());
-      
-      console.log( "In SaveInspection onchangedate: \"" + $( dpCalendar ).data( 'datepicker' ).getDate() +"\"" );
+      let IssuesDiv: HTMLDivElement = ( <HTMLDivElement>document.getElementById( 'NotScheduled' ) );
+      IssuesDiv.style.display = "none";
+      InspSched.UI.clearElement( IssuesDiv );
 
 
-      transport.SaveInspection( newInsp ).then( function ( isSaved: boolean )
+      newInsp = new NewInspection( thisPermit, thisInspCd, $( dpCalendar ).data( 'datepicker' ).getDate() );
+      $( dpCalendar ).data( 'datepicker' ).clearDates();
+
+      console.log( "In SaveInspection onchangedate: \"" + $( dpCalendar ).data( 'datepicker' ).getDate() + "\"" );
+
+      transport.SaveInspection( newInsp ).then( function ( issues: Array<string> )
       {
+
+        if ( issues.length > 0 )
+        {
+          let thisHeading: HTMLHeadingElement = ( <HTMLHeadingElement>document.createElement( 'h5' ) );
+          thisHeading.innerText = "The following issue(s) prevented scheduling the requested inspection:";
+          thisHeading.className = "large-12 medium-12 small-12 row";
+          IssuesDiv.appendChild( thisHeading );
+          let IssueList: HTMLUListElement = ( <HTMLUListElement>document.createElement( 'ul' ) );
+          for ( let i in issues )
+          {
+            let thisIssue: HTMLLIElement = ( <HTMLLIElement>document.createElement( 'li' ) );
+            thisIssue.textContent = issues[i];
+            thisIssue.style.marginLeft = "2rem;";
+            console.log( issues[i] );
+            IssueList.appendChild( thisIssue );
+
+          }
+
+          IssuesDiv.appendChild( IssueList );
+          IssuesDiv.style.removeProperty( "display" );
+        }
         // Will do something here when I am able to get this to my Controller
         return true;
 
       }, function ()
         {
-          console.log( 'error getting inspections' );
+          console.log( 'error Saving Inspection' );
           return false;
         });
 
 
     }
-
-    
-
 
   } //  END start()
   
@@ -176,6 +206,7 @@ namespace InspSched
           //return false;
           $( 'change-date' ).submit();
 
+          EnableSaveButton();
         });
 
       };
@@ -184,10 +215,20 @@ namespace InspSched
       console.log
   }
 
-  function setDateValue( date: Date ): void
+  function EnableSaveButton()
   {
-    console.log( date );
 
+    {
+      if ( InspectionTypeSelect.value != "" &&  $( dpCalendar ).data( 'datepicker' ).getDate() != null  )
+      {
+        SaveInspectionButton.removeAttribute( "disabled" );
+      }
+      else
+      {
+        SaveInspectionButton.setAttribute( "disabled", "disabled" );
+
+      }
+    }
   }
 
 }

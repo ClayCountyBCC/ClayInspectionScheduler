@@ -7,10 +7,10 @@
 #SearchFailed,
 #NoPermit,
 #Scheduler,
-#NoSchedule,
 #SearchFailed {
   display: none;
 }
+
 #PermitSelect {
   max-width: 15rem;
   min-width: 8rem;
@@ -200,5 +200,10 @@ table tbody, table tfoot, table thead {
   border-bottom-color: rgba(0,0,0,.1);
   margin-bottom: 1rem;
   padding-bottom: 1rem;
+}
+#NotScheduled {
+  background-color: lightpink;
+  padding:1rem;
+  font-weight: bold;
 }
 
