@@ -13,6 +13,7 @@ var InspSched;
     var dpCalendar = null;
     InspSched.InspectionDates = [];
     InspSched.InspectionTypes = [];
+    InspSched.GracePeriodDate = "";
     var InspectionTypeSelect = document.getElementById("InspTypeSelect");
     var PermitSearchButton = document.getElementById("PermitSearchButton");
     var PermitSearchField = document.getElementById("PermitSearch");
@@ -27,12 +28,16 @@ var InspSched;
         SaveInspectionButton.setAttribute("disabled", "disabled");
         PermitSearchButton.onclick = function () {
             InspSched.UI.Search(PermitSearchField.value);
+            console.log("PermitNo: " + PermitSearchField.value);
+            if (PermitSearchField.value != "") {
+                GetGracePeriodDate();
+            }
         };
         permitNumSelect.onchange = function () {
             // TODO: Add code to check if there is a selected date;
             SaveInspectionButton.setAttribute("disabled", "disabled");
             InspSched.UI.GetInspList(permitNumSelect.value);
-            $(dpCalendar.datepicker('clearDates'));
+            GetGracePeriodDate();
         };
         InspectionTypeSelect.onchange = function () {
             SaveInspectionButton.setAttribute("value", InspectionTypeSelect.value);
@@ -76,7 +81,6 @@ var InspSched;
     } //  END start()
     InspSched.start = start;
     function LoadData() {
-        LoadInspectionDates();
         LoadInspectionTypes();
     }
     function LoadInspectionTypes() {
@@ -92,12 +96,29 @@ var InspSched;
             InspSched.InspectionTypes = [];
         });
     }
-    function LoadInspectionDates() {
-        var myDisabledDates = [];
+    function GetGracePeriodDate() {
+        var checkString = (permitNumSelect.value == "" ? PermitSearchField.value : permitNumSelect.value);
+        InspSched.transport.GetGracePeriodDate(checkString).then(function (GracePeriodDate) {
+            var mydatestring = Date.parse(GracePeriodDate);
+            var todaystring = Date.now();
+            if (mydatestring != undefined && mydatestring < todaystring) {
+                console.log("I should pass the permit number to the InspSched.UI.permitSchedulingIssue(permitNumSelect.value)");
+                console.log("And I shouldn't run LoadInspectionDates");
+            }
+            else {
+                LoadInspectionDates(GracePeriodDate[0]);
+            }
+        });
+    }
+    function LoadInspectionDates(GracePeriodDate) {
         InspSched.transport.GenerateDates().then(function (dates) {
             InspSched.InspectionDates = dates;
             InspSched.firstDay = InspSched.InspectionDates[0];
             InspSched.lastDay = InspSched.InspectionDates[dates.length - 1];
+            if (GracePeriodDate != undefined && Date.parse(GracePeriodDate.toString()) < Date.parse(InspSched.lastDay)) {
+                InspSched.lastDay = GracePeriodDate;
+                console.log("GracePeriodDate: " + GracePeriodDate.toString());
+            }
             BuildCalendar(dates);
             console.log('InspectionDates', InspSched.InspectionDates);
         }, function () {
@@ -119,6 +140,7 @@ var InspSched;
         return AdditionalDisabledDates;
     }
     function BuildCalendar(dates) {
+        $(dpCalendar).datepicker('destroy');
         $(document).foundation();
         //
         var additionalDisabledDates = GetAdditionalDisabledDates(dates);

@@ -301,18 +301,7 @@ var InspSched;
                 }
                 else {
                     // TODO Add code to display suspended contractor
-                    var e = document.getElementById('SuspendedPermit');
-                    clearElement(e);
-                    var message = document.createElement("h5");
-                    message.appendChild(document.createTextNode("A new inspection cannot be scheduled for permit #" + key + "."));
-                    message.appendChild(document.createElement("br"));
-                    message.appendChild(document.createElement("br"));
-                    message.appendChild(document.createTextNode("\nPlease contact the Building Department " +
-                        "for assistance at 904-284-6307.  Inspections may not " +
-                        "be able to be scheduled on line due to many reasons " +
-                        "(fees due, permit problems, holds, or licensing issues)."));
-                    e.appendChild(message);
-                    document.getElementById('SuspendedContractor').style.removeProperty("display");
+                    permitSchedulingIssue(key);
                 }
             }
         }
@@ -447,6 +436,22 @@ var InspSched;
             if (inspDate < tomorrow)
                 return false;
             return true;
+        }
+        function permitSchedulingIssue(key) {
+            var InspTypeList = document.getElementById('InspTypeSelect');
+            clearElement(InspTypeList);
+            var e = document.getElementById('SuspendedPermit');
+            clearElement(e);
+            var message = document.createElement("h5");
+            message.appendChild(document.createTextNode("A new inspection cannot be scheduled for permit #" + key + "."));
+            message.appendChild(document.createElement("br"));
+            message.appendChild(document.createElement("br"));
+            message.appendChild(document.createTextNode("\nPlease contact the Building Department " +
+                "for assistance at 904-284-6307.  Inspections may not " +
+                "be able to be scheduled on line due to many reasons " +
+                "(fees due, permit problems, holds, or licensing issues)."));
+            e.appendChild(message);
+            document.getElementById('SuspendedContractor').style.removeProperty("display");
         }
     })(UI = InspSched.UI || (InspSched.UI = {}));
 })(InspSched || (InspSched = {}));

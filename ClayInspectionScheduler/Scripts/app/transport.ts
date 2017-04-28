@@ -109,6 +109,23 @@ namespace InspSched.transport
 
     }
 
+    export function GetGracePeriodDate( key: string )
+    {
+      var x = XHR.Get( "API/Dates/" + key );
+      return new Promise( function ( resolve, reject )
+      {
+        x.then( function ( response )
+        {
+          var di = JSON.parse( response.Text );
+          resolve( di );
 
+        }).catch( function ()
+        {
+          console.log( "error in CheckContractorPermitStatus" );
+          reject( null );
+        });
+      });
+
+    }
 }
 

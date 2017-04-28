@@ -22,5 +22,19 @@ namespace InspectionScheduler.Controllers
         return Ok(lat);
       }
     }
+    public IHttpActionResult Get(string id)
+    { 
+      List<string> lat = Dates.GetGracePeriodDate( id );
+      if (lat == null)
+      {
+        return InternalServerError();
+      }
+      else
+      {
+        return Ok(lat);
+      }
+    }
+
+
   }
 }

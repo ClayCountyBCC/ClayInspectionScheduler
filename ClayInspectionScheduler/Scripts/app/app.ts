@@ -18,6 +18,7 @@ namespace InspSched
   export let firstDay: string;
   export let lastDay: string;
   export let newInsp: NewInspection;
+  export let GracePeriodDate: string = "";
   var InspectionTypeSelect = <HTMLSelectElement>document.getElementById( "InspTypeSelect" );
   var PermitSearchButton = <HTMLButtonElement>document.getElementById( "PermitSearchButton" );
   var PermitSearchField = <HTMLInputElement>document.getElementById( "PermitSearch" );
@@ -41,17 +42,28 @@ namespace InspSched
     {
 
       InspSched.UI.Search( PermitSearchField.value );
+
+      console.log( "PermitNo: " + PermitSearchField.value );
+      if ( PermitSearchField.value != "" )
+      {
+        GetGracePeriodDate();
+      }
+
+
     }
 
     permitNumSelect.onchange = function ()
     {
+      
       // TODO: Add code to check if there is a selected date;
       SaveInspectionButton.setAttribute( "disabled", "disabled" );
+
       InspSched.UI.GetInspList( permitNumSelect.value );
-      $( dpCalendar.datepicker( 'clearDates' ) );
+      GetGracePeriodDate();
+
 
     }
-
+    
     InspectionTypeSelect.onchange = function ()
     {
       SaveInspectionButton.setAttribute( "value", InspectionTypeSelect.value );
@@ -115,12 +127,12 @@ namespace InspSched
   
   function LoadData()
   {
-    LoadInspectionDates();
     LoadInspectionTypes();
   }
 
   function LoadInspectionTypes()
   {
+    
     transport.GetInspType().then(function (insptypes: Array<InspType>)
     {
       InspectionTypes = insptypes;
@@ -137,24 +149,55 @@ namespace InspSched
       });
   }
 
-  function LoadInspectionDates()
+  function GetGracePeriodDate()
   {
-    let myDisabledDates: Array<string> = [];
-    transport.GenerateDates().then(function (dates: Array<string>)
+    let checkString: string = ( permitNumSelect.value == "" ? PermitSearchField.value : permitNumSelect.value );
+
+    transport.GetGracePeriodDate( checkString ).then( function ( GracePeriodDate: string )
     {
+      var mydatestring = Date.parse( GracePeriodDate );
+      var todaystring = Date.now();
+      
+      if ( mydatestring != undefined && mydatestring < todaystring )
+      {
+        console.log( "I should pass the permit number to the InspSched.UI.permitSchedulingIssue(permitNumSelect.value)" );
+        console.log( "And I shouldn't run LoadInspectionDates" );
+      }
+      else
+      {
+        LoadInspectionDates( GracePeriodDate[0] );
+      }
+    });
+
+  }
+
+  function LoadInspectionDates(GracePeriodDate?: string) 
+  {
+    
+   
+
+    transport.GenerateDates().then( function ( dates: Array<string> )
+    {
+      
       InspSched.InspectionDates = dates;
       InspSched.firstDay = InspSched.InspectionDates[0];
       InspSched.lastDay = InspSched.InspectionDates[dates.length - 1];
-      
-      BuildCalendar(dates);
 
-      console.log('InspectionDates', InspSched.InspectionDates);
+      if ( GracePeriodDate != undefined && Date.parse( GracePeriodDate.toString() ) < Date.parse( InspSched.lastDay) )
+      {
+        InspSched.lastDay = GracePeriodDate;
+        console.log( "GracePeriodDate: " + GracePeriodDate.toString() );
+      }
+
+      BuildCalendar( dates );
+
+      console.log( 'InspectionDates', InspSched.InspectionDates );
 
 
     },
       function ()
       {
-        console.log('error in LoadInspectionDates');
+        console.log( 'error in LoadInspectionDates' );
         // do something with the error here
         // need to figure out how to detect if something wasn't found
         // versus an error.
@@ -182,7 +225,8 @@ namespace InspSched
 
   function BuildCalendar(dates: Array<string>)
   {
-    
+    $( dpCalendar ).datepicker( 'destroy' );
+
     $( document ).foundation();
 
     //
@@ -201,6 +245,7 @@ namespace InspSched
       {
         $( dpCalendar ).on( 'changeDate', function ()
         {
+          
           let date = $( dpCalendar).data('datepicker').getDate();
           console.log( "In calendar onchangedate: " + date );
           //return false;
