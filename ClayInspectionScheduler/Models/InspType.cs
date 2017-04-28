@@ -28,7 +28,6 @@ namespace InspectionScheduler.Models
                 bpINS_REF I
         WHERE
                 I.Retired != 1
-          AND RIGHT(RTRIM(InspCd),2) != '00'
         ORDER BY 
           I.InsDesc
         ";

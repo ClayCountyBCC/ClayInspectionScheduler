@@ -87,38 +87,37 @@ namespace InspectionScheduler.Models
       }
     }
 
-    public static bool Save_Data<T>(string insertQuery, T item)
+    public static List<T> Save_Data<T>(string insertQuery)
     {
       try
       {
         using (IDbConnection db = new SqlConnection(Get_ConnStr("Printing")))
         {
-          db.Execute(insertQuery, item);
-          return true;
+          return ( List<T> )db.Query<T>( insertQuery);
         }
       }
       catch (Exception ex)
       {
         Log(ex, insertQuery);
-        return false;
+        return null;
       }
     }
 
-    public static bool Save_Data<T>( string query, DynamicParameters dbA )
+    public static List<T> Save_Data<T>( string query, DynamicParameters dbA )
     {
       {
         try
         {
           using( IDbConnection db = new SqlConnection( Get_ConnStr( "WATSC" + ( UseProduction() ? "Prod" : "QA" ) ) ) )
           {
-            db.Execute( query, dbA );
-            return true;
+            return ( List<T> )db.Query<T>( query, dbA );
+
           }
         }
         catch( Exception ex )
         {
           Log( ex, query );
-          return false;
+          return null;
         }
       }
     }

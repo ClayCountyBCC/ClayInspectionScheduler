@@ -12,12 +12,9 @@ namespace InspectionScheduler.Controllers
     {
       public IHttpActionResult Post( NewInspection thisInspection)
       {
-
-
-
-
-      bool lp = NewInspection.Post( thisInspection );
-        if( !lp )
+      
+        List<string> lp = NewInspection.Post( thisInspection );
+        if( lp == null)
         {
           return InternalServerError();
         }

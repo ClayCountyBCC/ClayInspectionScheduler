@@ -401,13 +401,19 @@ namespace InspSched.UI
     document.getElementById( 'InspSched' ).style.removeProperty( "display" );
     document.getElementById( 'FutureInspRow' ).style.removeProperty( "display" );
 
+    thisinspCancelButton.setAttribute( "onclick",
 
 
+      // cancels inspection and re-fetch inspections
+      "InspSched.UI.CancelInspection(\"" + inspection.InspReqID + "\", \"" + inspection.PermitNo + "\");" + 
+      
+      // clears Calendar of any chosen dates
+      "$( '#sandbox-container div' ).data( 'datepicker' ).clearDates();" + 
 
-    thisinspCancelButton.setAttribute( "onclick", "( InspSched.UI.CancelInspection(\"" + inspection.InspReqID + "\", \"" + inspection.PermitNo + "\" ) )" );
-    //thisinspCancelButton.setAttribute( "type", "button" );
+      // Hide scheduling issue div
+      "document.getElementById(\"NotScheduled\").style.display = \"none\"");
 
-
+                                       
     if ( IsGoodCancelDate( inspection ) )
       thisinspCancelDiv.appendChild( thisinspCancelButton );
 
@@ -459,24 +465,7 @@ namespace InspSched.UI
       else
       {
         // TODO Add code to display suspended contractor
-
-        let e: HTMLElement = document.getElementById( 'SuspendedPermit' );
-        clearElement( e );
-        let message: HTMLHeadingElement = ( <HTMLHeadingElement>document.createElement( "h5" ) );
-        message.appendChild( document.createTextNode( "A new inspection cannot be scheduled for permit #" + key + "." ) );
-        message.appendChild( document.createElement( "br" ) );
-        message.appendChild( document.createElement( "br" ) );
-        message.appendChild( document.createTextNode(
-
-          "\nPlease contact the Building Department " +
-          "for assistance at 904-284-6307.  Inspections may not " +
-          "be able to be scheduled on line due to many reasons " +
-          "(fees due, permit problems, holds, or licensing issues)."
-
-        ) );
-
-        e.appendChild( message );
-        document.getElementById( 'SuspendedContractor' ).style.removeProperty( "display" );
+        permitSchedulingIssue(key);
 
 
       }
@@ -671,4 +660,26 @@ namespace InspSched.UI
     return true;
   }
 
+  function permitSchedulingIssue(key: string)
+  {
+    let InspTypeList: HTMLSelectElement = ( <HTMLSelectElement>document.getElementById( 'InspTypeSelect' ) );
+    clearElement( InspTypeList );
+    let e: HTMLElement = document.getElementById( 'SuspendedPermit' );
+    clearElement( e );
+    let message: HTMLHeadingElement = ( <HTMLHeadingElement>document.createElement( "h5" ) );
+    message.appendChild( document.createTextNode( "A new inspection cannot be scheduled for permit #" + key + "." ) );
+    message.appendChild( document.createElement( "br" ) );
+    message.appendChild( document.createElement( "br" ) );
+    message.appendChild( document.createTextNode(
+
+      "\nPlease contact the Building Department " +
+      "for assistance at 904-284-6307.  Inspections may not " +
+      "be able to be scheduled on line due to many reasons " +
+      "(fees due, permit problems, holds, or licensing issues)."
+
+    ) );
+
+    e.appendChild( message );
+    document.getElementById( 'SuspendedContractor' ).style.removeProperty( "display" );
+  }
 }

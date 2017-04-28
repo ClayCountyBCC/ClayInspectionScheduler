@@ -118,7 +118,7 @@ namespace InspectionScheduler.Models
 	                  FROM 
 		                bpASSOC_PERMIT 
 	                  WHERE MPermitNo = @PermitNo 
-	                    AND MPermitNo IN 
+	                    OR MPermitNo IN 
 			                (SELECT PermitNo
     		                 FROM 
 				                bpMASTER_PERMIT 

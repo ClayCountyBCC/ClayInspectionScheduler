@@ -20,10 +20,10 @@ namespace InspectionScheduler.Models
       this.SchecDateTime = SchecDateTime;
     }
 
-    public static bool Post( NewInspection  thisInspection )
+    public static List<string> Post( NewInspection  thisInspection )
     {
       // thisInspection.SchecDateTime was being changed to local UTC Date via JSON.request.
-      // This statement fixes that issue and is now reformatted to the expected date at 12:00:00 AM
+      // This statement fixes that issue and reformats it to the expected date at 12:00:00 AM
       DateTime selectedDate = DateTime.Parse(thisInspection.SchecDateTime.ToShortDateString());
 
       var dbArgs = new Dapper.DynamicParameters();
@@ -33,21 +33,66 @@ namespace InspectionScheduler.Models
 
       if(thisInspection.PermitNo != null && 
          thisInspection.InspectionCd != null && 
-         selectedDate != null &&  
-         thisInspection.PermitNo[0] == thisInspection.InspectionCd[0])
+         selectedDate != null)
       {
+          string sql = @"
+          
+          USE WATSC;
 
+          IF	SUBSTRING(@PermitNo,1,1)  =  SUBSTRING(@InspCd,1,1) AND
+	          @InspCd IN (SELECT DISTINCT InspCd FROM bpINS_REF ) AND 
+	          @SelectedDate >= CONVERT(DATE, GETDATE()) AND 
+	          @SelectedDate != '' AND
+	          @PermitNo IN (SELECT PERMITNO FROM (SELECT DISTINCT PERMITNO 
+										          FROM bpASSOC_PERMIT 
+										          WHERE PERMITNO = @PermitNo 
+										          UNION 
+									          SELECT DISTINCT PERMITNO 
+										          FROM bpMASTER_PERMIT 
+										          WHERE PERMITNO = @PermitNo)
+									          AS TMP) AND
+            @InspCd NOT IN (SELECT IR.InspectionCode FROM bpINS_REQUEST IR WHERE @PermitNo = IR.PermitNo AND IR.ResultADC IS NULL)
 
-          string sql = @"";
+	          INSERT INTO bpINS_REQUEST
+				          (PermitNo
+				          ,InspectionCode
+				          ,SchecDateTime)
+			          VALUES
+				          (@PermitNo
+				          ,@InspCd
+				          ,@SelectedDate)
+          ELSE
+	          SELECT 'Permit Does Not Exist'
+	          WHERE @PermitNo not in (SELECT PERMITNO FROM (SELECT DISTINCT PERMITNO 
+											          FROM bpASSOC_PERMIT 
+											          WHERE PERMITNO = @PermitNo 
+											          UNION 
+										          SELECT DISTINCT PERMITNO 
+											          FROM bpMASTER_PERMIT 
+											          WHERE PERMITNO = @PermitNo) 
+										          AS TMP)
+	          UNION
+	          SELECT 'Invalid Inspection Type'
+	          WHERE substring(@PermitNo,1,1)  !=  SUBSTRING(@InspCd,1,1) OR 
+			          @InspCd NOT IN (SELECT DISTINCT LTRIM(RTRIM(InspCd)) FROM bpINS_REF )
+	          UNION
+	          SELECT 'Invalid Date'
+	          WHERE @SelectedDate < CONVERT(DATE, GETDATE()) OR @SelectedDate = ''
+	          UNION
+	          SELECT 'A Scheduled Inspection of This Type Exists for This Permit'
+	          WHERE @InspCd IN (SELECT IR.InspectionCode FROM bpINS_REQUEST IR WHERE @PermitNo = IR.PermitNo AND IR.ResultADC IS NULL)
 
-        var li = Constants.Save_Data<NewInspection>( sql, dbArgs );
-        return true;
+          ";
+
+        List<string> li = Constants.Save_Data<string>( sql, dbArgs );
+        return li;
+     
       }
       else 
       {
-        
-        
-        return false;
+        string sql = "";
+        List<string> li = Constants.Save_Data<string>( sql, dbArgs );
+        return li;
       }
 
     }

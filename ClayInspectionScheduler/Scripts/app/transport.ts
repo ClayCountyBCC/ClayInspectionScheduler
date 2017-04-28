@@ -56,16 +56,17 @@ namespace InspSched.transport
         });
     }
 
-    export function SaveInspection(thisInspection: NewInspection )
+    export function SaveInspection(thisInspection: NewInspection ):Promise<Array<string>>
     {
+
       console.log( "In transport.SaveInspection: " + JSON.stringify( thisInspection ) );
 
       var x = XHR.Post( "API/NewInspection/", JSON.stringify( thisInspection ) );
-      return new Promise( function ( resolve, reject )
+      return new Promise<Array<string>>( function ( resolve, reject )
       {
         x.then( function ( response )
         {
-          var di = JSON.parse( response.Text );
+          var di: Array<string> = JSON.parse( response.Text );
           UI.GetInspList( thisInspection.PermitNo );
           resolve( di );
 
@@ -108,6 +109,23 @@ namespace InspSched.transport
 
     }
 
+    export function GetGracePeriodDate( key: string )
+    {
+      var x = XHR.Get( "API/Dates/" + key );
+      return new Promise( function ( resolve, reject )
+      {
+        x.then( function ( response )
+        {
+          var di = JSON.parse( response.Text );
+          resolve( di );
 
+        }).catch( function ()
+        {
+          console.log( "error in CheckContractorPermitStatus" );
+          reject( null );
+        });
+      });
+
+    }
 }
 

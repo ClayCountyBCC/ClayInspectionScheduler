@@ -85,7 +85,7 @@ namespace InspectionScheduler.Models
                LEFT OUTER JOIN bpINS_REF ir ON ir.InspCd = i.InspectionCode
                LEFT OUTER JOIN bp_INSPECTORS ip ON i.Inspector = ip.Intl 
           WHERE i.PermitNo = @PermitNo
-          order by i.InspDateTime DESC, i.ResultADC desc ";
+          order by i.InspDateTime DESC, i.ResultADC DESC, i.SchecDateTime ASC";
 
         var li = Constants.Get_Data<Inspection> ( sql, dbArgs );
         return li;
