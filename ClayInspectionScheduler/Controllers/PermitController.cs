@@ -8,20 +8,20 @@ using InspectionScheduler.Models;
 
 namespace InspectionScheduler.Controllers
 {
-    public class PermitController : ApiController
+  public class PermitController : ApiController
+  {
+    public IHttpActionResult Get(string id)
     {
-        public IHttpActionResult Get(string id)
-        {
-            List<Permit> lp = Permit.Get(id);
-            if(lp == null)
-            {
-                return InternalServerError();
-            }
-            else
-            {
-                return Ok(lp);
-            }
-        }
+      List<Permit> lp = Permit.Get(id, true);
+      if (lp == null)
+      {
+        return InternalServerError();
+      }
+      else
+      {
+        return Ok(lp);
+      }
     }
+  }
 
 }

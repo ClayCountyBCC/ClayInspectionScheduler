@@ -69,14 +69,6 @@ namespace InspectionScheduler.Models
 
       switch (s[0].ToLower())
       {
-        case "inspectiondates":
-          bool bIU = Boolean.Parse(s[1]);
-          return Dates.GenerateDates(bIU);
-
-        case "inspectionshortdates":
-          bool bIUShort = Boolean.Parse(s[1]);
-          return Dates.GenerateShortDates(bIUShort);
-
         case "inspectiontypes":
           return InspType.Get();
 

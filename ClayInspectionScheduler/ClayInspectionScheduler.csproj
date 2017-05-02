@@ -93,7 +93,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
-    <Compile Include="Controllers\DatesController.cs" />
     <Compile Include="Controllers\InspectionController.cs" />
     <Compile Include="Controllers\InspTypeController.cs" />
     <Compile Include="Controllers\NewInspectionController.cs" />

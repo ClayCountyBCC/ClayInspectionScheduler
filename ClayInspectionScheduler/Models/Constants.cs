@@ -10,22 +10,15 @@ using Dapper;
 namespace InspectionScheduler.Models
 {
 
-  public static partial class Constants
+  public static class Constants
   {
     public const int appId = 20024;
 
-    public enum Users : int
-    {
-      Prod_User = 41222,
-      Test_User = 10776
-    }
 
     public static bool UseProduction()
     {
       switch (Environment.MachineName.ToUpper())
       {
-
-
         case "CLAYBCCDV10":
         case "MISML01":
         case "MISDW08":
