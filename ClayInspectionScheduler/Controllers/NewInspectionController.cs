@@ -12,17 +12,29 @@ namespace InspectionScheduler.Controllers
     {
       public IHttpActionResult Post( NewInspection thisInspection)
       {
-      
-        List<string> lp = NewInspection.Post( thisInspection );
-        if( lp == null)
+      var e = thisInspection.Validate(false);
+      if(e.Count() > 0)
+      {
+        // this means that errors were encounted in the validation process.
+        // we should return them so that the client can make an informed decision.
+      } else
+      {
+        if (!thisInspection.Save())
         {
-          return InternalServerError();
-        }
-        else
-        {
-          return Ok( lp );
-        }
 
+        }
       }
+
+      //List<string> lp = NewInspection.Post(thisInspection);
+      //if (lp == null)
+      //{
+      //  return InternalServerError();
+      //}
+      //else
+      //{
+      //  return Ok(lp);
+      //}
+
+    }
   }
 }

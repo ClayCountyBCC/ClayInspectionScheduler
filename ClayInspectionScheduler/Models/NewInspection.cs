@@ -97,5 +97,40 @@ namespace InspectionScheduler.Models
 
     }
 
+    public List<string> Validate(bool IsExternalUser)
+    {
+      // LET'S GET THE OLD MF PERMIT
+      List<string> Errors = new List<string>();
+
+      var Permits = (from p in Permit.Get(this.PermitNo, IsExternalUser)
+                     where p.PermitNo == this.PermitNo
+                     select p).ToList();
+
+      Permit CurrentPermit;
+      if(Permits.Count == 0)
+      {
+        Errors.Add("Permit number was not found.");
+        return Errors;
+      } else
+      {
+        CurrentPermit = Permits.First();
+      }
+
+
+
+
+
+
+
+      return Errors;
+    }
+
+    public bool Save()
+    {
+      // this function will save the inspection request.
+      //if (this.Validate(IsExternalUser).Count > 0) return false;
+
+
+    }
   }
 }
