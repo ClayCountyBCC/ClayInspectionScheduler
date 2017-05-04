@@ -4,14 +4,13 @@
 /// <reference path="Inspection.ts" />
 
 
+
 namespace InspSched.UI
 {
 
   "use strict"
-  let PermitList: Array<Permit> = [];
-  let CurrentPermits: Array<Permit> = [];
-  let InspectionList: Array<Inspection> = [];
-  let CurrentInspections: Array<Inspection> = [];
+  export let CurrentPermits: Array<Permit> = [];
+  export let CurrentInspections: Array<Inspection> = [];
 
   export function Search( key: string ): boolean
   {
@@ -180,13 +179,13 @@ namespace InspSched.UI
   function buildPermitSelectOption( permit: Permit, key: string ): HTMLElement
   {
 
-
+    let label: string = getInspTypeString( permit.PermitNo[0] );
     let option: HTMLOptionElement = ( <HTMLOptionElement>document.createElement( "option" ) );
 
     option.setAttribute( "value", permit.PermitNo.trim() );
-    option.setAttribute( "label", permit.PermitNo + "  (" + permit.PermitTypeDisplay + ")" );
+    option.setAttribute( "label", permit.PermitNo + "  (" +  label + ")" );
     option.setAttribute( "title", permit.PermitNo.trim() );
-    option.textContent = permit.PermitNo + "  (" + permit.PermitTypeDisplay + ")";
+    option.textContent = permit.PermitNo + "  (" + label + ")";
 
     option.id = permit.PermitNo + permit.CanSchedule;
 
@@ -453,7 +452,7 @@ namespace InspSched.UI
       {
 
         // Populate Inspection Type Select list
-        GetInspType( key );
+        getInspTypeString( key[0] );
 
         //BuildSchdeuleCalendar();
         document.getElementById( 'InspectionScheduler' ).style.removeProperty( "display" );
@@ -476,37 +475,13 @@ namespace InspSched.UI
 
   function GetInspType( key: string )
   {
-
     let thistype: string = key[0];
+    var label: string = getInspTypeString( thistype );
 
     let InspTypeList: HTMLSelectElement = ( <HTMLSelectElement>document.getElementById( 'InspTypeSelect' ) );
     let optionLabel: HTMLOptionElement = ( <HTMLOptionElement>document.createElement( "option" ) );
 
     clearElement( InspTypeList );
-
-    switch ( thistype )
-    {
-      case '1':
-      case '0':
-      case '9':
-        optionLabel.label = "Building";
-        thistype = "1";
-        break;
-      case '2':
-        optionLabel.label = "Electrical";
-        break;
-      case '3':
-        optionLabel.label = "Plumbing";
-        break;
-      case '4':
-        optionLabel.label = "Mechanical";
-        break;
-      case '6':
-        optionLabel.label = "Fire";
-        break;
-
-    }
-
     optionLabel.label += " Inspections:";
     optionLabel.innerText = optionLabel.label;
     optionLabel.className = "selectPlaceholder";
@@ -536,6 +511,27 @@ namespace InspSched.UI
     Do Somethings
   
   ***********************************/
+  function getInspTypeString(InspType: string)
+  {
+    switch ( InspType )
+    {
+      case "1":
+      case "0":
+      case "9":
+        return "Building";
+      case "2":
+        return "Electrical";
+      case "3":
+        return "Plumbing";
+      case "4":
+        return "Mechanical";
+      case "6":
+        return "Fire";
+      default:
+        return "Unknown"
+    }
+
+  }
 
   function Show( id?: string, element?: HTMLElement, displayType?: string ): void
   {

@@ -12,6 +12,9 @@ namespace InspectionScheduler.Models
     public string ProjAddrCombined { get; set; }
     public string ProjCity { get; set; }
     public DateTime SuspendGraceDt { get; set; }
+
+    public void SetIsExternalUser() { this.IsExternalUser = Constants.CheckIsExternalUser(); }
+    public bool GetIsExternalUser(){ return this.IsExternalUser; }
     public List<string> ScheduleDates {
       get
       {

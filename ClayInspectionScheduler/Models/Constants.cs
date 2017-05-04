@@ -139,6 +139,11 @@ namespace InspectionScheduler.Models
       return ConfigurationManager.ConnectionStrings[cs].ConnectionString;
     }
 
+    public static bool CheckIsExternalUser()
+    {
+
+      return true;
+    }
     #region Log Code
 
     public static void Log(Exception ex, string Query = "")

@@ -109,7 +109,7 @@ namespace InspectionScheduler.Models
     }
 
     public static List<DateTime> GenerateDates(DateTime GracePeriodDate, 
-      bool IsExternalUser = true)
+      bool IsExternalUser)
     {
       try
       {

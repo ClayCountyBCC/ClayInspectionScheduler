@@ -7,10 +7,8 @@ var InspSched;
     var UI;
     (function (UI) {
         "use strict";
-        var PermitList = [];
-        var CurrentPermits = [];
-        var InspectionList = [];
-        var CurrentInspections = [];
+        UI.CurrentPermits = [];
+        UI.CurrentInspections = [];
         function Search(key) {
             clearElement(document.getElementById('SearchFailed'));
             Hide('PermitSelectContainer');
@@ -53,7 +51,7 @@ var InspSched;
         **********************************/
         function GetPermitList(key, permit) {
             InspSched.transport.GetPermit(key).then(function (permits) {
-                CurrentPermits = permits;
+                UI.CurrentPermits = permits;
                 ProcessResults(permits, key);
                 return true;
             }, function () {
@@ -118,11 +116,12 @@ var InspSched;
             return og;
         }
         function buildPermitSelectOption(permit, key) {
+            var label = getInspTypeString(permit.PermitNo[0]);
             var option = document.createElement("option");
             option.setAttribute("value", permit.PermitNo.trim());
-            option.setAttribute("label", permit.PermitNo + "  (" + permit.PermitTypeDisplay + ")");
+            option.setAttribute("label", permit.PermitNo + "  (" + label + ")");
             option.setAttribute("title", permit.PermitNo.trim());
-            option.textContent = permit.PermitNo + "  (" + permit.PermitTypeDisplay + ")";
+            option.textContent = permit.PermitNo + "  (" + label + ")";
             option.id = permit.PermitNo + permit.CanSchedule;
             if (permit.PermitNo == key) {
                 option.value = permit.PermitNo.trim();
@@ -165,9 +164,9 @@ var InspSched;
             //clearElement( document.getElementById( 'InspectionType' ) );
             InspSched.transport.GetInspections(key).then(function (inspections) {
                 if (inspections.length > 0) {
-                    CurrentInspections = inspections;
-                    BuildInspectionList(CurrentInspections, permit);
-                    console.log("List of inspections: ", CurrentInspections);
+                    UI.CurrentInspections = inspections;
+                    BuildInspectionList(UI.CurrentInspections, permit);
+                    console.log("List of inspections: ", UI.CurrentInspections);
                 }
                 else {
                     BuildScheduler(inspections, canSchedule, completed, key);
@@ -294,7 +293,7 @@ var InspSched;
                 // if contractor IS ALLOWED to schedule, the contractor id will be on the list
                 if (pass) {
                     // Populate Inspection Type Select list
-                    GetInspType(key);
+                    getInspTypeString(key[0]);
                     //BuildSchdeuleCalendar();
                     document.getElementById('InspectionScheduler').style.removeProperty("display");
                     document.getElementById('InspectionScheduler').setAttribute("value", key);
@@ -307,29 +306,10 @@ var InspSched;
         }
         function GetInspType(key) {
             var thistype = key[0];
+            var label = getInspTypeString(thistype);
             var InspTypeList = document.getElementById('InspTypeSelect');
             var optionLabel = document.createElement("option");
             clearElement(InspTypeList);
-            switch (thistype) {
-                case '1':
-                case '0':
-                case '9':
-                    optionLabel.label = "Building";
-                    thistype = "1";
-                    break;
-                case '2':
-                    optionLabel.label = "Electrical";
-                    break;
-                case '3':
-                    optionLabel.label = "Plumbing";
-                    break;
-                case '4':
-                    optionLabel.label = "Mechanical";
-                    break;
-                case '6':
-                    optionLabel.label = "Fire";
-                    break;
-            }
             optionLabel.label += " Inspections:";
             optionLabel.innerText = optionLabel.label;
             optionLabel.className = "selectPlaceholder";
@@ -353,6 +333,24 @@ var InspSched;
           Do Somethings
         
         ***********************************/
+        function getInspTypeString(InspType) {
+            switch (InspType) {
+                case "1":
+                case "0":
+                case "9":
+                    return "Building";
+                case "2":
+                    return "Electrical";
+                case "3":
+                    return "Plumbing";
+                case "4":
+                    return "Mechanical";
+                case "6":
+                    return "Fire";
+                default:
+                    return "Unknown";
+            }
+        }
         function Show(id, element, displayType) {
             if (!element) {
                 var e = document.getElementById(id);

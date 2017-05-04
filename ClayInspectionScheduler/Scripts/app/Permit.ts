@@ -8,12 +8,8 @@ namespace InspSched
   interface IPermit 
   {
     PermitNo: string;
-    // MPermitNo: string;
     ProjAddrCombined: string;
     ProjCity: string;
-    //RelatedPermits: string;
-    PermitType: string;
-    PermitTypeDisplay: string;
     CanSchedule: string;
     FailType: string;
 
@@ -24,8 +20,6 @@ namespace InspSched
     public PermitNo: string;
     public ProjAddrCombined: string;
     public ProjCity: string;
-    public PermitType: string;
-    public PermitTypeDisplay: string;
     public CanSchedule: string;
     public FailType: string;
 
