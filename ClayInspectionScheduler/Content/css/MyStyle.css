@@ -36,7 +36,7 @@ select > .selectPlaceholder {
     font-weight: normal;
     font-style: normal;
 }
-[class*="foundicon-"] {
+.foundicon-{
     display: inline;
 
     line-height: inherit;
@@ -46,7 +46,7 @@ select > .selectPlaceholder {
     background-repeat: repeat;
 }
 
-    [class*="foundicon-"]:before {
+    .foundicon-:before {
         font-family: "[set]Foundicons";
         font-weight: normal;
         font-style: normal;
@@ -58,11 +58,15 @@ select > .selectPlaceholder {
 }
 
 .MyLabel {
-  background-color: #890ACC;
+  color: white;
   color: rgba(256,256,256, .9);
+  background-color: #890ACC;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   padding-top: .5rem;
+  line-height: 1.4;
+  padding-bottom: .5rem;
+  font-size: 1.25rem;
 }
 .infoDiv {
     background-color: white;

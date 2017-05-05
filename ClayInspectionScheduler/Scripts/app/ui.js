@@ -44,6 +44,7 @@ var InspSched;
                 ShowTable(key, permits);
             }
         }
+        UI.ProcessResults = ProcessResults;
         /**********************************
           
           Build Option List
@@ -367,11 +368,13 @@ var InspSched;
                     element.style.display = displayType;
             }
         }
+        UI.Show = Show;
         function Hide(id) {
             var e = document.getElementById(id);
             if (e)
                 e.style.display = "none";
         }
+        UI.Hide = Hide;
         // this function emptys an element of all its child nodes.
         function clearElement(node) {
             while (node.firstChild) {

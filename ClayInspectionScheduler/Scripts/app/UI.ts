@@ -42,7 +42,7 @@ namespace InspSched.UI
     }
   }
 
-  function ProcessResults( permits: Array<Permit>, key: string )
+  export function ProcessResults( permits: Array<Permit>, key: string )
   {
     let tbl: HTMLTableElement = ( <HTMLTableElement>document.getElementById( 'InspectionTable' ) );
 
@@ -533,7 +533,7 @@ namespace InspSched.UI
 
   }
 
-  function Show( id?: string, element?: HTMLElement, displayType?: string ): void
+  export function Show( id?: string, element?: HTMLElement, displayType?: string ): void
   {
     if ( !element )
     {
@@ -553,7 +553,7 @@ namespace InspSched.UI
     }
   }
 
-  function Hide( id: string ): void
+  export function Hide( id: string ): void
   {
 
     let e = document.getElementById( id );

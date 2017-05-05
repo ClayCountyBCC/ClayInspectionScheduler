@@ -19,6 +19,7 @@ namespace InspSched
   export let lastDay: string;
   export let newInsp: NewInspection;
   export let GracePeriodDate: string = "";
+  export let CurrentPermits: Array<Permit> = [];
   var InspectionTypeSelect = <HTMLSelectElement>document.getElementById( "InspTypeSelect" );
   var PermitSearchButton = <HTMLButtonElement>document.getElementById( "PermitSearchButton" );
   var PermitSearchField = <HTMLInputElement>document.getElementById( "PermitSearch" );
@@ -41,12 +42,32 @@ namespace InspSched
     PermitSearchButton.onclick = function ()
     {
 
-      InspSched.UI.Search( PermitSearchField.value );
+      //InspSched.UI.Search( PermitSearchField.value );
 
+      transport.GetPermit( PermitSearchField.value ).then( function ( permits: Array<Permit> )
+      {
+
+        InspSched.CurrentPermits = permits;
+        InspSched.UI.ProcessResults( permits, PermitSearchField.value  );
+
+        return true;
+
+      },
+        function ()
+        {
+
+          console.log( 'error getting permits' );
+          // do something with the error here
+          // need to figure out how to detect if something wasn't found
+          // versus an error.
+          InspSched.UI.Hide( 'Searching' );
+
+          return false;
+        });
       console.log( "PermitNo: " + PermitSearchField.value );
       if ( PermitSearchField.value != "" )
       {
-        GetGracePeriodDate();
+        LoadInspectionDates( );
       }
 
 
@@ -173,17 +194,15 @@ namespace InspSched
 
   function LoadInspectionDates(GracePeriodDate?: string) 
   {
-    
-   
-
     transport.GenerateDates().then( function ( dates: Array<string> )
     {
       
       InspSched.InspectionDates = dates;
       InspSched.firstDay = InspSched.InspectionDates[0];
       InspSched.lastDay = InspSched.InspectionDates[dates.length - 1];
-
-      if ( GracePeriodDate != undefined && Date.parse( GracePeriodDate.toString() ) < Date.parse( InspSched.lastDay) )
+      let graceDate: Date = new Date();
+      graceDate.setDate( Date.parse( GracePeriodDate ) );
+      if ( GracePeriodDate != undefined && Date.parse( GracePeriodDate ) < Date.parse( InspSched.lastDay) )
       {
         InspSched.lastDay = GracePeriodDate;
         console.log( "GracePeriodDate: " + GracePeriodDate.toString() );
