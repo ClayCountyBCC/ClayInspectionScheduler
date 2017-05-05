@@ -53,6 +53,7 @@ var InspSched;
         function GetPermitList(key, permit) {
             InspSched.transport.GetPermit(key).then(function (permits) {
                 UI.CurrentPermits = permits;
+                InspSched.CurrentPermits = permits;
                 ProcessResults(permits, key);
                 return true;
             }, function () {
@@ -294,7 +295,7 @@ var InspSched;
                 // if contractor IS ALLOWED to schedule, the contractor id will be on the list
                 if (pass) {
                     // Populate Inspection Type Select list
-                    getInspTypeString(key[0]);
+                    LoadInspTypeSelect(key);
                     //BuildSchdeuleCalendar();
                     document.getElementById('InspectionScheduler').style.removeProperty("display");
                     document.getElementById('InspectionScheduler').setAttribute("value", key);
@@ -305,13 +306,13 @@ var InspSched;
                 }
             }
         }
-        function GetInspType(key) {
+        function LoadInspTypeSelect(key) {
             var thistype = key[0];
             var label = getInspTypeString(thistype);
             var InspTypeList = document.getElementById('InspTypeSelect');
             var optionLabel = document.createElement("option");
             clearElement(InspTypeList);
-            optionLabel.label += " Inspections:";
+            optionLabel.label += label + " Inspections:";
             optionLabel.innerText = optionLabel.label;
             optionLabel.className = "selectPlaceholder";
             optionLabel.selected;

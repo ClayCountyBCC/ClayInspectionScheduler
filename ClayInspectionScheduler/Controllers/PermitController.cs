@@ -12,7 +12,7 @@ namespace InspectionScheduler.Controllers
   {
     public IHttpActionResult Get(string id)
     {
-      List<Permit> lp = Permit.Get(id, true);
+      List<Permit> lp = Permit.Get(id, Constants.CheckIsExternalUser());
       if (lp == null)
       {
         return InternalServerError();

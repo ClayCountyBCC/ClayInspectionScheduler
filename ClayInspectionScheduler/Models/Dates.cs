@@ -18,38 +18,34 @@ namespace InspectionScheduler.Models
       int FourthWeek = 4;
       int LastWeek = 5;
 
+      List<System.DateTime> HolidayList = new List<DateTime>();
 
+      //   http://www.usa.gov/citizens/holidays.shtml      
+      //   http://archive.opm.gov/operating_status_schedules/fedhol/2013.asp
 
-      List<System.DateTime> HolidayList = new List<System.DateTime>
-      {
+      // New Year's Day            Jan 1
+      HolidayList.Add( new DateTime( vYear, 1, 1 ) );
 
-        //   http://www.usa.gov/citizens/holidays.shtml      
-        //   http://archive.opm.gov/operating_status_schedules/fedhol/2013.asp
+      // Martin Luther King, Jr. third Mon in Jan
+      HolidayList.Add( GetNthDayOfNthWeek( new DateTime( vYear, 1, 1 ), ( int )DayOfWeek.Monday, ThirdWeek ) );
 
-        // New Year's Day            Jan 1
-        new DateTime( vYear, 1, 1 ),
+      // Washington's Birthday third Mon in Feb
+      HolidayList.Add( GetNthDayOfNthWeek( new DateTime( vYear, 2, 1 ), ( int )DayOfWeek.Monday, ThirdWeek ) );
 
-        // Martin Luther King, Jr. third Mon in Jan
-        GetNthDayOfNthWeek( new DateTime( vYear, 1, 1 ), ( int )DayOfWeek.Monday, ThirdWeek ),
+      // Memorial Day          last Mon in May
+      HolidayList.Add( GetNthDayOfNthWeek( new DateTime( vYear, 5, 1 ), ( int )DayOfWeek.Monday, LastWeek ) );
 
-        // Washington's Birthday third Mon in Feb
-        GetNthDayOfNthWeek( new DateTime( vYear, 2, 1 ), ( int )DayOfWeek.Monday, ThirdWeek ),
+      // Independence Day      July 4
+      HolidayList.Add( new DateTime( vYear, 7, 4 ) );
 
-        // Memorial Day          last Mon in May
-        GetNthDayOfNthWeek( new DateTime( vYear, 5, 1 ), ( int )DayOfWeek.Monday, LastWeek ),
+      // Labor Day             first Mon in Sept
+      HolidayList.Add( GetNthDayOfNthWeek( new DateTime( vYear, 9, 1 ), ( int )DayOfWeek.Monday, FirstWeek ) );
 
-        // Independence Day      July 4
-        new DateTime( vYear, 7, 4 ),
+      // Columbus Day          second Mon in Oct
+      //HolidayList.Add(GetNthDayOfNthWeek(new DateTime(vYear, 10, 1), DayOfWeek.Monday, SecondWeek))
 
-        // Labor Day             first Mon in Sept
-        GetNthDayOfNthWeek( new DateTime( vYear, 9, 1 ), ( int )DayOfWeek.Monday, FirstWeek ),
-
-        // Columbus Day          second Mon in Oct
-        //HolidayList.Add(GetNthDayOfNthWeek(new DateTime(vYear, 10, 1), DayOfWeek.Monday, SecondWeek))
-
-        // Veterans Day          Nov 11
-        new DateTime( vYear, 11, 11 )
-      };
+      // Veterans Day          Nov 11
+      HolidayList.Add( new DateTime( vYear, 11, 11 ) );
 
       // Thanksgiving Day      fourth Thur in Nov
       System.DateTime ThanksGiving = GetNthDayOfNthWeek( new DateTime( vYear, 11, 1 ), ( int )DayOfWeek.Thursday, FourthWeek );
@@ -112,8 +108,8 @@ namespace InspectionScheduler.Models
 
     }
 
-    public static List<DateTime> GenerateDates(bool IsExternalUser, 
-    DateTime? GracePeriodEndDate)
+    public static List<DateTime> GenerateDates( DateTime? GracePeriodDate,
+      bool IsExternalUser )
     {
       try
       {
@@ -133,14 +129,14 @@ namespace InspectionScheduler.Models
         var badDates = new List<DateTime>();
         var goodDates = new List<DateTime>();
         var holidays = GetHolidayList( dTmp.Year );
-        if( dTmp.Year != dTmp.AddDays( 8 ).Year )
+        if( dTmp.Year != dTmp.AddDays( ( IsExternalUser ? 9 : 18 ) ).Year )
         {
           holidays.AddRange( GetHolidayList( dTmp.Year + 1 ) );
         }
 
         badDates = ( from h in holidays
                      where h >= dTmp &&
-                     h <= dTmp.AddDays( 8 )
+                     h <= dTmp.AddDays( ( IsExternalUser ? 9 : 18 ) )
                      select h ).ToList();
 
         for( int i = ( IsExternalUser ? 1 : 0 ) ; i < ( IsExternalUser ? 9 : 18 ) ; i++ )
@@ -170,13 +166,12 @@ namespace InspectionScheduler.Models
 
 
         var minDate = ( from d in goodDates orderby d select d ).First();
-        var maxDate = ( from d in goodDates orderby d descending select d ).First();
-        
-        DateTime today = new DateTime();
-        if( Permit.SuspendGraceDt != null && Permit.GracePeriodEndDate < maxDate && Permit.GracePeriodEndDate > today)
-        {
-          maxDate = Permit.GracePeriodEndDate;
-        }
+        //var maxDate = ( from d in goodDates orderby d descending select d ).First();
+        var maxDate = GracePeriodDate ?? ( from d in goodDates orderby d descending select d ).First();
+        //if( GracePeriodDate != null && (GracePeriodDate < maxDate || GracePeriodDate >= minDate))
+        //{
+        //  maxDate = GracePeriodDate;
+        //}
 
         datesToReturn.Add( minDate );
         datesToReturn.AddRange( ( from d in badDates
@@ -193,15 +188,10 @@ namespace InspectionScheduler.Models
       }
     }
 
-    public static List<string> GenerateShortDates( bool IsExternalUser, DateTime? GracePeriodEndDate )
+    public static List<string> GenerateShortDates( bool IsExternalUser, DateTime? GracePeriodDate )
     {
-      if( GracePeriodEndDate != null )
-      {
-        return ( from d in GenerateDates(IsExternalUser,  GracePeriodEndDate )
-                 select d.ToShortDateString() ).ToList();
-      }
-      else
-        return null;
+      return ( from d in GenerateDates(GracePeriodDate, IsExternalUser )
+               select d.ToShortDateString() ).ToList();
     }
   }
 }

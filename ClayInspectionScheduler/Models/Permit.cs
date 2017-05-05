@@ -11,14 +11,13 @@ namespace InspectionScheduler.Models
     public string PermitNo { get; set; }
     public string ProjAddrCombined { get; set; }
     public string ProjCity { get; set; }
-    public DateTime SuspendGraceDt { get; set; }
-
-    public void SetIsExternalUser() { this.IsExternalUser = Constants.CheckIsExternalUser(); }
-    public bool GetIsExternalUser(){ return this.IsExternalUser; }
-    public List<string> ScheduleDates {
+    public Nullable<DateTime> SuspendGraceDt { get; set; } = null;
+    public List<string> ScheduleDates
+    {
       get
       {
-        return Dates.GenerateShortDates(IsExternalUser, SuspendGraceDt);
+        return Dates.GenerateShortDates( IsExternalUser, SuspendGraceDt );
+        
       }
     }
 
@@ -28,7 +27,7 @@ namespace InspectionScheduler.Models
     {
       get
       {
-        switch (FailType)
+        switch( FailType )
         {
           case "C":
           case "H":
@@ -41,17 +40,17 @@ namespace InspectionScheduler.Models
         }
       }
     }
-    
+
     public Permit()
     {
 
     }
 
-    public static List<Permit> Get(string AssocKey, bool IsExternalUser)
+    public static List<Permit> Get( string AssocKey, bool IsExternalUser )
     {
 
       var dbArgs = new Dapper.DynamicParameters();
-      dbArgs.Add("@PermitNo", AssocKey);
+      dbArgs.Add( "@PermitNo", AssocKey );
 
       string sql = @"
         USE WATSC;
@@ -132,7 +131,8 @@ namespace InspectionScheduler.Models
 			      M.PermitType,
             CASE WHEN CAST(C.SuspendGraceDt AS DATE) < CAST(GETDATE() AS DATE)
             THEN NULL 
-            ELSE CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) END SuspendGraceDt
+            ELSE CAST(DATEADD(dd, 40, C.SuspendGraceDt) AS DATE) END SuspendGraceDt
+            --ELSE CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) END SuspendGraceDt
             FROM bpMASTER_PERMIT M
             INNER JOIN bpBASE_PERMIT B ON M.BaseID = B.BaseID
             INNER JOIN clContractor C ON B.ContractorId = C.ContractorCd 
@@ -145,7 +145,8 @@ namespace InspectionScheduler.Models
 			      A.PermitType,
             CASE WHEN CAST(C.SuspendGraceDt AS DATE) < CAST(GETDATE() AS DATE)
             THEN NULL 
-            ELSE CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) END SuspendGraceDt
+            ELSE CAST(DATEADD(dd, 40, C.SuspendGraceDt) AS DATE) END SuspendGraceDt
+            --ELSE CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) END SuspendGraceDt
             FROM bpASSOC_PERMIT A
             INNER JOIN bpBASE_PERMIT B ON A.BaseID = B.BaseID
             INNER JOIN clContractor C ON A.ContractorId = C.ContractorCd 
@@ -156,17 +157,17 @@ namespace InspectionScheduler.Models
         DROP TABLE #Fail;";
       try
       {
-        var lp = Constants.Get_Data<Permit>(sql, dbArgs);
+        var lp = Constants.Get_Data<Permit>( sql, dbArgs );
         // let's set the isExternalUser field here
-        foreach (Permit p in lp)
+        foreach( Permit p in lp )
         {
           p.IsExternalUser = IsExternalUser;
         }
         return lp;
       }
-      catch(Exception ex)
+      catch( Exception ex )
       {
-        Constants.Log(ex);
+        Constants.Log( ex );
         return null;
       }
 

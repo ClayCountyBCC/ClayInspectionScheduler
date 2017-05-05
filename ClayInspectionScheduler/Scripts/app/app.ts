@@ -48,7 +48,18 @@ namespace InspSched
       {
 
         InspSched.CurrentPermits = permits;
-        InspSched.UI.ProcessResults( permits, PermitSearchField.value  );
+        InspSched.UI.ProcessResults( permits, PermitSearchField.value );
+
+        for ( let permit of permits )
+        {
+          console.log( "In for loop searching for Permit #" + permit.PermitNo );
+          if ( permit.PermitNo == permitNumSelect.value )
+          {
+            console.log( "Build Calendar for Permit #" + permitNumSelect.value );
+            BuildCalendar( permit.ScheduleDates );
+            break;
+          }
+        }
 
         return true;
 
@@ -67,7 +78,7 @@ namespace InspSched
       console.log( "PermitNo: " + PermitSearchField.value );
       if ( PermitSearchField.value != "" )
       {
-        LoadInspectionDates( );
+        //LoadInspectionDates( );
       }
 
 
@@ -75,12 +86,27 @@ namespace InspSched
 
     permitNumSelect.onchange = function ()
     {
-      
+      let permits = InspSched.CurrentPermits;
       // TODO: Add code to check if there is a selected date;
       SaveInspectionButton.setAttribute( "disabled", "disabled" );
 
       InspSched.UI.GetInspList( permitNumSelect.value );
-      GetGracePeriodDate();
+      console.log( "PermitNumSelect onchange: " );
+      console.log( permits );
+
+      for (let permit of permits )
+      {
+        console.log( "In for loop selecting permits. Permit #" + permit.PermitNo );
+        if ( permit.PermitNo == permitNumSelect.value )
+        {
+          console.log( "Build Calendar for Permit #" + permitNumSelect.value );
+          BuildCalendar( permit.ScheduleDates );
+          break;
+        }
+      }
+            
+
+      //GetGracePeriodDate();
 
 
     }
@@ -156,8 +182,8 @@ namespace InspSched
     
     transport.GetInspType().then(function (insptypes: Array<InspType>)
     {
-      InspectionTypes = insptypes;
-      console.log('InspectionTypes', InspectionTypes);
+      InspSched.InspectionTypes = insptypes;
+      console.log('InspectionTypes', InspSched.InspectionTypes);
     },
       function ()
       {
@@ -166,34 +192,13 @@ namespace InspSched
         // need to figure out how to detect if something wasn't found
         // versus an error.
         //Hide('Searching');
-        InspectionTypes = [];
+        InspSched.InspectionTypes = [];
       });
   }
 
-  function GetGracePeriodDate()
+  function LoadInspectionDates() 
   {
-    let checkString: string = ( permitNumSelect.value == "" ? PermitSearchField.value : permitNumSelect.value );
 
-    transport.GetGracePeriodDate( checkString ).then( function ( GracePeriodDate: string )
-    {
-      var mydatestring = Date.parse( GracePeriodDate );
-      var todaystring = Date.now();
-      
-      if ( mydatestring != undefined && mydatestring < todaystring )
-      {
-        console.log( "I should pass the permit number to the InspSched.UI.permitSchedulingIssue(permitNumSelect.value)" );
-        console.log( "And I shouldn't run LoadInspectionDates" );
-      }
-      else
-      {
-        LoadInspectionDates( GracePeriodDate[0] );
-      }
-    });
-
-  }
-
-  function LoadInspectionDates(GracePeriodDate?: string) 
-  {
     transport.GenerateDates().then( function ( dates: Array<string> )
     {
       
@@ -250,6 +255,10 @@ namespace InspSched
 
     //
     let additionalDisabledDates: string []= GetAdditionalDisabledDates( dates );
+
+    InspSched.InspectionDates = dates;
+    InspSched.firstDay = InspSched.InspectionDates[0];
+    InspSched.lastDay = InspSched.InspectionDates[dates.length - 1];
 
       dpCalendar = $( '#sandbox-container div' ).datepicker(
         <DatepickerOptions>

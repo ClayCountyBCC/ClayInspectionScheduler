@@ -88,19 +88,22 @@ var InspSched;
             });
         }
         transport.GenerateDates = GenerateDates;
-        function GetGracePeriodDate(key) {
-            var x = XHR.Get("API/Dates/" + key);
-            return new Promise(function (resolve, reject) {
-                x.then(function (response) {
-                    var di = JSON.parse(response.Text);
-                    resolve(di);
-                }).catch(function () {
-                    console.log("error in CheckContractorPermitStatus");
-                    reject(null);
-                });
-            });
-        }
-        transport.GetGracePeriodDate = GetGracePeriodDate;
+        //export function GetGracePeriodDate( key: string )
+        //{
+        //  var x = XHR.Get( "API/Dates/" + key );
+        //  return new Promise( function ( resolve, reject )
+        //  {
+        //    x.then( function ( response )
+        //    {
+        //      var di = JSON.parse( response.Text );
+        //      resolve( di );
+        //    }).catch( function ()
+        //    {
+        //      console.log( "error in CheckContractorPermitStatus" );
+        //      reject( null );
+        //    });
+        //  });
+        //}
     })(transport = InspSched.transport || (InspSched.transport = {}));
 })(InspSched || (InspSched = {}));
 //# sourceMappingURL=transport.js.map

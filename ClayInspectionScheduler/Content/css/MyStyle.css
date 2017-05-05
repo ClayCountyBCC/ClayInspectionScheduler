@@ -140,10 +140,24 @@ table {
   display: table;
 
 }
-  .datepicker table tr td.active.day {
+
+  .datepicker table tr td {
     background-color: #3e9571;
-    max-width: 20rem;
+    color: white;
+    color: rgba(256,256,256, .8);
   }
+
+    .datepicker table tr td.day:hover {
+      background-color: #27ce89;
+      color: white;
+      color: rgba(256,256,256, .8);
+    }
+
+    .datepicker table tr td.active.day {
+      background-color: #3e9571;
+      max-width: 20rem;
+    }
+
 
   .datepicker-switch, .prev, .next{
     background-color: #3e9571;
@@ -175,7 +189,7 @@ table tbody, table tfoot, table thead {
 .datepicker table tr td.active.active, 
 .datepicker table tr td.active.highlighted.active {
   color: white;
-  background-color: #3e9571;
+  background-color: #59b790;
   border-color: #3e9571;
 }
 
@@ -210,4 +224,13 @@ table tbody, table tfoot, table thead {
   padding:1rem;
   font-weight: bold;
 }
+.datepicker table tr td.disabled {
+  background-color: lightgray;
+  color: rgba(256,256,256, .4);
+}
+
+  .datepicker table tr td.disabled:hover {
+    background-color: lightgray;
+    color: rgba(256,256,256, .4);
+  }
 

@@ -78,6 +78,7 @@ namespace InspSched.UI
     {
 
       CurrentPermits = permits;
+      InspSched.CurrentPermits = permits
       ProcessResults( permits, key );
 
       return true;
@@ -452,8 +453,7 @@ namespace InspSched.UI
       {
 
         // Populate Inspection Type Select list
-        getInspTypeString( key[0] );
-
+        LoadInspTypeSelect( key );
         //BuildSchdeuleCalendar();
         document.getElementById( 'InspectionScheduler' ).style.removeProperty( "display" );
         document.getElementById( 'InspectionScheduler' ).setAttribute( "value", key );
@@ -473,7 +473,7 @@ namespace InspSched.UI
 
   }
 
-  function GetInspType( key: string )
+  function LoadInspTypeSelect( key: string )
   {
     let thistype: string = key[0];
     var label: string = getInspTypeString( thistype );
@@ -482,7 +482,7 @@ namespace InspSched.UI
     let optionLabel: HTMLOptionElement = ( <HTMLOptionElement>document.createElement( "option" ) );
 
     clearElement( InspTypeList );
-    optionLabel.label += " Inspections:";
+    optionLabel.label += label +" Inspections:";
     optionLabel.innerText = optionLabel.label;
     optionLabel.className = "selectPlaceholder";
     optionLabel.selected;

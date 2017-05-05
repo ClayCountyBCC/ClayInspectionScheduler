@@ -12,7 +12,7 @@ namespace InspSched
     ProjCity: string;
     CanSchedule: string;
     FailType: string;
-
+    ScheduleDates: string[];
   }
 
   export class Permit implements IPermit 
@@ -22,6 +22,7 @@ namespace InspSched
     public ProjCity: string;
     public CanSchedule: string;
     public FailType: string;
+    public ScheduleDates: string[];
 
     constructor() 
     {

@@ -142,7 +142,7 @@ namespace InspectionScheduler.Models
     public static bool CheckIsExternalUser()
     {
 
-      return true;
+      return false;
     }
     #region Log Code
 
