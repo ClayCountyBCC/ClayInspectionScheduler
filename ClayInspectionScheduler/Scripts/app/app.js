@@ -23,12 +23,8 @@ var InspSched;
     var SaveInspectionButton = document.getElementById("SaveSchedule");
     var IssuesDiv = document.getElementById('NotScheduled');
     function start() {
-        SaveInspectionButton.setAttribute("disabled", "disabled");
         LoadData();
-        IssuesDiv.style.display = "none";
-        SaveInspectionButton.setAttribute("disabled", "disabled");
         PermitSearchButton.onclick = function () {
-            //InspSched.UI.Search( PermitSearchField.value );
             InspSched.transport.GetPermit(PermitSearchField.value).then(function (permits) {
                 InspSched.CurrentPermits = permits;
                 InspSched.UI.ProcessResults(permits, PermitSearchField.value);
@@ -70,7 +66,6 @@ var InspSched;
                     break;
                 }
             }
-            //GetGracePeriodDate();
         };
         InspectionTypeSelect.onchange = function () {
             SaveInspectionButton.setAttribute("value", InspectionTypeSelect.value);
@@ -87,7 +82,7 @@ var InspSched;
             InspSched.newInsp = new InspSched.NewInspection(thisPermit, thisInspCd, $(dpCalendar).data('datepicker').getDate());
             $(dpCalendar).data('datepicker').clearDates();
             console.log("In SaveInspection onchangedate: \"" + $(dpCalendar).data('datepicker').getDate() + "\"");
-            InspSched.transport.SaveInspection(InspSched.newInsp).then(function (issues) {
+            var e = InspSched.transport.SaveInspection(InspSched.newInsp).then(function (issues) {
                 if (issues.length > 0) {
                     var thisHeading = document.createElement('h5');
                     thisHeading.innerText = "The following issue(s) prevented scheduling the requested inspection:";
@@ -114,6 +109,9 @@ var InspSched;
     } //  END start()
     InspSched.start = start;
     function LoadData() {
+        SaveInspectionButton.setAttribute("disabled", "disabled");
+        IssuesDiv.style.display = "none";
+        SaveInspectionButton.setAttribute("disabled", "disabled");
         LoadInspectionTypes();
     }
     function LoadInspectionTypes() {
@@ -128,37 +126,6 @@ var InspSched;
             //Hide('Searching');
             InspSched.InspectionTypes = [];
         });
-    }
-    function LoadInspectionDates() {
-        InspSched.transport.GenerateDates().then(function (dates) {
-            InspSched.InspectionDates = dates;
-            InspSched.firstDay = InspSched.InspectionDates[0];
-            InspSched.lastDay = InspSched.InspectionDates[dates.length - 1];
-            var graceDate = new Date();
-            graceDate.setDate(Date.parse(InspSched.GracePeriodDate));
-            if (InspSched.GracePeriodDate != undefined && Date.parse(InspSched.GracePeriodDate) < Date.parse(InspSched.lastDay)) {
-                InspSched.lastDay = InspSched.GracePeriodDate;
-                console.log("GracePeriodDate: " + InspSched.GracePeriodDate.toString());
-            }
-            BuildCalendar(dates);
-            console.log('InspectionDates', InspSched.InspectionDates);
-        }, function () {
-            console.log('error in LoadInspectionDates');
-            // do something with the error here
-            // need to figure out how to detect if something wasn't found
-            // versus an error.
-            //Hide('Searching');
-            InspSched.InspectionDates = [];
-        });
-    }
-    function GetAdditionalDisabledDates(dates) {
-        var AdditionalDisabledDates = [];
-        if (dates.length > 2) {
-            for (var d = 1; d < dates.length - 1; d++) {
-                AdditionalDisabledDates.push(dates[d]);
-            }
-        }
-        return AdditionalDisabledDates;
     }
     function BuildCalendar(dates) {
         $(dpCalendar).datepicker('destroy');
@@ -196,6 +163,15 @@ var InspSched;
                 SaveInspectionButton.setAttribute("disabled", "disabled");
             }
         }
+    }
+    function GetAdditionalDisabledDates(dates) {
+        var AdditionalDisabledDates = [];
+        if (dates.length > 2) {
+            for (var d = 1; d < dates.length - 1; d++) {
+                AdditionalDisabledDates.push(dates[d]);
+            }
+        }
+        return AdditionalDisabledDates;
     }
 })(InspSched || (InspSched = {}));
 //# sourceMappingURL=app.js.map

@@ -82,41 +82,41 @@ namespace InspectionScheduler.Models
         SELECT 
             PermitNo, 
             FailType FROM (
-        SELECT 
-            A.PermitNo,
-            'F' AS FailType
-        FROM bpASSOC_PERMIT A
-        INNER JOIN clContractor C ON A.ContractorId = C.ContractorCd
-        WHERE (A.PermitNo = @PermitNo 
-	          OR A.MPermitNo = @MPermitNo
-              OR PermitNo IN 
-	          (SELECT 
-		        PermitNo 
-	          FROM 
-		        bpASSOC_PERMIT 
-	          WHERE MPermitNo = @PermitNo 
-	            OR MPermitNo IN 
-			        (SELECT PermitNo
-    		          FROM 
-				        bpMASTER_PERMIT 
-			          WHERE
-				        CoClosed = 1 AND 
-				        PermitNo LIKE '1%')))     
-        UNION ALL
-        SELECT M.PermitNo,
-            'F' AS FailType
-        FROM bpMASTER_PERMIT M
-        INNER JOIN bpBASE_PERMIT B 
-        INNER JOIN clContractor C ON B.ContractorId = C.ContractorCd
-        ON M.BaseID = B.BaseID
-        WHERE M.CoClosed = 1
-	        and( (M.PermitNo = @PermitNo 
-		        OR M.PermitNo = @MPermitNo)
-	        OR(C.Status <> 'A' 
-            OR C.LiabInsExpDt < GETDATE()
-            OR C.WC_ExpDt < GETDATE())	
-		        and( (M.PermitNo = @PermitNo 
-			        OR M.PermitNo = @MPermitNo) ))
+					SELECT 
+						A.PermitNo,
+						'F' AS FailType
+					FROM bpASSOC_PERMIT A
+					LEFT OUTER JOIN clContractor C ON A.ContractorId = C.ContractorCd
+					WHERE(A.PermitNo = @PermitNo 
+							OR A.MPermitNo = @MPermitNo
+							OR a.PermitNo IN 
+							(SELECT 
+							a.PermitNo 
+							FROM 
+							bpASSOC_PERMIT a
+							inner join bpMASTER_PERMIT M on a.BaseID = m.BaseID 
+							WHERE (M.CoClosed = 1 and M.permitNo = @PermitNo or M.PermitNo = @MPermitNo) 
+							OR M.PermitNo in ( SELECT PermitNo
+													from bpINS_REQUEST i 
+													left outer join bpINS_REF ir on i.InspectionCode = ir.InspCd 
+													WHERE InsDesc LIKE '%[f]inal' 
+													and (permitno = @PermitNo 
+													or permitno = @MPermitNo)
+													and ResultADC in ('A', 'P'))))
+					union all
+
+					SELECT M.PermitNo,
+							'F' AS FailType
+					FROM bpMASTER_PERMIT M
+					left outer JOIN bpBASE_PERMIT B 
+					left outer JOIN clContractor C ON B.ContractorId = C.ContractorCd
+					ON M.BaseID = B.BaseID
+					WHERE M.PermitNo in ( SELECT PermitNo
+										from bpINS_REQUEST i 
+										left outer join bpINS_REF ir on i.InspectionCode = ir.InspCd 
+										WHERE InsDesc LIKE '%[f]inal' 
+											and (PermitNo = @MPermitNo or PermitNo = @PermitNo)
+											and ResultADC in ('A', 'P'))
         ) AS M
         WHERE PermitNo NOT IN (SELECT PermitNo FROM #Fail);
         SELECT 

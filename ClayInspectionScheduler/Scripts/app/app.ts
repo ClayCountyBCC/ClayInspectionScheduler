@@ -31,19 +31,10 @@ namespace InspSched
 
   export function start(): void
   {
-    SaveInspectionButton.setAttribute( "disabled", "disabled" );
-
     LoadData();
-
-    IssuesDiv.style.display = "none";
-
-    SaveInspectionButton.setAttribute( "disabled", "disabled" );
 
     PermitSearchButton.onclick = function ()
     {
-
-      //InspSched.UI.Search( PermitSearchField.value );
-
       transport.GetPermit( PermitSearchField.value ).then( function ( permits: Array<Permit> )
       {
 
@@ -105,10 +96,6 @@ namespace InspSched
         }
       }
             
-
-      //GetGracePeriodDate();
-
-
     }
     
     InspectionTypeSelect.onchange = function ()
@@ -135,7 +122,7 @@ namespace InspSched
 
       console.log( "In SaveInspection onchangedate: \"" + $( dpCalendar ).data( 'datepicker' ).getDate() + "\"" );
 
-      transport.SaveInspection( newInsp ).then( function ( issues: Array<string> )
+      var e = transport.SaveInspection( newInsp ).then( function ( issues: Array<string> )
       {
 
         if ( issues.length > 0 )
@@ -165,7 +152,7 @@ namespace InspSched
         {
           console.log( 'error Saving Inspection' );
           return false;
-        });
+     });
 
 
     }
@@ -174,7 +161,12 @@ namespace InspSched
   
   function LoadData()
   {
+    SaveInspectionButton.setAttribute( "disabled", "disabled" );
+    IssuesDiv.style.display = "none";
+    SaveInspectionButton.setAttribute( "disabled", "disabled" );
+
     LoadInspectionTypes();
+
   }
 
   function LoadInspectionTypes()
@@ -195,58 +187,7 @@ namespace InspSched
         InspSched.InspectionTypes = [];
       });
   }
-
-  function LoadInspectionDates() 
-  {
-
-    transport.GenerateDates().then( function ( dates: Array<string> )
-    {
-      
-      InspSched.InspectionDates = dates;
-      InspSched.firstDay = InspSched.InspectionDates[0];
-      InspSched.lastDay = InspSched.InspectionDates[dates.length - 1];
-      let graceDate: Date = new Date();
-      graceDate.setDate( Date.parse( GracePeriodDate ) );
-      if ( GracePeriodDate != undefined && Date.parse( GracePeriodDate ) < Date.parse( InspSched.lastDay) )
-      {
-        InspSched.lastDay = GracePeriodDate;
-        console.log( "GracePeriodDate: " + GracePeriodDate.toString() );
-      }
-
-      BuildCalendar( dates );
-
-      console.log( 'InspectionDates', InspSched.InspectionDates );
-
-
-    },
-      function ()
-      {
-        console.log( 'error in LoadInspectionDates' );
-        // do something with the error here
-        // need to figure out how to detect if something wasn't found
-        // versus an error.
-        //Hide('Searching');
-        InspectionDates = [];
-      });
-
-  }
-
-  function GetAdditionalDisabledDates(dates: Array<string>): Array<string>
-  {
-    var AdditionalDisabledDates: Array<string> = [];
-    if ( dates.length > 2 )
-    {
-      for ( let d: number = 1; d < dates.length - 1; d++ )
-      {
-        AdditionalDisabledDates.push(dates[d]);
-
-      }
-
-    }
-
-    return AdditionalDisabledDates;
-  }
-
+  
   function BuildCalendar(dates: Array<string>)
   {
     $( dpCalendar ).datepicker( 'destroy' );
@@ -283,25 +224,37 @@ namespace InspSched
         });
 
       };
-    
-
       console.log
   }
 
   function EnableSaveButton()
   {
-
     {
-      if ( InspectionTypeSelect.value != "" &&  $( dpCalendar ).data( 'datepicker' ).getDate() != null  )
+      if ( InspectionTypeSelect.value != "" && $( dpCalendar ).data( 'datepicker' ).getDate() != null )
       {
         SaveInspectionButton.removeAttribute( "disabled" );
       }
       else
       {
         SaveInspectionButton.setAttribute( "disabled", "disabled" );
-
       }
     }
+  }
+
+  function GetAdditionalDisabledDates( dates: Array<string> ): Array<string>
+  {
+    var AdditionalDisabledDates: Array<string> = [];
+    if ( dates.length > 2 )
+    {
+      for ( let d: number = 1; d < dates.length - 1; d++ )
+      {
+        AdditionalDisabledDates.push( dates[d] );
+
+      }
+
+    }
+
+    return AdditionalDisabledDates;
   }
 
 }

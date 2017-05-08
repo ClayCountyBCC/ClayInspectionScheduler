@@ -88,17 +88,15 @@ module XHR {
       headers = ( isJSON ? addJSONHeader( headers ) : headers );
       return SendCommand('GET', url, headers);
     }
-
     export function Post(
-        url: string,
-        data: string = "",
-        headers: Array<Header> = null,
-        isJSON: boolean = true): Promise<Data>
+      url: string,
+      data: string = "",
+      headers: Array<Header> = null,
+      isJSON: boolean = true ): Promise<Data>
     {
-        headers = (isJSON ? addJSONHeader(headers) : headers);
-        return SendCommand('POST', url, headers, data);
+      headers = ( isJSON ? addJSONHeader( headers ) : headers );
+      return SendCommand( 'POST', url, headers, data );
     }
-
     export function Put(
       url: string,
       data: string = "",
@@ -118,6 +116,7 @@ module XHR {
       headers = ( isJSON ? addJSONHeader( headers ) : headers );
       return SendCommand( 'DELETE', url, headers, data );
     }
+
 
 
 }

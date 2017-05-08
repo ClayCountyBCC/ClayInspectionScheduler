@@ -60,8 +60,8 @@ namespace InspectionScheduler.Models
                          select d ).ToList<string>();
 
         // Is the scheduled date between the start and end date?
-        if( SchecDateTime < start ||
-          SchecDateTime > end )
+        if( SchecDateTime.Date < start ||
+          SchecDateTime.Date > end )
         {
           Errors.Add( "Invalid Date Selected" );
         }
@@ -86,35 +86,34 @@ namespace InspectionScheduler.Models
           }
 
           // TODO: Need to code check inspection type exists on permit
-          bool InspExists = false;
-
-          if( InspExists )
+          var e = Inspection.Get( CurrentPermit.PermitNo );
+          foreach( var i in e )
           {
-            Errors.Add( "Inspection type exists on permit" );
+            if( i.InspectionCode == this.InspectionCd )
+            {
+              Errors.Add( "Inspection type exists on permit" );
+              break;
+            }
           }
-
         }
-
+        Errors.Add( "Inspection type exists on permit" );
         Console.Write( Errors );
 
       }
 
-      if( Errors.Count > 0 )
-      {
-        return Errors;
-      }
-      else
-      {
-        Save( IsExternalUser );
-        return null;
-      }
+
+      return Errors;
+      
     }
 
-    public bool Save( bool IsExternalUser )
+
+    public List<string> Save( bool IsExternalUser )
     {
 
-      if( this.Validate( IsExternalUser ).Count > 0 )
-        return false;
+      List<string> e = this.Validate( Constants.CheckIsExternalUser() );
+
+      if( e.Count > 0 )
+        return e;
 
 
       //DateTime selectedDate = DateTime.Parse( this.SchecDateTime.ToShortDateString() );
@@ -122,7 +121,7 @@ namespace InspectionScheduler.Models
       var dbArgs = new Dapper.DynamicParameters();
       dbArgs.Add( "@PermitNo", this.PermitNo );
       dbArgs.Add( "@InspCd", this.InspectionCd );
-      dbArgs.Add( "@SelectedDate", this.SchecDateTime );
+      dbArgs.Add( "@SelectedDate", this.SchecDateTime.Date );
       // this function will save the inspection request.
       string sql = @"
       INSERT INTO bpINS_REQUEST
@@ -136,8 +135,7 @@ namespace InspectionScheduler.Models
 
       Constants.Save_Data<string>( sql, dbArgs );
 
-      return true;
-      //
+      return e;
 
     }
   }

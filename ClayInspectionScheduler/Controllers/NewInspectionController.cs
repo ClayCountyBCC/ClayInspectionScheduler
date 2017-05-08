@@ -12,32 +12,9 @@ namespace InspectionScheduler.Controllers
   {
     public IHttpActionResult Save( NewInspection thisInspection )
     {
-      var IsExternalUser = Constants.CheckIsExternalUser();
-      var e = thisInspection.Validate( IsExternalUser );
-      if( e.Count() > 0 )
-      {
-        // this means that errors were encounted in the validation process.
-        // we should return them so that the client can make an informed decision.
-        return null;
-      }
-      else
-      {
-        if( !thisInspection.Save(IsExternalUser) )
-        {
-          return null;
-        }
-      }
 
-      //List<string> lp = NewInspection.Post(thisInspection);
-      //if (lp == null)
-      //{
-      //  return InternalServerError();
-      //}
-      //else
-      //{
-      //  return Ok(lp);
-      //}
-      return null;
+      List<string> e = thisInspection.Save( Constants.CheckIsExternalUser() );
+      return Ok( e );
 
     }
   }
