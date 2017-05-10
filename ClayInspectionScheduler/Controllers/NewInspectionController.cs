@@ -13,9 +13,15 @@ namespace InspectionScheduler.Controllers
     public IHttpActionResult Save( NewInspection thisInspection )
     {
 
-      List<string> e = thisInspection.Save( Constants.CheckIsExternalUser() );
-      return Ok( e );
-
+      var e = thisInspection.Save( Constants.CheckIsExternalUser() );
+      if( e == null )
+      {
+        return InternalServerError();  // Option to code my own error
+      }
+      else
+      {
+        return Ok( e );
+      }
     }
   }
 }

@@ -88,6 +88,7 @@ module XHR {
       headers = ( isJSON ? addJSONHeader( headers ) : headers );
       return SendCommand('GET', url, headers);
     }
+
     export function Post(
       url: string,
       data: string = "",
@@ -97,6 +98,7 @@ module XHR {
       headers = ( isJSON ? addJSONHeader( headers ) : headers );
       return SendCommand( 'POST', url, headers, data );
     }
+
     export function Put(
       url: string,
       data: string = "",
@@ -107,6 +109,7 @@ module XHR {
       return SendCommand( 'PUT', url, headers, data );
     }
 
+
     export function Delete(
       url: string,
       data: string = "",
@@ -116,6 +119,7 @@ module XHR {
       headers = ( isJSON ? addJSONHeader( headers ) : headers );
       return SendCommand( 'DELETE', url, headers, data );
     }
+
 
 
 

@@ -109,7 +109,7 @@ namespace InspectionScheduler.Models
 
     public List<string> Save( bool IsExternalUser )
     {
-
+      
       List<string> e = this.Validate( Constants.CheckIsExternalUser() );
 
       if( e.Count > 0 )
@@ -118,12 +118,12 @@ namespace InspectionScheduler.Models
 
       //DateTime selectedDate = DateTime.Parse( this.SchecDateTime.ToShortDateString() );
 
-      var dbArgs = new Dapper.DynamicParameters();
-      dbArgs.Add( "@PermitNo", this.PermitNo );
-      dbArgs.Add( "@InspCd", this.InspectionCd );
-      dbArgs.Add( "@SelectedDate", this.SchecDateTime.Date );
-      // this function will save the inspection request.
-      string sql = @"
+        var dbArgs = new Dapper.DynamicParameters();
+        dbArgs.Add( "@PermitNo", this.PermitNo );
+        dbArgs.Add( "@InspCd", this.InspectionCd );
+        dbArgs.Add( "@SelectedDate", this.SchecDateTime.Date );
+        // this function will save the inspection request.
+        string sql = @"
       INSERT INTO bpINS_REQUEST
         ( PermitNo
         , InspectionCode
@@ -132,11 +132,16 @@ namespace InspectionScheduler.Models
         ( @PermitNo
         , @InspCd
         , CAST(@SelectedDate AS DATE) )";
+      try
+      {
+        Constants.Save_Data<string>( sql, dbArgs );
 
-      Constants.Save_Data<string>( sql, dbArgs );
-
-      return e;
-
+        return e;
+      }catch(Exception ex)
+      {
+        Constants.Log( ex , sql);
+        return null;
+      }
     }
   }
 }

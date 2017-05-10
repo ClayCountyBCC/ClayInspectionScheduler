@@ -22,12 +22,12 @@ var InspSched;
             var k = key.trim().toUpperCase();
             document.getElementById('PermitSearch').setAttribute("value", k);
             if (k.length == 8 && !isNaN(Number(k))) {
-                GetPermitList(k);
+                return k;
             }
             else {
                 Hide('Searching');
                 UpdateSearchFailed(key);
-                return false;
+                return null;
             }
         }
         UI.Search = Search;
@@ -397,15 +397,16 @@ var InspSched;
             if (!isNaN(Number(key)) && key.length == 8) {
                 message.appendChild(document.createTextNode("Permit #" + key + " not found"));
             }
-            else if (!isNaN(Number(key)) && key.length != 8) {
-                message.innerHTML = "You did not enter any information.<br />Enter a valid permit number to search.";
+            else if (!isNaN(Number(key)) && key.length > 0 && key.length != 8) {
+                message.innerHTML = "\"" + key + "\" is not a valid Permit Number";
             }
             else if (key.length == 0) {
-                message.innerHTML = key + " is not a valid Permit Number";
+                message.innerHTML = "You did not enter any information.<br />Enter a valid permit number and click search.";
             }
             else {
                 message.innerHTML = "Invalid Entry<br />";
             }
+            message.style.textAlign = "center";
             e.appendChild(message);
             Hide('Searching');
             Show('SearchFailed');

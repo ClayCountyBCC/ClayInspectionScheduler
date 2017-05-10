@@ -12,7 +12,7 @@ namespace InspSched.UI
   export let CurrentPermits: Array<Permit> = [];
   export let CurrentInspections: Array<Inspection> = [];
 
-  export function Search( key: string ): boolean
+  export function Search( key: string )
   {
 
     clearElement( document.getElementById( 'SearchFailed' ) );
@@ -30,15 +30,16 @@ namespace InspSched.UI
 
     if ( k.length == 8 && !isNaN( Number( k ) ) )
     {
-      GetPermitList( k );
+      return k;
 
     }
     else
     {
       Hide( 'Searching' );
+
       UpdateSearchFailed( key );
 
-      return false;
+      return null;
     }
   }
 
@@ -592,20 +593,21 @@ namespace InspSched.UI
     {
       message.appendChild( document.createTextNode( "Permit #" + key + " not found" ) );
     }
-    else if ( !isNaN( Number( key ) ) && key.length != 8 )
+    else if ( !isNaN( Number( key ) ) && key.length > 0 && key.length != 8  )
     {
-      message.innerHTML = "You did not enter any information.<br />Enter a valid permit number to search.";
+      message.innerHTML = "\"" + key + "\" is not a valid Permit Number";
 
     }
     else if ( key.length == 0 )
     {
-      message.innerHTML = key + " is not a valid Permit Number";
+      message.innerHTML = "You did not enter any information.<br />Enter a valid permit number and click search.";
 
     }
     else
     {
       message.innerHTML = "Invalid Entry<br />";
     }
+    message.style.textAlign = "center";
     e.appendChild( message );
 
     Hide( 'Searching' );

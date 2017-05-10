@@ -35,7 +35,9 @@ namespace InspSched
 
     PermitSearchButton.onclick = function ()
     {
-      transport.GetPermit( PermitSearchField.value ).then( function ( permits: Array<Permit> )
+      ;
+
+      transport.GetPermit( InspSched.UI.Search( PermitSearchField.value )).then( function ( permits: Array<Permit> )
       {
 
         InspSched.CurrentPermits = permits;
@@ -125,32 +127,49 @@ namespace InspSched
       var e = transport.SaveInspection( newInsp ).then( function ( issues: Array<string> )
       {
 
-        if ( issues.length > 0 )
+        let thisHeading: HTMLHeadingElement = ( <HTMLHeadingElement>document.createElement( 'h5' ) );
+        let IssueList: HTMLUListElement = ( <HTMLUListElement>document.createElement( 'ul' ) );
+
+        if ( issues != null) 
         {
-          let thisHeading: HTMLHeadingElement = ( <HTMLHeadingElement>document.createElement( 'h5' ) );
           thisHeading.innerText = "The following issue(s) prevented scheduling the requested inspection:";
           thisHeading.className = "large-12 medium-12 small-12 row";
           IssuesDiv.appendChild( thisHeading );
-          let IssueList: HTMLUListElement = ( <HTMLUListElement>document.createElement( 'ul' ) );
-          for ( let i in issues )
+
+          if ( issues.length > 0 )
           {
-            let thisIssue: HTMLLIElement = ( <HTMLLIElement>document.createElement( 'li' ) );
-            thisIssue.textContent = issues[i];
-            thisIssue.style.marginLeft = "2rem;";
-            console.log( issues[i] );
-            IssueList.appendChild( thisIssue );
 
+            for ( let i in issues )
+            {
+              let thisIssue: HTMLLIElement = ( <HTMLLIElement>document.createElement( 'li' ) );
+              thisIssue.textContent = issues[i];
+              thisIssue.style.marginLeft = "2rem;";
+              console.log( issues[i] );
+              IssueList.appendChild( thisIssue );
+
+            }
+
+            IssuesDiv.appendChild( IssueList );
+            IssuesDiv.style.removeProperty( "display" );
           }
-
-          IssuesDiv.appendChild( IssueList );
-          IssuesDiv.style.removeProperty( "display" );
+          
         }
-        // Will do something here when I am able to get this to my Controller
+        else
+        {
+          let thisIssue: HTMLLIElement = ( <HTMLLIElement>document.createElement( 'li' ) );
+          thisIssue.textContent = "There is an issue saving the requested inspection. Please contact the Building Department " +
+           "for assistance at 904-284-6307." ;
+          thisIssue.style.marginLeft = "2rem;";
+          console.log( "This is a significant error");
+          IssueList.appendChild( thisIssue );
+          
+        }
+
         return true;
 
       }, function ()
         {
-          console.log( 'error Saving Inspection' );
+          console.log( 'error in Saving Inspection' );
           return false;
      });
 

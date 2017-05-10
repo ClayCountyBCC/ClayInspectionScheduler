@@ -25,7 +25,8 @@ var InspSched;
     function start() {
         LoadData();
         PermitSearchButton.onclick = function () {
-            InspSched.transport.GetPermit(PermitSearchField.value).then(function (permits) {
+            ;
+            InspSched.transport.GetPermit(InspSched.UI.Search(PermitSearchField.value)).then(function (permits) {
                 InspSched.CurrentPermits = permits;
                 InspSched.UI.ProcessResults(permits, PermitSearchField.value);
                 for (var _i = 0, permits_1 = permits; _i < permits_1.length; _i++) {
@@ -83,26 +84,35 @@ var InspSched;
             $(dpCalendar).data('datepicker').clearDates();
             console.log("In SaveInspection onchangedate: \"" + $(dpCalendar).data('datepicker').getDate() + "\"");
             var e = InspSched.transport.SaveInspection(InspSched.newInsp).then(function (issues) {
-                if (issues.length > 0) {
-                    var thisHeading = document.createElement('h5');
+                var thisHeading = document.createElement('h5');
+                var IssueList = document.createElement('ul');
+                if (issues != null) {
                     thisHeading.innerText = "The following issue(s) prevented scheduling the requested inspection:";
                     thisHeading.className = "large-12 medium-12 small-12 row";
                     IssuesDiv.appendChild(thisHeading);
-                    var IssueList = document.createElement('ul');
-                    for (var i in issues) {
-                        var thisIssue = document.createElement('li');
-                        thisIssue.textContent = issues[i];
-                        thisIssue.style.marginLeft = "2rem;";
-                        console.log(issues[i]);
-                        IssueList.appendChild(thisIssue);
+                    if (issues.length > 0) {
+                        for (var i in issues) {
+                            var thisIssue = document.createElement('li');
+                            thisIssue.textContent = issues[i];
+                            thisIssue.style.marginLeft = "2rem;";
+                            console.log(issues[i]);
+                            IssueList.appendChild(thisIssue);
+                        }
+                        IssuesDiv.appendChild(IssueList);
+                        IssuesDiv.style.removeProperty("display");
                     }
-                    IssuesDiv.appendChild(IssueList);
-                    IssuesDiv.style.removeProperty("display");
                 }
-                // Will do something here when I am able to get this to my Controller
+                else {
+                    var thisIssue = document.createElement('li');
+                    thisIssue.textContent = "There is an issue saving the requested inspection. Please contact the Building Department " +
+                        "for assistance at 904-284-6307.";
+                    thisIssue.style.marginLeft = "2rem;";
+                    console.log("This is a significant error");
+                    IssueList.appendChild(thisIssue);
+                }
                 return true;
             }, function () {
-                console.log('error Saving Inspection');
+                console.log('error in Saving Inspection');
                 return false;
             });
         };
