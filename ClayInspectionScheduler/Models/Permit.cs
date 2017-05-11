@@ -55,7 +55,7 @@ namespace InspectionScheduler.Models
       string sql = @"
         USE WATSC;
         DECLARE @MPermitNo CHAR(8) = (SELECT MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = @PermitNo);
-          CREATE TABLE #Fail 
+        CREATE TABLE #Fail 
         (
         PermitNo CHAR(8),
         FailType CHAR(1) -- 'C' for Charge, 'H' for Hold
@@ -70,6 +70,8 @@ namespace InspectionScheduler.Models
             AND CashierId IS NULL 
             AND UnCollectable = 0
             AND AssocKey NOT IN (SELECT PermitNo FROM #Fail);
+
+
         INSERT INTO #Fail 
             SELECT DISTINCT PermitNo, 'H'
             FROM bpHOLD H   
@@ -79,82 +81,93 @@ namespace InspectionScheduler.Models
             AND HldDate IS NULL
             AND PermitNo NOT IN (SELECT PermitNo FROM #Fail);
         INSERT INTO #Fail 
+
+        --DECLARE @PermitNo CHAR(8) = '31402192'; --'13110063' 21400935  31400726 11402073  31401424 11700682 
+        --DECLARE @MPermitNo CHAR(8) = (SELECT MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = @PermitNo);
+
         SELECT 
             PermitNo, 
             FailType FROM (
-					SELECT 
-						A.PermitNo,
-						'F' AS FailType
-					FROM bpASSOC_PERMIT A
-					LEFT OUTER JOIN clContractor C ON A.ContractorId = C.ContractorCd
-					WHERE(A.PermitNo = @PermitNo 
-							OR A.MPermitNo = @MPermitNo
-							OR a.PermitNo IN 
-							(SELECT 
-							a.PermitNo 
-							FROM 
-							bpASSOC_PERMIT a
-							inner join bpMASTER_PERMIT M on a.BaseID = m.BaseID 
-							WHERE (M.CoClosed = 1 and M.permitNo = @PermitNo or M.PermitNo = @MPermitNo) 
-							OR M.PermitNo in ( SELECT PermitNo
-													from bpINS_REQUEST i 
-													left outer join bpINS_REF ir on i.InspectionCode = ir.InspCd 
-													WHERE InsDesc LIKE '%[f]inal' 
-													and (permitno = @PermitNo 
-													or permitno = @MPermitNo)
-													and ResultADC in ('A', 'P'))))
-					union all
+		        SELECT 
+			        A.PermitNo,
+			        'F' AS FailType
+		        FROM bpASSOC_PERMIT A
+		        LEFT OUTER JOIN clContractor C ON A.ContractorId = C.ContractorCd
+		        WHERE(A.PermitNo = @PermitNo 
+				        OR A.MPermitNo = @MPermitNo
+				        OR a.PermitNo IN 
+				        (SELECT 
+				        a.PermitNo 
+				        FROM 
+				        bpASSOC_PERMIT a
+				        inner join bpMASTER_PERMIT M on a.BaseID = m.BaseID 
+				        WHERE (M.CoClosed = 1 and M.permitNo = @PermitNo or M.PermitNo = @MPermitNo) 
+				        OR M.PermitNo in ( SELECT PermitNo
+									        from bpINS_REQUEST i 
+									        left outer join bpINS_REF ir on i.InspectionCode = ir.InspCd 
+									        WHERE InsDesc LIKE '%[f]inal' 
+										        and (permitno = @PermitNo 
+										        or permitno = @MPermitNo)
+										        and ResultADC in ('A', 'P'))))
+		        union all
 
-					SELECT M.PermitNo,
-							'F' AS FailType
-					FROM bpMASTER_PERMIT M
-					left outer JOIN bpBASE_PERMIT B 
-					left outer JOIN clContractor C ON B.ContractorId = C.ContractorCd
-					ON M.BaseID = B.BaseID
-					WHERE M.PermitNo in ( SELECT PermitNo
-										from bpINS_REQUEST i 
-										left outer join bpINS_REF ir on i.InspectionCode = ir.InspCd 
-										WHERE InsDesc LIKE '%[f]inal' 
-											and (PermitNo = @MPermitNo or PermitNo = @PermitNo)
-											and ResultADC in ('A', 'P'))
-        ) AS M
+		        SELECT M.PermitNo,
+				        'F' AS FailType
+		        FROM bpMASTER_PERMIT M
+		        left outer JOIN bpBASE_PERMIT B ON M.BaseID = B.BaseID
+		        left outer JOIN clContractor C ON B.ContractorId = C.ContractorCd		        
+		        WHERE M.PermitNo in ( SELECT PermitNo
+							        from bpINS_REQUEST i 
+							        left outer join bpINS_REF ir on i.InspectionCode = ir.InspCd 
+							        WHERE InsDesc LIKE '%[f]inal' 
+								        and (PermitNo = @MPermitNo or PermitNo = @PermitNo)
+								        and ResultADC in ('A', 'P'))
+
+	        ) AS M
+
         WHERE PermitNo NOT IN (SELECT PermitNo FROM #Fail);
+
+
+
+
         SELECT 
-          TMP.*, 
-          ISNULL(F.FailType, '') FailType
+            TMP.*, 
+            ISNULL(F.FailType, '') FailType
         FROM (
             SELECT 
             M.PermitNo PermitNo,
             M.PermitNo MPermitNo,
             B.ProjAddrCombined,
             B.ProjCity,
-			      M.PermitType,
+			        M.PermitType,
             CASE WHEN CAST(C.SuspendGraceDt AS DATE) < CAST(GETDATE() AS DATE)
             THEN NULL 
             ELSE CAST(DATEADD(dd, 40, C.SuspendGraceDt) AS DATE) END SuspendGraceDt
             --ELSE CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) END SuspendGraceDt
             FROM bpMASTER_PERMIT M
-            INNER JOIN bpBASE_PERMIT B ON M.BaseID = B.BaseID
-            INNER JOIN clContractor C ON B.ContractorId = C.ContractorCd 
+            LEFT OUTER JOIN bpBASE_PERMIT B ON M.BaseID = B.BaseID
+            LEFT OUTER JOIN clContractor C ON B.ContractorId = C.ContractorCd 
             UNION ALL
             SELECT 
             A.PermitNo PermitNo,
             ISNULL(A.MPermitNo, A.PermitNo) MPermitNo,
             B.ProjAddrCombined,
             B.ProjCity,
-			      A.PermitType,
+			        A.PermitType,
             CASE WHEN CAST(C.SuspendGraceDt AS DATE) < CAST(GETDATE() AS DATE)
             THEN NULL 
             ELSE CAST(DATEADD(dd, 40, C.SuspendGraceDt) AS DATE) END SuspendGraceDt
             --ELSE CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) END SuspendGraceDt
             FROM bpASSOC_PERMIT A
-            INNER JOIN bpBASE_PERMIT B ON A.BaseID = B.BaseID
-            INNER JOIN clContractor C ON A.ContractorId = C.ContractorCd 
+            LEFT OUTER JOIN bpBASE_PERMIT B ON A.BaseID = B.BaseID
+            LEFT OUTER JOIN clContractor C ON A.ContractorId = C.ContractorCd 
         ) AS TMP
         LEFT OUTER JOIN #Fail F ON TMP.PermitNo = F.PermitNo
         WHERE MPermitNo = @MPermitNo
             OR MPermitNo = @PermitNo
         DROP TABLE #Fail;";
+
+
       try
       {
         var lp = Constants.Get_Data<Permit>( sql, dbArgs );
