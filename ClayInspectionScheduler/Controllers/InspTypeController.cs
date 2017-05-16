@@ -11,12 +11,12 @@ namespace InspectionScheduler.Controllers
   public class InspTypeController : ApiController
   {
     public IHttpActionResult Get()
-    {
+    { 
+      
       List<InspType> lp = (List<InspType>)MyCache.GetItem("inspectiontypes");
       if (lp == null)
       {
         return InternalServerError();
-
       }
       else
       {

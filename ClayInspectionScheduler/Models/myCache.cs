@@ -70,8 +70,7 @@ namespace InspectionScheduler.Models
       switch (s[0].ToLower())
       {
         case "inspectiontypes":
-          return InspType.Get();
-
+          return InspType.Get(Constants.CheckIsExternalUser());
         default:
           return null;
       }

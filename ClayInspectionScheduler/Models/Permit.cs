@@ -17,7 +17,6 @@ namespace InspectionScheduler.Models
       get
       {
         return Dates.GenerateShortDates( IsExternalUser, SuspendGraceDt );
-        
       }
     }
 
@@ -110,9 +109,8 @@ namespace InspectionScheduler.Models
 										        or permitno = @MPermitNo)
 										        and ResultADC in ('A', 'P'))))
 		        union all
-
 		        SELECT M.PermitNo,
-				        'F' AS FailType
+				      'F' AS FailType
 		        FROM bpMASTER_PERMIT M
 		        left outer JOIN bpBASE_PERMIT B ON M.BaseID = B.BaseID
 		        left outer JOIN clContractor C ON B.ContractorId = C.ContractorCd		        
@@ -122,14 +120,8 @@ namespace InspectionScheduler.Models
 							        WHERE InsDesc LIKE '%[f]inal' 
 								        and (PermitNo = @MPermitNo or PermitNo = @PermitNo)
 								        and ResultADC in ('A', 'P'))
-
 	        ) AS M
-
         WHERE PermitNo NOT IN (SELECT PermitNo FROM #Fail);
-
-
-
-
         SELECT 
             TMP.*, 
             ISNULL(F.FailType, '') FailType
@@ -139,11 +131,9 @@ namespace InspectionScheduler.Models
             M.PermitNo MPermitNo,
             B.ProjAddrCombined,
             B.ProjCity,
-			        M.PermitType,
             CASE WHEN CAST(C.SuspendGraceDt AS DATE) < CAST(GETDATE() AS DATE)
             THEN NULL 
-            ELSE CAST(DATEADD(dd, 40, C.SuspendGraceDt) AS DATE) END SuspendGraceDt
-            --ELSE CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) END SuspendGraceDt
+            ELSE CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) END SuspendGraceDt
             FROM bpMASTER_PERMIT M
             LEFT OUTER JOIN bpBASE_PERMIT B ON M.BaseID = B.BaseID
             LEFT OUTER JOIN clContractor C ON B.ContractorId = C.ContractorCd 
@@ -153,11 +143,9 @@ namespace InspectionScheduler.Models
             ISNULL(A.MPermitNo, A.PermitNo) MPermitNo,
             B.ProjAddrCombined,
             B.ProjCity,
-			        A.PermitType,
             CASE WHEN CAST(C.SuspendGraceDt AS DATE) < CAST(GETDATE() AS DATE)
             THEN NULL 
-            ELSE CAST(DATEADD(dd, 40, C.SuspendGraceDt) AS DATE) END SuspendGraceDt
-            --ELSE CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) END SuspendGraceDt
+            ELSE CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) END SuspendGraceDt
             FROM bpASSOC_PERMIT A
             LEFT OUTER JOIN bpBASE_PERMIT B ON A.BaseID = B.BaseID
             LEFT OUTER JOIN clContractor C ON A.ContractorId = C.ContractorCd 
@@ -171,6 +159,7 @@ namespace InspectionScheduler.Models
       try
       {
         var lp = Constants.Get_Data<Permit>( sql, dbArgs );
+
         // let's set the isExternalUser field here
         foreach( Permit p in lp )
         {

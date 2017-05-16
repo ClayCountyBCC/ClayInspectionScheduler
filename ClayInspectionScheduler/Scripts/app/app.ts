@@ -32,64 +32,21 @@ namespace InspSched
   export function start(): void
   {
     LoadData();
+    
+  } //  END start()
 
-    PermitSearchButton.onclick = function ()
+
+  PermitSearchButton.onclick = function ()
+  {
+    transport.GetPermit( InspSched.UI.Search( PermitSearchField.value ) ).then( function ( permits: Array<Permit> )
     {
-      ;
 
-      transport.GetPermit( InspSched.UI.Search( PermitSearchField.value )).then( function ( permits: Array<Permit> )
+      InspSched.CurrentPermits = permits;
+      InspSched.UI.ProcessResults( permits, PermitSearchField.value );
+
+      for ( let permit of permits )
       {
-
-        InspSched.CurrentPermits = permits;
-        InspSched.UI.ProcessResults( permits, PermitSearchField.value );
-
-        for ( let permit of permits )
-        {
-          console.log( "In for loop searching for Permit #" + permit.PermitNo );
-          if ( permit.PermitNo == permitNumSelect.value )
-          {
-            console.log( "Build Calendar for Permit #" + permitNumSelect.value );
-            BuildCalendar( permit.ScheduleDates );
-            break;
-          }
-        }
-
-        return true;
-
-      },
-        function ()
-        {
-
-          console.log( 'error getting permits' );
-          // do something with the error here
-          // need to figure out how to detect if something wasn't found
-          // versus an error.
-          InspSched.UI.Hide( 'Searching' );
-
-          return false;
-        });
-      console.log( "PermitNo: " + PermitSearchField.value );
-      if ( PermitSearchField.value != "" )
-      {
-        //LoadInspectionDates( );
-      }
-
-
-    }
-
-    permitNumSelect.onchange = function ()
-    {
-      let permits = InspSched.CurrentPermits;
-      // TODO: Add code to check if there is a selected date;
-      SaveInspectionButton.setAttribute( "disabled", "disabled" );
-
-      InspSched.UI.GetInspList( permitNumSelect.value );
-      console.log( "PermitNumSelect onchange: " );
-      console.log( permits );
-
-      for (let permit of permits )
-      {
-        console.log( "In for loop selecting permits. Permit #" + permit.PermitNo );
+        console.log( "In for loop searching for Permit #" + permit.PermitNo );
         if ( permit.PermitNo == permitNumSelect.value )
         {
           console.log( "Build Calendar for Permit #" + permitNumSelect.value );
@@ -97,87 +54,125 @@ namespace InspSched
           break;
         }
       }
-            
-    }
-    
-    InspectionTypeSelect.onchange = function ()
-    {
-      SaveInspectionButton.setAttribute( "value", InspectionTypeSelect.value );
-      if ( $( dpCalendar ).data( 'datepicker' ).getDate() != null )
+
+      return true;
+
+    },
+      function ()
       {
-        SaveInspectionButton.removeAttribute( "disabled" );
+
+        console.log( 'error getting permits' );
+        // do something with the error here
+        // need to figure out how to detect if something wasn't found
+        // versus an error.
+        InspSched.UI.Hide( 'Searching' );
+
+        return false;
+      } );
+
+
+
+  }
+
+  permitNumSelect.onchange = function ()
+  {
+    let permits = InspSched.CurrentPermits;
+    // TODO: Add code to check if there is a selected date;
+    SaveInspectionButton.setAttribute( "disabled", "disabled" );
+
+    InspSched.UI.GetInspList( permitNumSelect.value );
+    console.log( "PermitNumSelect onchange: " );
+    console.log( permits );
+
+    for ( let permit of permits )
+    {
+      console.log( "In for loop selecting permits. Permit #" + permit.PermitNo );
+      if ( permit.PermitNo == permitNumSelect.value )
+      {
+        console.log( "Build Calendar for Permit #" + permitNumSelect.value );
+        BuildCalendar( permit.ScheduleDates );
+        break;
       }
     }
 
-    SaveInspectionButton.onclick = function ()
+  }
+    
+  InspectionTypeSelect.onchange = function ()
+  {
+    SaveInspectionButton.setAttribute( "value", InspectionTypeSelect.value );
+    if ( $( dpCalendar ).data( 'datepicker' ).getDate() != null )
+    {
+      SaveInspectionButton.removeAttribute( "disabled" );
+    }
+  }
+
+  SaveInspectionButton.onclick = function ()
+  {
+
+    let thisPermit: string = permitNumSelect.value;
+    let thisInspCd: string = SaveInspectionButton.getAttribute( "value" );
+    let IssuesDiv: HTMLDivElement = ( <HTMLDivElement>document.getElementById( 'NotScheduled' ) );
+    IssuesDiv.style.display = "none";
+    InspSched.UI.clearElement( IssuesDiv );
+
+
+    newInsp = new NewInspection( thisPermit, thisInspCd, $( dpCalendar ).data( 'datepicker' ).getDate() );
+    $( dpCalendar ).data( 'datepicker' ).clearDates();
+
+    console.log( "In SaveInspection onchangedate: \"" + $( dpCalendar ).data( 'datepicker' ).getDate() + "\"" );
+
+    var e = transport.SaveInspection( newInsp ).then( function ( issues: Array<string> )
     {
 
-      let thisPermit: string = permitNumSelect.value;
-      let thisInspCd: string = SaveInspectionButton.getAttribute( "value" );
-      let IssuesDiv: HTMLDivElement = ( <HTMLDivElement>document.getElementById( 'NotScheduled' ) );
-      IssuesDiv.style.display = "none";
-      InspSched.UI.clearElement( IssuesDiv );
+      let thisHeading: HTMLHeadingElement = ( <HTMLHeadingElement>document.createElement( 'h5' ) );
+      let IssueList: HTMLUListElement = ( <HTMLUListElement>document.createElement( 'ul' ) );
 
-
-      newInsp = new NewInspection( thisPermit, thisInspCd, $( dpCalendar ).data( 'datepicker' ).getDate() );
-      $( dpCalendar ).data( 'datepicker' ).clearDates();
-
-      console.log( "In SaveInspection onchangedate: \"" + $( dpCalendar ).data( 'datepicker' ).getDate() + "\"" );
-
-      var e = transport.SaveInspection( newInsp ).then( function ( issues: Array<string> )
+      if ( issues != null ) 
       {
+        thisHeading.innerText = "The following issue(s) prevented scheduling the requested inspection:";
+        thisHeading.className = "large-12 medium-12 small-12 row";
+        IssuesDiv.appendChild( thisHeading );
 
-        let thisHeading: HTMLHeadingElement = ( <HTMLHeadingElement>document.createElement( 'h5' ) );
-        let IssueList: HTMLUListElement = ( <HTMLUListElement>document.createElement( 'ul' ) );
-
-        if ( issues != null) 
+        if ( issues.length > 0 )
         {
-          thisHeading.innerText = "The following issue(s) prevented scheduling the requested inspection:";
-          thisHeading.className = "large-12 medium-12 small-12 row";
-          IssuesDiv.appendChild( thisHeading );
 
-          if ( issues.length > 0 )
+          for ( let i in issues )
           {
+            let thisIssue: HTMLLIElement = ( <HTMLLIElement>document.createElement( 'li' ) );
+            thisIssue.textContent = issues[i];
+            thisIssue.style.marginLeft = "2rem;";
+            console.log( issues[i] );
+            IssueList.appendChild( thisIssue );
 
-            for ( let i in issues )
-            {
-              let thisIssue: HTMLLIElement = ( <HTMLLIElement>document.createElement( 'li' ) );
-              thisIssue.textContent = issues[i];
-              thisIssue.style.marginLeft = "2rem;";
-              console.log( issues[i] );
-              IssueList.appendChild( thisIssue );
-
-            }
-
-            IssuesDiv.appendChild( IssueList );
-            IssuesDiv.style.removeProperty( "display" );
           }
-          
-        }
-        else
-        {
-          let thisIssue: HTMLLIElement = ( <HTMLLIElement>document.createElement( 'li' ) );
-          thisIssue.textContent = "There is an issue saving the requested inspection. Please contact the Building Department " +
-           "for assistance at 904-284-6307." ;
-          thisIssue.style.marginLeft = "2rem;";
-          console.log( "This is a significant error");
-          IssueList.appendChild( thisIssue );
-          
+
+          IssuesDiv.appendChild( IssueList );
+          IssuesDiv.style.removeProperty( "display" );
         }
 
-        return true;
+      }
+      else
+      {
+        let thisIssue: HTMLLIElement = ( <HTMLLIElement>document.createElement( 'li' ) );
+        thisIssue.textContent = "There is an issue saving the requested inspection. Please contact the Building Department " +
+          "for assistance at 904-284-6307.";
+        thisIssue.style.marginLeft = "2rem;";
+        console.log( "This is a significant error" );
+        IssueList.appendChild( thisIssue );
 
-      }, function ()
-        {
-          console.log( 'error in Saving Inspection' );
-          return false;
-     });
+      }
+
+      return true;
+
+    }, function ()
+      {
+        console.log( 'error in Saving Inspection' );
+        return false;
+      } );
 
 
-    }
+  }
 
-  } //  END start()
-  
   function LoadData()
   {
     SaveInspectionButton.setAttribute( "disabled", "disabled" );
