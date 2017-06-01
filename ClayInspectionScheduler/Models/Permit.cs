@@ -13,12 +13,11 @@ namespace InspectionScheduler.Models
     public string PermitNo { get; set; }
     public string ProjAddrCombined { get; set; }
     public string ProjCity { get; set; }
-    public Nullable<DateTime> SuspendGraceDt { get; set; } = null;
     public List<string> ScheduleDates
     {
       get
       {
-        return Dates.GenerateShortDates( IsExternalUser, SuspendGraceDt );
+        return Dates.GenerateShortDates( IsExternalUser);
       }
     }
 

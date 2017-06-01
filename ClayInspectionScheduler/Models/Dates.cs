@@ -108,7 +108,7 @@ namespace InspectionScheduler.Models
 
     }
 
-    public static List<DateTime> GenerateDates( DateTime? GracePeriodDate,
+    public static List<DateTime> GenerateDates( /*DateTime? GracePeriodDate, */
       bool IsExternalUser )
     {
       try
@@ -129,17 +129,17 @@ namespace InspectionScheduler.Models
         var badDates = new List<DateTime>();
         var goodDates = new List<DateTime>();
         var holidays = GetHolidayList( dTmp.Year );
-        if( dTmp.Year != dTmp.AddDays( ( IsExternalUser ? 9 : 18 ) ).Year )
+        if( dTmp.Year != dTmp.AddDays( ( IsExternalUser ? 9 : 15 ) ).Year )
         {
           holidays.AddRange( GetHolidayList( dTmp.Year + 1 ) );
         }
 
         badDates = ( from h in holidays
                      where h >= dTmp &&
-                     h <= dTmp.AddDays( ( IsExternalUser ? 9 : 18 ) )
+                     h <= dTmp.AddDays( ( IsExternalUser ? 9 : 15 ) )
                      select h ).ToList();
 
-        for( int i = ( IsExternalUser ? 1 : 0 ) ; i < ( IsExternalUser ? 9 : 18 ) ; i++ )
+        for( int i = ( IsExternalUser ? 1 : 0 ) ; i < ( IsExternalUser ? 9 : 15 ) ; i++ )
         {
           var t = dTmp.AddDays( i );
           if( !badDates.Contains( t ) )
@@ -166,12 +166,9 @@ namespace InspectionScheduler.Models
 
 
         var minDate = ( from d in goodDates orderby d select d ).First();
-        //var maxDate = ( from d in goodDates orderby d descending select d ).First();
-        var maxDate = GracePeriodDate ?? ( from d in goodDates orderby d descending select d ).First();
-        //if( GracePeriodDate != null && (GracePeriodDate < maxDate || GracePeriodDate >= minDate))
-        //{
-        //  maxDate = GracePeriodDate;
-        //}
+
+
+        var maxDate = ( from d in goodDates orderby d descending select d ).First();
 
         datesToReturn.Add( minDate );
         datesToReturn.AddRange( ( from d in badDates
@@ -188,9 +185,9 @@ namespace InspectionScheduler.Models
       }
     }
 
-    public static List<string> GenerateShortDates( bool IsExternalUser, DateTime? GracePeriodDate )
+    public static List<string> GenerateShortDates( bool IsExternalUser)
     {
-      return ( from d in GenerateDates(GracePeriodDate, IsExternalUser )
+      return ( from d in GenerateDates(IsExternalUser )
                select d.ToShortDateString() ).ToList();
     }
   }

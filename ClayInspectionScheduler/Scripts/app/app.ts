@@ -82,16 +82,14 @@ namespace InspSched
     // TODO: Add code to check if there is a selected date;
     SaveInspectionButton.setAttribute( "disabled", "disabled" );
 
-    InspSched.UI.GetInspList( permitNumSelect.value );
-    console.log( "PermitNumSelect onchange: " );
-    console.log( permits );
+
 
     for ( let permit of permits )
     {
-      console.log( "In for loop selecting permits. Permit #" + permit.PermitNo );
       if ( permit.PermitNo == permitNumSelect.value )
       {
-        console.log( "Build Calendar for Permit #" + permitNumSelect.value );
+        InspSched.UI.GetInspList( permitNumSelect.value, permit);
+        console.log( permits );
         BuildCalendar( permit.ScheduleDates );
         break;
       }

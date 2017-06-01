@@ -305,8 +305,6 @@ namespace InspSched.UI
 
           NumFutureInsp++;
           BuildFutureInspRow( inspection, NumFutureInsp, permit.IsExternalUser );
-
-
         }
 
       }
