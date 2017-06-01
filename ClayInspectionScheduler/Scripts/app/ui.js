@@ -218,6 +218,7 @@ var InspSched;
                 document.getElementById('PermitScreen').style.display = "flex";
             }
             else {
+                // Display error: no Inspections
             }
             BuildScheduler(inspections, canSchedule, completed);
         }
@@ -434,6 +435,7 @@ var InspSched;
                     GetInspList(key);
                 }
                 else {
+                    //display notification of failed delete
                 }
             }
             else {

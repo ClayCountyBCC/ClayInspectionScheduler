@@ -108,23 +108,24 @@ namespace InspectionScheduler.Models
 
     }
 
-    public static List<DateTime> GenerateDates( /*DateTime? GracePeriodDate, */
-      bool IsExternalUser )
+    public static List<DateTime> GenerateDates(bool IsExternalUser)
     {
       try
       {
-        // Verified : MUST HAVE GRACE PERIOD DATE FUNCTIONALITY
 
 
         var dTmp = DateTime.Today;
 
         // external rules: 
+        // can schedule up to 9 days
         // can't schedule same day
         // can't schedule on weekends
         // can't schedule on holidays
 
         // internal rules
         // can't schedule on holidays
+        // can schedule up to 15 days
+
         var datesToReturn = new List<DateTime>();
         var badDates = new List<DateTime>();
         var goodDates = new List<DateTime>();
@@ -166,8 +167,6 @@ namespace InspectionScheduler.Models
 
 
         var minDate = ( from d in goodDates orderby d select d ).First();
-
-
         var maxDate = ( from d in goodDates orderby d descending select d ).First();
 
         datesToReturn.Add( minDate );

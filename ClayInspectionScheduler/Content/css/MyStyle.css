@@ -12,9 +12,12 @@
 }
 
 #PermitSelect {
-  max-width: 15rem;
+  max-width: 16rem;
   min-width: 8rem;
   padding-right: 28px;
+  min-height:50px;
+  font-size:130%
+
 }
 
 
@@ -170,6 +173,7 @@ table {
   background-color: #3e9571;
 
 }
+
 .datepicker table tr td.active.active:hover,
 .datepicker .prev:hover,
 .datepicker .next:hover {
@@ -245,4 +249,10 @@ table tbody, table tfoot, table thead {
 .inspRemarks {
   padding: 0px 50px;
   color: #bd3f52;
+}
+.PermitSelectDiv {
+  padding-top:3.5rem;
+}.PermitSelectDiv,
+.PermitAddressDiv {
+  min-height: 10.25rem;
 }

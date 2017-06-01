@@ -28,7 +28,6 @@ namespace InspSched
   var SaveInspectionButton = document.getElementById( "SaveSchedule" );
   let IssuesDiv: HTMLDivElement = ( <HTMLDivElement>document.getElementById( 'NotScheduled' ) );
   
-
   export function start(): void
   {
     LoadData();
@@ -42,7 +41,6 @@ namespace InspSched
     {
 
       InspSched.CurrentPermits = permits;
-      InspSched.UI.CurrentPermits = permits;
 
       InspSched.UI.ProcessResults( permits, PermitSearchField.value );
 
@@ -72,8 +70,6 @@ namespace InspSched
         return false;
       } );
 
-
-
   }
 
   permitNumSelect.onchange = function ()
@@ -81,8 +77,6 @@ namespace InspSched
     let permits = InspSched.CurrentPermits;
     // TODO: Add code to check if there is a selected date;
     SaveInspectionButton.setAttribute( "disabled", "disabled" );
-
-
 
     for ( let permit of permits )
     {

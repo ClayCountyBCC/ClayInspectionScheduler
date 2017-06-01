@@ -29,7 +29,6 @@ var InspSched;
     PermitSearchButton.onclick = function () {
         InspSched.transport.GetPermit(InspSched.UI.Search(PermitSearchField.value)).then(function (permits) {
             InspSched.CurrentPermits = permits;
-            InspSched.UI.CurrentPermits = permits;
             InspSched.UI.ProcessResults(permits, PermitSearchField.value);
             for (var _i = 0, permits_1 = permits; _i < permits_1.length; _i++) {
                 var permit = permits_1[_i];

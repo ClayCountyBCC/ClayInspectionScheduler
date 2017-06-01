@@ -127,9 +127,6 @@ namespace InspSched.UI
           related.appendChild( buildPermitSelectOption( permit, key ) );
       }
     }
-
-
-
   }
 
   export function UpdatePermitData( key: string, permits?: Array<Permit> ): void
@@ -376,9 +373,6 @@ namespace InspSched.UI
       Remarks.className = "large-12 medium-12 small-12 inspRemarks";
       inspRow.appendChild( Remarks );
     }
-
-
-
 
     return inspRow;
   }
