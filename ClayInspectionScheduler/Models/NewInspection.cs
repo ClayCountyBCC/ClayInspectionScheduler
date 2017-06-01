@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Web;
+
+
 
 namespace InspectionScheduler.Models
 {
@@ -107,6 +110,8 @@ namespace InspectionScheduler.Models
     }
 
 
+
+
     public List<string> Save( bool IsExternalUser )
     {
       
@@ -142,6 +147,12 @@ namespace InspectionScheduler.Models
         Constants.Log( ex , sql);
         return null;
       }
+
+
+      
     }
+
+
   }
+
 }

@@ -141,8 +141,10 @@ namespace InspectionScheduler.Models
 
     public static bool CheckIsExternalUser()
     {
-
-      return false;
+      var IsExternalUser = true;
+      // Use this location to determine if the application is loading on network server,
+      // or loading from public internet server. Default will always be true.
+      return IsExternalUser;
     }
     #region Log Code
 

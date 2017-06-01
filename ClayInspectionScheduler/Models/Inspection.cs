@@ -23,7 +23,7 @@ namespace InspectionScheduler.Models
 
     public string ResultADC { get; set; }
 
-    public string Remarks { get; set; }
+    public string Remarks { get; set; } = null;
 
     public DateTime SchedDateTime { get; set; }
 

@@ -234,3 +234,15 @@ table tbody, table tfoot, table thead {
     color: rgba(256,256,256, .4);
   }
 
+.SuspendDiv2 {
+  background-color: lightpink;
+  padding: 1rem;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  margin-bottom: .5rem;
+  height: 30rem;
+}
+.inspRemarks {
+  padding: 0px 50px;
+  color: #bd3f52;
+}

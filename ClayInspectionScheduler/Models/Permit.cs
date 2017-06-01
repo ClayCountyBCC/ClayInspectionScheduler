@@ -7,7 +7,9 @@ namespace InspectionScheduler.Models
   public class Permit
   {
     static bool PermitCheck { get; set; }
-    private bool IsExternalUser { get; set; }
+
+    // Had to make public in order to allow me to update the cancel button
+    public bool IsExternalUser { get; set; }
     public string PermitNo { get; set; }
     public string ProjAddrCombined { get; set; }
     public string ProjCity { get; set; }

@@ -8,6 +8,7 @@ namespace InspSched
   interface IPermit 
   {
     PermitNo: string;
+    IsExternalUser: boolean;
     ProjAddrCombined: string;
     ProjCity: string;
     CanSchedule: string;
@@ -18,6 +19,7 @@ namespace InspSched
   export class Permit implements IPermit 
   {
     public PermitNo: string;
+    public IsExternalUser: boolean;
     public ProjAddrCombined: string;
     public ProjCity: string;
     public CanSchedule: string;

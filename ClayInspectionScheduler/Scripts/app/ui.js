@@ -7,7 +7,7 @@ var InspSched;
     var UI;
     (function (UI) {
         "use strict";
-        UI.CurrentPermits = [];
+        UI.CurrentPermits = new Array();
         UI.CurrentInspections = [];
         function Search(key) {
             clearElement(document.getElementById('SearchFailed'));
@@ -162,6 +162,7 @@ var InspSched;
             Hide('InspectionScheduler');
             Hide('SuspendedContractor');
             document.getElementById('FutureInspRow').removeAttribute("value");
+            console.log("Inside GetInspList(); InspSched.CurrentPermits: " + InspSched.CurrentPermits);
             clearElement(document.getElementById('InspListData'));
             //clearElement( document.getElementById( 'InspectionType' ) );
             InspSched.transport.GetInspections(key).then(function (inspections) {
@@ -198,12 +199,13 @@ var InspSched;
                     if (inspection.ResultADC) {
                         if (completed < 5) {
                             InspList.appendChild(BuildCompletedInspection(inspection));
+                            InspList.appendChild(document.createElement("hr"));
                             completed++;
                         }
                     }
                     else if (!inspection.ResultADC) {
                         NumFutureInsp++;
-                        BuildFutureInspRow(inspection, NumFutureInsp);
+                        BuildFutureInspRow(inspection, NumFutureInsp, permit.IsExternalUser);
                     }
                 }
                 if (NumFutureInsp) {
@@ -236,12 +238,22 @@ var InspSched;
             ResultADC.className = "large-1 medium-1 small-1 inspResult";
             ResultADC.style.textAlign = "center";
             inspRow.appendChild(ResultADC);
-            inspRow.appendChild(document.createElement("hr"));
             if (inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'C' || inspection.ResultADC == 'N') {
+                var Remarks = document.createElement("div");
+                if (inspection.Remarks !== null || inspection.Remarks === "") {
+                    Remarks.textContent = "Remarks: " + inspection.Remarks.trim();
+                }
+                else {
+                    Remarks.textContent = "No remarks entered by the inspector. Please contact the Building Department " +
+                        "at 904-284-6307 or contact the inspector " +
+                        "directly for assistance.";
+                }
+                Remarks.className = "large-12 medium-12 small-12 inspRemarks";
+                inspRow.appendChild(Remarks);
             }
             return inspRow;
         }
-        function BuildFutureInspRow(inspection, numFutureInsp) {
+        function BuildFutureInspRow(inspection, numFutureInsp, IsExternalUser) {
             var schedBody = document.getElementById('InspSchedBody');
             var futureRow = document.getElementById('FutureInspRow');
             var thisinsp = document.createElement("div");
@@ -271,7 +283,7 @@ var InspSched;
                 "$( '#sandbox-container div' ).data( 'datepicker' ).clearDates();" +
                 // Hide scheduling issue div
                 "document.getElementById(\"NotScheduled\").style.display = \"none\"");
-            if (IsGoodCancelDate(inspection))
+            if (IsGoodCancelDate(inspection, IsExternalUser))
                 thisinspCancelDiv.appendChild(thisinspCancelButton);
             thisinsp.appendChild(thisinspDate);
             thisinsp.appendChild(thisinspType);
@@ -430,13 +442,13 @@ var InspSched;
             }
         }
         UI.CancelInspection = CancelInspection;
-        function IsGoodCancelDate(inspection) {
+        function IsGoodCancelDate(inspection, IsExternalUser) {
             var tomorrow = new Date();
             var inspDate = new Date(inspection.DisplaySchedDateTime);
             var dayOfMonth = tomorrow.getDate() + 1;
             //today.setDate( dayOfMonth - 20 );
             console.log("today: " + tomorrow + "\nSchedDateTime: " + inspDate);
-            if (inspDate < tomorrow)
+            if (inspDate < tomorrow && IsExternalUser)
                 return false;
             return true;
         }

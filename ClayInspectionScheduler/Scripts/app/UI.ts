@@ -8,8 +8,9 @@
 namespace InspSched.UI
 {
 
-  "use strict"
-  export let CurrentPermits: Array<Permit> = [];
+  "use strict";
+
+  export let CurrentPermits: Array<Permit> = new Array<Permit>();
   export let CurrentInspections: Array<Inspection> = [];
 
   export function Search( key: string )
@@ -227,7 +228,6 @@ namespace InspSched.UI
       saveButton.setAttribute( "disabled", "disabled" );
       saveButton.removeAttribute( "value" );
     }
-
     let completed: number = 0;
     let canSchedule: boolean = true;
     Hide( 'InspSched' );
@@ -238,7 +238,7 @@ namespace InspSched.UI
     document.getElementById( 'FutureInspRow' ).removeAttribute( "value" );
 
 
-
+    console.log( "Inside GetInspList(); InspSched.CurrentPermits: " +  InspSched.CurrentPermits );
     clearElement( document.getElementById( 'InspListData' ) );
     //clearElement( document.getElementById( 'InspectionType' ) );
 
@@ -296,6 +296,7 @@ namespace InspSched.UI
           if ( completed < 5 )
           {
             InspList.appendChild( BuildCompletedInspection( inspection ) );
+            InspList.appendChild( document.createElement( "hr" ) );
             completed++;
           }
         }
@@ -303,7 +304,8 @@ namespace InspSched.UI
         {
 
           NumFutureInsp++;
-          BuildFutureInspRow( inspection, NumFutureInsp );
+          BuildFutureInspRow( inspection, NumFutureInsp, permit.IsExternalUser );
+
 
         }
 
@@ -356,20 +358,34 @@ namespace InspSched.UI
     ResultADC.style.textAlign = "center";
     inspRow.appendChild( ResultADC );
 
-    inspRow.appendChild( document.createElement( "hr" ) );
 
     if ( inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'C' || inspection.ResultADC == 'N' )
     {
+      let Remarks: HTMLDivElement = ( <HTMLDivElement>document.createElement( "div" ) );
 
-      //TODO: Create overlay to show remarks from failed inspection
-
+      if ( inspection.Remarks !== null || inspection.Remarks === "" )
+      {
+        Remarks.textContent = "Remarks: " + inspection.Remarks.trim();
+        
+      }
+      else
+      {
+        Remarks.textContent = "No remarks entered by the inspector. Please contact the Building Department " +
+                              "at 904-284-6307 or contact the inspector " +
+                              "directly for assistance.";
+      }
+       
+      Remarks.className = "large-12 medium-12 small-12 inspRemarks";
+      inspRow.appendChild( Remarks );
     }
+
+
 
 
     return inspRow;
   }
 
-  function BuildFutureInspRow( inspection: Inspection, numFutureInsp: number )
+  function BuildFutureInspRow( inspection: Inspection, numFutureInsp: number, IsExternalUser: boolean )
   {
 
 
@@ -415,7 +431,7 @@ namespace InspSched.UI
       "document.getElementById(\"NotScheduled\").style.display = \"none\"");
 
                                        
-    if ( IsGoodCancelDate( inspection ) )
+    if ( IsGoodCancelDate( inspection, IsExternalUser )  )
       thisinspCancelDiv.appendChild( thisinspCancelButton );
 
 
@@ -644,7 +660,7 @@ namespace InspSched.UI
     }
   }
 
-  function IsGoodCancelDate(inspection: Inspection): boolean
+  function IsGoodCancelDate(inspection: Inspection, IsExternalUser: boolean): boolean
   {
     let tomorrow = new Date();
     let inspDate = new Date( inspection.DisplaySchedDateTime );
@@ -652,7 +668,7 @@ namespace InspSched.UI
     //today.setDate( dayOfMonth - 20 );
     console.log( "today: " + tomorrow + "\nSchedDateTime: " + inspDate );
 
-    if ( inspDate < tomorrow )
+    if ( inspDate < tomorrow && IsExternalUser )
       return false
 
     return true;

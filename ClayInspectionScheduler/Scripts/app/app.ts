@@ -42,6 +42,8 @@ namespace InspSched
     {
 
       InspSched.CurrentPermits = permits;
+      InspSched.UI.CurrentPermits = permits;
+
       InspSched.UI.ProcessResults( permits, PermitSearchField.value );
 
       for ( let permit of permits )
