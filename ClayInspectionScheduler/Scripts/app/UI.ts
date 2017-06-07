@@ -281,6 +281,9 @@ namespace InspSched.UI
     let empty: HTMLElement = ( <HTMLElement>document.createElement( "tr" ) );
     clearElement( document.getElementById( 'FutureInspRow' ) );
 
+    if(permit)
+      console.log( "User is " + ( permit.IsExternalUser? "external" : "internal" ) );
+
 
     // TODO: add Try/Catch
     if ( inspections.length > 0 )
@@ -301,7 +304,7 @@ namespace InspSched.UI
         {
 
           NumFutureInsp++;
-          BuildFutureInspRow( inspection, NumFutureInsp, permit.IsExternalUser );
+          BuildFutureInspRow( inspection, NumFutureInsp, permit.IsExternalUser);
         }
 
       }
@@ -676,6 +679,7 @@ namespace InspSched.UI
     message.appendChild( document.createTextNode( "A new inspection cannot be scheduled for permit #" + key + "." ) );
     message.appendChild( document.createElement( "br" ) );
     message.appendChild( document.createElement( "br" ) );
+
     message.appendChild( document.createTextNode(
 
       "\nPlease contact the Building Department " +

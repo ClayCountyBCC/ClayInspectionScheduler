@@ -3,7 +3,8 @@
 var InspSched;
 (function (InspSched) {
     var Permit = (function () {
-        function Permit() {
+        function Permit(IsExternalUser) {
+            this.IsExternalUser = true;
         }
         return Permit;
     }());

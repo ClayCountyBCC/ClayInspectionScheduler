@@ -191,6 +191,8 @@ var InspSched;
             var InspHeader = document.getElementById('InspListHeader');
             var empty = document.createElement("tr");
             clearElement(document.getElementById('FutureInspRow'));
+            if (permit)
+                console.log("User is " + (permit.IsExternalUser ? "external" : "internal"));
             // TODO: add Try/Catch
             if (inspections.length > 0) {
                 // create (call BuildInspectioN()) and add inspection row to container InspList
@@ -218,7 +220,6 @@ var InspSched;
                 document.getElementById('PermitScreen').style.display = "flex";
             }
             else {
-                // Display error: no Inspections
             }
             BuildScheduler(inspections, canSchedule, completed);
         }
@@ -435,7 +436,6 @@ var InspSched;
                     GetInspList(key);
                 }
                 else {
-                    //display notification of failed delete
                 }
             }
             else {

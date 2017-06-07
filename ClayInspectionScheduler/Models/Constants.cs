@@ -139,11 +139,12 @@ namespace InspectionScheduler.Models
       return ConfigurationManager.ConnectionStrings[cs].ConnectionString;
     }
 
+    // Check if user is on intranet or internet
     public static bool CheckIsExternalUser()
     {
+      
       var IsExternalUser = true;
-      // Use this location to determine if the application is loading on network server,
-      // or loading from public internet server. Default will always be true.
+
       return IsExternalUser;
     }
     #region Log Code

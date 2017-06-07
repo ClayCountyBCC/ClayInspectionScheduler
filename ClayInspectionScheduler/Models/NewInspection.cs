@@ -121,22 +121,112 @@ namespace InspectionScheduler.Models
         return e;
 
 
-      //DateTime selectedDate = DateTime.Parse( this.SchecDateTime.ToShortDateString() );
-
+      // assign string DB fieldname to variable based on permit type;
+      string PrivProvFieldName = "" ;
+      ;
         var dbArgs = new Dapper.DynamicParameters();
         dbArgs.Add( "@PermitNo", this.PermitNo );
         dbArgs.Add( "@InspCd", this.InspectionCd );
         dbArgs.Add( "@SelectedDate", this.SchecDateTime.Date );
-        // this function will save the inspection request.
-        string sql = @"
-      INSERT INTO bpINS_REQUEST
-        ( PermitNo
-        , InspectionCode
-        , SchecDateTime )
-      VALUES
-        ( @PermitNo
-        , @InspCd
-        , CAST(@SelectedDate AS DATE) )";
+
+        if(this.PermitNo != null || this.PermitNo != "")
+        { 
+        switch(this.PermitNo[0])
+        {
+        case '0':
+        case '1':
+        case '9':
+          PrivProvFieldName = "PrivProvBL";
+          break;
+        case '2':
+          PrivProvFieldName = "PrivProvEL";
+          break;
+        case '3':
+          PrivProvFieldName = "PrivProvPL";
+          break;
+        case '4':
+          PrivProvFieldName = "PrivProvME";
+          break;
+
+        }
+      }
+      // this function will save the inspection request.
+      string sql =
+      @"
+      USE WATSC
+
+      DECLARE @MPermitNo CHAR(8) = (SELECT MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = @PermitNo);
+      DECLARE @BaseId int = (select distinct BaseId from bpMasterPermit 
+                                         where PermitNo = @MPermitNo)
+
+      insert into bpINS_REQUEST
+         (PermitNo,
+             InspectionCode,
+             SchecDateTime,
+             BaseId)
+             Values
+         (@PermitNo,
+             @InspCd,
+             CAST(@SelectedDate AS DATE),
+             @BaseId)
+
+      IF (SELECT " + PrivProvFieldName + " FROM bpMASTER_PERMIT WHERE BASEID = @BaseId )= 1 " +
+      "BEGIN " +
+             "Declare @RETURN int " +
+             "execute @RETURN = dbo.prc_ins_irPPSched "+
+                                                        " @IRIDReturn OUTPUT " +
+                                                        ", @PermitNo "+
+                                                        ", @InspCd " +
+                                                        ", @BaseId "+
+                                                        ", @SelectedDate "+
+             "UPDATE bpINS_REQUEST " + 
+             "set PrivProvIRId = @RETURN " +
+             "where PermitNo = @PermitNo and " +
+                      "InspectionCode = @InspCd and "+
+                      "SchecDateTime = @SelectedDate " +
+
+      " END";
+
+
+      /*****************************************
+
+      USE WATSC
+
+      DECLARE @MPermitNo CHAR(8) = (SELECT MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = @PermitNo);
+      DECLARE @BaseId int = (select distinct BaseId from bpMasterPermit 
+                                         where PermitNo = @MPermitNo)
+
+      insert into bpINS_REQUEST
+         (PermitNo,
+             InspectionCode,
+             SchecDateTime,
+             BaseId)
+             Values
+         (@PermitNo,
+             @InspCd,
+             CAST(@SelectedDate AS DATE),
+             @BaseId)
+
+      IF (SELECT " + PrivProvFieldName + " FROM bpMASTER_PERMIT WHERE BASEID = @BaseId )= 1
+      BEGIN
+             Declare @RETURN int
+             execute @RETURN  =  dbo.prc_ins_irPPSched
+                                    @IRIDReturn OUTPUT
+                                    ,@PermitNo
+                                    ,@InspCd
+                                    ,@BaseId
+                                    ,@SelectedDate
+             UPDATE bpINS_REQUEST
+             set PrivProvIRId = @RETURN
+             where PermitNo = @PermitNo and 
+                      InspectionCode = @InspCd and 
+                      SchecDateTime = @SelectedDate
+
+      END;
+
+       * *************************************/
+
+
       try
       {
         Constants.Save_Data<string>( sql, dbArgs );
