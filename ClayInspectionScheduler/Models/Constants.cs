@@ -115,7 +115,7 @@ namespace InspectionScheduler.Models
       }
     }
 
-    public static bool Delete_Data<T>(string query, DynamicParameters dbA)
+    public static bool Execute(string query, DynamicParameters dbA)
     {
       {
         try

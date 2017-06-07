@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Web;
-
-
+using System.Data;
+using Dapper;
 
 namespace InspectionScheduler.Models
 {
@@ -17,14 +17,36 @@ namespace InspectionScheduler.Models
 
     public DateTime SchecDateTime { get; set; }
 
-    public NewInspection( string PermitNo, string InspectionCd, DateTime SchecDateTime )
+    public string PrivProvFieldName
+    {
+      get
+      {
+        switch (this.PermitNo[0])
+        {
+          case '0':
+          case '1':
+          case '9':
+            return "PrivProvBL";
+          case '2':
+            return "PrivProvEL";
+          case '3':
+            return "PrivProvPL";
+          case '4':
+            return "PrivProvME";
+          default:
+            return "";
+        }
+      }
+    }
+
+    public NewInspection(string PermitNo, string InspectionCd, DateTime SchecDateTime)
     {
       this.PermitNo = PermitNo;
       this.InspectionCd = InspectionCd;
       this.SchecDateTime = SchecDateTime;
     }
 
-    public List<string> Validate( bool IsExternalUser )
+    public List<string> Validate(bool IsExternalUser)
     {
       // List of things that need to be validated:
       // 1) Make sure this permit is valid
@@ -34,16 +56,16 @@ namespace InspectionScheduler.Models
       // 5) Make sure the inspection type isn't already scheduled for this permit.
 
       List<string> Errors = new List<string>();
-      List<InspType> inspTypes = ( List<InspType> )MyCache.GetItem( "inspectiontypes" );
+      List<InspType> inspTypes = (List<InspType>)MyCache.GetItem("inspectiontypes");
 
-      var Permits = ( from p in Permit.Get( this.PermitNo, IsExternalUser )
-                      where p.PermitNo == this.PermitNo
-                      select p ).ToList();
+      var Permits = (from p in Permit.Get(this.PermitNo, IsExternalUser)
+                     where p.PermitNo == this.PermitNo
+                     select p).ToList();
 
       Permit CurrentPermit;
-      if( Permits.Count == 0 )
+      if (Permits.Count == 0)
       {
-        Errors.Add( "Permit number \"" + PermitNo + "\" was not found." );
+        Errors.Add("Permit number \"" + PermitNo + "\" was not found.");
 
         // If permit is not found, then exit
         // no need to validate other data
@@ -55,137 +77,128 @@ namespace InspectionScheduler.Models
 
         // validate user selected date
 
-        var start = DateTime.Parse( CurrentPermit.ScheduleDates.First() );
-        var end = DateTime.Parse( CurrentPermit.ScheduleDates.Last() );
-        var badDates = ( from d in CurrentPermit.ScheduleDates
-                         where DateTime.Parse( d ) != start &&
-                         DateTime.Parse( d ) != end
-                         select d ).ToList<string>();
+        var start = DateTime.Parse(CurrentPermit.ScheduleDates.First());
+        var end = DateTime.Parse(CurrentPermit.ScheduleDates.Last());
+        var badDates = (from d in CurrentPermit.ScheduleDates
+                        where DateTime.Parse(d) != start &&
+                        DateTime.Parse(d) != end
+                        select d).ToList<string>();
 
         // Is the scheduled date between the start and end date?
-        if( SchecDateTime.Date < start ||
-          SchecDateTime.Date > end )
+        if (SchecDateTime.Date < start ||
+          SchecDateTime.Date > end)
         {
-          Errors.Add( "Invalid Date Selected" );
+          Errors.Add("Invalid Date Selected");
         }
         // Is the scheduled date one of the dates they aren't allowed to use?
-        if( badDates.Contains( SchecDateTime.ToShortDateString() ) )
+        if (badDates.Contains(SchecDateTime.ToShortDateString()))
         {
-          Errors.Add( "Invalid Date Selected" );
+          Errors.Add("Invalid Date Selected");
         }
         // Is the inspection type valid?
-        if( ( from i in inspTypes
-              where i.InspCd == InspectionCd
-              select i ).Count() == 0 )
+        if ((from i in inspTypes
+             where i.InspCd == InspectionCd
+             select i).Count() == 0)
         {
-          Errors.Add( "Invalid Inspection Type" );
+          Errors.Add("Invalid Inspection Type");
         }
         else
         {
           // Does the inspection type match the permit type
-          if( InspectionCd[ 0 ] != PermitNo[ 0 ] )
+          if (InspectionCd[0] != PermitNo[0])
           {
-            Errors.Add( "Invalid Inspection for this permit type" );
+            Errors.Add("Invalid Inspection for this permit type");
           }
 
           // TODO: Need to code check inspection type exists on permit
-          var e = Inspection.Get( CurrentPermit.PermitNo );
-          foreach( var i in e )
+          var e = Inspection.Get(CurrentPermit.PermitNo);
+          foreach (var i in e)
           {
-            if( i.InspectionCode == this.InspectionCd )
+            if (i.InspectionCode == this.InspectionCd)
             {
-              Errors.Add( "Inspection type exists on permit" );
+              Errors.Add("Inspection type exists on permit");
               break;
             }
           }
         }
-        Errors.Add( "Inspection type exists on permit" );
-        Console.Write( Errors );
+        Errors.Add("Inspection type exists on permit");
+        Console.Write(Errors);
 
       }
-
-
       return Errors;
-      
     }
 
-
-
-
-    public List<string> Save( bool IsExternalUser )
+    public int AddIRID()
     {
-      
-      List<string> e = this.Validate( Constants.CheckIsExternalUser() );
+      // assign string DB fieldname to variable based on permit type;
+      var dbArgs = new Dapper.DynamicParameters();
+      dbArgs.Add("@PermitNo", this.PermitNo);
+      dbArgs.Add("@InspCd", this.InspectionCd);
+      dbArgs.Add("@SelectedDate", this.SchecDateTime.Date);
+      dbArgs.Add("@IRID", dbType: DbType.Int64, direction: ParameterDirection.Output);
 
-      if( e.Count > 0 )
+      int IRID = -1;
+
+      // this function will save the inspection request.
+      if (this.PrivProvFieldName.Length == 0) return -1;
+
+      string sqlPP = $@"
+        INSERT INTO bpPrivateProviderInsp (BaseId, PermitNo, InspCd, SchedDt)
+        SELECT TOP 1
+          B.BaseId,
+          @PermitNo,
+          @InspCd,
+          CAST(@SelectedDate AS DATE)
+        FROM bpBASE_PERMIT B
+        INNER JOIN bpMASTER_PERMIT M ON B.BaseID = M.BaseID
+        LEFT OUTER JOIN bpASSOC_PERMIT A ON B.BaseID = A.BaseID AND M.PermitNo = A.MPermitNo
+        WHERE M.{this.PrivProvFieldName} = 1
+        AND (A.PermitNo = @PermitNo OR M.PermitNo = @PermitNo)
+
+        SET @IRIDReturn = ISNULL(SCOPE_IDENTITY(), -1);";
+      try
+      {
+        var i = Constants.Execute(sqlPP, dbArgs);
+        IRID = dbArgs.Get<int>("@IRID");
+        return IRID;
+      }
+      catch (Exception ex)
+      {
+        Constants.Log(ex, sqlPP);
+        return -1;
+      }
+    }
+
+    public List<string> Save(bool IsExternalUser)
+    {
+
+      List<string> e = this.Validate(Constants.CheckIsExternalUser());
+
+      if (e.Count > 0)
         return e;
 
+      int IRID = this.AddIRID();
 
-      // assign string DB fieldname to variable based on permit type;
-      string PrivProvFieldName = "" ;
-      ;
-        var dbArgs = new Dapper.DynamicParameters();
-        dbArgs.Add( "@PermitNo", this.PermitNo );
-        dbArgs.Add( "@InspCd", this.InspectionCd );
-        dbArgs.Add( "@SelectedDate", this.SchecDateTime.Date );
+      var dbArgs = new Dapper.DynamicParameters();
+      dbArgs.Add("@PermitNo", this.PermitNo);
+      dbArgs.Add("@InspCd", this.InspectionCd);
+      dbArgs.Add("@SelectedDate", this.SchecDateTime.Date);
+      dbArgs.Add("@IRID", (IRID == -1) ? null : IRID.ToString());
 
-        if(this.PermitNo != null || this.PermitNo != "")
-        { 
-        switch(this.PermitNo[0])
-        {
-        case '0':
-        case '1':
-        case '9':
-          PrivProvFieldName = "PrivProvBL";
-          break;
-        case '2':
-          PrivProvFieldName = "PrivProvEL";
-          break;
-        case '3':
-          PrivProvFieldName = "PrivProvPL";
-          break;
-        case '4':
-          PrivProvFieldName = "PrivProvME";
-          break;
-
-        }
-      }
-      // this function will save the inspection request.
-      string sql =
-      @"
+      string sql =  $@"
       USE WATSC
-
-      DECLARE @MPermitNo CHAR(8) = (SELECT MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = @PermitNo);
-      DECLARE @BaseId int = (select distinct BaseId from bpMasterPermit 
-                                         where PermitNo = @MPermitNo)
-
       insert into bpINS_REQUEST
          (PermitNo,
-             InspectionCode,
-             SchecDateTime,
-             BaseId)
-             Values
+          InspectionCode,
+          SchecDateTime,
+          BaseId, 
+          PrivProvIRId)
+      Values
          (@PermitNo,
-             @InspCd,
-             CAST(@SelectedDate AS DATE),
-             @BaseId)
-
-      IF (SELECT " + PrivProvFieldName + " FROM bpMASTER_PERMIT WHERE BASEID = @BaseId )= 1 " +
-      "BEGIN " +
-             "Declare @RETURN int " +
-             "execute @RETURN = dbo.prc_ins_irPPSched "+
-                                                        " @IRIDReturn OUTPUT " +
-                                                        ", @PermitNo "+
-                                                        ", @InspCd " +
-                                                        ", @BaseId "+
-                                                        ", @SelectedDate "+
-             "UPDATE bpINS_REQUEST " + 
-             "set PrivProvIRId = @RETURN " +
-             "where PermitNo = @PermitNo and " +
-                      "InspectionCode = @InspCd and "+
-                      "SchecDateTime = @SelectedDate " +
-
-      " END";
+          @InspCd,
+          CAST(@SelectedDate AS DATE),
+          @BaseId, 
+          @IRID)";
 
 
       /*****************************************
@@ -229,17 +242,18 @@ namespace InspectionScheduler.Models
 
       try
       {
-        Constants.Save_Data<string>( sql, dbArgs );
+        Constants.Save_Data<string>(sql, dbArgs);
 
         return e;
-      }catch(Exception ex)
+      }
+      catch (Exception ex)
       {
-        Constants.Log( ex , sql);
+        Constants.Log(ex, sql);
         return null;
       }
 
 
-      
+
     }
 
 

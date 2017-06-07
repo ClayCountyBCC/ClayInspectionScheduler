@@ -121,7 +121,7 @@ namespace InspectionScheduler.Models
             delete bpINS_REQUEST
             where PermitNo = @PermitNo AND InspReqID = @ID;";
 
-          var li = Constants.Delete_Data<Inspection>( sql, dbArgs );
+          var li = Constants.Execute<Inspection>( sql, dbArgs );
           return true;
 
         }
@@ -129,7 +129,7 @@ namespace InspectionScheduler.Models
         {
           string sql = @"";
 
-          var li = Constants.Delete_Data<Inspection>( sql, dbArgs );
+          var li = Constants.Execute<Inspection>( sql, dbArgs );
           return false;
         }
       }
