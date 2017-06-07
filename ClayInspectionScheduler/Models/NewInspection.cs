@@ -201,45 +201,6 @@ namespace InspectionScheduler.Models
           @IRID)";
 
 
-      /*****************************************
-
-      USE WATSC
-
-      DECLARE @MPermitNo CHAR(8) = (SELECT MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = @PermitNo);
-      DECLARE @BaseId int = (select distinct BaseId from bpMasterPermit 
-                                         where PermitNo = @MPermitNo)
-
-      insert into bpINS_REQUEST
-         (PermitNo,
-             InspectionCode,
-             SchecDateTime,
-             BaseId)
-             Values
-         (@PermitNo,
-             @InspCd,
-             CAST(@SelectedDate AS DATE),
-             @BaseId)
-
-      IF (SELECT " + PrivProvFieldName + " FROM bpMASTER_PERMIT WHERE BASEID = @BaseId )= 1
-      BEGIN
-             Declare @RETURN int
-             execute @RETURN  =  dbo.prc_ins_irPPSched
-                                    @IRIDReturn OUTPUT
-                                    ,@PermitNo
-                                    ,@InspCd
-                                    ,@BaseId
-                                    ,@SelectedDate
-             UPDATE bpINS_REQUEST
-             set PrivProvIRId = @RETURN
-             where PermitNo = @PermitNo and 
-                      InspectionCode = @InspCd and 
-                      SchecDateTime = @SelectedDate
-
-      END;
-
-       * *************************************/
-
-
       try
       {
         Constants.Save_Data<string>(sql, dbArgs);

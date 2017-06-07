@@ -19,7 +19,7 @@ namespace InspectionScheduler.Models
 
     public string InsDesc { get; set; }
 
-    public DateTime InspDateTime { get; set; }
+    public DateTime InspDateTime { get; set; } = DateTime.MinValue;
 
     public string ResultADC { get; set; }
 
@@ -32,24 +32,25 @@ namespace InspectionScheduler.Models
     public string Phone { get; set; } = " ";
 
     public string InspectorName { get; set; } = "Unassigned";
-    
+
 
     public string DisplayInspDateTime
     {
       get
       {
-        return InspDateTime == DateTime.MaxValue || DateTime.Parse(InspDateTime.ToShortDateString()) == DateTime.Parse("01/01/0001") ? "" : InspDateTime.ToShortDateString ( );
+        return ( InspDateTime == DateTime.MinValue ) ? "" : InspDateTime.ToShortDateString();
       }
+
     }
 
     public string DisplaySchedDateTime
     {
       get
       {
-        return SchedDateTime == DateTime.MinValue ? "" : SchedDateTime.ToShortDateString ( );
+        return SchedDateTime == DateTime.MinValue ? "" : SchedDateTime.ToShortDateString();
       }
     }
-    
+
     public Inspection()
     {
 
@@ -58,15 +59,13 @@ namespace InspectionScheduler.Models
 
     public static List<Inspection> Get( string key )
     {
-      var testNum = new double ( );
-      testNum = 0.0;
 
-      var dbArgs = new Dapper.DynamicParameters ( );
-      dbArgs.Add ( "@PermitNo", key );
+      var dbArgs = new Dapper.DynamicParameters();
+      dbArgs.Add( "@PermitNo", key );
 
-      if ( key.Length == 8 && double.TryParse ( key, out testNum ) )
-      {
-        string sql = @"
+
+
+      string sql = @"
         
         USE WATSC;
           select 
@@ -87,20 +86,13 @@ namespace InspectionScheduler.Models
           WHERE i.PermitNo = @PermitNo
           order by i.InspDateTime DESC, i.ResultADC DESC, i.SchecDateTime ASC";
 
-        var li = Constants.Get_Data<Inspection> ( sql, dbArgs );
-        return li;
 
-      }
-      else
-      {
-        string sql = @"";
-
-        var li = Constants.Get_Data<Inspection> ( sql, dbArgs );
-        return li;
-      }
+      var li = Constants.Get_Data<Inspection>( sql, dbArgs );
+      return li;
 
     }
-    
+
+
     public static bool Delete( string PermitNo, string InspID )
     {
       if( PermitNo != null && InspID != null )
@@ -138,7 +130,4 @@ namespace InspectionScheduler.Models
     }
 
   }
-
-
-
 }
