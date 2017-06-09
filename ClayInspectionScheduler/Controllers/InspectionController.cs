@@ -26,7 +26,7 @@ namespace InspectionScheduler.Controllers
     public IHttpActionResult Delete( string id , string InspId)
     {
       
-      bool lp = Inspection.Delete ( id  ,InspId);
+      bool lp = Inspection.Cancel ( id  ,InspId);
       if (!lp )
       {
         return InternalServerError ( );

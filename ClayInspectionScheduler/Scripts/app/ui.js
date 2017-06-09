@@ -57,7 +57,7 @@ var InspSched;
                 ProcessResults(permits, key);
                 return true;
             }, function () {
-                console.log('error getting permits');
+                console.log('error in GetPermits');
                 // do something with the error here
                 // need to figure out how to detect if something wasn't found
                 // versus an error.
@@ -162,14 +162,11 @@ var InspSched;
             Hide('InspectionScheduler');
             Hide('SuspendedContractor');
             document.getElementById('FutureInspRow').removeAttribute("value");
-            console.log("Inside GetInspList(); InspSched.CurrentPermits: " + InspSched.CurrentPermits);
             clearElement(document.getElementById('InspListData'));
-            //clearElement( document.getElementById( 'InspectionType' ) );
             InspSched.transport.GetInspections(key).then(function (inspections) {
                 if (inspections.length > 0) {
                     UI.CurrentInspections = inspections;
                     BuildInspectionList(UI.CurrentInspections, permit);
-                    console.log("List of inspections: ", UI.CurrentInspections);
                 }
                 else {
                     BuildScheduler(inspections, canSchedule, completed, key);
@@ -191,8 +188,6 @@ var InspSched;
             var InspHeader = document.getElementById('InspListHeader');
             var empty = document.createElement("tr");
             clearElement(document.getElementById('FutureInspRow'));
-            if (permit)
-                console.log("User is " + (permit.IsExternalUser ? "external" : "internal"));
             // TODO: add Try/Catch
             if (inspections.length > 0) {
                 // create (call BuildInspectioN()) and add inspection row to container InspList
@@ -207,7 +202,7 @@ var InspSched;
                     }
                     else if (!inspection.ResultADC) {
                         NumFutureInsp++;
-                        BuildFutureInspRow(inspection, NumFutureInsp, permit.IsExternalUser);
+                        BuildFutureInspRow(inspection, NumFutureInsp, InspSched.ThisPermit.IsExternalUser);
                     }
                 }
                 if (NumFutureInsp) {
@@ -219,9 +214,14 @@ var InspSched;
                 }
                 document.getElementById('PermitScreen').style.display = "flex";
             }
-            else {
+            if (isFinalInspection.search("final") != -1
+                && inspections[0].ResultADC != 'A'
+                && inspections[0].ResultADC != 'P') {
+                BuildScheduler(inspections, canSchedule, completed);
             }
-            BuildScheduler(inspections, canSchedule, completed);
+            else {
+                permitSchedulingIssue(inspections[0].PermitNo);
+            }
         }
         UI.BuildInspectionList = BuildInspectionList;
         function BuildCompletedInspection(inspection) {
@@ -279,7 +279,7 @@ var InspSched;
             document.getElementById('InspSched').style.removeProperty("display");
             document.getElementById('FutureInspRow').style.removeProperty("display");
             thisinspCancelButton.setAttribute("onclick", 
-            // cancels inspection and re-fetch inspections
+            // cancels inspection then re-fetch inspections
             "InspSched.UI.CancelInspection(\"" + inspection.InspReqID + "\", \"" + inspection.PermitNo + "\");" +
                 // clears Calendar of any chosen dates
                 "$( '#sandbox-container div' ).data( 'datepicker' ).clearDates();" +
@@ -310,12 +310,10 @@ var InspSched;
                 if (pass) {
                     // Populate Inspection Type Select list
                     LoadInspTypeSelect(key);
-                    //BuildSchdeuleCalendar();
                     document.getElementById('InspectionScheduler').style.removeProperty("display");
                     document.getElementById('InspectionScheduler').setAttribute("value", key);
                 }
                 else {
-                    // TODO Add code to display suspended contractor
                     permitSchedulingIssue(key);
                 }
             }
@@ -436,6 +434,7 @@ var InspSched;
                     GetInspList(key);
                 }
                 else {
+                    //display notification of failed delete
                 }
             }
             else {
@@ -449,7 +448,6 @@ var InspSched;
             var inspDate = new Date(inspection.DisplaySchedDateTime);
             var dayOfMonth = tomorrow.getDate() + 1;
             //today.setDate( dayOfMonth - 20 );
-            console.log("today: " + tomorrow + "\nSchedDateTime: " + inspDate);
             if (inspDate < tomorrow && IsExternalUser)
                 return false;
             return true;

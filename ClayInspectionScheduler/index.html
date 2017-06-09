@@ -78,7 +78,12 @@
           <label class="large-12 medium-12 small-12 row MyLabel" style="padding-left:1rem;padding-top:.5rem;">
             Schedule Inspection
           </label>
-          <div id="NotScheduled" class="large-12 medium-12 small-12 row" ></div>
+          <div class="row" id="NotScheduled" style="display:none;">
+            <div id="Reasons" class="large-11 medium-11 small-11"></div>
+            <button type="button" class="CloseIssueListButton large-1 medium-1 small-1" id="CloseIssueList" aria-label="CloseIssuesList">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
           <div class="large-12 medium-12 small-12 row infoDiv " style="padding-top:1rem;">
 
             <!--Scheduling Calendar-->

@@ -38,7 +38,11 @@ namespace InspectionScheduler.Models
     {
       get
       {
-        return ( InspDateTime == DateTime.MinValue ) ? "" : InspDateTime.ToShortDateString();
+        if(this.ResultADC == "C")
+          return ( InspDateTime == DateTime.MinValue ) ? "Canceled" : InspDateTime.ToShortDateString();
+        
+        return ( InspDateTime == DateTime.MinValue ) ? "Not Completed" : InspDateTime.ToShortDateString();
+
       }
 
     }
@@ -83,45 +87,59 @@ namespace InspectionScheduler.Models
           from bpINS_REQUEST i
                LEFT OUTER JOIN bpINS_REF ir ON ir.InspCd = i.InspectionCode
                LEFT OUTER JOIN bp_INSPECTORS ip ON i.Inspector = ip.Intl 
-          WHERE i.PermitNo = @PermitNo
-          order by i.InspDateTime DESC, i.ResultADC DESC, i.SchecDateTime ASC";
+          WHERE i.PermitNo = @PermitNo 
+		      order by InspReqID DESC";
 
 
-      var li = Constants.Get_Data<Inspection>( sql, dbArgs );
-      return li;
-
+      try
+      {
+        var li = Constants.Get_Data<Inspection>( sql, dbArgs );
+        return li;
+      }
+      catch(Exception ex)
+      {
+        Constants.Log( ex, sql );
+        var li =  new List<Inspection>();
+        li.Clear();
+        return li;
+      }
+      
     }
 
 
-    public static bool Delete( string PermitNo, string InspID )
+    public static bool Cancel( string PermitNo, string InspID )
     {
       if( PermitNo != null && InspID != null )
       {
-        var testNum = new double();
-        testNum = 0.0;
+
 
         var dbArgs = new Dapper.DynamicParameters();
         dbArgs.Add( "@PermitNo", PermitNo );
         dbArgs.Add( "@ID", InspID );
 
-        if( PermitNo.Length == 8 && InspID.Length > 0 && double.TryParse( PermitNo, out testNum ) && double.TryParse( InspID, out testNum ) )
-        {
-          string sql = @"
 
-            USE WATSC;
+        string sql = @"
+
+          USE WATSC;
         
-            delete bpINS_REQUEST
-            where PermitNo = @PermitNo AND InspReqID = @ID;";
+          Update bpINS_REQUEST
+          set RESULTADC = 'C'
+          where PermitNo = @PermitNo AND InspReqID = @ID
+            
+          update bpPrivateProviderInsp
+          SET Result = 'C'
+          WHERE IRId = (SELECT PrivProvIRId FROM bpINS_REQUEST WHERE InspReqID = @ID);";
+
+        try
+        {
 
           var li = Constants.Execute( sql, dbArgs );
           return true;
 
         }
-        else
+        catch(Exception ex)
         {
-          string sql = @"";
-
-          var li = Constants.Execute( sql, dbArgs );
+          Constants.Log(ex, sql);
           return false;
         }
       }

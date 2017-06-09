@@ -67,10 +67,11 @@ namespace InspectionScheduler.Models
     {
       string[] s = key.Split(new[] { "," }, StringSplitOptions.None);
 
-      switch (s[0].ToLower())
+      switch( s[ 0 ].ToLower() )
       {
         case "inspectiontypes":
-          return InspType.Get(Constants.CheckIsExternalUser());
+          bool IsExternal = bool.Parse(s[ 1 ]);
+          return InspType.Get(IsExternal);
         default:
           return null;
       }

@@ -17,11 +17,13 @@ var InspSched;
     InspSched.CurrentPermits = [];
     var InspectionTypeSelect = document.getElementById("InspTypeSelect");
     var PermitSearchButton = document.getElementById("PermitSearchButton");
+    var CloseIssueDivButton = document.getElementById("CloseIssueList");
     var PermitSearchField = document.getElementById("PermitSearch");
     var permitNumSelect = document.getElementById("PermitSelect");
     var inspScheduler = document.getElementById("InspectionScheduler");
-    var SaveInspectionButton = document.getElementById("SaveSchedule");
+    var IssueContainer = document.getElementById("NotScheduled");
     var IssuesDiv = document.getElementById('NotScheduled');
+    var SaveInspectionButton = document.getElementById("SaveSchedule");
     function start() {
         LoadData();
     } //  END start()
@@ -32,9 +34,8 @@ var InspSched;
             InspSched.UI.ProcessResults(permits, PermitSearchField.value);
             for (var _i = 0, permits_1 = permits; _i < permits_1.length; _i++) {
                 var permit = permits_1[_i];
-                console.log("In for loop searching for Permit #" + permit.PermitNo);
                 if (permit.PermitNo == permitNumSelect.value) {
-                    console.log("Build Calendar for Permit #" + permitNumSelect.value);
+                    InspSched.ThisPermit = permit;
                     BuildCalendar(permit.ScheduleDates);
                     break;
                 }
@@ -57,7 +58,7 @@ var InspSched;
             var permit = permits_2[_i];
             if (permit.PermitNo == permitNumSelect.value) {
                 InspSched.UI.GetInspList(permitNumSelect.value, permit);
-                console.log(permits);
+                InspSched.ThisPermit = permit;
                 BuildCalendar(permit.ScheduleDates);
                 break;
             }
@@ -72,12 +73,12 @@ var InspSched;
     SaveInspectionButton.onclick = function () {
         var thisPermit = permitNumSelect.value;
         var thisInspCd = SaveInspectionButton.getAttribute("value");
-        var IssuesDiv = document.getElementById('NotScheduled');
-        IssuesDiv.style.display = "none";
+        var IssueContainer = document.getElementById("NotScheduled");
+        var IssuesDiv = document.getElementById('Reasons');
+        IssueContainer.style.display = "none";
         InspSched.UI.clearElement(IssuesDiv);
         InspSched.newInsp = new InspSched.NewInspection(thisPermit, thisInspCd, $(dpCalendar).data('datepicker').getDate());
         $(dpCalendar).data('datepicker').clearDates();
-        console.log("In SaveInspection onchangedate: \"" + $(dpCalendar).data('datepicker').getDate() + "\"");
         var e = InspSched.transport.SaveInspection(InspSched.newInsp).then(function (issues) {
             var thisHeading = document.createElement('h5');
             var IssueList = document.createElement('ul');
@@ -90,11 +91,10 @@ var InspSched;
                         var thisIssue = document.createElement('li');
                         thisIssue.textContent = issues[i];
                         thisIssue.style.marginLeft = "2rem;";
-                        console.log(issues[i]);
                         IssueList.appendChild(thisIssue);
                     }
                     IssuesDiv.appendChild(IssueList);
-                    IssuesDiv.style.removeProperty("display");
+                    IssueContainer.style.removeProperty("display");
                 }
             }
             else {
@@ -102,7 +102,6 @@ var InspSched;
                 thisIssue.textContent = "There is an issue saving the requested inspection. Please contact the Building Department " +
                     "for assistance at 904-284-6307.";
                 thisIssue.style.marginLeft = "2rem;";
-                console.log("This is a significant error");
                 IssueList.appendChild(thisIssue);
             }
             return true;
@@ -111,16 +110,18 @@ var InspSched;
             return false;
         });
     };
+    CloseIssueDivButton.onclick = function () {
+        IssueContainer.style.display = "none";
+    };
     function LoadData() {
         SaveInspectionButton.setAttribute("disabled", "disabled");
-        IssuesDiv.style.display = "none";
+        IssueContainer.style.display = "none";
         SaveInspectionButton.setAttribute("disabled", "disabled");
         LoadInspectionTypes();
     }
     function LoadInspectionTypes() {
         InspSched.transport.GetInspType().then(function (insptypes) {
             InspSched.InspectionTypes = insptypes;
-            console.log('InspectionTypes', InspSched.InspectionTypes);
         }, function () {
             console.log('error in LoadInspectionTypes');
             // do something with the error here
@@ -148,14 +149,12 @@ var InspSched;
         {
             $(dpCalendar).on('changeDate', function () {
                 var date = $(dpCalendar).data('datepicker').getDate();
-                console.log("In calendar onchangedate: " + date);
                 //return false;
                 $('change-date').submit();
                 EnableSaveButton();
             });
         }
         ;
-        console.log;
     }
     function EnableSaveButton() {
         {

@@ -56,7 +56,7 @@ namespace InspectionScheduler.Models
       // 5) Make sure the inspection type isn't already scheduled for this permit.
 
       List<string> Errors = new List<string>();
-      List<InspType> inspTypes = (List<InspType>)MyCache.GetItem("inspectiontypes");
+      List<InspType> inspTypes = (List<InspType>)MyCache.GetItem("inspectiontypes,"+IsExternalUser.ToString());
 
       var Permits = (from p in Permit.Get(this.PermitNo, IsExternalUser)
                      where p.PermitNo == this.PermitNo
@@ -114,14 +114,13 @@ namespace InspectionScheduler.Models
           var e = Inspection.Get(CurrentPermit.PermitNo);
           foreach (var i in e)
           {
-            if (i.InspectionCode == this.InspectionCd)
+            if (i.InspectionCode == this.InspectionCd && i.ResultADC == null)
             {
               Errors.Add("Inspection type exists on permit");
               break;
             }
           }
         }
-        Errors.Add("Inspection type exists on permit");
         Console.Write(Errors);
 
       }
@@ -137,7 +136,7 @@ namespace InspectionScheduler.Models
       dbArgs.Add("@SelectedDate", this.SchecDateTime.Date);
       dbArgs.Add("@IRID", dbType: DbType.Int64, direction: ParameterDirection.Output);
 
-      int IRID = -1;
+       long? IRID = -1;
 
       // this function will save the inspection request.
       if (this.PrivProvFieldName.Length == 0) return -1;
@@ -155,12 +154,28 @@ namespace InspectionScheduler.Models
         WHERE M.{this.PrivProvFieldName} = 1
         AND (A.PermitNo = @PermitNo OR M.PermitNo = @PermitNo)
 
-        SET @IRIDReturn = ISNULL(SCOPE_IDENTITY(), -1);";
+        SET @IRID = SCOPE_IDENTITY();";
       try
       {
         var i = Constants.Execute(sqlPP, dbArgs);
-        IRID = dbArgs.Get<int>("@IRID");
-        return IRID;
+        if (i)
+        {
+          IRID = dbArgs.Get<long?>( "@IRID" );
+          if( IRID.HasValue )
+          {
+            return (int)IRID.Value;
+          }
+          else
+          {
+            return -1;
+          }
+        }
+        else 
+        {
+          return -1;
+
+        }
+        
       }
       catch (Exception ex)
       {
@@ -172,7 +187,7 @@ namespace InspectionScheduler.Models
     public List<string> Save(bool IsExternalUser)
     {
 
-      List<string> e = this.Validate(Constants.CheckIsExternalUser());
+      List<string> e = this.Validate(IsExternalUser);
 
       if (e.Count > 0)
         return e;
@@ -186,19 +201,24 @@ namespace InspectionScheduler.Models
       dbArgs.Add("@IRID", (IRID == -1) ? null : IRID.ToString());
 
       string sql =  $@"
-      USE WATSC
+      USE WATSC;      
       insert into bpINS_REQUEST
          (PermitNo,
           InspectionCode,
           SchecDateTime,
           BaseId, 
           PrivProvIRId)
-      Values
-         (@PermitNo,
+        SELECT TOP 1
+          @PermitNo,
           @InspCd,
-          CAST(@SelectedDate AS DATE),
-          @BaseId, 
-          @IRID)";
+          CAST(@SelectedDate AS DATE), 
+          B.BaseId,
+          @IRID
+        FROM bpBASE_PERMIT B
+        INNER JOIN bpMASTER_PERMIT M ON B.BaseID = M.BaseID
+        LEFT OUTER JOIN bpASSOC_PERMIT A ON B.BaseID = A.BaseID AND M.PermitNo = A.MPermitNo
+        WHERE (A.PermitNo = @PermitNo OR M.PermitNo = @PermitNo)
+      ";
 
 
       try

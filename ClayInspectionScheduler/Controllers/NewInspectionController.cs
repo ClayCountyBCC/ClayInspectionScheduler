@@ -10,20 +10,20 @@ namespace InspectionScheduler.Controllers
 {
   public class NewInspectionController :ApiController
   {
+    
     public IHttpActionResult Save( NewInspection thisInspection )
     {
 
       if( thisInspection == null )
       {
-        return InternalServerError();  // Option to code my own error
+        return InternalServerError();  
       }
       else
       {
-        var e = thisInspection.Save( Constants.CheckIsExternalUser() );
+        var e = thisInspection.Save( Constants.CheckIsExternalUser( User.Identity.Name ) );
+
         return Ok( e );
       }
-      
-
     }
   }
 }

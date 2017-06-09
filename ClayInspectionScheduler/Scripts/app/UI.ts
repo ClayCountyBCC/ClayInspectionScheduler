@@ -7,15 +7,12 @@
 
 namespace InspSched.UI
 {
-
   "use strict";
-
   export let CurrentPermits: Array<Permit> = new Array<Permit>();
   export let CurrentInspections: Array<Inspection> = [];
 
   export function Search( key: string )
   {
-
     clearElement( document.getElementById( 'SearchFailed' ) );
     Hide( 'PermitSelectContainer' );
     Hide( 'CurrentPermitData' )
@@ -32,7 +29,6 @@ namespace InspSched.UI
     if ( k.length == 8 && !isNaN( Number( k ) ) )
     {
       return k;
-
     }
     else
     {
@@ -47,12 +43,9 @@ namespace InspSched.UI
   export function ProcessResults( permits: Array<Permit>, key: string )
   {
     let tbl: HTMLTableElement = ( <HTMLTableElement>document.getElementById( 'InspectionTable' ) );
-
-
     AddPermit( permits, key );
     UpdatePermitData( key, permits );
-
-
+    
     if ( permits.length == 0 ) 
     {
       UpdateSearchFailed( key );
@@ -64,7 +57,6 @@ namespace InspSched.UI
       ShowTable( key, permits );
 
     }
-
   }
 
   /**********************************
@@ -88,8 +80,7 @@ namespace InspSched.UI
     },
       function ()
       {
-
-        console.log( 'error getting permits' );
+        console.log( 'error in GetPermits' );
         // do something with the error here
         // need to figure out how to detect if something wasn't found
         // versus an error.
@@ -111,8 +102,7 @@ namespace InspSched.UI
     {
       container.appendChild( related );
     }
-
-
+    
     for ( let permit of permits )
     {
       if ( permit.PermitNo == key )
@@ -135,7 +125,6 @@ namespace InspSched.UI
     let street: HTMLElement = ( <HTMLElement>document.getElementById( 'ProjAddrCombined' ) );
     let city: HTMLElement = ( <HTMLElement>document.getElementById( 'ProjCity' ) );
 
-
     for ( let permit of permits )
     {
       if ( permit.PermitNo == key ) 
@@ -145,11 +134,7 @@ namespace InspSched.UI
         city.innerHTML = permit.ProjCity.trim();
         break;
       }
-
-
     }
-
-
   }
 
   function buildPermitSelectOptGroup( lbl: string, val: string ): HTMLElement
@@ -233,40 +218,26 @@ namespace InspSched.UI
     Hide( 'InspectionScheduler' );
     Hide( 'SuspendedContractor' );
     document.getElementById( 'FutureInspRow' ).removeAttribute( "value" );
-
-
-    console.log( "Inside GetInspList(); InspSched.CurrentPermits: " +  InspSched.CurrentPermits );
     clearElement( document.getElementById( 'InspListData' ) );
-    //clearElement( document.getElementById( 'InspectionType' ) );
 
     transport.GetInspections( key ).then( function ( inspections: Array<Inspection> )
     {
-
       if ( inspections.length > 0 )
       {
-
         CurrentInspections = inspections;
         BuildInspectionList( CurrentInspections, permit );
-        console.log( "List of inspections: ", CurrentInspections );
-
-
       }
       else
       {
-
         BuildScheduler( inspections, canSchedule, completed, key );
         document.getElementById( 'PermitScreen' ).style.display = "flex";
-
       }
-
       return true;
-
     }, function ()
       {
         console.log( 'error getting inspections' );
         return false;
       });
-
   }
 
   export function BuildInspectionList( inspections: Array<Inspection>, permit?: Permit )
@@ -280,11 +251,7 @@ namespace InspSched.UI
     let InspHeader: HTMLTableElement = ( <HTMLTableElement>document.getElementById( 'InspListHeader' ) );
     let empty: HTMLElement = ( <HTMLElement>document.createElement( "tr" ) );
     clearElement( document.getElementById( 'FutureInspRow' ) );
-
-    if(permit)
-      console.log( "User is " + ( permit.IsExternalUser? "external" : "internal" ) );
-
-
+    
     // TODO: add Try/Catch
     if ( inspections.length > 0 )
     {
@@ -295,7 +262,7 @@ namespace InspSched.UI
         {
           if ( completed < 5 )
           {
-            InspList.appendChild( BuildCompletedInspection( inspection ) );
+            InspList.appendChild( BuildCompletedInspection( inspection) );
             InspList.appendChild( document.createElement( "hr" ) );
             completed++;
           }
@@ -304,7 +271,7 @@ namespace InspSched.UI
         {
 
           NumFutureInsp++;
-          BuildFutureInspRow( inspection, NumFutureInsp, permit.IsExternalUser);
+          BuildFutureInspRow( inspection, NumFutureInsp, InspSched.ThisPermit.IsExternalUser);
         }
 
       }
@@ -323,15 +290,18 @@ namespace InspSched.UI
 
       document.getElementById( 'PermitScreen' ).style.display = "flex";
     }
+
+
+    if ( isFinalInspection.search( "final" ) != -1
+      && inspections[0].ResultADC != 'A'
+      && inspections[0].ResultADC != 'P' ) 
+    {
+      BuildScheduler( inspections, canSchedule, completed );
+    }
     else
     {
-
-      // Display error: no Inspections
-
+      permitSchedulingIssue( inspections[0].PermitNo );
     }
-
-
-    BuildScheduler( inspections, canSchedule, completed );
 
   }
 
@@ -355,7 +325,6 @@ namespace InspSched.UI
     ResultADC.className = "large-1 medium-1 small-1 inspResult";
     ResultADC.style.textAlign = "center";
     inspRow.appendChild( ResultADC );
-
 
     if ( inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'C' || inspection.ResultADC == 'N' )
     {
@@ -382,8 +351,6 @@ namespace InspSched.UI
 
   function BuildFutureInspRow( inspection: Inspection, numFutureInsp: number, IsExternalUser: boolean )
   {
-
-
     let schedBody: HTMLDivElement = ( <HTMLDivElement>document.getElementById( 'InspSchedBody' ) );
     let futureRow: HTMLDivElement = ( <HTMLDivElement>document.getElementById( 'FutureInspRow' ) );
     let thisinsp: HTMLDivElement = ( <HTMLDivElement>document.createElement( "div" ) );
@@ -415,17 +382,15 @@ namespace InspSched.UI
 
     thisinspCancelButton.setAttribute( "onclick",
 
-
-      // cancels inspection and re-fetch inspections
+      // cancels inspection then re-fetch inspections
       "InspSched.UI.CancelInspection(\"" + inspection.InspReqID + "\", \"" + inspection.PermitNo + "\");" + 
       
       // clears Calendar of any chosen dates
       "$( '#sandbox-container div' ).data( 'datepicker' ).clearDates();" + 
 
       // Hide scheduling issue div
-      "document.getElementById(\"NotScheduled\").style.display = \"none\"");
+      "document.getElementById(\"NotScheduled\").style.display = \"none\"" ); 
 
-                                       
     if ( IsGoodCancelDate( inspection, IsExternalUser )  )
       thisinspCancelDiv.appendChild( thisinspCancelButton );
 
@@ -466,7 +431,6 @@ namespace InspSched.UI
 
         // Populate Inspection Type Select list
         LoadInspTypeSelect( key );
-        //BuildSchdeuleCalendar();
         document.getElementById( 'InspectionScheduler' ).style.removeProperty( "display" );
         document.getElementById( 'InspectionScheduler' ).setAttribute( "value", key );
 
@@ -475,7 +439,6 @@ namespace InspSched.UI
       // if contractor IS NOT ALLOWED to schedule inspection, the list will be empty
       else
       {
-        // TODO Add code to display suspended contractor
         permitSchedulingIssue(key);
 
 
@@ -513,9 +476,6 @@ namespace InspSched.UI
         option.innerText = type.InsDesc;
       }
     }
-    
-
-
   }
 
   /**********************************
@@ -661,10 +621,9 @@ namespace InspSched.UI
     let inspDate = new Date( inspection.DisplaySchedDateTime );
     var dayOfMonth = tomorrow.getDate()+1;
     //today.setDate( dayOfMonth - 20 );
-    console.log( "today: " + tomorrow + "\nSchedDateTime: " + inspDate );
 
     if ( inspDate < tomorrow && IsExternalUser )
-      return false
+      return false;
 
     return true;
   }

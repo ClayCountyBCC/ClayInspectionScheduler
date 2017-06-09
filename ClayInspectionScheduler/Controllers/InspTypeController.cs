@@ -8,19 +8,20 @@ using InspectionScheduler.Models;
 
 namespace InspectionScheduler.Controllers
 {
-  public class InspTypeController : ApiController
+  public class InspTypeController :ApiController
   {
     public IHttpActionResult Get()
-    { 
-      
-      List<InspType> lp = (List<InspType>)MyCache.GetItem("inspectiontypes");
-      if (lp == null)
+    {
+
+
+      List<InspType> lp = ( List<InspType> )MyCache.GetItem( "inspectiontypes," + Constants.CheckIsExternalUser( User.Identity.Name ) );
+      if( lp == null )
       {
         return InternalServerError();
       }
       else
       {
-        return Ok(lp);
+        return Ok( lp );
       }
     }
   }
