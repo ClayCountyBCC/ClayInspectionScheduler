@@ -111,10 +111,6 @@ namespace InspectionScheduler.Models
             Errors.Add("Invalid Inspection for this permit type");
           }
 
-
-          // TODO: Need to code check inspection type exists on permit
-          //List<InspType> insptypes = ( List<InspType> )MyCache.GetItem( "inspectiontypes," + IsExternalUser );
-          //var FinalInspList = new List<InspType>();
           var e = Inspection.Get(CurrentPermit.PermitNo);
           bool IsFinal = false;
           foreach (var i in e)
@@ -132,14 +128,6 @@ namespace InspectionScheduler.Models
               Errors.Add( "Permit has already passed final inspection." );
               IsFinal = true;
             }
-
-            //foreach( var type in insptypes )
-            //{
-            //  if( type.InsDesc.ToLower().Contains( "final" ) && type.InsDesc.ToLower()== i.InsDesc.ToLower())
-            //  {
-            //    Errors.Add( "Permit has already passed final inspection." );
-            //  }
-            //}
 
           }
         }
