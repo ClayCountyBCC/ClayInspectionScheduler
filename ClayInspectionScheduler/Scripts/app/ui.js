@@ -214,13 +214,21 @@ var InspSched;
                 }
                 document.getElementById('PermitScreen').style.display = "flex";
             }
-            if (isFinalInspection.search("final") != -1
-                && inspections[0].ResultADC != 'A'
-                && inspections[0].ResultADC != 'P') {
-                BuildScheduler(inspections, canSchedule, completed);
+            var passedFinal = false;
+            for (var _a = 0, inspections_2 = inspections; _a < inspections_2.length; _a++) {
+                var i = inspections_2[_a];
+                var isFinalInspection = i.InsDesc.toLowerCase();
+                if (isFinalInspection.search("final") != -1
+                    && (i.ResultADC == 'A'
+                        || i.ResultADC == 'P')) {
+                    passedFinal = true;
+                }
+            }
+            if (passedFinal) {
+                permitSchedulingIssue(inspections[0].PermitNo);
             }
             else {
-                permitSchedulingIssue(inspections[0].PermitNo);
+                BuildScheduler(inspections, canSchedule, completed);
             }
         }
         UI.BuildInspectionList = BuildInspectionList;

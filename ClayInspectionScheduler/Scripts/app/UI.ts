@@ -291,17 +291,29 @@ namespace InspSched.UI
       document.getElementById( 'PermitScreen' ).style.display = "flex";
     }
 
-
-    if ( isFinalInspection.search( "final" ) != -1
-      && inspections[0].ResultADC != 'A'
-      && inspections[0].ResultADC != 'P' ) 
+    var passedFinal = false;
+    for ( let i of inspections )
     {
-      BuildScheduler( inspections, canSchedule, completed );
+      var isFinalInspection = i.InsDesc.toLowerCase();
+
+      if ( isFinalInspection.search( "final" ) != -1
+          && (i.ResultADC == 'A'
+          || i.ResultADC == 'P' ) ) 
+      {
+        passedFinal = true;
+      }
+
     }
-    else
+
+    if ( passedFinal )
     {
       permitSchedulingIssue( inspections[0].PermitNo );
     }
+    else
+    {
+      BuildScheduler( inspections, canSchedule, completed );
+    }
+
 
   }
 
@@ -440,8 +452,6 @@ namespace InspSched.UI
       else
       {
         permitSchedulingIssue(key);
-
-
       }
 
     }

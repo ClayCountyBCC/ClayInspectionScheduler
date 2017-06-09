@@ -54,6 +54,7 @@ namespace InspectionScheduler.Models
       // 3) Make sure the inspection type matches the permit type.
       // 4) Make sure the inspection type is a valid inspection type.
       // 5) Make sure the inspection type isn't already scheduled for this permit.
+      // 6) Need to ensure an Inspection cannot be saved if a final inspection result is 'A' or 'P'
 
       List<string> Errors = new List<string>();
       List<InspType> inspTypes = (List<InspType>)MyCache.GetItem("inspectiontypes,"+IsExternalUser.ToString());
@@ -110,15 +111,36 @@ namespace InspectionScheduler.Models
             Errors.Add("Invalid Inspection for this permit type");
           }
 
+
           // TODO: Need to code check inspection type exists on permit
+          //List<InspType> insptypes = ( List<InspType> )MyCache.GetItem( "inspectiontypes," + IsExternalUser );
+          //var FinalInspList = new List<InspType>();
           var e = Inspection.Get(CurrentPermit.PermitNo);
+          bool IsFinal = false;
           foreach (var i in e)
           {
+            
             if (i.InspectionCode == this.InspectionCd && i.ResultADC == null)
             {
               Errors.Add("Inspection type exists on permit");
               break;
             }
+
+            // Adds functionality to return error when saving an inspection for permit that has already passed a final inspection.
+            if(!IsFinal && i.InsDesc.ToLower().Contains("final") && (i.ResultADC  == "A" || i.ResultADC == "P" ))
+            {
+              Errors.Add( "Permit has already passed final inspection." );
+              IsFinal = true;
+            }
+
+            //foreach( var type in insptypes )
+            //{
+            //  if( type.InsDesc.ToLower().Contains( "final" ) && type.InsDesc.ToLower()== i.InsDesc.ToLower())
+            //  {
+            //    Errors.Add( "Permit has already passed final inspection." );
+            //  }
+            //}
+
           }
         }
         Console.Write(Errors);
