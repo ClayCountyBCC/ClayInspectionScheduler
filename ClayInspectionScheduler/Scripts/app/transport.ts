@@ -58,9 +58,6 @@ namespace InspSched.transport
 
     export function SaveInspection(thisInspection: NewInspection ):Promise<Array<string>>
     {
-
-      console.log( "In transport.SaveInspection: " + JSON.stringify( thisInspection ) );
-
       var x = XHR.Post( "API/NewInspection/", JSON.stringify( thisInspection ) );
       return new Promise<Array<string>>( function ( resolve, reject )
       {

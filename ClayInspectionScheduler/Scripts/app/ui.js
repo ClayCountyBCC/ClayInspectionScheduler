@@ -446,7 +446,6 @@ var InspSched;
                 }
             }
             else {
-                console.log("There is no scheduled inspection to cancel");
                 document.getElementById('InspSched').style.display = "none";
             }
         }
