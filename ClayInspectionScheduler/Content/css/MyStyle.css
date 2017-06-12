@@ -12,9 +12,12 @@
 }
 
 #PermitSelect {
-  max-width: 15rem;
+  max-width: 16rem;
   min-width: 8rem;
   padding-right: 28px;
+  min-height:50px;
+  font-size:130%
+
 }
 
 
@@ -36,7 +39,7 @@ select > .selectPlaceholder {
     font-weight: normal;
     font-style: normal;
 }
-[class*="foundicon-"] {
+.foundicon-{
     display: inline;
 
     line-height: inherit;
@@ -46,7 +49,7 @@ select > .selectPlaceholder {
     background-repeat: repeat;
 }
 
-    [class*="foundicon-"]:before {
+    .foundicon-:before {
         font-family: "[set]Foundicons";
         font-weight: normal;
         font-style: normal;
@@ -58,11 +61,15 @@ select > .selectPlaceholder {
 }
 
 .MyLabel {
-  background-color: #890ACC;
+  color: white;
   color: rgba(256,256,256, .9);
+  background-color: #890ACC;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   padding-top: .5rem;
+  line-height: 1.4;
+  padding-bottom: .5rem;
+  font-size: 1.25rem;
 }
 .infoDiv {
     background-color: white;
@@ -136,10 +143,24 @@ table {
   display: table;
 
 }
-  .datepicker table tr td.active.day {
+
+  .datepicker table tr td {
     background-color: #3e9571;
-    max-width: 20rem;
+    color: white;
+    color: rgba(256,256,256, .8);
   }
+
+    .datepicker table tr td.day:hover {
+      background-color: #27ce89;
+      color: white;
+      color: rgba(256,256,256, .8);
+    }
+
+    .datepicker table tr td.active.day {
+      background-color: #3e9571;
+      max-width: 20rem;
+    }
+
 
   .datepicker-switch, .prev, .next{
     background-color: #3e9571;
@@ -152,6 +173,7 @@ table {
   background-color: #3e9571;
 
 }
+
 .datepicker table tr td.active.active:hover,
 .datepicker .prev:hover,
 .datepicker .next:hover {
@@ -171,7 +193,7 @@ table tbody, table tfoot, table thead {
 .datepicker table tr td.active.active, 
 .datepicker table tr td.active.highlighted.active {
   color: white;
-  background-color: #3e9571;
+  background-color: #59b790;
   border-color: #3e9571;
 }
 
@@ -206,4 +228,47 @@ table tbody, table tfoot, table thead {
   padding:1rem;
   font-weight: bold;
 }
+.datepicker table tr td.disabled {
+  background-color: lightgray;
+  color: rgba(256,256,256, .4);
+}
 
+  .datepicker table tr td.disabled:hover {
+    background-color: lightgray;
+    color: rgba(256,256,256, .4);
+  }
+
+.SuspendDiv2 {
+  background-color: lightpink;
+  padding: 1rem;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  margin-bottom: .5rem;
+  height: 30rem;
+}
+.inspRemarks {
+  padding: 0px 50px;
+  color: #bd3f52;
+}
+.PermitSelectDiv {
+  padding-top:3.5rem;
+}.PermitSelectDiv,
+.PermitAddressDiv {
+  min-height: 10.25rem;
+}
+.CloseIssueListButton{
+max-height:30px;
+max-width:30px;
+font-size:27px;
+outline-color:none;
+}
+  .CloseIssueListButton:focus {
+    outline: none;
+    outline-color: black;
+    border: none;
+  }
+  .CloseIssueListButton:active {
+    outline: none;
+    outline-color: black;
+    border:none;
+  }

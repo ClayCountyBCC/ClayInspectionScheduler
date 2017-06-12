@@ -2,10 +2,25 @@
 <ArrayOfArrayOfArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <ArrayOfArrayOfString>
     <ArrayOfString>
-      <string>ClayInspectionScheduler</string>
+      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\scripts\app\ui.ts</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\content\css\mystyle.css</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\westje\source\repos\clayinspectionscheduler\clayinspectionscheduler\index.html</string>
     </ArrayOfString>
     <ArrayOfString>
       <string>C:\Users\westje\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Scripts\app\app.ts</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>C:\Users\westje\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Models\NewInspection.cs</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>C:\Users\westje\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Models\Permit.cs</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>C:\Users\westje\Source\Repos\ClayInspectionScheduler\ClayInspectionScheduler\Scripts\app\tsconfig.json</string>
     </ArrayOfString>
   </ArrayOfArrayOfString>
 </ArrayOfArrayOfArrayOfString>

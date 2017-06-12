@@ -19,261 +19,252 @@ namespace InspSched
   export let lastDay: string;
   export let newInsp: NewInspection;
   export let GracePeriodDate: string = "";
+  export let CurrentPermits: Array<Permit> = [];
+  export let ThisPermit: Permit;
   var InspectionTypeSelect = <HTMLSelectElement>document.getElementById( "InspTypeSelect" );
   var PermitSearchButton = <HTMLButtonElement>document.getElementById( "PermitSearchButton" );
+  var CloseIssueDivButton = <HTMLButtonElement>document.getElementById( "CloseIssueList" );
   var PermitSearchField = <HTMLInputElement>document.getElementById( "PermitSearch" );
   var permitNumSelect = <HTMLSelectElement>document.getElementById( "PermitSelect" );
   var inspScheduler = document.getElementById( "InspectionScheduler" );
-  var SaveInspectionButton = document.getElementById( "SaveSchedule" );
+  var IssueContainer: HTMLDivElement = ( <HTMLDivElement>document.getElementById( "NotScheduled" ) );
   let IssuesDiv: HTMLDivElement = ( <HTMLDivElement>document.getElementById( 'NotScheduled' ) );
-  
+  var SaveInspectionButton = document.getElementById( "SaveSchedule" );
+
 
   export function start(): void
   {
-    SaveInspectionButton.setAttribute( "disabled", "disabled" );
-
     LoadData();
 
-    IssuesDiv.style.display = "none";
+  } //  END start()
+  
+  PermitSearchButton.onclick = function ()
+  {
+    transport.GetPermit( InspSched.UI.Search( PermitSearchField.value ) ).then( function ( permits: Array<Permit> )
+    {
 
+      InspSched.CurrentPermits = permits;
+
+      InspSched.UI.ProcessResults( permits, PermitSearchField.value );
+
+      for ( let permit of permits )
+      {
+        if ( permit.PermitNo == permitNumSelect.value )
+        {
+          InspSched.ThisPermit = permit;
+          BuildCalendar( permit.ScheduleDates );
+          break;
+        }
+      }
+
+      return true;
+
+    },
+      function ()
+      {
+
+        console.log( 'error getting permits' );
+        // do something with the error here
+        // need to figure out how to detect if something wasn't found
+        // versus an error.
+        InspSched.UI.Hide( 'Searching' );
+
+        return false;
+      } );
+
+  }
+
+  permitNumSelect.onchange = function ()
+  {
+    let permits = InspSched.CurrentPermits;
+    // TODO: Add code to check if there is a selected date;
     SaveInspectionButton.setAttribute( "disabled", "disabled" );
 
-    PermitSearchButton.onclick = function ()
+    for ( let permit of permits )
     {
-
-      InspSched.UI.Search( PermitSearchField.value );
-
-      console.log( "PermitNo: " + PermitSearchField.value );
-      if ( PermitSearchField.value != "" )
+      if ( permit.PermitNo == permitNumSelect.value )
       {
-        GetGracePeriodDate();
-      }
+        InspSched.UI.GetInspList( permitNumSelect.value, permit );
+        InspSched.ThisPermit = permit;
 
-
-    }
-
-    permitNumSelect.onchange = function ()
-    {
-      
-      // TODO: Add code to check if there is a selected date;
-      SaveInspectionButton.setAttribute( "disabled", "disabled" );
-
-      InspSched.UI.GetInspList( permitNumSelect.value );
-      GetGracePeriodDate();
-
-
-    }
-    
-    InspectionTypeSelect.onchange = function ()
-    {
-      SaveInspectionButton.setAttribute( "value", InspectionTypeSelect.value );
-      if ( $( dpCalendar ).data( 'datepicker' ).getDate() != null )
-      {
-        SaveInspectionButton.removeAttribute( "disabled" );
+        BuildCalendar( permit.ScheduleDates );
+        break;
       }
     }
 
-    SaveInspectionButton.onclick = function ()
+  }
+
+  InspectionTypeSelect.onchange = function ()
+  {
+    SaveInspectionButton.setAttribute( "value", InspectionTypeSelect.value );
+    if ( $( dpCalendar ).data( 'datepicker' ).getDate() != null )
     {
+      SaveInspectionButton.removeAttribute( "disabled" );
+    }
+  }
 
-      let thisPermit: string = permitNumSelect.value;
-      let thisInspCd: string = SaveInspectionButton.getAttribute( "value" );
-      let IssuesDiv: HTMLDivElement = ( <HTMLDivElement>document.getElementById( 'NotScheduled' ) );
-      IssuesDiv.style.display = "none";
-      InspSched.UI.clearElement( IssuesDiv );
+  SaveInspectionButton.onclick = function ()
+  {
+
+    let thisPermit: string = permitNumSelect.value;
+    let thisInspCd: string = SaveInspectionButton.getAttribute( "value" );
+    let IssueContainer: HTMLDivElement = ( <HTMLDivElement>document.getElementById( "NotScheduled" ) )
+    let IssuesDiv: HTMLDivElement = ( <HTMLDivElement>document.getElementById( 'Reasons' ) );
+    IssueContainer.style.display = "none";
+    InspSched.UI.clearElement( IssuesDiv );
 
 
-      newInsp = new NewInspection( thisPermit, thisInspCd, $( dpCalendar ).data( 'datepicker' ).getDate() );
-      $( dpCalendar ).data( 'datepicker' ).clearDates();
+    newInsp = new NewInspection( thisPermit, thisInspCd, $( dpCalendar ).data( 'datepicker' ).getDate() );
+    $( dpCalendar ).data( 'datepicker' ).clearDates();
 
-      console.log( "In SaveInspection onchangedate: \"" + $( dpCalendar ).data( 'datepicker' ).getDate() + "\"" );
 
-      transport.SaveInspection( newInsp ).then( function ( issues: Array<string> )
+    var e = transport.SaveInspection( newInsp ).then( function ( issues: Array<string> )
+    {
+      let thisHeading: HTMLHeadingElement = ( <HTMLHeadingElement>document.createElement( 'h5' ) );
+      let IssueList: HTMLUListElement = ( <HTMLUListElement>document.createElement( 'ul' ) );
+
+      if ( issues != null ) 
       {
+        thisHeading.innerText = "The following issue(s) prevented scheduling the requested inspection:";
+        thisHeading.className = "large-12 medium-12 small-12 row";
+        IssuesDiv.appendChild( thisHeading );
 
         if ( issues.length > 0 )
         {
-          let thisHeading: HTMLHeadingElement = ( <HTMLHeadingElement>document.createElement( 'h5' ) );
-          thisHeading.innerText = "The following issue(s) prevented scheduling the requested inspection:";
-          thisHeading.className = "large-12 medium-12 small-12 row";
-          IssuesDiv.appendChild( thisHeading );
-          let IssueList: HTMLUListElement = ( <HTMLUListElement>document.createElement( 'ul' ) );
+
           for ( let i in issues )
           {
             let thisIssue: HTMLLIElement = ( <HTMLLIElement>document.createElement( 'li' ) );
             thisIssue.textContent = issues[i];
             thisIssue.style.marginLeft = "2rem;";
-            console.log( issues[i] );
             IssueList.appendChild( thisIssue );
 
           }
 
           IssuesDiv.appendChild( IssueList );
-          IssuesDiv.style.removeProperty( "display" );
+          IssueContainer.style.removeProperty( "display" );
         }
-        // Will do something here when I am able to get this to my Controller
-        return true;
 
-      }, function ()
-        {
-          console.log( 'error Saving Inspection' );
-          return false;
-        });
+      }
+      else
+      {
+        let thisIssue: HTMLLIElement = ( <HTMLLIElement>document.createElement( 'li' ) );
+        thisIssue.textContent = "There is an issue saving the requested inspection. Please contact the Building Department " +
+          "for assistance at 904-284-6307.";
+        thisIssue.style.marginLeft = "2rem;";
+        IssueList.appendChild( thisIssue );
+
+      }
+
+      return true;
+
+    }, function ()
+      {
+        console.log( 'error in Saving Inspection' );
+        return false;
+      } );
 
 
-    }
+  }
 
-  } //  END start()
-  
+  CloseIssueDivButton.onclick = function ()
+  {
+    IssueContainer.style.display = "none";
+  }
+
   function LoadData()
   {
+    SaveInspectionButton.setAttribute( "disabled", "disabled" );
+    IssueContainer.style.display = "none";
+    SaveInspectionButton.setAttribute( "disabled", "disabled" );
+
     LoadInspectionTypes();
+
   }
 
   function LoadInspectionTypes()
   {
-    
-    transport.GetInspType().then(function (insptypes: Array<InspType>)
+
+    transport.GetInspType().then( function ( insptypes: Array<InspType> )
     {
-      InspectionTypes = insptypes;
-      console.log('InspectionTypes', InspectionTypes);
+      InspSched.InspectionTypes = insptypes;
     },
       function ()
       {
-        console.log('error in LoadInspectionTypes');
+        console.log( 'error in LoadInspectionTypes' );
         // do something with the error here
         // need to figure out how to detect if something wasn't found
         // versus an error.
         //Hide('Searching');
-        InspectionTypes = [];
-      });
+        InspSched.InspectionTypes = [];
+      } );
   }
 
-  function GetGracePeriodDate()
-  {
-    let checkString: string = ( permitNumSelect.value == "" ? PermitSearchField.value : permitNumSelect.value );
-
-    transport.GetGracePeriodDate( checkString ).then( function ( GracePeriodDate: string )
-    {
-      var mydatestring = Date.parse( GracePeriodDate );
-      var todaystring = Date.now();
-      
-      if ( mydatestring != undefined && mydatestring < todaystring )
-      {
-        console.log( "I should pass the permit number to the InspSched.UI.permitSchedulingIssue(permitNumSelect.value)" );
-        console.log( "And I shouldn't run LoadInspectionDates" );
-      }
-      else
-      {
-        LoadInspectionDates( GracePeriodDate[0] );
-      }
-    });
-
-  }
-
-  function LoadInspectionDates(GracePeriodDate?: string) 
-  {
-    
-   
-
-    transport.GenerateDates().then( function ( dates: Array<string> )
-    {
-      
-      InspSched.InspectionDates = dates;
-      InspSched.firstDay = InspSched.InspectionDates[0];
-      InspSched.lastDay = InspSched.InspectionDates[dates.length - 1];
-
-      if ( GracePeriodDate != undefined && Date.parse( GracePeriodDate.toString() ) < Date.parse( InspSched.lastDay) )
-      {
-        InspSched.lastDay = GracePeriodDate;
-        console.log( "GracePeriodDate: " + GracePeriodDate.toString() );
-      }
-
-      BuildCalendar( dates );
-
-      console.log( 'InspectionDates', InspSched.InspectionDates );
-
-
-    },
-      function ()
-      {
-        console.log( 'error in LoadInspectionDates' );
-        // do something with the error here
-        // need to figure out how to detect if something wasn't found
-        // versus an error.
-        //Hide('Searching');
-        InspectionDates = [];
-      });
-
-  }
-
-  function GetAdditionalDisabledDates(dates: Array<string>): Array<string>
-  {
-    var AdditionalDisabledDates: Array<string> = [];
-    if ( dates.length > 2 )
-    {
-      for ( let d: number = 1; d < dates.length - 1; d++ )
-      {
-        AdditionalDisabledDates.push(dates[d]);
-
-      }
-
-    }
-
-    return AdditionalDisabledDates;
-  }
-
-  function BuildCalendar(dates: Array<string>)
+  function BuildCalendar( dates: Array<string> )
   {
     $( dpCalendar ).datepicker( 'destroy' );
 
     $( document ).foundation();
 
     //
-    let additionalDisabledDates: string []= GetAdditionalDisabledDates( dates );
+    let additionalDisabledDates: string[] = GetAdditionalDisabledDates( dates );
 
-      dpCalendar = $( '#sandbox-container div' ).datepicker(
-        <DatepickerOptions>
-        {
-          startDate: InspSched.firstDay,
-          datesDisabled: additionalDisabledDates,
-          endDate: InspSched.lastDay,
-          maxViewMode: 0,
-          toggleActive: true,
-          
-      })
+    InspSched.InspectionDates = dates;
+    InspSched.firstDay = InspSched.InspectionDates[0];
+    InspSched.lastDay = InspSched.InspectionDates[dates.length - 1];
+
+    dpCalendar = $( '#sandbox-container div' ).datepicker(
+      <DatepickerOptions>
       {
-        $( dpCalendar ).on( 'changeDate', function ()
-        {
-          
-          let date = $( dpCalendar).data('datepicker').getDate();
-          console.log( "In calendar onchangedate: " + date );
-          //return false;
-          $( 'change-date' ).submit();
+        startDate: InspSched.firstDay,
+        datesDisabled: additionalDisabledDates,
+        endDate: InspSched.lastDay,
+        maxViewMode: 0,
+        toggleActive: true,
 
-          EnableSaveButton();
-        });
+      } )
+    {
+      $( dpCalendar ).on( 'changeDate', function ()
+      {
 
-      };
-    
+        let date = $( dpCalendar ).data( 'datepicker' ).getDate();
+        //return false;
+        $( 'change-date' ).submit();
 
-      console.log
+        EnableSaveButton();
+      } );
+
+    };
   }
 
   function EnableSaveButton()
   {
-
     {
-      if ( InspectionTypeSelect.value != "" &&  $( dpCalendar ).data( 'datepicker' ).getDate() != null  )
+      if ( InspectionTypeSelect.value != "" && $( dpCalendar ).data( 'datepicker' ).getDate() != null )
       {
         SaveInspectionButton.removeAttribute( "disabled" );
       }
       else
       {
         SaveInspectionButton.setAttribute( "disabled", "disabled" );
-
       }
     }
+  }
+
+  function GetAdditionalDisabledDates( dates: Array<string> ): Array<string>
+  {
+    var AdditionalDisabledDates: Array<string> = [];
+    if ( dates.length > 2 )
+    {
+      for ( let d: number = 1; d < dates.length - 1; d++ )
+      {
+        AdditionalDisabledDates.push( dates[d] );
+
+      }
+
+    }
+
+    return AdditionalDisabledDates;
   }
 
 }

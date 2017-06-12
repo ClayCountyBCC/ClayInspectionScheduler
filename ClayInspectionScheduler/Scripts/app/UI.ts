@@ -4,18 +4,15 @@
 /// <reference path="Inspection.ts" />
 
 
+
 namespace InspSched.UI
 {
+  "use strict";
+  export let CurrentPermits: Array<Permit> = new Array<Permit>();
+  export let CurrentInspections: Array<Inspection> = [];
 
-  "use strict"
-  let PermitList: Array<Permit> = [];
-  let CurrentPermits: Array<Permit> = [];
-  let InspectionList: Array<Inspection> = [];
-  let CurrentInspections: Array<Inspection> = [];
-
-  export function Search( key: string ): boolean
+  export function Search( key: string )
   {
-
     clearElement( document.getElementById( 'SearchFailed' ) );
     Hide( 'PermitSelectContainer' );
     Hide( 'CurrentPermitData' )
@@ -31,27 +28,24 @@ namespace InspSched.UI
 
     if ( k.length == 8 && !isNaN( Number( k ) ) )
     {
-      GetPermitList( k );
-
+      return k;
     }
     else
     {
       Hide( 'Searching' );
+
       UpdateSearchFailed( key );
 
-      return false;
+      return null;
     }
   }
 
-  function ProcessResults( permits: Array<Permit>, key: string )
+  export function ProcessResults( permits: Array<Permit>, key: string )
   {
     let tbl: HTMLTableElement = ( <HTMLTableElement>document.getElementById( 'InspectionTable' ) );
-
-
     AddPermit( permits, key );
     UpdatePermitData( key, permits );
-
-
+    
     if ( permits.length == 0 ) 
     {
       UpdateSearchFailed( key );
@@ -63,7 +57,6 @@ namespace InspSched.UI
       ShowTable( key, permits );
 
     }
-
   }
 
   /**********************************
@@ -79,6 +72,7 @@ namespace InspSched.UI
     {
 
       CurrentPermits = permits;
+      InspSched.CurrentPermits = permits
       ProcessResults( permits, key );
 
       return true;
@@ -86,8 +80,7 @@ namespace InspSched.UI
     },
       function ()
       {
-
-        console.log( 'error getting permits' );
+        console.log( 'error in GetPermits' );
         // do something with the error here
         // need to figure out how to detect if something wasn't found
         // versus an error.
@@ -109,8 +102,7 @@ namespace InspSched.UI
     {
       container.appendChild( related );
     }
-
-
+    
     for ( let permit of permits )
     {
       if ( permit.PermitNo == key )
@@ -125,9 +117,6 @@ namespace InspSched.UI
           related.appendChild( buildPermitSelectOption( permit, key ) );
       }
     }
-
-
-
   }
 
   export function UpdatePermitData( key: string, permits?: Array<Permit> ): void
@@ -135,7 +124,6 @@ namespace InspSched.UI
     Hide( '' )
     let street: HTMLElement = ( <HTMLElement>document.getElementById( 'ProjAddrCombined' ) );
     let city: HTMLElement = ( <HTMLElement>document.getElementById( 'ProjCity' ) );
-
 
     for ( let permit of permits )
     {
@@ -146,11 +134,7 @@ namespace InspSched.UI
         city.innerHTML = permit.ProjCity.trim();
         break;
       }
-
-
     }
-
-
   }
 
   function buildPermitSelectOptGroup( lbl: string, val: string ): HTMLElement
@@ -180,13 +164,13 @@ namespace InspSched.UI
   function buildPermitSelectOption( permit: Permit, key: string ): HTMLElement
   {
 
-
+    let label: string = getInspTypeString( permit.PermitNo[0] );
     let option: HTMLOptionElement = ( <HTMLOptionElement>document.createElement( "option" ) );
 
     option.setAttribute( "value", permit.PermitNo.trim() );
-    option.setAttribute( "label", permit.PermitNo + "  (" + permit.PermitTypeDisplay + ")" );
+    option.setAttribute( "label", permit.PermitNo + "  (" +  label + ")" );
     option.setAttribute( "title", permit.PermitNo.trim() );
-    option.textContent = permit.PermitNo + "  (" + permit.PermitTypeDisplay + ")";
+    option.textContent = permit.PermitNo + "  (" + label + ")";
 
     option.id = permit.PermitNo + permit.CanSchedule;
 
@@ -226,7 +210,6 @@ namespace InspSched.UI
       saveButton.setAttribute( "disabled", "disabled" );
       saveButton.removeAttribute( "value" );
     }
-
     let completed: number = 0;
     let canSchedule: boolean = true;
     Hide( 'InspSched' );
@@ -235,40 +218,26 @@ namespace InspSched.UI
     Hide( 'InspectionScheduler' );
     Hide( 'SuspendedContractor' );
     document.getElementById( 'FutureInspRow' ).removeAttribute( "value" );
-
-
-
     clearElement( document.getElementById( 'InspListData' ) );
-    //clearElement( document.getElementById( 'InspectionType' ) );
 
     transport.GetInspections( key ).then( function ( inspections: Array<Inspection> )
     {
-
       if ( inspections.length > 0 )
       {
-
         CurrentInspections = inspections;
         BuildInspectionList( CurrentInspections, permit );
-        console.log( "List of inspections: ", CurrentInspections );
-
-
       }
       else
       {
-
         BuildScheduler( inspections, canSchedule, completed, key );
         document.getElementById( 'PermitScreen' ).style.display = "flex";
-
       }
-
       return true;
-
     }, function ()
       {
         console.log( 'error getting inspections' );
         return false;
       });
-
   }
 
   export function BuildInspectionList( inspections: Array<Inspection>, permit?: Permit )
@@ -282,8 +251,7 @@ namespace InspSched.UI
     let InspHeader: HTMLTableElement = ( <HTMLTableElement>document.getElementById( 'InspListHeader' ) );
     let empty: HTMLElement = ( <HTMLElement>document.createElement( "tr" ) );
     clearElement( document.getElementById( 'FutureInspRow' ) );
-
-
+    
     // TODO: add Try/Catch
     if ( inspections.length > 0 )
     {
@@ -294,7 +262,8 @@ namespace InspSched.UI
         {
           if ( completed < 5 )
           {
-            InspList.appendChild( BuildCompletedInspection( inspection ) );
+            InspList.appendChild( BuildCompletedInspection( inspection) );
+            InspList.appendChild( document.createElement( "hr" ) );
             completed++;
           }
         }
@@ -302,8 +271,7 @@ namespace InspSched.UI
         {
 
           NumFutureInsp++;
-          BuildFutureInspRow( inspection, NumFutureInsp );
-
+          BuildFutureInspRow( inspection, NumFutureInsp, InspSched.ThisPermit.IsExternalUser);
         }
 
       }
@@ -322,15 +290,30 @@ namespace InspSched.UI
 
       document.getElementById( 'PermitScreen' ).style.display = "flex";
     }
-    else
-    {
 
-      // Display error: no Inspections
+    var passedFinal = false;
+    for ( let i of inspections )
+    {
+      var isFinalInspection = i.InsDesc.toLowerCase();
+
+      if ( isFinalInspection.search( "final" ) != -1
+          && (i.ResultADC == 'A'
+          || i.ResultADC == 'P' ) ) 
+      {
+        passedFinal = true;
+      }
 
     }
 
+    if ( passedFinal )
+    {
+      permitSchedulingIssue( inspections[0].PermitNo );
+    }
+    else
+    {
+      BuildScheduler( inspections, canSchedule, completed );
+    }
 
-    BuildScheduler( inspections, canSchedule, completed );
 
   }
 
@@ -355,23 +338,31 @@ namespace InspSched.UI
     ResultADC.style.textAlign = "center";
     inspRow.appendChild( ResultADC );
 
-    inspRow.appendChild( document.createElement( "hr" ) );
-
     if ( inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'C' || inspection.ResultADC == 'N' )
     {
+      let Remarks: HTMLDivElement = ( <HTMLDivElement>document.createElement( "div" ) );
 
-      //TODO: Create overlay to show remarks from failed inspection
-
+      if ( inspection.Remarks !== null || inspection.Remarks === "" )
+      {
+        Remarks.textContent = "Remarks: " + inspection.Remarks.trim();
+        
+      }
+      else
+      {
+        Remarks.textContent = "No remarks entered by the inspector. Please contact the Building Department " +
+                              "at 904-284-6307 or contact the inspector " +
+                              "directly for assistance.";
+      }
+       
+      Remarks.className = "large-12 medium-12 small-12 inspRemarks";
+      inspRow.appendChild( Remarks );
     }
-
 
     return inspRow;
   }
 
-  function BuildFutureInspRow( inspection: Inspection, numFutureInsp: number )
+  function BuildFutureInspRow( inspection: Inspection, numFutureInsp: number, IsExternalUser: boolean )
   {
-
-
     let schedBody: HTMLDivElement = ( <HTMLDivElement>document.getElementById( 'InspSchedBody' ) );
     let futureRow: HTMLDivElement = ( <HTMLDivElement>document.getElementById( 'FutureInspRow' ) );
     let thisinsp: HTMLDivElement = ( <HTMLDivElement>document.createElement( "div" ) );
@@ -403,18 +394,16 @@ namespace InspSched.UI
 
     thisinspCancelButton.setAttribute( "onclick",
 
-
-      // cancels inspection and re-fetch inspections
+      // cancels inspection then re-fetch inspections
       "InspSched.UI.CancelInspection(\"" + inspection.InspReqID + "\", \"" + inspection.PermitNo + "\");" + 
       
       // clears Calendar of any chosen dates
       "$( '#sandbox-container div' ).data( 'datepicker' ).clearDates();" + 
 
       // Hide scheduling issue div
-      "document.getElementById(\"NotScheduled\").style.display = \"none\"");
+      "document.getElementById(\"NotScheduled\").style.display = \"none\"" ); 
 
-                                       
-    if ( IsGoodCancelDate( inspection ) )
+    if ( IsGoodCancelDate( inspection, IsExternalUser )  )
       thisinspCancelDiv.appendChild( thisinspCancelButton );
 
 
@@ -453,9 +442,7 @@ namespace InspSched.UI
       {
 
         // Populate Inspection Type Select list
-        GetInspType( key );
-
-        //BuildSchdeuleCalendar();
+        LoadInspTypeSelect( key );
         document.getElementById( 'InspectionScheduler' ).style.removeProperty( "display" );
         document.getElementById( 'InspectionScheduler' ).setAttribute( "value", key );
 
@@ -464,50 +451,23 @@ namespace InspSched.UI
       // if contractor IS NOT ALLOWED to schedule inspection, the list will be empty
       else
       {
-        // TODO Add code to display suspended contractor
         permitSchedulingIssue(key);
-
-
       }
 
     }
 
   }
 
-  function GetInspType( key: string )
+  function LoadInspTypeSelect( key: string )
   {
-
     let thistype: string = key[0];
+    var label: string = getInspTypeString( thistype );
 
     let InspTypeList: HTMLSelectElement = ( <HTMLSelectElement>document.getElementById( 'InspTypeSelect' ) );
     let optionLabel: HTMLOptionElement = ( <HTMLOptionElement>document.createElement( "option" ) );
 
     clearElement( InspTypeList );
-
-    switch ( thistype )
-    {
-      case '1':
-      case '0':
-      case '9':
-        optionLabel.label = "Building";
-        thistype = "1";
-        break;
-      case '2':
-        optionLabel.label = "Electrical";
-        break;
-      case '3':
-        optionLabel.label = "Plumbing";
-        break;
-      case '4':
-        optionLabel.label = "Mechanical";
-        break;
-      case '6':
-        optionLabel.label = "Fire";
-        break;
-
-    }
-
-    optionLabel.label += " Inspections:";
+    optionLabel.label += label +" Inspections:";
     optionLabel.innerText = optionLabel.label;
     optionLabel.className = "selectPlaceholder";
     optionLabel.selected;
@@ -526,9 +486,6 @@ namespace InspSched.UI
         option.innerText = type.InsDesc;
       }
     }
-    
-
-
   }
 
   /**********************************
@@ -536,8 +493,29 @@ namespace InspSched.UI
     Do Somethings
   
   ***********************************/
+  function getInspTypeString(InspType: string)
+  {
+    switch ( InspType )
+    {
+      case "1":
+      case "0":
+      case "9":
+        return "Building";
+      case "2":
+        return "Electrical";
+      case "3":
+        return "Plumbing";
+      case "4":
+        return "Mechanical";
+      case "6":
+        return "Fire";
+      default:
+        return "Unknown"
+    }
 
-  function Show( id?: string, element?: HTMLElement, displayType?: string ): void
+  }
+
+  export function Show( id?: string, element?: HTMLElement, displayType?: string ): void
   {
     if ( !element )
     {
@@ -557,7 +535,7 @@ namespace InspSched.UI
     }
   }
 
-  function Hide( id: string ): void
+  export function Hide( id: string ): void
   {
 
     let e = document.getElementById( id );
@@ -596,20 +574,21 @@ namespace InspSched.UI
     {
       message.appendChild( document.createTextNode( "Permit #" + key + " not found" ) );
     }
-    else if ( !isNaN( Number( key ) ) && key.length != 8 )
+    else if ( !isNaN( Number( key ) ) && key.length > 0 && key.length != 8  )
     {
-      message.innerHTML = "You did not enter any information.<br />Enter a valid permit number to search.";
+      message.innerHTML = "\"" + key + "\" is not a valid Permit Number";
 
     }
     else if ( key.length == 0 )
     {
-      message.innerHTML = key + " is not a valid Permit Number";
+      message.innerHTML = "You did not enter any information.<br />Enter a valid permit number and click search.";
 
     }
     else
     {
       message.innerHTML = "Invalid Entry<br />";
     }
+    message.style.textAlign = "center";
     e.appendChild( message );
 
     Hide( 'Searching' );
@@ -646,16 +625,15 @@ namespace InspSched.UI
     }
   }
 
-  function IsGoodCancelDate(inspection: Inspection): boolean
+  function IsGoodCancelDate(inspection: Inspection, IsExternalUser: boolean): boolean
   {
     let tomorrow = new Date();
     let inspDate = new Date( inspection.DisplaySchedDateTime );
     var dayOfMonth = tomorrow.getDate()+1;
     //today.setDate( dayOfMonth - 20 );
-    console.log( "today: " + tomorrow + "\nSchedDateTime: " + inspDate );
 
-    if ( inspDate < tomorrow )
-      return false
+    if ( inspDate < tomorrow && IsExternalUser )
+      return false;
 
     return true;
   }
@@ -670,6 +648,7 @@ namespace InspSched.UI
     message.appendChild( document.createTextNode( "A new inspection cannot be scheduled for permit #" + key + "." ) );
     message.appendChild( document.createElement( "br" ) );
     message.appendChild( document.createElement( "br" ) );
+
     message.appendChild( document.createTextNode(
 
       "\nPlease contact the Building Department " +

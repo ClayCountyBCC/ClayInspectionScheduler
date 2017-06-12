@@ -5,16 +5,21 @@ using System.Web;
 using System.Data;
 using System.Data.SqlClient;
 using System.Configuration;
+using System.Net;
+using System.Net.Http;
+using System.Web.Http;
+using InspectionScheduler.Models;
 using Dapper;
+
+
 
 namespace InspectionScheduler.Models
 {
-
+ 
   public static class Constants
   {
     public const int appId = 20024;
-
-
+    
     public static bool UseProduction()
     {
       switch (Environment.MachineName.ToUpper())
@@ -30,7 +35,7 @@ namespace InspectionScheduler.Models
         case "CLAYBCCDMZIIS01":
           Console.WriteLine("MachineName = " + Environment.MachineName.ToUpper());
           // TODO: will need to add the DMZ machine name(s) here.
-          return false;
+          return true;
 
         default:
           Console.WriteLine("MachineName = " + Environment.MachineName.ToUpper());
@@ -115,7 +120,7 @@ namespace InspectionScheduler.Models
       }
     }
 
-    public static bool Delete_Data<T>(string query, DynamicParameters dbA)
+    public static bool Execute(string query, DynamicParameters dbA)
     {
       {
         try
@@ -139,6 +144,12 @@ namespace InspectionScheduler.Models
       return ConfigurationManager.ConnectionStrings[cs].ConnectionString;
     }
 
+    // return true if name.length > 0
+    public static bool CheckIsExternalUser(string name)
+    {
+      return name.Length == 0;
+    }
+    
     #region Log Code
 
     public static void Log(Exception ex, string Query = "")

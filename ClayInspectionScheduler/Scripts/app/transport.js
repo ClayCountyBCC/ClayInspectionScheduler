@@ -75,32 +75,6 @@ var InspSched;
             });
         }
         transport.CancelInspection = CancelInspection;
-        function GenerateDates() {
-            var x = XHR.Get("API/Dates/");
-            return new Promise(function (resolve, reject) {
-                x.then(function (response) {
-                    var di = JSON.parse(response.Text);
-                    resolve(di);
-                }).catch(function () {
-                    console.log("error in CheckContractorPermitStatus");
-                    reject(null);
-                });
-            });
-        }
-        transport.GenerateDates = GenerateDates;
-        function GetGracePeriodDate(key) {
-            var x = XHR.Get("API/Dates/" + key);
-            return new Promise(function (resolve, reject) {
-                x.then(function (response) {
-                    var di = JSON.parse(response.Text);
-                    resolve(di);
-                }).catch(function () {
-                    console.log("error in CheckContractorPermitStatus");
-                    reject(null);
-                });
-            });
-        }
-        transport.GetGracePeriodDate = GetGracePeriodDate;
     })(transport = InspSched.transport || (InspSched.transport = {}));
 })(InspSched || (InspSched = {}));
 //# sourceMappingURL=transport.js.map

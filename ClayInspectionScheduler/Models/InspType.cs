@@ -15,8 +15,9 @@ namespace InspectionScheduler.Models
 
     public string InspCd { get; set; }
 
-    public static List<InspType> Get()
+    public static List<InspType> Get(bool IsExternalUser)
     {
+      
       string sql = @"
         
         USE WATSC;
@@ -31,8 +32,14 @@ namespace InspectionScheduler.Models
         ORDER BY 
           I.InsDesc
         ";
-
+      
       var lp = Constants.Get_Data<InspType>(sql);
+
+      if(IsExternalUser)
+      {
+        // remove Permit Information Inspections here
+      }
+
       return lp;
     }
 

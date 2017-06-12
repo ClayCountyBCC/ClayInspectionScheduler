@@ -7,10 +7,8 @@ var InspSched;
     var UI;
     (function (UI) {
         "use strict";
-        var PermitList = [];
-        var CurrentPermits = [];
-        var InspectionList = [];
-        var CurrentInspections = [];
+        UI.CurrentPermits = new Array();
+        UI.CurrentInspections = [];
         function Search(key) {
             clearElement(document.getElementById('SearchFailed'));
             Hide('PermitSelectContainer');
@@ -24,12 +22,12 @@ var InspSched;
             var k = key.trim().toUpperCase();
             document.getElementById('PermitSearch').setAttribute("value", k);
             if (k.length == 8 && !isNaN(Number(k))) {
-                GetPermitList(k);
+                return k;
             }
             else {
                 Hide('Searching');
                 UpdateSearchFailed(key);
-                return false;
+                return null;
             }
         }
         UI.Search = Search;
@@ -46,6 +44,7 @@ var InspSched;
                 ShowTable(key, permits);
             }
         }
+        UI.ProcessResults = ProcessResults;
         /**********************************
           
           Build Option List
@@ -53,11 +52,12 @@ var InspSched;
         **********************************/
         function GetPermitList(key, permit) {
             InspSched.transport.GetPermit(key).then(function (permits) {
-                CurrentPermits = permits;
+                UI.CurrentPermits = permits;
+                InspSched.CurrentPermits = permits;
                 ProcessResults(permits, key);
                 return true;
             }, function () {
-                console.log('error getting permits');
+                console.log('error in GetPermits');
                 // do something with the error here
                 // need to figure out how to detect if something wasn't found
                 // versus an error.
@@ -118,11 +118,12 @@ var InspSched;
             return og;
         }
         function buildPermitSelectOption(permit, key) {
+            var label = getInspTypeString(permit.PermitNo[0]);
             var option = document.createElement("option");
             option.setAttribute("value", permit.PermitNo.trim());
-            option.setAttribute("label", permit.PermitNo + "  (" + permit.PermitTypeDisplay + ")");
+            option.setAttribute("label", permit.PermitNo + "  (" + label + ")");
             option.setAttribute("title", permit.PermitNo.trim());
-            option.textContent = permit.PermitNo + "  (" + permit.PermitTypeDisplay + ")";
+            option.textContent = permit.PermitNo + "  (" + label + ")";
             option.id = permit.PermitNo + permit.CanSchedule;
             if (permit.PermitNo == key) {
                 option.value = permit.PermitNo.trim();
@@ -162,12 +163,10 @@ var InspSched;
             Hide('SuspendedContractor');
             document.getElementById('FutureInspRow').removeAttribute("value");
             clearElement(document.getElementById('InspListData'));
-            //clearElement( document.getElementById( 'InspectionType' ) );
             InspSched.transport.GetInspections(key).then(function (inspections) {
                 if (inspections.length > 0) {
-                    CurrentInspections = inspections;
-                    BuildInspectionList(CurrentInspections, permit);
-                    console.log("List of inspections: ", CurrentInspections);
+                    UI.CurrentInspections = inspections;
+                    BuildInspectionList(UI.CurrentInspections, permit);
                 }
                 else {
                     BuildScheduler(inspections, canSchedule, completed, key);
@@ -197,12 +196,13 @@ var InspSched;
                     if (inspection.ResultADC) {
                         if (completed < 5) {
                             InspList.appendChild(BuildCompletedInspection(inspection));
+                            InspList.appendChild(document.createElement("hr"));
                             completed++;
                         }
                     }
                     else if (!inspection.ResultADC) {
                         NumFutureInsp++;
-                        BuildFutureInspRow(inspection, NumFutureInsp);
+                        BuildFutureInspRow(inspection, NumFutureInsp, InspSched.ThisPermit.IsExternalUser);
                     }
                 }
                 if (NumFutureInsp) {
@@ -214,9 +214,22 @@ var InspSched;
                 }
                 document.getElementById('PermitScreen').style.display = "flex";
             }
-            else {
+            var passedFinal = false;
+            for (var _a = 0, inspections_2 = inspections; _a < inspections_2.length; _a++) {
+                var i = inspections_2[_a];
+                var isFinalInspection = i.InsDesc.toLowerCase();
+                if (isFinalInspection.search("final") != -1
+                    && (i.ResultADC == 'A'
+                        || i.ResultADC == 'P')) {
+                    passedFinal = true;
+                }
             }
-            BuildScheduler(inspections, canSchedule, completed);
+            if (passedFinal) {
+                permitSchedulingIssue(inspections[0].PermitNo);
+            }
+            else {
+                BuildScheduler(inspections, canSchedule, completed);
+            }
         }
         UI.BuildInspectionList = BuildInspectionList;
         function BuildCompletedInspection(inspection) {
@@ -235,12 +248,22 @@ var InspSched;
             ResultADC.className = "large-1 medium-1 small-1 inspResult";
             ResultADC.style.textAlign = "center";
             inspRow.appendChild(ResultADC);
-            inspRow.appendChild(document.createElement("hr"));
             if (inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'C' || inspection.ResultADC == 'N') {
+                var Remarks = document.createElement("div");
+                if (inspection.Remarks !== null || inspection.Remarks === "") {
+                    Remarks.textContent = "Remarks: " + inspection.Remarks.trim();
+                }
+                else {
+                    Remarks.textContent = "No remarks entered by the inspector. Please contact the Building Department " +
+                        "at 904-284-6307 or contact the inspector " +
+                        "directly for assistance.";
+                }
+                Remarks.className = "large-12 medium-12 small-12 inspRemarks";
+                inspRow.appendChild(Remarks);
             }
             return inspRow;
         }
-        function BuildFutureInspRow(inspection, numFutureInsp) {
+        function BuildFutureInspRow(inspection, numFutureInsp, IsExternalUser) {
             var schedBody = document.getElementById('InspSchedBody');
             var futureRow = document.getElementById('FutureInspRow');
             var thisinsp = document.createElement("div");
@@ -264,13 +287,13 @@ var InspSched;
             document.getElementById('InspSched').style.removeProperty("display");
             document.getElementById('FutureInspRow').style.removeProperty("display");
             thisinspCancelButton.setAttribute("onclick", 
-            // cancels inspection and re-fetch inspections
+            // cancels inspection then re-fetch inspections
             "InspSched.UI.CancelInspection(\"" + inspection.InspReqID + "\", \"" + inspection.PermitNo + "\");" +
                 // clears Calendar of any chosen dates
                 "$( '#sandbox-container div' ).data( 'datepicker' ).clearDates();" +
                 // Hide scheduling issue div
                 "document.getElementById(\"NotScheduled\").style.display = \"none\"");
-            if (IsGoodCancelDate(inspection))
+            if (IsGoodCancelDate(inspection, IsExternalUser))
                 thisinspCancelDiv.appendChild(thisinspCancelButton);
             thisinsp.appendChild(thisinspDate);
             thisinsp.appendChild(thisinspType);
@@ -294,43 +317,22 @@ var InspSched;
                 // if contractor IS ALLOWED to schedule, the contractor id will be on the list
                 if (pass) {
                     // Populate Inspection Type Select list
-                    GetInspType(key);
-                    //BuildSchdeuleCalendar();
+                    LoadInspTypeSelect(key);
                     document.getElementById('InspectionScheduler').style.removeProperty("display");
                     document.getElementById('InspectionScheduler').setAttribute("value", key);
                 }
                 else {
-                    // TODO Add code to display suspended contractor
                     permitSchedulingIssue(key);
                 }
             }
         }
-        function GetInspType(key) {
+        function LoadInspTypeSelect(key) {
             var thistype = key[0];
+            var label = getInspTypeString(thistype);
             var InspTypeList = document.getElementById('InspTypeSelect');
             var optionLabel = document.createElement("option");
             clearElement(InspTypeList);
-            switch (thistype) {
-                case '1':
-                case '0':
-                case '9':
-                    optionLabel.label = "Building";
-                    thistype = "1";
-                    break;
-                case '2':
-                    optionLabel.label = "Electrical";
-                    break;
-                case '3':
-                    optionLabel.label = "Plumbing";
-                    break;
-                case '4':
-                    optionLabel.label = "Mechanical";
-                    break;
-                case '6':
-                    optionLabel.label = "Fire";
-                    break;
-            }
-            optionLabel.label += " Inspections:";
+            optionLabel.label += label + " Inspections:";
             optionLabel.innerText = optionLabel.label;
             optionLabel.className = "selectPlaceholder";
             optionLabel.selected;
@@ -353,6 +355,24 @@ var InspSched;
           Do Somethings
         
         ***********************************/
+        function getInspTypeString(InspType) {
+            switch (InspType) {
+                case "1":
+                case "0":
+                case "9":
+                    return "Building";
+                case "2":
+                    return "Electrical";
+                case "3":
+                    return "Plumbing";
+                case "4":
+                    return "Mechanical";
+                case "6":
+                    return "Fire";
+                default:
+                    return "Unknown";
+            }
+        }
         function Show(id, element, displayType) {
             if (!element) {
                 var e = document.getElementById(id);
@@ -369,11 +389,13 @@ var InspSched;
                     element.style.display = displayType;
             }
         }
+        UI.Show = Show;
         function Hide(id) {
             var e = document.getElementById(id);
             if (e)
                 e.style.display = "none";
         }
+        UI.Hide = Hide;
         // this function emptys an element of all its child nodes.
         function clearElement(node) {
             while (node.firstChild) {
@@ -395,15 +417,16 @@ var InspSched;
             if (!isNaN(Number(key)) && key.length == 8) {
                 message.appendChild(document.createTextNode("Permit #" + key + " not found"));
             }
-            else if (!isNaN(Number(key)) && key.length != 8) {
-                message.innerHTML = "You did not enter any information.<br />Enter a valid permit number to search.";
+            else if (!isNaN(Number(key)) && key.length > 0 && key.length != 8) {
+                message.innerHTML = "\"" + key + "\" is not a valid Permit Number";
             }
             else if (key.length == 0) {
-                message.innerHTML = key + " is not a valid Permit Number";
+                message.innerHTML = "You did not enter any information.<br />Enter a valid permit number and click search.";
             }
             else {
                 message.innerHTML = "Invalid Entry<br />";
             }
+            message.style.textAlign = "center";
             e.appendChild(message);
             Hide('Searching');
             Show('SearchFailed');
@@ -419,6 +442,7 @@ var InspSched;
                     GetInspList(key);
                 }
                 else {
+                    //display notification of failed delete
                 }
             }
             else {
@@ -427,13 +451,12 @@ var InspSched;
             }
         }
         UI.CancelInspection = CancelInspection;
-        function IsGoodCancelDate(inspection) {
+        function IsGoodCancelDate(inspection, IsExternalUser) {
             var tomorrow = new Date();
             var inspDate = new Date(inspection.DisplaySchedDateTime);
             var dayOfMonth = tomorrow.getDate() + 1;
             //today.setDate( dayOfMonth - 20 );
-            console.log("today: " + tomorrow + "\nSchedDateTime: " + inspDate);
-            if (inspDate < tomorrow)
+            if (inspDate < tomorrow && IsExternalUser)
                 return false;
             return true;
         }
