@@ -124,6 +124,7 @@
     <Content Include="Content\css\foundation-rtl.min.css" />
     <Content Include="Content\css\foundation.css" />
     <Content Include="Content\css\foundation.min.css" />
+    <Content Include="Content\css\jquery-ui.css" />
     <Content Include="Content\css\MyStyle.css" />
     <Content Include="Content\fonts\foundation-icons.css" />
     <Content Include="Content\fonts\foundation-icons.svg" />
@@ -412,6 +413,7 @@
     <Content Include="Content\fonts\svgs\fi-zoom-out.svg" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
+    <Content Include="Scripts\app\es6-promise.min.js" />
     <Content Include="Scripts\app\tsconfig.json" />
     <Content Include="Scripts\app\tslint.json" />
     <Content Include="Content\css\bootstrap-datepicker3.standalone.css.map" />
@@ -423,6 +425,7 @@
     <Content Include="Content\fonts\foundation-icons.woff" />
     <Content Include="bundleconfig.json" />
     <Content Include="compilerconfig.json.defaults" />
+    <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Scripts\jquery-3.1.1.intellisense.js" />
     <Content Include="index.html" />
     <Content Include="Scripts\bootstrap-datepicker.js" />
