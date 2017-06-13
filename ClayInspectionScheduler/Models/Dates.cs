@@ -145,17 +145,10 @@ namespace InspectionScheduler.Models
           var t = dTmp.AddDays( i );
           if( !badDates.Contains( t ) )
           {
-            if( IsExternalUser )
+            if (t.DayOfWeek == DayOfWeek.Saturday ||
+              t.DayOfWeek == DayOfWeek.Sunday)
             {
-              if( t.DayOfWeek == DayOfWeek.Saturday ||
-                t.DayOfWeek == DayOfWeek.Sunday )
-              {
-                badDates.Add( t );
-              }
-              else
-              {
-                goodDates.Add( t );
-              }
+              badDates.Add(t);
             }
             else
             {
