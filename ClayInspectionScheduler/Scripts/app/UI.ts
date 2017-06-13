@@ -651,8 +651,9 @@ namespace InspSched.UI
     message.appendChild( document.createTextNode(
 
       "\nPlease contact the Building Department " +
-      "for assistance at 904-284-6307.  Inspections may not " +
-      "be able to be scheduled on line due to many reasons " +
+      "for assistance at 904-284-6307.  There are multiple " +
+      "reasons an inspections may not " +
+      "be scheduled on-line " +
       "(fees due, permit problems, holds, or licensing issues)."
 
     ) );
