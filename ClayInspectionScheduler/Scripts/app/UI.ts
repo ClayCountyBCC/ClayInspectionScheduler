@@ -467,8 +467,9 @@ namespace InspSched.UI
     let optionLabel: HTMLOptionElement = ( <HTMLOptionElement>document.createElement( "option" ) );
 
     clearElement( InspTypeList );
-    optionLabel.label += label +" Inspections:";
-    optionLabel.innerText = optionLabel.label;
+    optionLabel.textContent = label + " Inspections:";
+    //optionLabel.label += label +" Inspections:";
+    //optionLabel.innerText = optionLabel.label;
     optionLabel.className = "selectPlaceholder";
     optionLabel.selected;
     optionLabel.value = "";
