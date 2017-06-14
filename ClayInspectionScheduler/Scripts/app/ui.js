@@ -244,11 +244,11 @@ var InspSched;
             inspDesc.className = "large-8 medium-8 small-9 inspType ";
             inspRow.appendChild(inspDesc);
             var ResultADC = document.createElement("div");
-            ResultADC.textContent = inspection.ResultADC.trim();
+            ResultADC.textContent = inspection.ResultDescription.trim();
             ResultADC.className = "large-1 medium-1 small-1 inspResult";
             ResultADC.style.textAlign = "center";
             inspRow.appendChild(ResultADC);
-            if (inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'C' || inspection.ResultADC == 'N') {
+            if (inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'N') {
                 var Remarks = document.createElement("div");
                 if (inspection.Remarks !== null || inspection.Remarks === "") {
                     Remarks.textContent = "Remarks: " + inspection.Remarks.trim();

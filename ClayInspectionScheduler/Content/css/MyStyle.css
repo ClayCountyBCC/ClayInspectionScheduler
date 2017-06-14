@@ -208,7 +208,7 @@ table tbody, table tfoot, table thead {
   width:100%;
 }
 .App-Container {
-  min-height: 54rem;
+  min-height: calc(100% - .top-bar);
   min-width: 300px;
 
 }

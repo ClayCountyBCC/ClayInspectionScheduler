@@ -23,7 +23,28 @@ namespace InspectionScheduler.Models
 
     public string ResultADC { get; set; }
 
-    public string Remarks { get; set; } = null;
+    public string ResultDescription
+    {
+      get
+      {
+        switch(ResultADC)
+        {
+          case "A":
+            return "Approved";
+          case "C": 
+            return "Canceled";
+          case "D":
+            return "Denied";
+          case "P":
+            return "Pass";
+          default:
+            return "";
+ 
+        }
+      }
+    }
+
+public string Remarks { get; set; } = null;
 
     public DateTime SchedDateTime { get; set; }
 

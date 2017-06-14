@@ -13,6 +13,7 @@ namespace InspSched
     InspDateTime: Date;
     DisplayInspDateTime: string;
     ResultADC: string;
+    ResultDescription: string;
     Remarks: string;
     SchedDateTime: Date;
     DisplaySchedDateTime: string;
@@ -34,6 +35,7 @@ namespace InspSched
     public InspDateTime: Date;
     public DisplayInspDateTime: string;
     public ResultADC: string;
+    public ResultDescription: string;
     public Remarks: string;
     public SchedDateTime: Date;
     public DisplaySchedDateTime: string;

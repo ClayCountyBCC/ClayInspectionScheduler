@@ -28,6 +28,11 @@ var InspSched;
         LoadData();
     } //  END start()
     InspSched.start = start;
+    PermitSearchField.onkeydown = function (event) {
+        if (event.keyCode == 13) {
+            $(PermitSearchButton).click();
+        }
+    };
     PermitSearchButton.onclick = function () {
         InspSched.transport.GetPermit(InspSched.UI.Search(PermitSearchField.value)).then(function (permits) {
             InspSched.CurrentPermits = permits;

@@ -37,7 +37,13 @@ namespace InspSched
     LoadData();
 
   } //  END start()
-  
+
+  PermitSearchField.onkeydown = function (event) {
+    if (event.keyCode == 13) {
+      $(PermitSearchButton).click();
+    }
+  };
+
   PermitSearchButton.onclick = function ()
   {
     transport.GetPermit( InspSched.UI.Search( PermitSearchField.value ) ).then( function ( permits: Array<Permit> )

@@ -332,13 +332,13 @@ namespace InspSched.UI
     inspDesc.className = "large-8 medium-8 small-9 inspType ";
     inspRow.appendChild( inspDesc );
 
-    let ResultADC: HTMLDivElement = ( <HTMLDivElement>document.createElement( "div" ) );
-    ResultADC.textContent = inspection.ResultADC.trim();
+    let ResultADC: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
+    ResultADC.textContent = inspection.ResultDescription.trim();
     ResultADC.className = "large-1 medium-1 small-1 inspResult";
     ResultADC.style.textAlign = "center";
     inspRow.appendChild( ResultADC );
 
-    if ( inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'C' || inspection.ResultADC == 'N' )
+    if ( inspection.ResultADC == 'F' || inspection.ResultADC == 'D' ||  inspection.ResultADC == 'N' )
     {
       let Remarks: HTMLDivElement = ( <HTMLDivElement>document.createElement( "div" ) );
 
