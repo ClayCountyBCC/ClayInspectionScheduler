@@ -53,8 +53,8 @@ namespace InspectionScheduler.Models
       dbArgs.Add( "@PermitNo", AssocKey );
 
       string sql = @"
-        USE WATSC;
-        DECLARE @MPermitNo CHAR(8) = (SELECT MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = @PermitNo);
+      USE WATSC;
+      DECLARE @MPermitNo CHAR(8) = (SELECT MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = @PermitNo);
 
         CREATE TABLE #Fail 
         (
@@ -81,6 +81,7 @@ namespace InspectionScheduler.Models
             OR @MPermitNo = PermitNo
             OR PermitNo IN (SELECT PermitNo FROM bpASSOC_PERMIT WHERE  MPermitNo = @PermitNo or MPermitNo = @MPermitNo))    
             AND HldDate IS NULL
+			AND H.HldCd NOT IN ('1SWF','PPCC')
             AND PermitNo NOT IN (SELECT PermitNo FROM #Fail);
   
 
