@@ -119,7 +119,7 @@ span.prefix, label.prefix {
 }
 
 
-.small-12 div#sandbox-container {
+.small-12 #sandbox-container {
   margin-bottom: 20px;
 }
 
@@ -138,7 +138,7 @@ table {
 }
 
 .datepicker {
-  border-radius: 0px;
+  border-radius: 0;
   direction: ltr;
   display: table;
 
@@ -207,8 +207,11 @@ table tbody, table tfoot, table thead {
 .datepicker-inline{
   width:100%;
 }
+.top-bar{
+height: 5em;
+}
 .App-Container {
-  min-height: calc(100% - .top-bar);
+  min-height: calc(100% - 5em);
   min-width: 300px;
 
 }
@@ -219,7 +222,8 @@ table tbody, table tfoot, table thead {
 
 .InspBorderBottom {
   border-bottom: 2px solid;
-  border-bottom-color: rgba(0,0,0,.1);
+  border-bottom-color: rgb(159, 159, 159);
+  border-bottom-color: rgba(0, 0, 0, 0.1);
   margin-bottom: 1rem;
   padding-bottom: 1rem;
 }
@@ -230,11 +234,13 @@ table tbody, table tfoot, table thead {
 }
 .datepicker table tr td.disabled {
   background-color: lightgray;
+  color: rgb(104, 104, 104);
   color: rgba(256,256,256, .4);
 }
 
   .datepicker table tr td.disabled:hover {
     background-color: lightgray;
+    color: rgb(104, 104, 104);
     color: rgba(256,256,256, .4);
   }
 
@@ -247,7 +253,7 @@ table tbody, table tfoot, table thead {
   height: 30rem;
 }
 .inspRemarks {
-  padding: 0px 50px;
+  padding: 0 50px;
   color: #bd3f52;
 }
 .PermitSelectDiv {

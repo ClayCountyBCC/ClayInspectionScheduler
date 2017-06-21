@@ -121,7 +121,7 @@ namespace InspSched.UI
 
   export function UpdatePermitData( key: string, permits?: Array<Permit> ): void
   {
-    Hide( '' )
+
     let street: HTMLElement = ( <HTMLElement>document.getElementById( 'ProjAddrCombined' ) );
     let city: HTMLElement = ( <HTMLElement>document.getElementById( 'ProjCity' ) );
 

@@ -87,7 +87,6 @@ var InspSched;
             }
         }
         function UpdatePermitData(key, permits) {
-            Hide('');
             var street = document.getElementById('ProjAddrCombined');
             var city = document.getElementById('ProjCity');
             for (var _i = 0, permits_2 = permits; _i < permits_2.length; _i++) {

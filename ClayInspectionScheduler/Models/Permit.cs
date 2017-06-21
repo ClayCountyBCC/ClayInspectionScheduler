@@ -85,22 +85,31 @@ namespace InspectionScheduler.Models
   
 
 		    INSERT INTO #Fail
-		    SELECT DISTINCT A.PermitNo, 'F' AS FailType
-		    FROM bpASSOC_PERMIT A
-		    LEFT OUTER JOIN clContractor C ON A.ContractorId = C.ContractorCd
-		    WHERE A.MPermitNo IN 
-				    (select PermitNo 
-				    from bpMASTER_PERMIT
-				    where IssueDate is not null 
-					    and CoDate is null
-					    and permitno not in 
-					    (Select permitno 
-					    from bpINS_REQUEST 
-					    where InspectionCode in 
-						    (select InspCd 
-						    from bpINS_REF
-						    Where InsDesc  like ('%Final%')))) 
-			    and PermitNo NOT IN (SELECT PermitNo FROM #Fail)
+        SELECT 
+            PermitNo, 
+            FailType FROM (
+		        SELECT 
+			        A.PermitNo,
+			        'F' AS FailType
+		        FROM bpASSOC_PERMIT A
+		        LEFT OUTER JOIN clContractor C ON A.ContractorId = C.ContractorCd
+		        WHERE((A.PermitNo = @PermitNo 
+				        OR A.MPermitNo = @MPermitNo)
+				        and a.PermitNo IN 
+				        (SELECT 
+				        a.PermitNo 
+				        FROM 
+				        bpASSOC_PERMIT a
+				        inner join bpMASTER_PERMIT M on a.BaseID = m.BaseID 
+				        WHERE (M.CoClosed = 1 and (M.permitNo = @PermitNo or M.PermitNo = @MPermitNo)) 
+				        OR M.PermitNo in ( SELECT PermitNo
+									        from bpINS_REQUEST i 
+									        left outer join bpINS_REF ir on i.InspectionCode = ir.InspCd 
+									        WHERE InsDesc LIKE '%[f]inal' 
+										        and (permitno = @PermitNo 
+										        or permitno = @MPermitNo)
+										        and ResultADC in ('A', 'P'))))
+				        and PermitNo NOT IN (SELECT PermitNo FROM #Fail)
 
 		    UNION ALL
 		    SELECT DISTINCT M.PermitNo,
@@ -115,7 +124,7 @@ namespace InspectionScheduler.Models
 			    WHERE InsDesc LIKE '%[f]inal' 
 				    and (PermitNo = @MPermitNo or PermitNo = @PermitNo)
 				    and ResultADC in ('A', 'P')
-		    and PermitNo NOT IN (SELECT PermitNo FROM #Fail));
+		    and PermitNo NOT IN (SELECT PermitNo FROM #Fail))) as m
 
 
 	    SELECT 
