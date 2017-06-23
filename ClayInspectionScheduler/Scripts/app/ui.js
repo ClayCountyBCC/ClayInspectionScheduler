@@ -470,7 +470,7 @@ var InspSched;
             message.appendChild(document.createElement("br"));
             message.appendChild(document.createTextNode("\nPlease contact the Building Department " +
                 "for assistance at 904-284-6307.  There are multiple " +
-                "reasons an inspections may not " +
+                "reasons an inspection may not " +
                 "be scheduled on-line " +
                 "(fees due, permit problems, holds, or licensing issues)."));
             e.appendChild(message);
