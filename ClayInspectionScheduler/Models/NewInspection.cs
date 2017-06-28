@@ -7,7 +7,7 @@ using System.Web;
 using System.Data;
 using Dapper;
 
-namespace InspectionScheduler.Models
+namespace ClayInspectionScheduler.Models
 {
   public class NewInspection
   {
@@ -49,14 +49,23 @@ namespace InspectionScheduler.Models
     public List<string> Validate(bool IsExternalUser)
     {
       // List of things that need to be validated:
+      // 0) Make sure the permit is able to be scheduled to be inspected.
       // 1) Make sure this permit is valid
       // 2) Make sure the date is in the range expected
       // 3) Make sure the inspection type matches the permit type.
       // 4) Make sure the inspection type is a valid inspection type.
       // 5) Make sure the inspection type isn't already scheduled for this permit.
       // 6) Need to ensure an Inspection cannot be saved if a final inspection result is 'A' or 'P'
-
       List<string> Errors = new List<string>();
+
+      // 0)
+      string s = Permit.Validate(this.PermitNo, IsExternalUser);
+      if (s.Length > 0)
+      {
+        Errors.Add(s);
+        return Errors;
+      }
+      
       List<InspType> inspTypes = (List<InspType>)MyCache.GetItem("inspectiontypes,"+IsExternalUser.ToString());
 
       var Permits = (from p in Permit.Get(this.PermitNo, IsExternalUser)
@@ -66,7 +75,7 @@ namespace InspectionScheduler.Models
       Permit CurrentPermit;
       if (Permits.Count == 0)
       {
-        Errors.Add("Permit number \"" + PermitNo + "\" was not found.");
+        Errors.Add($"Permit number {PermitNo} was not found.");
 
         // If permit is not found, then exit
         // no need to validate other data

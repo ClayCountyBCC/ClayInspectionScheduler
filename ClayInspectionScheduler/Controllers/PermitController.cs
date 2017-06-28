@@ -4,9 +4,9 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
-using InspectionScheduler.Models;
+using ClayInspectionScheduler.Models;
 
-namespace InspectionScheduler.Controllers
+namespace ClayInspectionScheduler.Controllers
 {
   public class PermitController : ApiController
   {

@@ -7,7 +7,7 @@ using System.Data.SqlClient;
 using System.Configuration;
 using Dapper;
 
-namespace InspectionScheduler.Models
+namespace ClayInspectionScheduler.Models
 {
   public class InspType
   {

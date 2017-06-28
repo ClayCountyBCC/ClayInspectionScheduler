@@ -101,11 +101,12 @@
     <Compile Include="Controllers\InspTypeController.cs" />
     <Compile Include="Controllers\NewInspectionController.cs" />
     <Compile Include="Controllers\PermitController.cs" />
+    <Compile Include="Controllers\ValidatePermitController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Constants.cs" />
-    <Compile Include="Models\Dates.cs" />
+    <Compile Include="Models\InspectionDates.cs" />
     <Compile Include="Models\ErrorLog.cs" />
     <Compile Include="Models\Inspection.cs" />
     <Compile Include="Models\InspType.cs" />
