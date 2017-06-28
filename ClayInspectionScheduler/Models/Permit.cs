@@ -59,7 +59,9 @@ namespace ClayInspectionScheduler.Models
       WHERE 
         (M.PermitNo = @PermitNo OR M.PermitNo = @MPermitNo)
         AND M.VoidDate IS NULL
+
       UNION ALL
+
       SELECT DISTINCT 
         A.PermitNo PermitNo,
         ISNULL(A.MPermitNo, A.PermitNo) MPermitNo,
