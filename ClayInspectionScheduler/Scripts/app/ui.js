@@ -93,8 +93,10 @@ var InspSched;
                 var permit = permits_2[_i];
                 if (permit.PermitNo == key) {
                     Show('PermitSelectContainer');
-                    street.innerHTML = permit.ProjAddrCombined.trim();
-                    city.innerHTML = permit.ProjCity.trim();
+                    if (permit.ProjAddrCombined != null)
+                        street.innerHTML = permit.ProjAddrCombined.trim();
+                    if (permit.ProjCity != null)
+                        city.innerHTML = permit.ProjCity.trim();
                     break;
                 }
             }
