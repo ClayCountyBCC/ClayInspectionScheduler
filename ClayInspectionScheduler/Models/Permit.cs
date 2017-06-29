@@ -14,6 +14,7 @@ namespace ClayInspectionScheduler.Models
     public string ProjAddrCombined { get; set; }
     public string ProjCity { get; set; }
     public int Confidential { get; set; }
+    public string ErrorText { get; set; }
 
     private DateTime SuspendGraceDate { get; set; } = DateTime.MinValue;
     private DateTime WorkersCompExpirationDate { get; set; }
@@ -87,6 +88,7 @@ namespace ClayInspectionScheduler.Models
           l.IsExternalUser = IsExternalUser;
           if(l.Confidential == 1 && IsExternalUser)
           {
+            l.ErrorText = Permit.Validate(l.PermitNo, IsExternalUser);
             l.ProjAddrCombined = "Confidential";
             l.ProjCity = "Confidential";
           }
