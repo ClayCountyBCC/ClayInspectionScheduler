@@ -101,7 +101,6 @@
     <Compile Include="Controllers\InspTypeController.cs" />
     <Compile Include="Controllers\NewInspectionController.cs" />
     <Compile Include="Controllers\PermitController.cs" />
-    <Compile Include="Controllers\ValidatePermitController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

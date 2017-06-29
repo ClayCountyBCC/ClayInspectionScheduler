@@ -59,18 +59,14 @@ namespace ClayInspectionScheduler.Models
       List<string> Errors = new List<string>();
 
       // 0)
-      string s = Permit.Validate(this.PermitNo, IsExternalUser);
-      if (s.Length > 0)
-      {
-        Errors.Add(s);
-        return Errors;
-      }
+
       
       List<InspType> inspTypes = (List<InspType>)MyCache.GetItem("inspectiontypes,"+IsExternalUser.ToString());
 
       var Permits = (from p in Permit.Get(this.PermitNo, IsExternalUser)
                      where p.PermitNo == this.PermitNo
                      select p).ToList();
+
 
       Permit CurrentPermit;
       if (Permits.Count == 0)
@@ -84,6 +80,11 @@ namespace ClayInspectionScheduler.Models
       else
       {
         CurrentPermit = Permits.First();
+        if (CurrentPermit.ErrorText.Length > 0)
+        {
+          Errors.Add(CurrentPermit.ErrorText);
+          return Errors;
+        }
 
         // validate user selected date
 
