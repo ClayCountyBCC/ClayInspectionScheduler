@@ -4,13 +4,12 @@ using System.Linq;
 using System.Web.Http;
 using System.Net.Http;
 using Newtonsoft.Json.Serialization;
-using InspectionScheduler.Models;
 
 namespace ClayInspectionScheduler
 {
   public static class WebApiConfig
   {
-    public static void Register( HttpConfiguration config )
+    public static void Register(HttpConfiguration config)
     {
       // Web API configuration and services
 
@@ -24,8 +23,11 @@ namespace ClayInspectionScheduler
       );
       config.Routes.MapHttpRoute(
         name: "NewInspectionApi",
-        routeTemplate: "API/NewInspection/ ",
-        defaults: new { thisInspection = RouteParameter.Optional}
+        routeTemplate: "API/NewInspection/{thisInspection} "
+      );
+      config.Routes.MapHttpRoute(
+        name: "ValidatePermitApi",
+        routeTemplate: "API/ValidatePermit/{permitNo}"
       );
     }
   }

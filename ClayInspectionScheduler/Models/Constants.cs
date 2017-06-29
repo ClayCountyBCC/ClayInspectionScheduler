@@ -8,12 +8,11 @@ using System.Configuration;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
-using InspectionScheduler.Models;
 using Dapper;
 
 
 
-namespace InspectionScheduler.Models
+namespace ClayInspectionScheduler.Models
 {
  
   public static class Constants
