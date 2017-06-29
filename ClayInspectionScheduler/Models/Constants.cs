@@ -14,11 +14,11 @@ using Dapper;
 
 namespace ClayInspectionScheduler.Models
 {
- 
+
   public static class Constants
   {
     public const int appId = 20024;
-    
+
     public static bool UseProduction()
     {
       switch (Environment.MachineName.ToUpper())
@@ -90,7 +90,7 @@ namespace ClayInspectionScheduler.Models
       {
         using (IDbConnection db = new SqlConnection(Get_ConnStr("Printing")))
         {
-          return ( List<T> )db.Query<T>( insertQuery);
+          return (List<T>)db.Query<T>(insertQuery);
         }
       }
       catch (Exception ex)
@@ -100,40 +100,57 @@ namespace ClayInspectionScheduler.Models
       }
     }
 
-    public static List<T> Save_Data<T>( string query, DynamicParameters dbA )
-    {
-      {
-        try
-        {
-          using( IDbConnection db = new SqlConnection( Get_ConnStr( "WATSC" + ( UseProduction() ? "Prod" : "QA" ) ) ) )
-          {
-            return ( List<T> )db.Query<T>( query, dbA );
-
-          }
-        }
-        catch( Exception ex )
-        {
-          Log( ex, query );
-          return null;
-        }
-      }
-    }
-
-    public static bool Execute(string query, DynamicParameters dbA)
+    public static List<T> Save_Data<T>(string query, DynamicParameters dbA)
     {
       {
         try
         {
           using (IDbConnection db = new SqlConnection(Get_ConnStr("WATSC" + (UseProduction() ? "Prod" : "QA"))))
           {
-            db.Execute(query, dbA);
-            return true;
+            return (List<T>)db.Query<T>(query, dbA);
+
           }
         }
         catch (Exception ex)
         {
           Log(ex, query);
-          return false;
+          return null;
+        }
+      }
+    }
+
+    public static int Execute(string query, DynamicParameters dbA)
+    {
+      {
+        try
+        {
+          using (IDbConnection db = new SqlConnection(Get_ConnStr("WATSC" + (UseProduction() ? "Prod" : "QA"))))
+          {
+            return db.Execute(query, dbA);
+          }
+        }
+        catch (Exception ex)
+        {
+          Log(ex, query);
+          return -1;
+        }
+      }
+    }
+
+    public static T Execute_Scalar<T>(string query, DynamicParameters dbA)
+    {
+      {
+        try
+        {
+          using (IDbConnection db = new SqlConnection(Get_ConnStr("WATSC" + (UseProduction() ? "Prod" : "QA"))))
+          {
+            return db.ExecuteScalar<T>(query, dbA);
+          }
+        }
+        catch (Exception ex)
+        {
+          Log(ex, query);
+          return default(T);
         }
       }
     }
@@ -148,7 +165,7 @@ namespace ClayInspectionScheduler.Models
     {
       return name.Length == 0;
     }
-    
+
     #region Log Code
 
     public static void Log(Exception ex, string Query = "")

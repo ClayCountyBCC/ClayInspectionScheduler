@@ -25,7 +25,7 @@ namespace ClayInspectionScheduler.Models
     {
       get
       {
-        return InspectionDates.GenerateShortDates(IsExternalUser,SuspendGraceDate);
+        return InspectionDates.GenerateShortDates(IsExternalUser, SuspendGraceDate);
       }
     }
 
@@ -34,11 +34,11 @@ namespace ClayInspectionScheduler.Models
 
     }
 
-    public static List<Permit> Get(string AssocKey,bool IsExternalUser)
+    public static List<Permit> Get(string AssocKey, bool IsExternalUser)
     {
 
       var dbArgs = new DynamicParameters();
-      dbArgs.Add("@PermitNo",AssocKey);
+      dbArgs.Add("@PermitNo", AssocKey);
 
       string sql = @"
       USE WATSC;
@@ -81,15 +81,15 @@ namespace ClayInspectionScheduler.Models
     ";
       try
       {
-        var lp = Constants.Get_Data<Permit>(sql,dbArgs);
-        foreach(Permit l in lp)
+        var lp = Constants.Get_Data<Permit>(sql, dbArgs);
+        foreach (Permit l in lp)
         {
-          l.IsExternalUser=IsExternalUser;
+          l.IsExternalUser = IsExternalUser;
 
-          if(l.Confidential==1&&IsExternalUser)
+          if (l.Confidential == 1 && IsExternalUser)
           {
-            l.ProjAddrCombined="Confidential";
-            l.ProjCity="Confidential";
+            l.ProjAddrCombined = "Confidential";
+            l.ProjCity = "Confidential";
           }
 
           l.Validate();
@@ -97,7 +97,7 @@ namespace ClayInspectionScheduler.Models
         }
         return lp;
       }
-      catch(Exception ex)
+      catch (Exception ex)
       {
         Constants.Log(ex);
         return null;
@@ -122,48 +122,56 @@ namespace ClayInspectionScheduler.Models
           Has a hold that does not hold up the final inspection?
           If the user is external and a final inspection has already been completed
       */
-      if(ChargesExist()) return;
+      if (ChargesExist()) return;
 
-      if(ContractorIssues()) return;
+      if (ContractorIssues()) return;
 
-      if(HoldsExist()) return;
-      
-      if(this.IsExternalUser)
+      if (HoldsExist()) return;
+
+      if (this.IsExternalUser)
       {
-        if(PassedFinal()) return;
+        if (PassedFinal()) return;
       }
     }
 
     private bool ChargesExist()
     {
-
       // returns true if charges exist for this permit or there is an issue getting this data for the permit.
       try
       {
-      string sql = $@"
-        USE WATSC;
-        Select distinct AssocKey from ccCashierItem 
-        where AssocKey = {this.PermitNo}
-        AND Total > 0			    -- CHECKS IF TOTAL (owed) IS GREATER THAN ZERO
-        AND CashierId IS NULL	-- CHECK IF CASHIER HAS SIGNED OFF ON CHARGE (IF NULL, THEN CHARGE IS STILL VALID)
-        AND UnCollectable = 0
+        var dp = new DynamicParameters();
+        dp.Add("@PermitNo", this.PermitNo);
+
+        string sql = $@"
+          USE WATSC;
+          Select 
+            COUNT(DISTINCT AssocKey) AS CNT
+          FROM ccCashierItem 
+          WHERE 
+            AssocKey = @PermitNo
+            AND Total > 0			    -- CHECKS IF TOTAL (owed) IS GREATER THAN ZERO
+            AND CashierId IS NULL	-- CHECK IF CASHIER HAS SIGNED OFF ON CHARGE (IF NULL, THEN CHARGE IS STILL VALID)
+            AND UnCollectable = 0
         ";
 
-        var lp = Constants.Get_Data<Permit>(sql);
+        int i = Constants.Execute_Scalar<int>(sql, dp);
 
-        if(lp.Count>0)
+        switch(i)
         {
-          ErrorText=$"There is a charge associated with Permit #{this.PermitNo}";
-          return true;
+          case -1:
+            ErrorText = $"There was an issue calculating the charges for Permit #{this.PermitNo}";
+            return true;
+          case 0:
+            return false;
+          default:
+            ErrorText = $"There is a charge associated with Permit #{this.PermitNo}";
+            return true;
         }
-        else
-          return false;
-        
       }
-      catch(Exception ex)
+      catch (Exception ex)
       {
         Constants.Log(ex);
-        ErrorText=$"There was an issue getting data for Permit #{this.PermitNo}";
+        ErrorText = $"There was an issue getting data for Permit #{this.PermitNo}";
         return true;
       }
 
@@ -171,25 +179,25 @@ namespace ClayInspectionScheduler.Models
 
     private bool ContractorIssues()
     {
-     
-      if(this.LiabilityExpirationDate<=DateTime.Today)
+
+      if (this.LiabilityExpirationDate <= DateTime.Today)
       {
-        ErrorText="The Contractor's Liability Insurance expiration date has passed";
+        ErrorText = "The Contractor's Liability Insurance expiration date has passed";
         return true;
       }
-      else if(this.WorkersCompExpirationDate<=DateTime.Today)
+      else if (this.WorkersCompExpirationDate <= DateTime.Today)
       {
-        ErrorText="The Contractor's Workman's Compensation Insurance expiration date has passed";
+        ErrorText = "The Contractor's Workman's Compensation Insurance expiration date has passed";
         return true;
       }
-      else if(this.ContractorStatus!="A")
+      else if (this.ContractorStatus != "A")
       {
-        ErrorText="There is an issue with the contractor's status";
+        ErrorText = "There is an issue with the contractor's status";
         return true;
       }
-      else if(this.SuspendGraceDate<DateTime.Today && this.SuspendGraceDate != DateTime.MinValue)
+      else if (this.SuspendGraceDate < DateTime.Today && this.SuspendGraceDate != DateTime.MinValue)
       {
-        ErrorText="The Grace Period for this permit has passed";
+        ErrorText = "The Grace Period for this permit has passed";
         return true;
       }
       // returns true if contractor issues exist for this permit.
@@ -199,65 +207,82 @@ namespace ClayInspectionScheduler.Models
 
     private bool HoldsExist()
     {
-      //bool holdsExist = false;
+      var dp = new DynamicParameters();
+      dp.Add("@PermitNo", this.PermitNo);
       string sql = $@"
-      select * from bpHOLD h
-      where h.PermitNo = {this.PermitNo}
-      AND HldDate IS NULL
-      --AND H.HldCd NOT IN ('1SWF','PPCC')
+        select 
+          COUNT(*) AS CNT 
+        from bpHOLD h
+        where 
+          h.PermitNo = @PermitNo
+          AND HldDate IS NULL
+          AND H.HldCd NOT IN ('1SWF','PPCC')
       ";
-
+      // Revisit this when the changes are made to the bpHold_REF table
+      // to add hte additional column to check if a hold will prevent
+      // the permit from having a final inspection.
       try
       {
-        var lp = Constants.Get_Data<Permit>(sql);
-        if(lp.Count>0)
+        int i = Constants.Execute_Scalar<int>(sql, dp);
+
+        switch (i)
         {
-          ErrorText=($"There is a hold associated with Permit #{PermitNo}");
-          return true;
+          case -1:
+            ErrorText = $"There was an issue checking for holds for Permit #{this.PermitNo}";
+            return true;
+          case 0:
+            return false;
+          default:
+            ErrorText = $"There is a hold associated with Permit #{this.PermitNo}";
+            return true;
         }
-        else
-          return false;
+
       }
-      catch(Exception ex)
+      catch (Exception ex)
       {
         Constants.Log(ex);
-        ErrorText=$"There was an issue getting data for Permit #{this.PermitNo}";
+        ErrorText = $"There was an issue checking for holds for Permit #{this.PermitNo}";
         return true;
       }
     }
 
     private bool PassedFinal()
     {
-      
+      var dp = new DynamicParameters();
+      dp.Add("@PermitNo", this.PermitNo);
       string sql = $@"
-        
         USE WATSC;
-        DECLARE @MPermitNo CHAR(8) = (SELECT MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = {this.PermitNo});
 
-        SELECT PERMITNO FROM bpINS_REQUEST I
-        JOIN bpINS_REF IR ON I.InspectionCode = IR.InspCd
-        WHERE PermitNo = {this.PermitNo}
-	        AND I.InspectionCode IN (SELECT InspCd FROM bpINS_REF WHERE Partial = 0) 
+        SELECT 
+          COUNT(*) AS CNT 
+        FROM bpINS_REQUEST I
+        INNER JOIN bpINS_REF IR ON I.InspectionCode = IR.InspCd AND Partial = 0
+        WHERE 
+          PermitNo = @PermitNo
           AND ResultADC IN ('A', 'P')";
       try
       {
-        var lp = Constants.Get_Data<Permit>(sql);
-        if(lp.Count>0)
+        int i = Constants.Execute_Scalar<int>(sql, dp);
+        switch (i)
         {
-          ErrorText=($"Permit #{this.PermitNo} has passed a final inspection");
-          return true;
+          case -1:
+            ErrorText = $"There was an issue checking for a final inspection for Permit #{this.PermitNo}";
+            return true;
+          case 0:
+            return false;
+          default:
+            ErrorText = $"Permit #{this.PermitNo} has passed a final inspection";
+            return true;
         }
-        else
-          return false;
       }
-      catch(Exception ex)
+      catch (Exception ex)
       {
         Constants.Log(ex);
-        ErrorText=$"There was an issue getting data for Permit #{this.PermitNo}";
+        ErrorText = $"There was an issue checking for a final inspection for Permit #{this.PermitNo}";
         return true;
       }
     }
 
-    
+
   }
 }

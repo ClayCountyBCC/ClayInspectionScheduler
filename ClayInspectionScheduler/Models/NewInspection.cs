@@ -178,7 +178,7 @@ namespace ClayInspectionScheduler.Models
       try
       {
         var i = Constants.Execute(sqlPP, dbArgs);
-        if (i)
+        if (i > -1)
         {
           IRID = dbArgs.Get<long?>( "@IRID" );
           if( IRID.HasValue )
@@ -239,8 +239,6 @@ namespace ClayInspectionScheduler.Models
         LEFT OUTER JOIN bpASSOC_PERMIT A ON B.BaseID = A.BaseID AND M.PermitNo = A.MPermitNo
         WHERE (A.PermitNo = @PermitNo OR M.PermitNo = @PermitNo)
       ";
-
-
       try
       {
         Constants.Save_Data<string>(sql, dbArgs);
