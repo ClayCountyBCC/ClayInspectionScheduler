@@ -88,7 +88,7 @@ namespace ClayInspectionScheduler.Models
           l.IsExternalUser = IsExternalUser;
           if(l.Confidential == 1 && IsExternalUser)
           {
-            l.ErrorText = Permit.Validate(l.PermitNo, IsExternalUser);
+            l.Validate();
             l.ProjAddrCombined = "Confidential";
             l.ProjCity = "Confidential";
           }
@@ -104,7 +104,7 @@ namespace ClayInspectionScheduler.Models
 
     }
 
-    public static string Validate(string permitNo, bool IsExternal)
+    public void Validate()
     {
       /*
       They cannot schedule an inspection if:
@@ -120,52 +120,48 @@ namespace ClayInspectionScheduler.Models
           Has a hold that does not hold up the final inspection?
           If the user is external and a final inspection has already been completed
       */
-      string s = ChargesExist(permitNo);
-      if (s.Length > 0) return s;
+      if (ChargesExist()) return;
 
-      s = ContractorIssues(permitNo);
-      if (s.Length > 0) return s;
+      if (ContractorIssues()) return;
 
-      s = HoldsExist(permitNo);
-      if (s.Length > 0) return s;
+      if(HoldsExist()) return;
 
 
 
-      if (IsExternal)
+
+      if (this.IsExternalUser)
       {
-        s = PassedFinal(permitNo);
-        return s;
+        if (PassedFinal()) return;
       }
-      return "";
     }
 
-    private static string ContractorIssues(string permitNo)
+    private bool ContractorIssues()
     {
+      // returns true if contractor issues exist for this permit.
       //"The grace period for this permit has passed."
-      return "";
+
+      return false;
     }
 
-    private static string ChargesExist(string permitNo)
+    private bool ChargesExist()
     {
-      string sql = @"
-
-
-";
-      return sql;
+      // returns true if charges exist for this permit.
+      string sql = @"";
+      return false;
     }
 
-    private static string HoldsExist(string permitNo)
+    private bool HoldsExist()
     {
       //bool holdsExist = false;
 
-      return "";
+      return false;
     }
 
-    private static string PassedFinal(string permitNo)
+    private bool PassedFinal()
     {
       //bool passedFinal = false;
 
-      return "";
+      return false;
     }
   }
 }
