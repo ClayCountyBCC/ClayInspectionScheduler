@@ -4,25 +4,25 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
-using InspectionScheduler.Models;
+using ClayInspectionScheduler.Models;
 
-namespace InspectionScheduler.Controllers
+namespace ClayInspectionScheduler.Controllers
 {
-  public class NewInspectionController :ApiController
+  public class NewInspectionController : ApiController
   {
-    
-    public IHttpActionResult Save( NewInspection thisInspection )
+
+    public IHttpActionResult Save(NewInspection thisInspection)
     {
 
-      if( thisInspection == null )
+      if (thisInspection == null)
       {
-        return InternalServerError();  
+        return InternalServerError();
       }
       else
       {
-        var e = thisInspection.Save( Constants.CheckIsExternalUser( User.Identity.Name ) );
+        var e = thisInspection.Save(Constants.CheckIsExternalUser(User.Identity.Name));
 
-        return Ok( e );
+        return Ok(e);
       }
     }
   }

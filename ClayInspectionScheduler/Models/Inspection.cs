@@ -7,7 +7,7 @@ using System.Data.SqlClient;
 using System.Configuration;
 using Dapper;
 
-namespace InspectionScheduler.Models
+namespace ClayInspectionScheduler.Models
 {
   public class Inspection
   {
@@ -27,11 +27,11 @@ namespace InspectionScheduler.Models
     {
       get
       {
-        switch(ResultADC)
+        switch (ResultADC)
         {
           case "A":
             return "Approved";
-          case "C": 
+          case "C":
             return "Canceled";
           case "D":
             return "Denied";
@@ -39,16 +39,14 @@ namespace InspectionScheduler.Models
             return "Pass";
           default:
             return "";
- 
+
         }
       }
     }
 
-public string Remarks { get; set; } = null;
+    public string Remarks { get; set; } = null;
 
     public DateTime SchedDateTime { get; set; }
-
-    public string Initials { get; set; } = " ";
 
     public string Phone { get; set; } = " ";
 
@@ -59,10 +57,10 @@ public string Remarks { get; set; } = null;
     {
       get
       {
-        if(this.ResultADC == "C")
-          return ( InspDateTime == DateTime.MinValue ) ? "Canceled" : InspDateTime.ToShortDateString();
-        
-        return ( InspDateTime == DateTime.MinValue ) ? "Not Completed" : InspDateTime.ToShortDateString();
+        if (this.ResultADC == "C")
+          return (InspDateTime == DateTime.MinValue) ? "Canceled" : InspDateTime.ToShortDateString();
+
+        return (InspDateTime == DateTime.MinValue) ? "Not Completed" : InspDateTime.ToShortDateString();
 
       }
 
@@ -82,61 +80,63 @@ public string Remarks { get; set; } = null;
 
     }
 
-    public static List<Inspection> Get( string key )
+    public static List<Inspection> Get(string key)
     {
 
       var dbArgs = new Dapper.DynamicParameters();
-      dbArgs.Add( "@PermitNo", key );
+      dbArgs.Add("@PermitNo", key);
 
 
 
       string sql = @"
         
         USE WATSC;
-          select 
-                 i.InspReqID,
-                 i.PermitNo, 
-                 i.InspectionCode, 
-                 ir.InsDesc, 
-                 i.InspDateTime, 
-                 i.ResultADC,
-                 i.SchecDateTime SchedDateTime,
-                 i.Remarks,
-                 i.inspector Initials,
-                 ip.name InspectorName,
-                 ip.PhoneNbr PhoneNumber
-          from bpINS_REQUEST i
-               LEFT OUTER JOIN bpINS_REF ir ON ir.InspCd = i.InspectionCode
-               LEFT OUTER JOIN bp_INSPECTORS ip ON i.Inspector = ip.Intl 
-          WHERE i.PermitNo = @PermitNo 
-		      order by InspReqID DESC";
-
-
+        select 
+          i.InspReqID,
+          i.PermitNo, 
+          i.InspectionCode, 
+          ir.InsDesc, 
+          i.InspDateTime, 
+          i.ResultADC,
+          i.SchecDateTime SchedDateTime,
+          i.Remarks,
+          CASE WHEN CAST(i.SchecDateTime AS DATE) = @Today AND ResultADC IS NULL
+          THEN LTRIM(RTRIM(ip.name)) 
+          ELSE '' END AS InspectorName,
+          CASE WHEN CAST(i.SchecDateTime AS DATE) = @Today AND ResultADC IS NULL
+          THEN LTRIM(RTRIM(ip.PhoneNbr)) 
+          ELSE '' END AS PhoneNumber,
+          ir.partial
+        from bpINS_REQUEST i
+              LEFT OUTER JOIN bpINS_REF ir ON ir.InspCd = i.InspectionCode
+              LEFT OUTER JOIN bp_INSPECTORS ip ON i.Inspector = ip.Intl 
+        WHERE i.PermitNo = @PermitNo 
+		    order by InspReqID DESC";
       try
       {
-        var li = Constants.Get_Data<Inspection>( sql, dbArgs );
+        var li = Constants.Get_Data<Inspection>(sql, dbArgs);
         return li;
       }
-      catch(Exception ex)
+      catch (Exception ex)
       {
-        Constants.Log( ex, sql );
-        var li =  new List<Inspection>();
+        Constants.Log(ex, sql);
+        var li = new List<Inspection>();
         li.Clear();
         return li;
       }
-      
+
     }
 
 
-    public static bool Cancel( string PermitNo, string InspID )
+    public static bool Cancel(string PermitNo, string InspID)
     {
-      if( PermitNo != null && InspID != null )
+      if (PermitNo != null && InspID != null)
       {
 
 
         var dbArgs = new Dapper.DynamicParameters();
-        dbArgs.Add( "@PermitNo", PermitNo );
-        dbArgs.Add( "@ID", InspID );
+        dbArgs.Add("@PermitNo", PermitNo);
+        dbArgs.Add("@ID", InspID);
 
 
         string sql = @"
@@ -154,11 +154,10 @@ public string Remarks { get; set; } = null;
         try
         {
 
-          var li = Constants.Execute( sql, dbArgs );
-          return true;
+          return Constants.Execute(sql, dbArgs);
 
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
           Constants.Log(ex, sql);
           return false;

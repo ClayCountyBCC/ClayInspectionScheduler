@@ -5,7 +5,7 @@ using System.Web;
 using System.Runtime;
 using System.Runtime.Caching;
 
-namespace InspectionScheduler.Models
+namespace ClayInspectionScheduler.Models
 {
   public class MyCache
   {
