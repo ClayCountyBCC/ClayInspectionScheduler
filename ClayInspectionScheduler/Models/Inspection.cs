@@ -91,6 +91,9 @@ namespace ClayInspectionScheduler.Models
       string sql = @"
         
         USE WATSC;
+        DECLARE @MPermitNo CHAR(8) = (SELECT MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = @PermitNo);
+
+        DECLARE @Today DATE = Cast(GetDate() as DATE);
         select 
           i.InspReqID,
           i.PermitNo, 
@@ -100,17 +103,24 @@ namespace ClayInspectionScheduler.Models
           i.ResultADC,
           i.SchecDateTime SchedDateTime,
           i.Remarks,
-          CASE WHEN CAST(i.SchecDateTime AS DATE) = @Today AND ResultADC IS NULL
+          CASE WHEN CAST(i.SchecDateTime AS DATE) >= @Today AND ResultADC IS NULL
           THEN LTRIM(RTRIM(ip.name)) 
           ELSE '' END AS InspectorName,
-          CASE WHEN CAST(i.SchecDateTime AS DATE) = @Today AND ResultADC IS NULL
+          CASE WHEN CAST(i.SchecDateTime AS DATE) >= @Today AND ResultADC IS NULL
           THEN LTRIM(RTRIM(ip.PhoneNbr)) 
           ELSE '' END AS PhoneNumber,
           ir.partial
         from bpINS_REQUEST i
               LEFT OUTER JOIN bpINS_REF ir ON ir.InspCd = i.InspectionCode
               LEFT OUTER JOIN bp_INSPECTORS ip ON i.Inspector = ip.Intl 
-        WHERE i.PermitNo = @PermitNo 
+        where baseID = (select distinct a.BaseID 
+                        from bpASSOC_PERMIT a 
+                        where a.permitno = @PermitNo 
+                           or a.MPermitNo = @PermitNo 
+                        union select m.BaseID 
+                        from bpMASTER_PERMIT m 
+                        where m.permitno = @PermitNo 
+                           or m.PermitNo = @MPermitNo)
 		    order by InspReqID DESC";
       try
       {

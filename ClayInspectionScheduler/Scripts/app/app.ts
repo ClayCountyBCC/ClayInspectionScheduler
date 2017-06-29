@@ -90,9 +90,7 @@ namespace InspSched
     {
       if ( permit.PermitNo == permitNumSelect.value )
       {
-        InspSched.UI.GetInspList( permitNumSelect.value, permit );
         InspSched.ThisPermit = permit;
-
         BuildCalendar( permit.ScheduleDates );
         break;
       }

@@ -258,18 +258,14 @@ namespace InspSched.UI
       // create (call BuildInspectioN()) and add inspection row to container InspList
       for ( let inspection of inspections )
       {
-        if ( inspection.ResultADC )
+        if (inspection.ResultADC)
         {
-          if ( completed < 5 )
-          {
             InspList.appendChild( BuildCompletedInspection( inspection) );
             InspList.appendChild( document.createElement( "hr" ) );
             completed++;
-          }
         }
-        else if ( !inspection.ResultADC )
+        else if (!inspection.ResultADC)
         {
-
           NumFutureInsp++;
           BuildFutureInspRow( inspection, NumFutureInsp, InspSched.ThisPermit.IsExternalUser);
         }
@@ -285,9 +281,7 @@ namespace InspSched.UI
       {
         InspHeader.style.removeProperty( "display" );
         InspList.style.removeProperty( "display" );
-
       }
-
       document.getElementById( 'PermitScreen' ).style.display = "flex";
     }
 
@@ -302,7 +296,6 @@ namespace InspSched.UI
       {
         passedFinal = true;
       }
-
     }
 
     if ( passedFinal )
@@ -313,13 +306,10 @@ namespace InspSched.UI
     {
       BuildScheduler( inspections, canSchedule, completed );
     }
-
-
   }
 
   function BuildCompletedInspection( inspection: Inspection )
   {
-
     let inspRow: HTMLDivElement = ( <HTMLDivElement>document.createElement( "div" ) );
     inspRow.className = "row large-12";
     let inspDateTime: HTMLDivElement = ( <HTMLDivElement>document.createElement( "div" ) );

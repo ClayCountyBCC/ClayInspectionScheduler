@@ -62,7 +62,6 @@ var InspSched;
         for (var _i = 0, permits_2 = permits; _i < permits_2.length; _i++) {
             var permit = permits_2[_i];
             if (permit.PermitNo == permitNumSelect.value) {
-                InspSched.UI.GetInspList(permitNumSelect.value, permit);
                 InspSched.ThisPermit = permit;
                 BuildCalendar(permit.ScheduleDates);
                 break;

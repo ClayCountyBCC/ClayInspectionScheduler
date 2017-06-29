@@ -193,11 +193,9 @@ var InspSched;
                 for (var _i = 0, inspections_1 = inspections; _i < inspections_1.length; _i++) {
                     var inspection = inspections_1[_i];
                     if (inspection.ResultADC) {
-                        if (completed < 5) {
-                            InspList.appendChild(BuildCompletedInspection(inspection));
-                            InspList.appendChild(document.createElement("hr"));
-                            completed++;
-                        }
+                        InspList.appendChild(BuildCompletedInspection(inspection));
+                        InspList.appendChild(document.createElement("hr"));
+                        completed++;
                     }
                     else if (!inspection.ResultADC) {
                         NumFutureInsp++;
