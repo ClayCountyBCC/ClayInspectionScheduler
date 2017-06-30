@@ -160,7 +160,6 @@ var InspSched;
             Hide('InspListData');
             Hide('InspectionScheduler');
             Hide('SuspendedContractor');
-            document.getElementById('FutureInspRow').removeAttribute("value");
             clearElement(document.getElementById('InspListData'));
             InspSched.transport.GetInspections(key).then(function (inspections) {
                 if (inspections.length > 0) {
@@ -168,6 +167,7 @@ var InspSched;
                     BuildInspectionList(UI.CurrentInspections, permit);
                 }
                 else {
+                    // TODO: add 'NO INSPECTIONS ERROR'
                     BuildScheduler(inspections, canSchedule, completed, key);
                     document.getElementById('PermitScreen').style.display = "flex";
                 }
@@ -186,46 +186,25 @@ var InspSched;
             var InspList = document.getElementById('InspListData');
             var InspHeader = document.getElementById('InspListHeader');
             var empty = document.createElement("tr");
-            clearElement(document.getElementById('FutureInspRow'));
             // TODO: add Try/Catch
-            if (inspections.length > 0) {
-                // create (call BuildInspectioN()) and add inspection row to container InspList
-                for (var _i = 0, inspections_1 = inspections; _i < inspections_1.length; _i++) {
-                    var inspection = inspections_1[_i];
-                    if (inspection.ResultADC) {
-                        InspList.appendChild(BuildCompletedInspection(inspection));
-                        InspList.appendChild(document.createElement("hr"));
-                        completed++;
-                    }
-                    else if (!inspection.ResultADC) {
-                        NumFutureInsp++;
-                        BuildFutureInspRow(inspection, NumFutureInsp, InspSched.ThisPermit.IsExternalUser);
-                    }
+            // create (call BuildInspectioN()) and add inspection row to container InspList
+            for (var _i = 0, inspections_1 = inspections; _i < inspections_1.length; _i++) {
+                var inspection = inspections_1[_i];
+                if (inspection.ResultADC) {
+                    InspList.appendChild(BuildCompletedInspection(inspection));
+                    InspList.appendChild(document.createElement("hr"));
+                    completed++;
                 }
-                if (NumFutureInsp) {
-                    document.getElementById('FutureInspRow').setAttribute("value", inspections[0].PermitNo);
+                else if (!inspection.ResultADC) {
+                    BuildFutureInspRow(inspection, NumFutureInsp, InspSched.ThisPermit.IsExternalUser);
                 }
-                if (completed > 0) {
-                    InspHeader.style.removeProperty("display");
-                    InspList.style.removeProperty("display");
-                }
-                document.getElementById('PermitScreen').style.display = "flex";
             }
+            InspList.style.removeProperty("display");
+            document.getElementById("InspSched").style.removeProperty("display");
+            document.getElementById('PermitScreen').style.display = "flex";
             var passedFinal = false;
-            for (var _a = 0, inspections_2 = inspections; _a < inspections_2.length; _a++) {
-                var i = inspections_2[_a];
-                var isFinalInspection = i.InsDesc.toLowerCase();
-                if (isFinalInspection.search("final") != -1
-                    && (i.ResultADC == 'A'
-                        || i.ResultADC == 'P')) {
-                    passedFinal = true;
-                }
-            }
             if (passedFinal) {
-                permitSchedulingIssue(inspections[0].PermitNo);
-            }
-            else {
-                BuildScheduler(inspections, canSchedule, completed);
+                //TODO: Update passed final issue
             }
         }
         UI.BuildInspectionList = BuildInspectionList;
@@ -374,10 +353,12 @@ var InspSched;
         function Show(id, element, displayType) {
             if (!element) {
                 var e = document.getElementById(id);
-                if (displayType == null)
-                    e.style.display = "block";
-                else
-                    e.style.display = displayType;
+                if (e.style.display != null) {
+                    if (displayType == null)
+                        e.style.display = "block";
+                    else
+                        e.style.display = displayType;
+                }
             }
             else {
                 var e = document.getElementById(id);

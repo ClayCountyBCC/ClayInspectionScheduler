@@ -6,18 +6,18 @@
 #Searching,
 #SearchFailed,
 #NoPermit,
-#Scheduler,
 #SearchFailed {
   display: none;
 }
-
+#InspectionScheduler{
+  display:none;
+}
 #PermitSelect {
   max-width: 16rem;
   min-width: 8rem;
   padding-right: 28px;
   min-height:50px;
   font-size:130%
-
 }
 
 
@@ -61,9 +61,9 @@ select > .selectPlaceholder {
 }
 
 .MyLabel {
-  color: white;
-  color: rgba(256,256,256, .9);
-  background-color: #890ACC;
+  color: black;
+  color: rgba(0,0,0,.7);
+  background-color: lightsteelblue;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   padding-top: .5rem;
@@ -229,8 +229,9 @@ height: 5em;
 }
 #NotScheduled {
   background-color: lightpink;
-  padding:1rem;
+  padding: 1rem;
   font-weight: bold;
+  margin-top: 2em;
 }
 .datepicker table tr td.disabled {
   background-color: lightgray;
@@ -256,17 +257,18 @@ height: 5em;
   padding: 0 50px;
   color: #bd3f52;
 }
-.PermitSelectDiv {
-  padding-top:3.5rem;
-}.PermitSelectDiv,
+.PermitSelectDiv,
 .PermitAddressDiv {
-  min-height: 10.25rem;
+  min-height: 3rem;
 }
-.CloseIssueListButton{
-max-height:30px;
-max-width:30px;
-font-size:27px;
-outline-color:none;
+#PermitInfoDiv {
+ margin-top: 2rem;
+}
+.CloseIssueListButton {
+  max-height: 30px;
+  max-width: 30px;
+  font-size: 27px;
+  outline-color: none;
 }
   .CloseIssueListButton:focus {
     outline: none;
@@ -278,3 +280,17 @@ outline-color:none;
     outline-color: black;
     border:none;
   }
+h2 {
+  font-size:2.5em;
+}
+h5 {
+  font-size: 1.25em;
+font-weight:500;
+}
+@media (max-width: 415px){
+  h2{
+    font-size: 1.75em;
+  }
+
+
+}

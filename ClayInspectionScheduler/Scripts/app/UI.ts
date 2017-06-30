@@ -217,7 +217,6 @@ namespace InspSched.UI
     Hide( 'InspListData' );
     Hide( 'InspectionScheduler' );
     Hide( 'SuspendedContractor' );
-    document.getElementById( 'FutureInspRow' ).removeAttribute( "value" );
     clearElement( document.getElementById( 'InspListData' ) );
 
     transport.GetInspections( key ).then( function ( inspections: Array<Inspection> )
@@ -229,6 +228,7 @@ namespace InspSched.UI
       }
       else
       {
+        // TODO: add 'NO INSPECTIONS ERROR'
         BuildScheduler( inspections, canSchedule, completed, key );
         document.getElementById( 'PermitScreen' ).style.display = "flex";
       }
@@ -250,11 +250,9 @@ namespace InspSched.UI
     let InspList: HTMLTableElement = ( <HTMLTableElement>document.getElementById( 'InspListData' ) );
     let InspHeader: HTMLTableElement = ( <HTMLTableElement>document.getElementById( 'InspListHeader' ) );
     let empty: HTMLElement = ( <HTMLElement>document.createElement( "tr" ) );
-    clearElement( document.getElementById( 'FutureInspRow' ) );
     
     // TODO: add Try/Catch
-    if ( inspections.length > 0 )
-    {
+
       // create (call BuildInspectioN()) and add inspection row to container InspList
       for ( let inspection of inspections )
       {
@@ -266,45 +264,19 @@ namespace InspSched.UI
         }
         else if (!inspection.ResultADC)
         {
-          NumFutureInsp++;
           BuildFutureInspRow( inspection, NumFutureInsp, InspSched.ThisPermit.IsExternalUser);
         }
 
       }
 
-      if ( NumFutureInsp )
-      {
-        document.getElementById( 'FutureInspRow' ).setAttribute( "value", inspections[0].PermitNo );
-      }
-
-      if ( completed > 0 )
-      {
-        InspHeader.style.removeProperty( "display" );
-        InspList.style.removeProperty( "display" );
-      }
-      document.getElementById( 'PermitScreen' ).style.display = "flex";
-    }
+      InspList.style.removeProperty("display");
+      document.getElementById("InspSched").style.removeProperty("display");
+      document.getElementById('PermitScreen').style.display = "flex";
 
     var passedFinal = false;
-    for ( let i of inspections )
-    {
-      var isFinalInspection = i.InsDesc.toLowerCase();
-
-      if ( isFinalInspection.search( "final" ) != -1
-          && (i.ResultADC == 'A'
-          || i.ResultADC == 'P' ) ) 
-      {
-        passedFinal = true;
-      }
-    }
-
     if ( passedFinal )
     {
-      permitSchedulingIssue( inspections[0].PermitNo );
-    }
-    else
-    {
-      BuildScheduler( inspections, canSchedule, completed );
+      //TODO: Update passed final issue
     }
   }
 
@@ -503,18 +475,20 @@ namespace InspSched.UI
       default:
         return "Unknown"
     }
-
   }
 
   export function Show( id?: string, element?: HTMLElement, displayType?: string ): void
   {
-    if ( !element )
+    if (!element)
     {
-      let e = document.getElementById( id );
-      if ( displayType == null )
-        e.style.display = "block";
-      else
-        e.style.display = displayType;
+      let e = document.getElementById(id);
+      if (e.style.display != null)
+      {
+        if (displayType == null)
+          e.style.display = "block";
+        else
+          e.style.display = displayType;
+      }
     }
     else
     {
