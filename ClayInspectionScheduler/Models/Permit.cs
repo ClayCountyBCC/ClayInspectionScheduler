@@ -43,27 +43,9 @@ namespace ClayInspectionScheduler.Models
       string sql = @"
       USE WATSC;
       DECLARE @MPermitNo CHAR(8) = (SELECT MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = @PermitNo);
-      SELECT DISTINCT 
-        A.PermitNo PermitNo,
-        ISNULL(A.MPermitNo, A.PermitNo) MPermitNo,
-        B.ProjAddrCombined,
-        B.ProjCity,
-        CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) SuspendGraceDate,
-        B.Confidential,
-        C.WC_ExpDt WorkersCompExpirationDate,
-        C.LiabInsExpDt LiabilityExpirationDate,
-        C.Status ContractorStatus
-      FROM bpASSOC_PERMIT A
-      LEFT OUTER JOIN bpBASE_PERMIT B ON A.BaseID = B.BaseID
-      LEFT OUTER JOIN clContractor C ON A.ContractorId = C.ContractorCd
-      WHERE 
-        (A.PermitNo = @PermitNo OR MPermitNo = @MPermitNo)
-        AND A.VoidDate IS NULL
-
-      UNION ALL
-
+      
       SELECT 
-        M.PermitNo PermitNo,
+        distinct M.PermitNo PermitNo,
         M.PermitNo MPermitNo,
         B.ProjAddrCombined,
         B.ProjCity,
@@ -72,12 +54,48 @@ namespace ClayInspectionScheduler.Models
         C.WC_ExpDt WorkersCompExpirationDate,
         C.LiabInsExpDt LiabilityExpirationDate,
         C.Status ContractorStatus
-      FROM bpMASTER_PERMIT M    
-      LEFT OUTER JOIN bpBASE_PERMIT B ON M.BaseID = B.BaseID
-      LEFT OUTER JOIN clContractor C ON B.ContractorId = C.ContractorCd
-      WHERE 
-        (M.PermitNo = @PermitNo OR M.PermitNo = @MPermitNo)
-        AND M.VoidDate IS NULL
+            
+      FROM bpMASTER_PERMIT M
+      LEFT OUTER JOIN 
+        bpBASE_PERMIT B 
+          ON M.BaseID = B.BaseID
+      LEFT OUTER JOIN 
+        clContractor C 
+          ON B.ContractorId = C.ContractorCd 
+		
+		  WHERE 
+        (M.PermitNo = @MPermitNo 
+		      OR M.PermitNo = @PermitNo)
+		    AND M.VoidDate is NULL
+
+      UNION ALL
+
+      SELECT 
+        distinct A.PermitNo PermitNo,
+        ISNULL(A.MPermitNo, A.PermitNo) MPermitNo,
+        B.ProjAddrCombined,
+        B.ProjCity,
+        CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) SuspendGraceDate,
+        B.Confidential,
+        C.WC_ExpDt WorkersCompExpirationDate,
+        C.LiabInsExpDt LiabilityExpirationDate,
+        C.Status ContractorStatus
+           
+      FROM 
+        bpASSOC_PERMIT A
+      LEFT OUTER JOIN 
+        bpBASE_PERMIT B 
+          ON A.BaseID = B.BaseID
+      LEFT OUTER JOIN 
+        clContractor C 
+          ON A.ContractorId = C.ContractorCd 
+
+		  WHERE
+        (A.PermitNo = @PermitNo 
+		        OR MPermitNo = @MPermitNo
+		        OR A.mPermitNo = @PermitNo)
+   		    AND A.VoidDate IS NULL
+
     ";
       try
       {
