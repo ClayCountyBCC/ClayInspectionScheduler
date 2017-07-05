@@ -213,15 +213,15 @@ var InspSched;
             inspRow.className = "row large-12";
             var inspDateTime = document.createElement("div");
             inspDateTime.textContent = inspection.DisplayInspDateTime.trim();
-            inspDateTime.className = "large-3 medium-2 small-12 inspDate ";
+            inspDateTime.className = "large-3 medium-4 small-12 inspDate ";
             inspRow.appendChild(inspDateTime);
             var inspDesc = document.createElement("div");
             inspDesc.textContent = inspection.InsDesc.trim();
-            inspDesc.className = "large-8 medium-8 small-9 inspType ";
+            inspDesc.className = "large-8 medium-6 small-9 inspType ";
             inspRow.appendChild(inspDesc);
             var ResultADC = document.createElement("div");
             ResultADC.textContent = inspection.ResultDescription.trim();
-            ResultADC.className = "large-1 medium-1 small-1 inspResult";
+            ResultADC.className = "large-1 medium-2 small-2 inspResult";
             ResultADC.style.textAlign = "center";
             inspRow.appendChild(ResultADC);
             if (inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'N') {
@@ -275,7 +275,7 @@ var InspSched;
             thisinsp.appendChild(thisinspType);
             thisinsp.appendChild(thisinspInspector);
             thisinsp.appendChild(thisinspCancelDiv);
-            futureRow.appendChild(thisinsp);
+            schedBody.appendChild(thisinsp);
             schedBody.style.removeProperty("display");
         }
         /**********************************************
