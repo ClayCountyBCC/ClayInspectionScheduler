@@ -15,6 +15,7 @@ var InspSched;
     InspSched.InspectionTypes = [];
     InspSched.GracePeriodDate = "";
     InspSched.CurrentPermits = [];
+    InspSched.CurrentInspections = [];
     var InspectionTypeSelect = document.getElementById("InspTypeSelect");
     var PermitSearchButton = document.getElementById("PermitSearchButton");
     var CloseIssueDivButton = document.getElementById("CloseIssueList");
@@ -41,7 +42,11 @@ var InspSched;
                 var permit = permits_1[_i];
                 if (permit.PermitNo == permitNumSelect.value) {
                     InspSched.ThisPermit = permit;
-                    BuildCalendar(permit.ScheduleDates);
+                    if (permit.ErrorText == null)
+                        BuildCalendar(permit.ScheduleDates);
+                    else {
+                        InspSched.UI.InformUserOfError(permit.PermitNo, permit.ErrorText);
+                    }
                     break;
                 }
             }
@@ -64,6 +69,7 @@ var InspSched;
             if (permit.PermitNo == permitNumSelect.value) {
                 InspSched.ThisPermit = permit;
                 BuildCalendar(permit.ScheduleDates);
+                InspSched.UI.LoadInspTypeSelect(permit.PermitNo);
                 break;
             }
         }
@@ -82,7 +88,7 @@ var InspSched;
         IssueContainer.style.display = "none";
         InspSched.UI.clearElement(IssuesDiv);
         InspSched.newInsp = new InspSched.NewInspection(thisPermit, thisInspCd, $(dpCalendar).data('datepicker').getDate());
-        $(dpCalendar).data('datepicker').clearDates();
+        //$( dpCalendar ).data( 'datepicker' ).clearDates();
         var e = InspSched.transport.SaveInspection(InspSched.newInsp).then(function (issues) {
             var thisHeading = document.createElement('h5');
             var IssueList = document.createElement('ul');
@@ -113,6 +119,7 @@ var InspSched;
             console.log('error in Saving Inspection');
             return false;
         });
+        InspSched.UI.GetInspList(thisPermit);
     };
     CloseIssueDivButton.onclick = function () {
         IssueContainer.style.display = "none";
@@ -179,5 +186,35 @@ var InspSched;
         }
         return AdditionalDisabledDates;
     }
+    function UpdatePermitSelectList(PermitNo) {
+        var selectedoption = document.getElementById("select_" + PermitNo);
+        selectedoption.selected = true;
+        $('#sandbox-container div').data('datepicker').clearDates();
+        InspSched.UI.LoadInspTypeSelect(PermitNo);
+        InspSched.UI.BuildScheduler(InspSched.CurrentInspections, PermitNo);
+        $('#InspectionSchedulerTabs').foundation('selectTab', 'Scheduler', true);
+        // clears Calendar of any chosen dates
+    }
+    InspSched.UpdatePermitSelectList = UpdatePermitSelectList;
+    function CancelInspection(InspID, PermitNo) {
+        document.getElementById('NotScheduled').style.display = "none";
+        if (InspID != null && PermitNo != null) {
+            //Hide( 'FutureInspRow' );
+            // TODO: Add function to not allow cancel if scheduled date of insp is current date 
+            var isDeleted = InspSched.transport.CancelInspection(InspID, PermitNo);
+            // TODO: ADD code to inform user if the inspection has been deleted 
+            // Reload inspection list after delete
+            if (isDeleted) {
+                InspSched.UI.GetInspList(PermitNo);
+            }
+            else {
+                //display notification of failed delete
+            }
+        }
+        else {
+            document.getElementById('InspSched').style.display = "none";
+        }
+    }
+    InspSched.CancelInspection = CancelInspection;
 })(InspSched || (InspSched = {}));
 //# sourceMappingURL=app.js.map

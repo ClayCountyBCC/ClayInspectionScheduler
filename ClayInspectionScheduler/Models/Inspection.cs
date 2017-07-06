@@ -58,9 +58,9 @@ namespace ClayInspectionScheduler.Models
       get
       {
         if (this.ResultADC == "C")
-          return (InspDateTime == DateTime.MinValue) ? "Canceled" : InspDateTime.ToShortDateString();
+          return (InspDateTime == DateTime.MinValue) ? "N/A" : InspDateTime.ToString("MM/dd/yyyy");
 
-        return (InspDateTime == DateTime.MinValue) ? "Not Completed" : InspDateTime.ToShortDateString();
+        return (InspDateTime == DateTime.MinValue) ? "Not Completed" : InspDateTime.ToString("MM/dd/yyyy");
 
       }
 
@@ -70,7 +70,7 @@ namespace ClayInspectionScheduler.Models
     {
       get
       {
-        return SchedDateTime == DateTime.MinValue ? "" : SchedDateTime.ToShortDateString();
+        return SchedDateTime == DateTime.MinValue ? "" : SchedDateTime.ToString("MM/dd/yyyy");
       }
     }
 

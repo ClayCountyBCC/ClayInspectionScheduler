@@ -20,6 +20,7 @@ namespace InspSched
   export let newInsp: NewInspection;
   export let GracePeriodDate: string = "";
   export let CurrentPermits: Array<Permit> = [];
+  export let CurrentInspections: Array<Inspection> = [];
   export let ThisPermit: Permit;
   var InspectionTypeSelect = <HTMLSelectElement>document.getElementById( "InspTypeSelect" );
   var PermitSearchButton = <HTMLButtonElement>document.getElementById( "PermitSearchButton" );
@@ -58,7 +59,12 @@ namespace InspSched
         if ( permit.PermitNo == permitNumSelect.value )
         {
           InspSched.ThisPermit = permit;
-          BuildCalendar( permit.ScheduleDates );
+          if (permit.ErrorText == null)
+              BuildCalendar(permit.ScheduleDates);
+          else
+          {
+              InspSched.UI.InformUserOfError(permit.PermitNo, permit.ErrorText);
+          }
           break;
         }
       }
@@ -91,10 +97,14 @@ namespace InspSched
       if ( permit.PermitNo == permitNumSelect.value )
       {
         InspSched.ThisPermit = permit;
-        BuildCalendar( permit.ScheduleDates );
+        BuildCalendar(permit.ScheduleDates);
+        InspSched.UI.LoadInspTypeSelect(permit.PermitNo);
+
+
         break;
       }
     }
+    
 
   }
 
@@ -119,7 +129,7 @@ namespace InspSched
 
 
     newInsp = new NewInspection( thisPermit, thisInspCd, $( dpCalendar ).data( 'datepicker' ).getDate() );
-    $( dpCalendar ).data( 'datepicker' ).clearDates();
+    //$( dpCalendar ).data( 'datepicker' ).clearDates();
 
 
     var e = transport.SaveInspection( newInsp ).then( function ( issues: Array<string> )
@@ -160,14 +170,16 @@ namespace InspSched
 
       }
 
+
       return true;
 
     }, function ()
       {
         console.log( 'error in Saving Inspection' );
         return false;
-      } );
+    } );
 
+    InspSched.UI.GetInspList(thisPermit);
 
   }
 
@@ -206,6 +218,8 @@ namespace InspSched
 
   function BuildCalendar( dates: Array<string> )
   {
+
+   
     $( dpCalendar ).datepicker( 'destroy' );
 
     $( document ).foundation();
@@ -270,5 +284,54 @@ namespace InspSched
 
     return AdditionalDisabledDates;
   }
+
+  export function UpdatePermitSelectList(PermitNo: string):void
+  {
+    let selectedoption: HTMLOptionElement = (<HTMLOptionElement>document.getElementById("select_" + PermitNo));
+
+    selectedoption.selected = true;
+
+    $('#sandbox-container div').data('datepicker').clearDates();
+
+    InspSched.UI.LoadInspTypeSelect(PermitNo);
+    InspSched.UI.BuildScheduler(InspSched.CurrentInspections, PermitNo);
+
+    $('#InspectionSchedulerTabs').foundation('selectTab', 'Scheduler', true);
+
+      // clears Calendar of any chosen dates
+  }
+
+  export function CancelInspection(InspID?: string, PermitNo?: string)
+  {
+
+    document.getElementById('NotScheduled').style.display = "none";
+
+    if (InspID != null && PermitNo != null)
+    {
+      //Hide( 'FutureInspRow' );
+      // TODO: Add function to not allow cancel if scheduled date of insp is current date 
+
+      var isDeleted = transport.CancelInspection(InspID, PermitNo);
+
+      // TODO: ADD code to inform user if the inspection has been deleted 
+
+      // Reload inspection list after delete
+      if (isDeleted)
+      {
+        InspSched.UI.GetInspList(PermitNo);
+      }
+
+      else
+      {
+        //display notification of failed delete
+
+      }
+    }
+    else
+    {
+      document.getElementById('InspSched').style.display = "none";
+    }
+  }
+
 
 }

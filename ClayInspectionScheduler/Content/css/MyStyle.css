@@ -20,10 +20,16 @@
   font-size:130%
 }
 
-
+.NewInspButton {
+  height: 20px;
+  background-color: #3e9571;
+  color: white;
+    
+}
 .button {
   font-weight: bold;
   background-color: #3e9571;
+  margin:0;
 }
 .button:hover {
   background-color: #27ce89;
@@ -31,13 +37,18 @@
 select > .selectPlaceholder {
   display: none;
 }
-
+#InspListData {
+  border-top: 1px solid lightgrey;
+  border-bottom: 1px solid lightgrey;
+  padding-left:0;
+  margin:1rem;
+}
 @font-face {
-    font-family: '[set]Foundicons';
-    src: url('fonts/[set]_foundicons.eot');
-    src: url('fonts/[set]_foundicons.eot?#iefix') format('embedded-opentype'), url('fonts/[set]_foundicons.woff') format('woff'), url('fonts/[set]_foundicons.ttf') format('truetype'), url('fonts/[set]_foundicons.svg#[set]Foundicons') format('svg');
-    font-weight: normal;
-    font-style: normal;
+  font-family: '[set]Foundicons';
+  src: url('fonts/[set]_foundicons.eot');
+  src: url('fonts/[set]_foundicons.eot?#iefix') format('embedded-opentype'), url('fonts/[set]_foundicons.woff') format('woff'), url('fonts/[set]_foundicons.ttf') format('truetype'), url('fonts/[set]_foundicons.svg#[set]Foundicons') format('svg');
+  font-weight: normal;
+  font-style: normal;
 }
 .foundicon-{
     display: inline;
@@ -73,10 +84,8 @@ select > .selectPlaceholder {
 }
 .infoDiv {
     background-color: white;
-    padding: 1rem;
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
-    margin-bottom:.5rem;
 }
 
 
@@ -212,7 +221,7 @@ height: 5em;
 }
 .App-Container {
   min-height: calc(100% - 5em);
-  min-width: 300px;
+  min-width: 320px;
 
 }
 .TypeSelectOption{
@@ -220,13 +229,7 @@ height: 5em;
 }
 
 
-.InspBorderBottom {
-  border-bottom: 2px solid;
-  border-bottom-color: rgb(159, 159, 159);
-  border-bottom-color: rgba(0, 0, 0, 0.1);
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
-}
+
 #NotScheduled {
   background-color: lightpink;
   padding: 1rem;
@@ -253,6 +256,7 @@ height: 5em;
   margin-bottom: .5rem;
   height: 30rem;
 }
+
 .inspRemarks {
   padding: 0 50px;
   color: #bd3f52;
@@ -287,10 +291,44 @@ h5 {
   font-size: 1.25em;
 font-weight:500;
 }
+.InspPermit,
+.InspType,
+.InspInspector,
+.InspDate,
+.InspResult {
+  border-right: 1px solid lightgrey;
+  padding-left: 1rem;
+}
+.InspRow {
+  padding: 1rem;
+  border-left: 8px solid lightgrey;
+  border-bottom: 1px solid black;
+  margin-bottom: 0px;
+}
+.FailRow {
+  border-left-color: indianred;
+}
+.PassRow {
+  border-left-color: darkseagreen;
+}
+.CancelRow {
+  border-left-color: goldenrod;
+}
 @media (max-width: 415px){
   h2{
     font-size: 1.75em;
   }
 
 
+}
+@media (max-width: 639px){
+  .InspResult,
+  .InspDate{
+    text-align:center;
+  }
+  .NewInspButton {
+    height: 20px;
+    background-color: #3e9571;
+    color: white;
+  }
 }

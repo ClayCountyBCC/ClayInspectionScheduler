@@ -7,25 +7,26 @@ namespace InspSched
 
   interface IPermit 
   {
+      IsExternalUser: boolean;
+
     PermitNo: string;
     ProjAddrCombined: string;
     ProjCity: string;
-    CanSchedule: string;
-    FailType: string;
+    Confidential: number;
+    ErrorText: string;
     ScheduleDates: string[];
-    IsExternalUser: boolean;
 
 
   }
 
   export class Permit implements IPermit 
   {
-    public PermitNo: string;
     public IsExternalUser: boolean = true;
+    public PermitNo: string;
     public ProjAddrCombined: string;
     public ProjCity: string;
-    public CanSchedule: string;
-    public FailType: string;
+    public Confidential: number;
+    public ErrorText: string;
     public ScheduleDates: string[];
 
     constructor( IsExternalUser: boolean) 
