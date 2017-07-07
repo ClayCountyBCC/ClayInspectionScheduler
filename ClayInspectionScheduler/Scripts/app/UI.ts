@@ -283,7 +283,7 @@ namespace InspSched.UI
   function BuildCompletedInspection(inspection: Inspection)
   {
     let ShowCreateNewInsp: HTMLDivElement = (<HTMLDivElement>document.getElementById("CreateNew_" + inspection.PermitNo));
-    
+    let thisInspPermit: Permit;
     let inspRow: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
     if (inspection.ResultADC == 'A' || inspection.ResultADC == 'P')
       inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle PassRow";
@@ -294,7 +294,14 @@ namespace InspSched.UI
     else if (inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'N')
       inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle FailRow";
 
-
+    for (let p of InspSched.CurrentPermits)
+    {
+      if (p.PermitNo === inspection.PermitNo)
+      {
+        thisInspPermit = p;
+      }
+    }
+    
     let dataColumn: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
     dataColumn.className = "large-10 medium-10 small-12 ";
 
@@ -323,22 +330,25 @@ namespace InspSched.UI
     let NewInspButtonDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
     NewInspButtonDiv.className = "large-2 medium-2 small-12  flex-container align-center ";
 
-    if (!ShowCreateNewInsp )
+    if (!ShowCreateNewInsp)
     {
-      let NewInspButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
-      NewInspButton.className = "align-self-center myButton small-12 NewInspButton";
-      NewInspButton.innerText = "New";
-      NewInspButton.value = inspection.PermitNo;
-      NewInspButton.setAttribute("onclick",
+      if (thisInspPermit.ErrorText == null)
+      {
+        let NewInspButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
+        NewInspButton.className = "align-self-center myButton small-12 NewInspButton";
+        NewInspButton.innerText = "New";
+        NewInspButton.value = inspection.PermitNo;
+        NewInspButton.setAttribute("onclick",
 
-        "InspSched.UpdatePermitSelectList(this.value);"
+          "InspSched.UpdatePermitSelectList(this.value);"
 
-      );
+        );
 
 
-      NewInspButton.id = "CreateNew_" + inspection.PermitNo;
+        NewInspButton.id = "CreateNew_" + inspection.PermitNo;
 
-      NewInspButtonDiv.appendChild(NewInspButton);
+        NewInspButtonDiv.appendChild(NewInspButton);
+      }
     }
 
     inspRow.appendChild(dataColumn);
@@ -593,17 +603,24 @@ namespace InspSched.UI
 
   export function InformUserOfError(permitno: string, error: string): void
   {
-      let errorbox: HTMLDivElement = (<HTMLDivElement>document.getElementById('NotScheduled'));
-      let thisHeading: HTMLHeadingElement = (<HTMLHeadingElement>document.createElement('h5'));
-      let IssueList: HTMLUListElement = (<HTMLUListElement>document.createElement('ul'));
-      let thisIssue: HTMLLIElement = (<HTMLLIElement>document.createElement('li'));
+    document.getElementById("NotScheduled").style.display = "flex";
 
-      thisHeading.innerText = "The following issue(s) prevented scheduling the requested inspection:";
-      thisHeading.className = "large-12 medium-12 small-12 row";
-      errorbox.appendChild(thisHeading);
-      thisIssue.textContent = error;
-      thisIssue.style.marginLeft = "2rem;";
-      IssueList.appendChild(thisIssue);
+    document.getElementById("InspectionScheduler").style.display = "none";
+    let reasons: HTMLDivElement = (<HTMLDivElement>document.getElementById('Reasons'));
+    clearElement(reasons);
+    let thisHeading: HTMLHeadingElement = (<HTMLHeadingElement>document.createElement('h5'));
+    let IssueList: HTMLUListElement = (<HTMLUListElement>document.createElement('ul'));
+    let thisIssue: HTMLLIElement = (<HTMLLIElement>document.createElement('li'));
+    InspSched.BuildCalendar(null, error);
+
+    thisHeading.innerText = "The following issue(s) prevented scheduling the requested inspection:";
+    thisHeading.className = "large-12 medium-12 small-12 row";
+    reasons.appendChild(thisHeading);
+    thisIssue.textContent = error;
+    thisIssue.style.marginLeft = "2rem;";
+    IssueList.appendChild(thisIssue);
+    reasons.appendChild(IssueList);
+    document.getElementById("NotScheduled").style.display = "flex";
   }
 
 

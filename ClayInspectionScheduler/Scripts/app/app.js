@@ -68,8 +68,13 @@ var InspSched;
             var permit = permits_2[_i];
             if (permit.PermitNo == permitNumSelect.value) {
                 InspSched.ThisPermit = permit;
-                BuildCalendar(permit.ScheduleDates);
-                InspSched.UI.LoadInspTypeSelect(permit.PermitNo);
+                if (permit.ErrorText != null) {
+                    InspSched.UI.InformUserOfError(permit.PermitNo, permit.ErrorText);
+                }
+                else {
+                    InspSched.UI.LoadInspTypeSelect(permit.PermitNo);
+                    BuildCalendar(permit.ScheduleDates);
+                }
                 break;
             }
         }
@@ -142,31 +147,36 @@ var InspSched;
             InspSched.InspectionTypes = [];
         });
     }
-    function BuildCalendar(dates) {
+    function BuildCalendar(dates, errorText) {
         $(dpCalendar).datepicker('destroy');
-        $(document).foundation();
         //
-        var additionalDisabledDates = GetAdditionalDisabledDates(dates);
-        InspSched.InspectionDates = dates;
-        InspSched.firstDay = InspSched.InspectionDates[0];
-        InspSched.lastDay = InspSched.InspectionDates[dates.length - 1];
-        dpCalendar = $('#sandbox-container div').datepicker({
-            startDate: InspSched.firstDay,
-            datesDisabled: additionalDisabledDates,
-            endDate: InspSched.lastDay,
-            maxViewMode: 0,
-            toggleActive: true,
-        });
-        {
-            $(dpCalendar).on('changeDate', function () {
-                var date = $(dpCalendar).data('datepicker').getDate();
-                //return false;
-                $('change-date').submit();
-                EnableSaveButton();
+        if (errorText == null) {
+            document.getElementById("NotScheduled").style.display = "none";
+            $(document).foundation();
+            var additionalDisabledDates = GetAdditionalDisabledDates(dates);
+            InspSched.InspectionDates = dates;
+            InspSched.firstDay = InspSched.InspectionDates[0];
+            InspSched.lastDay = InspSched.InspectionDates[dates.length - 1];
+            dpCalendar = $('#sandbox-container div').datepicker({
+                startDate: InspSched.firstDay,
+                datesDisabled: additionalDisabledDates,
+                endDate: InspSched.lastDay,
+                maxViewMode: 0,
+                toggleActive: true,
             });
+            {
+                $(dpCalendar).on('changeDate', function () {
+                    var date = $(dpCalendar).data('datepicker').getDate();
+                    //return false;
+                    $('change-date').submit();
+                    EnableSaveButton();
+                });
+            }
+            ;
+            document.getElementById("InspectionScheduler").style.display = "flex";
         }
-        ;
     }
+    InspSched.BuildCalendar = BuildCalendar;
     function EnableSaveButton() {
         {
             if (InspectionTypeSelect.value != "" && $(dpCalendar).data('datepicker').getDate() != null) {

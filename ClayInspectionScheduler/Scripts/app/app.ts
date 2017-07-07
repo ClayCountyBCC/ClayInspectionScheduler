@@ -94,13 +94,20 @@ namespace InspSched
 
     for ( let permit of permits )
     {
-      if ( permit.PermitNo == permitNumSelect.value )
+      if (permit.PermitNo == permitNumSelect.value)
       {
         InspSched.ThisPermit = permit;
-        BuildCalendar(permit.ScheduleDates);
-        InspSched.UI.LoadInspTypeSelect(permit.PermitNo);
+        if (permit.ErrorText != null)
+        {
+          InspSched.UI.InformUserOfError(permit.PermitNo, permit.ErrorText);
 
+        }
+        else
+        {
 
+          InspSched.UI.LoadInspTypeSelect(permit.PermitNo);
+          BuildCalendar(permit.ScheduleDates);
+        }
         break;
       }
     }
@@ -216,43 +223,52 @@ namespace InspSched
       } );
   }
 
-  function BuildCalendar( dates: Array<string> )
+  export function BuildCalendar( dates: Array<string>, errorText?: string )
   {
 
    
     $( dpCalendar ).datepicker( 'destroy' );
 
-    $( document ).foundation();
 
     //
-    let additionalDisabledDates: string[] = GetAdditionalDisabledDates( dates );
 
-    InspSched.InspectionDates = dates;
-    InspSched.firstDay = InspSched.InspectionDates[0];
-    InspSched.lastDay = InspSched.InspectionDates[dates.length - 1];
-
-    dpCalendar = $( '#sandbox-container div' ).datepicker(
-      <DatepickerOptions>
-      {
-        startDate: InspSched.firstDay,
-        datesDisabled: additionalDisabledDates,
-        endDate: InspSched.lastDay,
-        maxViewMode: 0,
-        toggleActive: true,
-
-      } )
+    if (errorText == null)
     {
-      $( dpCalendar ).on( 'changeDate', function ()
+      document.getElementById("NotScheduled").style.display = "none";
+
+      $(document).foundation();
+
+      let additionalDisabledDates: string[] = GetAdditionalDisabledDates(dates);
+
+      InspSched.InspectionDates = dates;
+      InspSched.firstDay = InspSched.InspectionDates[0];
+      InspSched.lastDay = InspSched.InspectionDates[dates.length - 1];
+
+      dpCalendar = $('#sandbox-container div').datepicker(
+        <DatepickerOptions>
+        {
+          startDate: InspSched.firstDay,
+          datesDisabled: additionalDisabledDates,
+          endDate: InspSched.lastDay,
+          maxViewMode: 0,
+          toggleActive: true,
+
+        })
       {
+        $(dpCalendar).on('changeDate', function ()
+        {
 
-        let date = $( dpCalendar ).data( 'datepicker' ).getDate();
-        //return false;
-        $( 'change-date' ).submit();
+          let date = $(dpCalendar).data('datepicker').getDate();
+          //return false;
+          $('change-date').submit();
 
-        EnableSaveButton();
-      } );
+          EnableSaveButton();
+        });
 
-    };
+      };
+
+      document.getElementById("InspectionScheduler").style.display = "flex";
+    }
   }
 
   function EnableSaveButton()

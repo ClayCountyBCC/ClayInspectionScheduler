@@ -207,6 +207,7 @@ var InspSched;
         UI.BuildInspectionList = BuildInspectionList;
         function BuildCompletedInspection(inspection) {
             var ShowCreateNewInsp = document.getElementById("CreateNew_" + inspection.PermitNo);
+            var thisInspPermit;
             var inspRow = document.createElement("div");
             if (inspection.ResultADC == 'A' || inspection.ResultADC == 'P')
                 inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle PassRow";
@@ -216,6 +217,12 @@ var InspSched;
                 inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle CancelRow";
             else if (inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'N')
                 inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle FailRow";
+            for (var _i = 0, _a = InspSched.CurrentPermits; _i < _a.length; _i++) {
+                var p = _a[_i];
+                if (p.PermitNo === inspection.PermitNo) {
+                    thisInspPermit = p;
+                }
+            }
             var dataColumn = document.createElement("div");
             dataColumn.className = "large-10 medium-10 small-12 ";
             var thisPermit = document.createElement('div');
@@ -237,13 +244,15 @@ var InspSched;
             var NewInspButtonDiv = document.createElement("div");
             NewInspButtonDiv.className = "large-2 medium-2 small-12  flex-container align-center ";
             if (!ShowCreateNewInsp) {
-                var NewInspButton = document.createElement("button");
-                NewInspButton.className = "align-self-center myButton small-12 NewInspButton";
-                NewInspButton.innerText = "New";
-                NewInspButton.value = inspection.PermitNo;
-                NewInspButton.setAttribute("onclick", "InspSched.UpdatePermitSelectList(this.value);");
-                NewInspButton.id = "CreateNew_" + inspection.PermitNo;
-                NewInspButtonDiv.appendChild(NewInspButton);
+                if (thisInspPermit.ErrorText == null) {
+                    var NewInspButton = document.createElement("button");
+                    NewInspButton.className = "align-self-center myButton small-12 NewInspButton";
+                    NewInspButton.innerText = "New";
+                    NewInspButton.value = inspection.PermitNo;
+                    NewInspButton.setAttribute("onclick", "InspSched.UpdatePermitSelectList(this.value);");
+                    NewInspButton.id = "CreateNew_" + inspection.PermitNo;
+                    NewInspButtonDiv.appendChild(NewInspButton);
+                }
             }
             inspRow.appendChild(dataColumn);
             inspRow.appendChild(NewInspButtonDiv);
@@ -432,16 +441,22 @@ var InspSched;
             Show('SearchFailed');
         }
         function InformUserOfError(permitno, error) {
-            var errorbox = document.getElementById('NotScheduled');
+            document.getElementById("NotScheduled").style.display = "flex";
+            document.getElementById("InspectionScheduler").style.display = "none";
+            var reasons = document.getElementById('Reasons');
+            clearElement(reasons);
             var thisHeading = document.createElement('h5');
             var IssueList = document.createElement('ul');
             var thisIssue = document.createElement('li');
+            InspSched.BuildCalendar(null, error);
             thisHeading.innerText = "The following issue(s) prevented scheduling the requested inspection:";
             thisHeading.className = "large-12 medium-12 small-12 row";
-            errorbox.appendChild(thisHeading);
+            reasons.appendChild(thisHeading);
             thisIssue.textContent = error;
             thisIssue.style.marginLeft = "2rem;";
             IssueList.appendChild(thisIssue);
+            reasons.appendChild(IssueList);
+            document.getElementById("NotScheduled").style.display = "flex";
         }
         UI.InformUserOfError = InformUserOfError;
         function permitSchedulingIssue(key) {

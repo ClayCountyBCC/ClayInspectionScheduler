@@ -80,7 +80,7 @@ namespace ClayInspectionScheduler.Models
       else
       {
         CurrentPermit = Permits.First();
-        if (CurrentPermit.ErrorText.Length > 0)
+        if (CurrentPermit.ErrorText != null)
         {
           Errors.Add(CurrentPermit.ErrorText);
           return Errors;
@@ -181,7 +181,7 @@ namespace ClayInspectionScheduler.Models
         if (i > -1)
         {
           IRID = dbArgs.Get<long?>( "@IRID" );
-          if( IRID.HasValue )
+          if(IRID != null)
           {
             return (int)IRID.Value;
           }
