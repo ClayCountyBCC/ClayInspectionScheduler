@@ -6,24 +6,35 @@
 #Searching,
 #SearchFailed,
 #NoPermit,
-#Scheduler,
 #SearchFailed {
   display: none;
+}
+#InspectionScheduler{
+  display:none;
+}
+#SaveConfirmed {
+  display:none;
+  margin-top: 1.5em;
 }
 
 #PermitSelect {
   max-width: 16rem;
   min-width: 8rem;
   padding-right: 28px;
-  min-height:50px;
-  font-size:130%
-
+  min-height: 50px;
+  font-size: 130%
 }
 
-
+.NewInspButton {
+  height: 20px;
+  background-color: #3e9571;
+  color: white;
+    
+}
 .button {
   font-weight: bold;
   background-color: #3e9571;
+  margin:0;
 }
 .button:hover {
   background-color: #27ce89;
@@ -31,13 +42,18 @@
 select > .selectPlaceholder {
   display: none;
 }
-
+#InspListData {
+  border-top: 1px solid lightgrey;
+  border-bottom: 1px solid lightgrey;
+  padding-left:0;
+  margin:1rem;
+}
 @font-face {
-    font-family: '[set]Foundicons';
-    src: url('fonts/[set]_foundicons.eot');
-    src: url('fonts/[set]_foundicons.eot?#iefix') format('embedded-opentype'), url('fonts/[set]_foundicons.woff') format('woff'), url('fonts/[set]_foundicons.ttf') format('truetype'), url('fonts/[set]_foundicons.svg#[set]Foundicons') format('svg');
-    font-weight: normal;
-    font-style: normal;
+  font-family: '[set]Foundicons';
+  src: url('fonts/[set]_foundicons.eot');
+  src: url('fonts/[set]_foundicons.eot?#iefix') format('embedded-opentype'), url('fonts/[set]_foundicons.woff') format('woff'), url('fonts/[set]_foundicons.ttf') format('truetype'), url('fonts/[set]_foundicons.svg#[set]Foundicons') format('svg');
+  font-weight: normal;
+  font-style: normal;
 }
 .foundicon-{
     display: inline;
@@ -61,9 +77,9 @@ select > .selectPlaceholder {
 }
 
 .MyLabel {
-  color: white;
-  color: rgba(256,256,256, .9);
-  background-color: #890ACC;
+  color: black;
+  color: rgba(0,0,0,.7);
+  background-color: lightsteelblue;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   padding-top: .5rem;
@@ -73,10 +89,8 @@ select > .selectPlaceholder {
 }
 .infoDiv {
     background-color: white;
-    padding: 1rem;
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
-    margin-bottom:.5rem;
 }
 
 
@@ -212,7 +226,7 @@ height: 5em;
 }
 .App-Container {
   min-height: calc(100% - 5em);
-  min-width: 300px;
+  min-width: 320px;
 
 }
 .TypeSelectOption{
@@ -220,17 +234,12 @@ height: 5em;
 }
 
 
-.InspBorderBottom {
-  border-bottom: 2px solid;
-  border-bottom-color: rgb(159, 159, 159);
-  border-bottom-color: rgba(0, 0, 0, 0.1);
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
-}
+
 #NotScheduled {
   background-color: lightpink;
-  padding:1rem;
+  padding: 1rem;
   font-weight: bold;
+  margin-top: 2em;
 }
 .datepicker table tr td.disabled {
   background-color: lightgray;
@@ -252,29 +261,85 @@ height: 5em;
   margin-bottom: .5rem;
   height: 30rem;
 }
+
 .inspRemarks {
   padding: 0 50px;
   color: #bd3f52;
 }
-.PermitSelectDiv {
-  padding-top:3.5rem;
-}.PermitSelectDiv,
+.PermitSelectDiv,
 .PermitAddressDiv {
-  min-height: 10.25rem;
+  min-height: 3rem;
 }
-.CloseIssueListButton{
-max-height:30px;
-max-width:30px;
-font-size:27px;
-outline-color:none;
+#PermitInfoDiv {
+ margin-top: 2rem;
 }
-  .CloseIssueListButton:focus {
-    outline: none;
-    outline-color: black;
-    border: none;
+.CloseIssueListButton {
+  max-height: 30px;
+  max-width: 30px;
+  font-size: 27px;
+  outline-color: none;
+  text-align: right;
+}
+.CloseIssueListButton:hover {
+  cursor:pointer;
+}
+
+h2 {
+  font-size:2.5em;
+}
+h5 {
+  font-size: 1.25em;
+font-weight:500;
+}
+.InspPermit,
+.InspType,
+.InspInspector,
+.InspDate,
+.InspResult {
+  border-right: 1px solid lightgrey;
+  padding-left: 1rem;
+}
+.CancelRow,
+.InspRow {
+  padding: 1rem;
+  border-left: 8px solid white;
+  border-bottom: 1px solid black;
+  margin-bottom: 0px;
+}
+.FailRow {
+  border-left-color: indianred;
+}
+.PassRow {
+  border-left-color: darkseagreen;
+}
+{
+  border-left-color: goldenrod;
+}
+
+.tabs-title > a {
+    font-size: 1.25em;
+    line-height:  1.25em;
+    padding: .5em 1em;
+}
+@media (max-width: 415px){
+  h2{
+    font-size: 1.75em;
   }
-  .CloseIssueListButton:active {
-    outline: none;
-    outline-color: black;
-    border:none;
+
+
+}
+@media (max-width: 639px){
+  .InspResult,
+  .InspDate{
+    text-align:center;
   }
+  .NewInspButton {
+    height: 20px;
+    background-color: #3e9571;
+    color: white;
+  }
+  .inspRemarks {
+    padding: 0;
+    font-size: .75em;
+  }
+}

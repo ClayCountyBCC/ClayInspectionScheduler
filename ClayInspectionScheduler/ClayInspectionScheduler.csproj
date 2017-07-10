@@ -413,6 +413,7 @@
     <Content Include="Content\fonts\svgs\fi-zoom-out.svg" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
+    <Content Include="index.html" />
     <Content Include="Scripts\app\es6-promise.min.js" />
     <Content Include="Scripts\app\tsconfig.json" />
     <Content Include="Scripts\app\tslint.json" />
@@ -427,7 +428,7 @@
     <Content Include="compilerconfig.json.defaults" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Scripts\jquery-3.1.1.intellisense.js" />
-    <Content Include="index.html" />
+    <Content Include="index_previous.html" />
     <Content Include="Scripts\bootstrap-datepicker.js" />
     <Content Include="Scripts\foundation.js" />
     <Content Include="Scripts\foundation.min.js" />

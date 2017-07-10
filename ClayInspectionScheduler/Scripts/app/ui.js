@@ -123,14 +123,13 @@ var InspSched;
             option.setAttribute("label", permit.PermitNo + "  (" + label + ")");
             option.setAttribute("title", permit.PermitNo.trim());
             option.textContent = permit.PermitNo + "  (" + label + ")";
-            option.id = permit.PermitNo + permit.CanSchedule;
+            option.id = "select_" + permit.PermitNo;
             if (permit.PermitNo == key) {
                 option.value = permit.PermitNo.trim();
                 option.selected = true;
             }
             else {
                 option.value = permit.PermitNo.trim();
-                option.selected = false;
             }
             return option;
         }
@@ -160,16 +159,16 @@ var InspSched;
             Hide('InspListData');
             Hide('InspectionScheduler');
             Hide('SuspendedContractor');
-            document.getElementById('FutureInspRow').removeAttribute("value");
             clearElement(document.getElementById('InspListData'));
             InspSched.transport.GetInspections(key).then(function (inspections) {
                 if (inspections.length > 0) {
-                    UI.CurrentInspections = inspections;
-                    BuildInspectionList(UI.CurrentInspections, permit);
+                    InspSched.CurrentInspections = inspections;
+                    BuildInspectionList(InspSched.CurrentInspections, permit);
+                    BuildScheduler(InspSched.CurrentInspections, key);
                 }
                 else {
-                    BuildScheduler(inspections, canSchedule, completed, key);
-                    document.getElementById('PermitScreen').style.display = "flex";
+                    // TODO: add 'NO INSPECTIONS ERROR'
+                    //document.getElementById('PermitScreen').style.display = "flex";
                 }
                 return true;
             }, function () {
@@ -181,70 +180,83 @@ var InspSched;
         function BuildInspectionList(inspections, permit) {
             var completed = 0;
             var NumFutureInsp = 0;
-            var canSchedule = true;
             // Initialize element variable for list container 'InspListData'
             var InspList = document.getElementById('InspListData');
             var InspHeader = document.getElementById('InspListHeader');
             var empty = document.createElement("tr");
-            clearElement(document.getElementById('FutureInspRow'));
             // TODO: add Try/Catch
-            if (inspections.length > 0) {
-                // create (call BuildInspectioN()) and add inspection row to container InspList
-                for (var _i = 0, inspections_1 = inspections; _i < inspections_1.length; _i++) {
-                    var inspection = inspections_1[_i];
-                    if (inspection.ResultADC) {
-                        InspList.appendChild(BuildCompletedInspection(inspection));
-                        InspList.appendChild(document.createElement("hr"));
-                        completed++;
-                    }
-                    else if (!inspection.ResultADC) {
-                        NumFutureInsp++;
-                        BuildFutureInspRow(inspection, NumFutureInsp, InspSched.ThisPermit.IsExternalUser);
-                    }
+            // create (call BuildInspectioN()) and add inspection row to container InspList
+            for (var _i = 0, inspections_1 = inspections; _i < inspections_1.length; _i++) {
+                var inspection = inspections_1[_i];
+                if (inspection.ResultADC) {
+                    InspList.appendChild(BuildCompletedInspection(inspection));
+                    completed++;
                 }
-                if (NumFutureInsp) {
-                    document.getElementById('FutureInspRow').setAttribute("value", inspections[0].PermitNo);
+                else if (!inspection.ResultADC) {
+                    InspList.appendChild(BuildFutureInspRow(inspection, NumFutureInsp, InspSched.ThisPermit.IsExternalUser));
                 }
-                if (completed > 0) {
-                    InspHeader.style.removeProperty("display");
-                    InspList.style.removeProperty("display");
-                }
-                document.getElementById('PermitScreen').style.display = "flex";
             }
+            InspList.style.removeProperty("display");
+            document.getElementById("InspSched").style.removeProperty("display");
+            document.getElementById('PermitScreen').style.display = "flex";
             var passedFinal = false;
-            for (var _a = 0, inspections_2 = inspections; _a < inspections_2.length; _a++) {
-                var i = inspections_2[_a];
-                var isFinalInspection = i.InsDesc.toLowerCase();
-                if (isFinalInspection.search("final") != -1
-                    && (i.ResultADC == 'A'
-                        || i.ResultADC == 'P')) {
-                    passedFinal = true;
-                }
-            }
             if (passedFinal) {
-                permitSchedulingIssue(inspections[0].PermitNo);
-            }
-            else {
-                BuildScheduler(inspections, canSchedule, completed);
+                //TODO: Update passed final issue
             }
         }
         UI.BuildInspectionList = BuildInspectionList;
         function BuildCompletedInspection(inspection) {
+            var ShowCreateNewInsp = document.getElementById("CreateNew_" + inspection.PermitNo);
+            var thisInspPermit;
             var inspRow = document.createElement("div");
-            inspRow.className = "row large-12";
+            if (inspection.ResultADC == 'A' || inspection.ResultADC == 'P')
+                inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle PassRow";
+            else if (inspection.ResultADC == null || inspection.ResultADC == "")
+                inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle";
+            else if (inspection.ResultADC == 'C')
+                inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle CancelRow";
+            else if (inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'N')
+                inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle FailRow";
+            var dataColumn = document.createElement("div");
+            dataColumn.className = "large-10 medium-10 small-12 ";
+            var thisPermit = document.createElement('div');
+            thisPermit.innerText = inspection.PermitNo;
+            thisPermit.className = "large-2 meduim-6 small-6 column InspPermit ";
+            dataColumn.appendChild(thisPermit);
             var inspDateTime = document.createElement("div");
             inspDateTime.textContent = inspection.DisplayInspDateTime.trim();
-            inspDateTime.className = "large-3 medium-2 small-12 inspDate ";
-            inspRow.appendChild(inspDateTime);
+            inspDateTime.className = "large-2 medium-5 small-6 column  InspDate";
+            dataColumn.appendChild(inspDateTime);
             var inspDesc = document.createElement("div");
             inspDesc.textContent = inspection.InsDesc.trim();
-            inspDesc.className = "large-8 medium-8 small-9 inspType ";
-            inspRow.appendChild(inspDesc);
+            inspDesc.className = "large-5 medium-6 small-6  InspType column  ";
+            dataColumn.appendChild(inspDesc);
             var ResultADC = document.createElement("div");
             ResultADC.textContent = inspection.ResultDescription.trim();
-            ResultADC.className = "large-1 medium-1 small-1 inspResult";
-            ResultADC.style.textAlign = "center";
-            inspRow.appendChild(ResultADC);
+            ResultADC.className = "large-3 medium-5 small-6 InspResult column end";
+            dataColumn.appendChild(ResultADC);
+            var NewInspButtonDiv = document.createElement("div");
+            NewInspButtonDiv.className = "large-2 medium-2 small-12  flex-container align-center ";
+            if (ShowCreateNewInsp == null) {
+                for (var _i = 0, _a = InspSched.CurrentPermits; _i < _a.length; _i++) {
+                    var p = _a[_i];
+                    if (p.PermitNo === inspection.PermitNo) {
+                        thisInspPermit = p;
+                        break;
+                    }
+                }
+                if (thisInspPermit.ErrorText == null) {
+                    var NewInspButton = document.createElement("button");
+                    NewInspButton.className = "align-self-center myButton small-12 NewInspButton";
+                    NewInspButton.innerText = "New";
+                    NewInspButton.value = inspection.PermitNo;
+                    NewInspButton.setAttribute("onclick", "InspSched.UpdatePermitSelectList(this.value);");
+                    NewInspButton.id = "CreateNew_" + inspection.PermitNo;
+                    NewInspButtonDiv.appendChild(NewInspButton);
+                }
+            }
+            inspRow.appendChild(dataColumn);
+            inspRow.appendChild(NewInspButtonDiv);
             if (inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'N') {
                 var Remarks = document.createElement("div");
                 if (inspection.Remarks !== null || inspection.Remarks === "") {
@@ -262,42 +274,43 @@ var InspSched;
         }
         function BuildFutureInspRow(inspection, numFutureInsp, IsExternalUser) {
             var schedBody = document.getElementById('InspSchedBody');
-            var futureRow = document.getElementById('FutureInspRow');
             var thisinsp = document.createElement("div");
-            var dateName = document.createElement("div");
-            var thisinspDate = document.createElement("div");
-            var thisinspType = document.createElement("div");
-            var thisinspInspector = document.createElement("div");
-            var thisinspCancelDiv = document.createElement("div");
-            var thisinspCancelButton = document.createElement("button");
             thisinsp.setAttribute("id", inspection.InspReqID + "_" + numFutureInsp);
-            thisinsp.className = "InspBorderBottom large-12 medium-12 small-12 row";
-            thisinspDate.className = "large-2 medium-2 small-4 column align-center column";
-            thisinspType.className = "large-5 medium-4 small-8 column align-center column ";
-            thisinspInspector.className = "large-3 medium-4 hide-for-small-only end column align-center";
-            thisinspCancelDiv.className = "large-2 medium-2 small-12 column flex-container align-center";
-            thisinspCancelButton.className = " button";
+            thisinsp.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle";
+            var thisPermit = document.createElement('div');
+            thisPermit.innerText = inspection.PermitNo;
+            thisPermit.className = "large-2 meduim-6 small-6 column InspPermit";
+            var thisinspDate = document.createElement("div");
+            thisinspDate.className = "large-2 medium-5 small-6 column InspDate ";
             thisinspDate.innerText = inspection.DisplaySchedDateTime;
+            var thisinspType = document.createElement("div");
+            thisinspType.className = "large-5 medium-6 small-12 column InspType";
             thisinspType.innerText = inspection.InsDesc;
+            var thisinspInspector = document.createElement("div");
+            thisinspInspector.className = "large-3 medium-5  hide-for-small-only column InspInspector";
             thisinspInspector.innerText = inspection.InspectorName;
+            thisinspInspector.setAttribute("style", "float:left;");
+            var thisinspCancelDiv = document.createElement("div");
+            thisinspCancelDiv.className = "large-2 medium-2 small-12  flex-container align-center";
+            var thisinspCancelButton = document.createElement("button");
+            thisinspCancelButton.className = "align-self-center myButton small-12 NewInspButton";
             thisinspCancelButton.innerText = "Cancel";
-            document.getElementById('InspSched').style.removeProperty("display");
-            document.getElementById('FutureInspRow').style.removeProperty("display");
+            thisinspCancelButton.value = inspection.PermitNo;
             thisinspCancelButton.setAttribute("onclick", 
             // cancels inspection then re-fetch inspections
-            "InspSched.UI.CancelInspection(\"" + inspection.InspReqID + "\", \"" + inspection.PermitNo + "\");" +
-                // clears Calendar of any chosen dates
-                "$( '#sandbox-container div' ).data( 'datepicker' ).clearDates();" +
-                // Hide scheduling issue div
-                "document.getElementById(\"NotScheduled\").style.display = \"none\"");
+            "InspSched.CancelInspection('" + inspection.InspReqID + "', '" + inspection.PermitNo + "');");
+            // Display cancel button if good date
             if (IsGoodCancelDate(inspection, IsExternalUser))
                 thisinspCancelDiv.appendChild(thisinspCancelButton);
-            thisinsp.appendChild(thisinspDate);
-            thisinsp.appendChild(thisinspType);
-            thisinsp.appendChild(thisinspInspector);
+            var dataColumn = document.createElement("div");
+            dataColumn.className = "large-10 medium-10 small-12";
+            dataColumn.appendChild(thisPermit);
+            dataColumn.appendChild(thisinspDate);
+            dataColumn.appendChild(thisinspType);
+            dataColumn.appendChild(thisinspInspector);
+            thisinsp.appendChild(dataColumn);
             thisinsp.appendChild(thisinspCancelDiv);
-            futureRow.appendChild(thisinsp);
-            schedBody.style.removeProperty("display");
+            return thisinsp;
         }
         /**********************************************
          *
@@ -305,24 +318,17 @@ var InspSched;
          * Get and build select list of inspections@
          *
          *********************************************/
-        function BuildScheduler(inspections, canSchedule, completed, key) {
-            if (inspections.length > 0)
-                key = inspections[0].PermitNo;
-            if (canSchedule) {
-                var fail = document.getElementById(key + "FAIL");
-                var pass = document.getElementById(key + "PASS");
-                // if contractor IS ALLOWED to schedule, the contractor id will be on the list
-                if (pass) {
-                    // Populate Inspection Type Select list
-                    LoadInspTypeSelect(key);
-                    document.getElementById('InspectionScheduler').style.removeProperty("display");
-                    document.getElementById('InspectionScheduler').setAttribute("value", key);
-                }
-                else {
-                    permitSchedulingIssue(key);
-                }
+        function BuildScheduler(inspections, key) {
+            // Populate Inspection Type Select list
+            for (var _i = 0, _a = InspSched.CurrentPermits; _i < _a.length; _i++) {
+                var permit = _a[_i];
+                console.log(permit.PermitNo);
             }
+            LoadInspTypeSelect(key);
+            document.getElementById('InspectionScheduler').setAttribute("value", key);
+            //permitSchedulingIssue(key);
         }
+        UI.BuildScheduler = BuildScheduler;
         function LoadInspTypeSelect(key) {
             var thistype = key[0];
             var label = getInspTypeString(thistype);
@@ -348,6 +354,7 @@ var InspSched;
                 }
             }
         }
+        UI.LoadInspTypeSelect = LoadInspTypeSelect;
         /**********************************
         
           Do Somethings
@@ -374,10 +381,12 @@ var InspSched;
         function Show(id, element, displayType) {
             if (!element) {
                 var e = document.getElementById(id);
-                if (displayType == null)
-                    e.style.display = "block";
-                else
-                    e.style.display = displayType;
+                if (e.style.display != null) {
+                    if (displayType == null)
+                        e.style.display = "block";
+                    else
+                        e.style.display = displayType;
+                }
             }
             else {
                 var e = document.getElementById(id);
@@ -429,25 +438,44 @@ var InspSched;
             Hide('Searching');
             Show('SearchFailed');
         }
-        function CancelInspection(InspID, key) {
-            if (InspID && key) {
-                //Hide( 'FutureInspRow' );
-                // TODO: Add function to not allow cancel if scheduled date of insp is current date 
-                var isDeleted = InspSched.transport.CancelInspection(InspID, key);
-                // TODO: ADD code to inform user if the inspection has been deleted 
-                // Reload inspection list after delete
-                if (isDeleted) {
-                    GetInspList(key);
-                }
-                else {
-                    //display notification of failed delete
-                }
-            }
-            else {
-                document.getElementById('InspSched').style.display = "none";
-            }
+        function InformUserOfError(permitno, error) {
+            document.getElementById("InspectionScheduler").style.display = "none";
+            clearElement(document.getElementById('InspTypeSelect'));
+            var reasons = document.getElementById('Reasons');
+            clearElement(reasons);
+            var thisHeading = document.getElementById('ErrorHeading');
+            clearElement(thisHeading);
+            var IssueList = document.createElement('ul');
+            var thisIssue = document.createElement('li');
+            InspSched.BuildCalendar(null, error);
+            thisHeading.innerText = "The following issue is preventing the ability to schedule an inspection:";
+            thisIssue.textContent = error;
+            thisIssue.style.marginLeft = "2rem;";
+            IssueList.appendChild(thisIssue);
+            reasons.appendChild(IssueList);
+            document.getElementById("NotScheduled").style.display = "flex";
         }
-        UI.CancelInspection = CancelInspection;
+        UI.InformUserOfError = InformUserOfError;
+        //function permitSchedulingIssue(key: string)
+        //{
+        //  let InspTypeList: HTMLSelectElement = (<HTMLSelectElement>document.getElementById('InspTypeSelect'));
+        //  clearElement(InspTypeList);
+        //  let e: HTMLElement = document.getElementById('SuspendedPermit');
+        //  clearElement(e);
+        //  let message: HTMLHeadingElement = (<HTMLHeadingElement>document.createElement("h5"));
+        //  message.appendChild(document.createTextNode("A new inspection cannot be scheduled for permit #" + key + "."));
+        //  message.appendChild(document.createElement("br"));
+        //  message.appendChild(document.createElement("br"));
+        //  message.appendChild(document.createTextNode(
+        //    "\nPlease contact the Building Department " +
+        //    "for assistance at 904-284-6307.  There are multiple " +
+        //    "reasons an inspection may not " +
+        //    "be scheduled on-line " +
+        //    "(fees due, permit problems, holds, or licensing issues)."
+        //  ));
+        //  e.appendChild(message);
+        //  document.getElementById('SuspendedContractor').style.removeProperty("display");
+        //}
         function IsGoodCancelDate(inspection, IsExternalUser) {
             var tomorrow = new Date();
             var inspDate = new Date(inspection.DisplaySchedDateTime);
@@ -456,23 +484,6 @@ var InspSched;
             if (inspDate < tomorrow && IsExternalUser)
                 return false;
             return true;
-        }
-        function permitSchedulingIssue(key) {
-            var InspTypeList = document.getElementById('InspTypeSelect');
-            clearElement(InspTypeList);
-            var e = document.getElementById('SuspendedPermit');
-            clearElement(e);
-            var message = document.createElement("h5");
-            message.appendChild(document.createTextNode("A new inspection cannot be scheduled for permit #" + key + "."));
-            message.appendChild(document.createElement("br"));
-            message.appendChild(document.createElement("br"));
-            message.appendChild(document.createTextNode("\nPlease contact the Building Department " +
-                "for assistance at 904-284-6307.  There are multiple " +
-                "reasons an inspection may not " +
-                "be scheduled on-line " +
-                "(fees due, permit problems, holds, or licensing issues)."));
-            e.appendChild(message);
-            document.getElementById('SuspendedContractor').style.removeProperty("display");
         }
     })(UI = InspSched.UI || (InspSched.UI = {}));
 })(InspSched || (InspSched = {}));
