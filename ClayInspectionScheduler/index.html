@@ -22,11 +22,10 @@
   <div class="row expanded top-bar" style="background-color:lightsteelblue">
     <div class="columns">
       <div class="row expanded">
-        <div class="large-3 medium-6 small-12 column"><h2>Clay County</h2></div>
-        <div class="large-4 medium-6 small-12 column"><h3 style="line-height:3.5rem;">Inspection Scheduler</h3></div>
+          <h2><span class="hide-for-small-only">Clay </span> Inspection Scheduler</h2>
       </div>
     </div>
-  </div>
+  </div> 
 
   <!--Inspection Scheduler Application container-->
   <div class="row expanded App-Container large-12 medium-12 small-12 columns align-center" style="padding-top:1rem;">
@@ -51,8 +50,8 @@
 
           <!-- Tab List-->
           <ul class="tabs" data-tabs id="InspectionSchedulerTabs" style="border-top-left-radius:10px;border-top-right-radius:10px;overflow:hidden">
-            <li class="tabs-title is-active"><a href="#InspectionView" aria-selected="true">Inspection View</a></li>
-            <li class="tabs-title"><a href="#Scheduler">Scheduler</a></li>
+            <li class="tabs-title is-active"><a href="#InspectionView" aria-selected="true">Inspections View</a></li>
+            <li class="tabs-title"><a href="#Scheduler">Scheduler View</a></li>
           </ul>
 
           <div class="tabs-content" data-tabs-content="InspectionSchedulerTabs">
@@ -60,10 +59,12 @@
             <!-- Tab 1 : Inspection View -->
             <div class="tabs-panel is-active tabs-content" id="InspectionView">
               <div class="large-12 medium-12 small-12" id="InspectionTable">
+                <div class="row large-12 medium-12 small-12 InspTitle align-center" id="InspTitle">
+                  <h5 class="InspTitle hide-for-small-only">Inspections View</h5>
+                </div>
                 <div class="large-12 medium-12 small-12" id="InspSched">
                   <div class="large-12 row infoDiv " id="InspSchedBody">
-                    <div class="large-12 medium-12 small-12 row" id="FutureInspRow" label="" value="">
-                    </div>
+
                     <div class="column infoDiv" id="InspListData" style="overflow-y: scroll;max-height:40em;"></div>
                   </div>
                 </div>
@@ -72,6 +73,9 @@
 
             <!-- Tab 2 : Scheduler -->
             <div class="tabs-panel" id="Scheduler">
+              <div class="row large-12 medium-12 small-12 InspTitle align-center" id="InspTitle">
+                <h5 class="InspTitle hide-for-small-only">Scheduler View</h5>
+              </div>
               <div class="row align-justify" id="PermitInfoDiv">
 
                 <div class="large-6 medium-6 small-12 PermitSelectDiv column" style="text-align:center;" id="PermitSelectContainer">
@@ -82,12 +86,10 @@
                 <div class="column large-6 medium-6 small-12 PermitAddressDiv" style="text-align:center;" id="CurrentPermitData">
                   <div class="row align-center small-12" style="text-align:center;">
                     <div class="column large-6 medium-12 small-12" style="text-align:center;">
-                      <h5 class=" align-center">Street</h5>
-                      <h6 class=" align-center" id="ProjAddrCombined"></h6>
-                    </div>
-                    <div class="column large-6 medium-12 small-12" style="text-align:center;">
-                      <h5 class=" align-center">City/Municipality</h5>
-                      <h6 class=" align-center" id="ProjCity"></h6>
+                      <h5 class="row align-center">Job Address</h5>
+                      <h6><span class="row align-center" id="ProjAddrCombined"></span>
+                      <span class="row align-center" id="ProjCity"></span></h6>
+
                     </div>
                   </div>
                 </div>
@@ -96,10 +98,16 @@
 
               <!-- Inspection Shceduler Issues Container -->
               <div class="row expanded" id="NotScheduled" style="display:none;">
+
+                <div class="large-12 medium-12 small-12 row align-justify">
+                  <h5 class="small-11 "id="ErrorHeading"></h5>
+                  <button type="button" class="CloseIssueListButton large-1 medium-1 small-1" style="border: 1px solid black; background-color:rgba(203, 33, 33, 0.83); color: white;text-align:center" id="CloseIssueList" aria-label="CloseIssuesList">
+                    <span aria-hidden="true">×</span>
+                  </button>
+                </div>
+
                 <div id="Reasons" class="large-11 medium-11 small-11"></div>
-                <button type="button" class="CloseIssueListButton large-1 medium-1 small-1" id="CloseIssueList" aria-label="CloseIssuesList">
-                  <span aria-hidden="true">×</span>
-                </button>
+
               </div> <!-- End Issues Container-->
 
               <!-- Inspection Shceduler Container -->
@@ -108,27 +116,26 @@
                   <div class="large-12 medium-12 small-12 row" style="padding-top:1rem;">
 
                     <!--Scheduling Calendar-->
-                    <div class="large-6 medium-6 small-12 align-center datepicker-box " style="margin-bottom:20px;" label="Select a date:">
-                      <label class="small-12">Select a Date</label>
-                      <div class="flex-containerr align-center date" id="sandbox-container">
+                    <div class="large-6 medium-6 small-12 align-center datepicker-box flex-container  " style="margin-bottom:20px;" label="Select a date:">
+                      <div class="large-10 medium-11 small-12 align-self-center date" id="sandbox-container">
                         <div class=" date" id="date"></div>
                       </div>
-                      <!--Scheduling Inspection Type Selector / Save button-->
-                      <div class="large-6 medium-6 small-12 ">
-                        <label>Inspection Type:</label>
-                        <div class="infoDiv large-12 medium-12 small-12 " style="text-align:center;">
-                          <select id="InspTypeSelect"></select>
-                          <button class="button " id="SaveSchedule" type="button" onclick="">Save Inspection</button>
-                        </div>
-                        <div class="text-center" id="SaveConfirmed">
-                          <p>
-                            <span id="InspSaveDesc"></span> Inspection scheduled for permit #
-                            <span id="InspSavePermitNo"></span>12345678,
-                            <span id="InspSaveDate"></span>on 07/14/2017
-                          </p>
-                        </div>
-                      </div> <!-- End Scheduling Inspection Type Selector / Save button-->
                     </div>
+                      <!--Scheduling Inspection Type Selector / Save button-->
+                    <div class="large-6 medium-6 small-12 row flex-container align-center align-self-middle">
+                      <div class="large-10 medium-10 small-10" style="text-align:center;">
+                        <select class="large-12 medium-12 small-12" id="InspTypeSelect"></select>
+                        <button class="button " id="SaveSchedule" type="button" onclick="">Save Inspection</button>
+                      </div>
+                      <div class="large-10 medium-10 small-10 text-center align-center" id="SaveConfirmed">
+                        <p class="large-12" style="font-size:1.5em;">
+                           <span id="InspSaveDesc">EIA  - Temp Pole</span> inspection scheduled for permit
+                          #<span id="InspSavePermitNo">21700192</span>,
+                        on <span id="InspSaveDate">07/12/2017</span> 
+                        </p>
+                      </div>
+                    </div>                                                 <!-- End Scheduling Inspection Type Selector / Save button-->
+                    
 
                     <!--Suspended Contractor Container -->
                     <!--<div class="large-10 medium-12 small-12 " id="SuspendedContractor">

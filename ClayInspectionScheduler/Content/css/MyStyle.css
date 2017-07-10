@@ -12,12 +12,17 @@
 #InspectionScheduler{
   display:none;
 }
+#SaveConfirmed {
+  display:none;
+  margin-top: 1.5em;
+}
+
 #PermitSelect {
   max-width: 16rem;
   min-width: 8rem;
   padding-right: 28px;
-  min-height:50px;
-  font-size:130%
+  min-height: 50px;
+  font-size: 130%
 }
 
 .NewInspButton {
@@ -273,17 +278,12 @@ height: 5em;
   max-width: 30px;
   font-size: 27px;
   outline-color: none;
+  text-align: right;
 }
-  .CloseIssueListButton:focus {
-    outline: none;
-    outline-color: black;
-    border: none;
-  }
-  .CloseIssueListButton:active {
-    outline: none;
-    outline-color: black;
-    border:none;
-  }
+.CloseIssueListButton:hover {
+  cursor:pointer;
+}
+
 h2 {
   font-size:2.5em;
 }
@@ -299,9 +299,10 @@ font-weight:500;
   border-right: 1px solid lightgrey;
   padding-left: 1rem;
 }
+.CancelRow,
 .InspRow {
   padding: 1rem;
-  border-left: 8px solid lightgrey;
+  border-left: 8px solid white;
   border-bottom: 1px solid black;
   margin-bottom: 0px;
 }
@@ -311,8 +312,14 @@ font-weight:500;
 .PassRow {
   border-left-color: darkseagreen;
 }
-.CancelRow {
+{
   border-left-color: goldenrod;
+}
+
+.tabs-title > a {
+    font-size: 1.25em;
+    line-height:  1.25em;
+    padding: .5em 1em;
 }
 @media (max-width: 415px){
   h2{
@@ -330,5 +337,9 @@ font-weight:500;
     height: 20px;
     background-color: #3e9571;
     color: white;
+  }
+  .inspRemarks {
+    padding: 0;
+    font-size: .75em;
   }
 }

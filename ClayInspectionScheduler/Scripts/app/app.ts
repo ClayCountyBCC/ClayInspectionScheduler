@@ -60,7 +60,10 @@ namespace InspSched
         {
           InspSched.ThisPermit = permit;
           if (permit.ErrorText == null)
-              BuildCalendar(permit.ScheduleDates);
+          {
+            BuildCalendar(permit.ScheduleDates);
+          }
+
           else
           {
               InspSched.UI.InformUserOfError(permit.PermitNo, permit.ErrorText);
@@ -82,12 +85,14 @@ namespace InspSched
         InspSched.UI.Hide( 'Searching' );
 
         return false;
-      } );
+      });
+
 
   }
 
   permitNumSelect.onchange = function ()
   {
+    document.getElementById("SaveConfirmed").style.display = "none";
     let permits = InspSched.CurrentPermits;
     // TODO: Add code to check if there is a selected date;
     SaveInspectionButton.setAttribute( "disabled", "disabled" );
@@ -107,6 +112,7 @@ namespace InspSched
 
           InspSched.UI.LoadInspTypeSelect(permit.PermitNo);
           BuildCalendar(permit.ScheduleDates);
+
         }
         break;
       }
@@ -126,30 +132,30 @@ namespace InspSched
 
   SaveInspectionButton.onclick = function ()
   {
+    document.getElementById("SaveConfirmed").style.display = "none";
 
     let thisPermit: string = permitNumSelect.value;
-    let thisInspCd: string = SaveInspectionButton.getAttribute( "value" );
+    let thisInspCd: string = SaveInspectionButton.getAttribute("value");
+    let thisInspDesc: HTMLSelectElement = (<HTMLSelectElement>document.getElementById("InspTypeSelect")); 
     let IssueContainer: HTMLDivElement = ( <HTMLDivElement>document.getElementById( "NotScheduled" ) )
-    let IssuesDiv: HTMLDivElement = ( <HTMLDivElement>document.getElementById( 'Reasons' ) );
+    let IssuesDiv: HTMLDivElement = (<HTMLDivElement>document.getElementById('Reasons'));
     IssueContainer.style.display = "none";
-    InspSched.UI.clearElement( IssuesDiv );
+    InspSched.UI.clearElement(IssuesDiv);
 
 
+    let inspDesc: string = thisInspDesc.options[thisInspDesc.selectedIndex].textContent;
     newInsp = new NewInspection( thisPermit, thisInspCd, $( dpCalendar ).data( 'datepicker' ).getDate() );
     //$( dpCalendar ).data( 'datepicker' ).clearDates();
 
 
     var e = transport.SaveInspection( newInsp ).then( function ( issues: Array<string> )
     {
-      let thisHeading: HTMLHeadingElement = ( <HTMLHeadingElement>document.createElement( 'h5' ) );
+      let thisHeading: HTMLHeadingElement = (<HTMLHeadingElement>document.getElementById('ErrorHeading'));
       let IssueList: HTMLUListElement = ( <HTMLUListElement>document.createElement( 'ul' ) );
 
-      if ( issues != null ) 
+      if ( issues.length > 0 ) 
       {
         thisHeading.innerText = "The following issue(s) prevented scheduling the requested inspection:";
-        thisHeading.className = "large-12 medium-12 small-12 row";
-        IssuesDiv.appendChild( thisHeading );
-
         if ( issues.length > 0 )
         {
 
@@ -169,14 +175,23 @@ namespace InspSched
       }
       else
       {
-        let thisIssue: HTMLLIElement = ( <HTMLLIElement>document.createElement( 'li' ) );
-        thisIssue.textContent = "There is an issue saving the requested inspection. Please contact the Building Department " +
-          "for assistance at 904-284-6307.";
-        thisIssue.style.marginLeft = "2rem;";
-        IssueList.appendChild( thisIssue );
+        //  Display safe confirm div
+        let inspType: HTMLSpanElement = (<HTMLSpanElement>document.getElementById("InspSaveDesc"));
+        let inspPermitNo: HTMLSpanElement = (<HTMLSpanElement>document.getElementById("InspSavePermitNo"));
+        let inspSchedDate: HTMLSpanElement = (<HTMLSpanElement>document.getElementById("InspSaveDate"));
+        InspSched.UI.clearElement(inspType);
+        InspSched.UI.clearElement(inspPermitNo);
+        InspSched.UI.clearElement(inspSchedDate);
+
+        inspType.innerText = inspDesc;
+        inspPermitNo.innerText = newInsp.PermitNo;
+        inspSchedDate.innerText = newInsp.SchecDateTime.toLocaleDateString();
+
+        document.getElementById("SaveConfirmed").style.display = "flex";
 
       }
 
+      document.getElementById('InspectionScheduler').style.display = "flex";
 
       return true;
 
@@ -229,9 +244,6 @@ namespace InspSched
    
     $( dpCalendar ).datepicker( 'destroy' );
 
-
-    //
-
     if (errorText == null)
     {
       document.getElementById("NotScheduled").style.display = "none";
@@ -266,9 +278,11 @@ namespace InspSched
         });
 
       };
+      document.getElementById('InspectionScheduler').style.display = "flex";
 
-      document.getElementById("InspectionScheduler").style.display = "flex";
     }
+
+
   }
 
   function EnableSaveButton()
@@ -303,6 +317,9 @@ namespace InspSched
 
   export function UpdatePermitSelectList(PermitNo: string):void
   {
+
+    document.getElementById("SaveConfirmed").style.display = "none";
+
     let selectedoption: HTMLOptionElement = (<HTMLOptionElement>document.getElementById("select_" + PermitNo));
 
     selectedoption.selected = true;
@@ -335,6 +352,8 @@ namespace InspSched
       if (isDeleted)
       {
         InspSched.UI.GetInspList(PermitNo);
+        BuildCalendar(ThisPermit.ScheduleDates);
+
       }
 
       else
@@ -345,9 +364,8 @@ namespace InspSched
     }
     else
     {
-      document.getElementById('InspSched').style.display = "none";
+
     }
   }
-
 
 }

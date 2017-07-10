@@ -230,7 +230,7 @@ namespace InspSched.UI
       else
       {
         // TODO: add 'NO INSPECTIONS ERROR'
-        document.getElementById('PermitScreen').style.display = "flex";
+        //document.getElementById('PermitScreen').style.display = "flex";
       }
 
 
@@ -294,13 +294,7 @@ namespace InspSched.UI
     else if (inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'N')
       inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle FailRow";
 
-    for (let p of InspSched.CurrentPermits)
-    {
-      if (p.PermitNo === inspection.PermitNo)
-      {
-        thisInspPermit = p;
-      }
-    }
+
     
     let dataColumn: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
     dataColumn.className = "large-10 medium-10 small-12 ";
@@ -330,8 +324,17 @@ namespace InspSched.UI
     let NewInspButtonDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
     NewInspButtonDiv.className = "large-2 medium-2 small-12  flex-container align-center ";
 
-    if (!ShowCreateNewInsp)
+    if (ShowCreateNewInsp==null)
     {
+      for (let p of InspSched.CurrentPermits)
+      {
+        if (p.PermitNo === inspection.PermitNo)
+        {
+          thisInspPermit = p;
+          break;
+        }
+      }
+
       if (thisInspPermit.ErrorText == null)
       {
         let NewInspButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
@@ -340,7 +343,7 @@ namespace InspSched.UI
         NewInspButton.value = inspection.PermitNo;
         NewInspButton.setAttribute("onclick",
 
-          "InspSched.UpdatePermitSelectList(this.value);"
+        "InspSched.UpdatePermitSelectList(this.value);"
 
         );
 
@@ -380,7 +383,6 @@ namespace InspSched.UI
   function BuildFutureInspRow(inspection: Inspection, numFutureInsp: number, IsExternalUser: boolean)
   {
     let schedBody: HTMLDivElement = (<HTMLDivElement>document.getElementById('InspSchedBody'));
-    let dateName: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
 
     let thisinsp: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
     thisinsp.setAttribute("id", inspection.InspReqID + "_" + numFutureInsp);
@@ -431,8 +433,6 @@ namespace InspSched.UI
     thisinsp.appendChild(dataColumn);
     thisinsp.appendChild(thisinspCancelDiv);
 
-    document.getElementById('InspSched').style.removeProperty("display");
-
     return thisinsp;
 
   }
@@ -455,7 +455,6 @@ namespace InspSched.UI
     }
     LoadInspTypeSelect(key);
 
-    document.getElementById('InspectionScheduler').style.display="flex";
     document.getElementById('InspectionScheduler').setAttribute("value", key);
       
     //permitSchedulingIssue(key);
@@ -603,51 +602,54 @@ namespace InspSched.UI
 
   export function InformUserOfError(permitno: string, error: string): void
   {
-    document.getElementById("NotScheduled").style.display = "flex";
 
     document.getElementById("InspectionScheduler").style.display = "none";
+    clearElement(document.getElementById('InspTypeSelect'));
+
     let reasons: HTMLDivElement = (<HTMLDivElement>document.getElementById('Reasons'));
     clearElement(reasons);
-    let thisHeading: HTMLHeadingElement = (<HTMLHeadingElement>document.createElement('h5'));
+    let thisHeading: HTMLHeadingElement = (<HTMLHeadingElement>document.getElementById('ErrorHeading'));
+    clearElement(thisHeading);
+
     let IssueList: HTMLUListElement = (<HTMLUListElement>document.createElement('ul'));
     let thisIssue: HTMLLIElement = (<HTMLLIElement>document.createElement('li'));
     InspSched.BuildCalendar(null, error);
 
-    thisHeading.innerText = "The following issue(s) prevented scheduling the requested inspection:";
-    thisHeading.className = "large-12 medium-12 small-12 row";
-    reasons.appendChild(thisHeading);
+    thisHeading.innerText = "The following issue is preventing the ability to schedule an inspection:";
+
     thisIssue.textContent = error;
     thisIssue.style.marginLeft = "2rem;";
+
     IssueList.appendChild(thisIssue);
     reasons.appendChild(IssueList);
     document.getElementById("NotScheduled").style.display = "flex";
+    
   }
 
+  //function permitSchedulingIssue(key: string)
+  //{
+  //  let InspTypeList: HTMLSelectElement = (<HTMLSelectElement>document.getElementById('InspTypeSelect'));
+  //  clearElement(InspTypeList);
+  //  let e: HTMLElement = document.getElementById('SuspendedPermit');
+  //  clearElement(e);
+  //  let message: HTMLHeadingElement = (<HTMLHeadingElement>document.createElement("h5"));
+  //  message.appendChild(document.createTextNode("A new inspection cannot be scheduled for permit #" + key + "."));
+  //  message.appendChild(document.createElement("br"));
+  //  message.appendChild(document.createElement("br"));
 
-  function permitSchedulingIssue(key: string)
-  {
-    let InspTypeList: HTMLSelectElement = (<HTMLSelectElement>document.getElementById('InspTypeSelect'));
-    clearElement(InspTypeList);
-    let e: HTMLElement = document.getElementById('SuspendedPermit');
-    clearElement(e);
-    let message: HTMLHeadingElement = (<HTMLHeadingElement>document.createElement("h5"));
-    message.appendChild(document.createTextNode("A new inspection cannot be scheduled for permit #" + key + "."));
-    message.appendChild(document.createElement("br"));
-    message.appendChild(document.createElement("br"));
+  //  message.appendChild(document.createTextNode(
 
-    message.appendChild(document.createTextNode(
+  //    "\nPlease contact the Building Department " +
+  //    "for assistance at 904-284-6307.  There are multiple " +
+  //    "reasons an inspection may not " +
+  //    "be scheduled on-line " +
+  //    "(fees due, permit problems, holds, or licensing issues)."
 
-      "\nPlease contact the Building Department " +
-      "for assistance at 904-284-6307.  There are multiple " +
-      "reasons an inspection may not " +
-      "be scheduled on-line " +
-      "(fees due, permit problems, holds, or licensing issues)."
+  //  ));
 
-    ));
-
-    e.appendChild(message);
-    document.getElementById('SuspendedContractor').style.removeProperty("display");
-  }
+  //  e.appendChild(message);
+  //  document.getElementById('SuspendedContractor').style.removeProperty("display");
+  //}
 
   function IsGoodCancelDate(inspection: Inspection, IsExternalUser: boolean): boolean
   {

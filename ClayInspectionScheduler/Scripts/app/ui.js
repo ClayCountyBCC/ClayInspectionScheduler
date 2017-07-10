@@ -168,7 +168,7 @@ var InspSched;
                 }
                 else {
                     // TODO: add 'NO INSPECTIONS ERROR'
-                    document.getElementById('PermitScreen').style.display = "flex";
+                    //document.getElementById('PermitScreen').style.display = "flex";
                 }
                 return true;
             }, function () {
@@ -217,12 +217,6 @@ var InspSched;
                 inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle CancelRow";
             else if (inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'N')
                 inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle FailRow";
-            for (var _i = 0, _a = InspSched.CurrentPermits; _i < _a.length; _i++) {
-                var p = _a[_i];
-                if (p.PermitNo === inspection.PermitNo) {
-                    thisInspPermit = p;
-                }
-            }
             var dataColumn = document.createElement("div");
             dataColumn.className = "large-10 medium-10 small-12 ";
             var thisPermit = document.createElement('div');
@@ -243,7 +237,14 @@ var InspSched;
             dataColumn.appendChild(ResultADC);
             var NewInspButtonDiv = document.createElement("div");
             NewInspButtonDiv.className = "large-2 medium-2 small-12  flex-container align-center ";
-            if (!ShowCreateNewInsp) {
+            if (ShowCreateNewInsp == null) {
+                for (var _i = 0, _a = InspSched.CurrentPermits; _i < _a.length; _i++) {
+                    var p = _a[_i];
+                    if (p.PermitNo === inspection.PermitNo) {
+                        thisInspPermit = p;
+                        break;
+                    }
+                }
                 if (thisInspPermit.ErrorText == null) {
                     var NewInspButton = document.createElement("button");
                     NewInspButton.className = "align-self-center myButton small-12 NewInspButton";
@@ -273,7 +274,6 @@ var InspSched;
         }
         function BuildFutureInspRow(inspection, numFutureInsp, IsExternalUser) {
             var schedBody = document.getElementById('InspSchedBody');
-            var dateName = document.createElement("div");
             var thisinsp = document.createElement("div");
             thisinsp.setAttribute("id", inspection.InspReqID + "_" + numFutureInsp);
             thisinsp.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle";
@@ -310,7 +310,6 @@ var InspSched;
             dataColumn.appendChild(thisinspInspector);
             thisinsp.appendChild(dataColumn);
             thisinsp.appendChild(thisinspCancelDiv);
-            document.getElementById('InspSched').style.removeProperty("display");
             return thisinsp;
         }
         /**********************************************
@@ -326,7 +325,6 @@ var InspSched;
                 console.log(permit.PermitNo);
             }
             LoadInspTypeSelect(key);
-            document.getElementById('InspectionScheduler').style.display = "flex";
             document.getElementById('InspectionScheduler').setAttribute("value", key);
             //permitSchedulingIssue(key);
         }
@@ -441,17 +439,16 @@ var InspSched;
             Show('SearchFailed');
         }
         function InformUserOfError(permitno, error) {
-            document.getElementById("NotScheduled").style.display = "flex";
             document.getElementById("InspectionScheduler").style.display = "none";
+            clearElement(document.getElementById('InspTypeSelect'));
             var reasons = document.getElementById('Reasons');
             clearElement(reasons);
-            var thisHeading = document.createElement('h5');
+            var thisHeading = document.getElementById('ErrorHeading');
+            clearElement(thisHeading);
             var IssueList = document.createElement('ul');
             var thisIssue = document.createElement('li');
             InspSched.BuildCalendar(null, error);
-            thisHeading.innerText = "The following issue(s) prevented scheduling the requested inspection:";
-            thisHeading.className = "large-12 medium-12 small-12 row";
-            reasons.appendChild(thisHeading);
+            thisHeading.innerText = "The following issue is preventing the ability to schedule an inspection:";
             thisIssue.textContent = error;
             thisIssue.style.marginLeft = "2rem;";
             IssueList.appendChild(thisIssue);
@@ -459,23 +456,26 @@ var InspSched;
             document.getElementById("NotScheduled").style.display = "flex";
         }
         UI.InformUserOfError = InformUserOfError;
-        function permitSchedulingIssue(key) {
-            var InspTypeList = document.getElementById('InspTypeSelect');
-            clearElement(InspTypeList);
-            var e = document.getElementById('SuspendedPermit');
-            clearElement(e);
-            var message = document.createElement("h5");
-            message.appendChild(document.createTextNode("A new inspection cannot be scheduled for permit #" + key + "."));
-            message.appendChild(document.createElement("br"));
-            message.appendChild(document.createElement("br"));
-            message.appendChild(document.createTextNode("\nPlease contact the Building Department " +
-                "for assistance at 904-284-6307.  There are multiple " +
-                "reasons an inspection may not " +
-                "be scheduled on-line " +
-                "(fees due, permit problems, holds, or licensing issues)."));
-            e.appendChild(message);
-            document.getElementById('SuspendedContractor').style.removeProperty("display");
-        }
+        //function permitSchedulingIssue(key: string)
+        //{
+        //  let InspTypeList: HTMLSelectElement = (<HTMLSelectElement>document.getElementById('InspTypeSelect'));
+        //  clearElement(InspTypeList);
+        //  let e: HTMLElement = document.getElementById('SuspendedPermit');
+        //  clearElement(e);
+        //  let message: HTMLHeadingElement = (<HTMLHeadingElement>document.createElement("h5"));
+        //  message.appendChild(document.createTextNode("A new inspection cannot be scheduled for permit #" + key + "."));
+        //  message.appendChild(document.createElement("br"));
+        //  message.appendChild(document.createElement("br"));
+        //  message.appendChild(document.createTextNode(
+        //    "\nPlease contact the Building Department " +
+        //    "for assistance at 904-284-6307.  There are multiple " +
+        //    "reasons an inspection may not " +
+        //    "be scheduled on-line " +
+        //    "(fees due, permit problems, holds, or licensing issues)."
+        //  ));
+        //  e.appendChild(message);
+        //  document.getElementById('SuspendedContractor').style.removeProperty("display");
+        //}
         function IsGoodCancelDate(inspection, IsExternalUser) {
             var tomorrow = new Date();
             var inspDate = new Date(inspection.DisplaySchedDateTime);
