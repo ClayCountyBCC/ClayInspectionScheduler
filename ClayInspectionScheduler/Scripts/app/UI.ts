@@ -202,6 +202,8 @@ namespace InspSched.UI
 
   export function GetInspList(key: string, permit?: Permit)
   {
+    document.getElementById("NoInspections").style.display = "none";
+
     document.getElementById('InspectionScheduler').removeAttribute("value");
     var saveButton: HTMLElement = (<HTMLElement>document.getElementById('SaveSchedule'));
     if (saveButton != undefined)

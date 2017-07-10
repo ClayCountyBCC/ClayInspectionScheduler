@@ -126,6 +126,7 @@ namespace InspSched
 
   InspectionTypeSelect.onchange = function ()
   {
+
     SaveInspectionButton.setAttribute( "value", InspectionTypeSelect.value );
     if ( $( dpCalendar ).data( 'datepicker' ).getDate() != null )
     {
@@ -135,6 +136,7 @@ namespace InspSched
 
   SaveInspectionButton.onclick = function ()
   {
+
     document.getElementById("SaveConfirmed").style.display = "none";
 
     let thisPermit: string = permitNumSelect.value;
