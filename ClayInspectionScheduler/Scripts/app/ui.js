@@ -164,12 +164,14 @@ var InspSched;
                 if (inspections.length > 0) {
                     InspSched.CurrentInspections = inspections;
                     BuildInspectionList(InspSched.CurrentInspections, permit);
-                    BuildScheduler(InspSched.CurrentInspections, key);
                 }
                 else {
                     // TODO: add 'NO INSPECTIONS ERROR'
-                    //document.getElementById('PermitScreen').style.display = "flex";
+                    document.getElementById('NoInspections').style.display = "flex";
+                    document.getElementById("InspSched").style.display = "flex";
+                    document.getElementById('PermitScreen').style.display = "flex";
                 }
+                BuildScheduler(InspSched.CurrentInspections, key);
                 return true;
             }, function () {
                 console.log('error getting inspections');

@@ -35,6 +35,8 @@ var InspSched;
         }
     };
     PermitSearchButton.onclick = function () {
+        document.getElementById('PermitScreen').style.display = "none";
+        document.getElementById("NoInspections").style.display = "none";
         InspSched.transport.GetPermit(InspSched.UI.Search(PermitSearchField.value)).then(function (permits) {
             InspSched.CurrentPermits = permits;
             InspSched.UI.ProcessResults(permits, PermitSearchField.value);
