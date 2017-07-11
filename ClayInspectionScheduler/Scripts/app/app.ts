@@ -50,6 +50,7 @@ namespace InspSched
     document.getElementById('PermitScreen').style.display = "none";
 
     document.getElementById("NoInspections").style.display = "none";
+
     transport.GetPermit( InspSched.UI.Search( PermitSearchField.value ) ).then( function ( permits: Array<Permit> )
     {
 

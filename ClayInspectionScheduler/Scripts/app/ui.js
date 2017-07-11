@@ -146,7 +146,6 @@ var InspSched;
         
         ***********************************/
         function GetInspList(key, permit) {
-            document.getElementById("NoInspections").style.display = "none";
             document.getElementById('InspectionScheduler').removeAttribute("value");
             var saveButton = document.getElementById('SaveSchedule');
             if (saveButton != undefined) {
