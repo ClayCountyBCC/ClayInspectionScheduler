@@ -9,6 +9,7 @@ var InspSched;
         "use strict";
         UI.CurrentPermits = new Array();
         UI.CurrentInspections = [];
+        UI.PermitsWithOutInsp = [];
         function Search(key) {
             clearElement(document.getElementById('SearchFailed'));
             Hide('PermitSelectContainer');
@@ -18,6 +19,7 @@ var InspSched;
             Hide('InspectionTable');
             Hide('SearchFailed');
             Hide('SuspendedContractor');
+            Hide('NoInspContainer');
             Show('Searching');
             var k = key.trim().toUpperCase();
             document.getElementById('PermitSearch').setAttribute("value", k);
@@ -157,6 +159,7 @@ var InspSched;
             Hide('InspSched');
             Hide('InspListHeader');
             Hide('InspListData');
+            Hide('NoInspContainer');
             Hide('InspectionScheduler');
             Hide('SuspendedContractor');
             clearElement(document.getElementById('InspListData'));
@@ -180,25 +183,41 @@ var InspSched;
         }
         UI.GetInspList = GetInspList;
         function BuildInspectionList(inspections, permit) {
-            var completed = 0;
+            var LocalPermitsWithOutInsp = [];
             var NumFutureInsp = 0;
+            for (var _i = 0, _a = InspSched.CurrentPermits; _i < _a.length; _i++) {
+                var p = _a[_i];
+                LocalPermitsWithOutInsp.push(p.PermitNo);
+            }
+            InspSched.UI.PermitsWithOutInsp = LocalPermitsWithOutInsp;
+            var PermitsNoInspCount = InspSched.UI.PermitsWithOutInsp.length;
             // Initialize element variable for list container 'InspListData'
             var InspList = document.getElementById('InspListData');
             var InspHeader = document.getElementById('InspListHeader');
             var empty = document.createElement("tr");
             // TODO: add Try/Catch
             // create (call BuildInspectioN()) and add inspection row to container InspList
-            for (var _i = 0, inspections_1 = inspections; _i < inspections_1.length; _i++) {
-                var inspection = inspections_1[_i];
+            for (var _b = 0, inspections_1 = inspections; _b < inspections_1.length; _b++) {
+                var inspection = inspections_1[_b];
                 if (inspection.ResultADC) {
                     InspList.appendChild(BuildCompletedInspection(inspection));
-                    completed++;
+                    if (InspSched.UI.PermitsWithOutInsp.indexOf(inspection.PermitNo, 0) > -1) {
+                        PermitsNoInspCount--;
+                        delete InspSched.UI.PermitsWithOutInsp[(InspSched.UI.PermitsWithOutInsp.indexOf(inspection.PermitNo))];
+                    }
                 }
                 else if (!inspection.ResultADC) {
                     InspList.appendChild(BuildFutureInspRow(inspection, NumFutureInsp, InspSched.ThisPermit.IsExternalUser));
+                    if (InspSched.UI.PermitsWithOutInsp.indexOf(inspection.PermitNo, 0) > -1) {
+                        PermitsNoInspCount--;
+                        delete InspSched.UI.PermitsWithOutInsp[(InspSched.UI.PermitsWithOutInsp.indexOf(inspection.PermitNo))];
+                    }
                 }
             }
             InspList.style.removeProperty("display");
+            // Inform user of permits with no inspections. If no error text, show "New" button
+            if (PermitsNoInspCount > 0)
+                ShowPermitsWithNoInspections(PermitsNoInspCount);
             document.getElementById("InspSched").style.removeProperty("display");
             document.getElementById('PermitScreen').style.display = "flex";
             var passedFinal = false;
@@ -239,6 +258,7 @@ var InspSched;
             dataColumn.appendChild(ResultADC);
             var NewInspButtonDiv = document.createElement("div");
             NewInspButtonDiv.className = "large-2 medium-2 small-12  flex-container align-center ";
+            // Create New Button
             if (ShowCreateNewInsp == null) {
                 for (var _i = 0, _a = InspSched.CurrentPermits; _i < _a.length; _i++) {
                     var p = _a[_i];
@@ -313,6 +333,48 @@ var InspSched;
             thisinsp.appendChild(dataColumn);
             thisinsp.appendChild(thisinspCancelDiv);
             return thisinsp;
+        }
+        function ShowPermitsWithNoInspections(count) {
+            clearElement(document.getElementById('PermitsWithNoInspections'));
+            var inspRow = document.getElementById('PermitsWithNoInspections');
+            inspRow.className = "NoInspRow large-12 medium-12 small-12 row flex-container align-middle align-center";
+            var NewInspButtonDiv = document.createElement("div");
+            NewInspButtonDiv.className = "large-2 medium-2 small-5  flex-container align-center ";
+            for (var _i = 0, _a = InspSched.UI.PermitsWithOutInsp; _i < _a.length; _i++) {
+                var ni = _a[_i];
+                if (ni != undefined) {
+                    var permitDiv = document.createElement("div");
+                    permitDiv.className = "large-5 medium-5 small-12 flex-container align-center align-middle row";
+                    permitDiv.style.borderBottom = "1px solid lightgray";
+                    var permitNumDiv = document.createElement("div");
+                    permitNumDiv.innerText = "Permit #" + ni;
+                    permitNumDiv.className = "large-5 medium-5 small-12 align-center flex-container";
+                    var ShowCreateNewInsp = document.getElementById("CreateNew_" + ni);
+                    if (ShowCreateNewInsp == null) {
+                        var thisInspPermit = void 0;
+                        for (var _b = 0, _c = InspSched.CurrentPermits; _b < _c.length; _b++) {
+                            var p = _c[_b];
+                            if (p.PermitNo === ni.toString()) {
+                                thisInspPermit = p;
+                                break;
+                            }
+                        }
+                        permitDiv.appendChild(permitNumDiv);
+                        if (thisInspPermit.ErrorText == null) {
+                            var NewInspButton = document.createElement("button");
+                            NewInspButton.className = "align-self-center myButton small-12 NewInspButton";
+                            NewInspButton.innerText = "New";
+                            NewInspButton.value = ni;
+                            NewInspButton.setAttribute("onclick", "InspSched.UpdatePermitSelectList(this.value);");
+                            NewInspButton.id = "CreateNew_" + ni;
+                            NewInspButtonDiv.appendChild(NewInspButton);
+                            permitDiv.appendChild(NewInspButtonDiv);
+                        }
+                    }
+                    inspRow.appendChild(permitDiv);
+                    document.getElementById('NoInspContainer').style.display = "flex";
+                }
+            } // end for loop (create row for each existing in PermitsWithNoInspections array)
         }
         /**********************************************
          *

@@ -18,37 +18,39 @@ namespace ClayInspectionScheduler.Models
       int FourthWeek = 4;
       int LastWeek = 5;
 
-      List<System.DateTime> HolidayList = new List<DateTime>();
+      List<DateTime> HolidayList = new List<DateTime>
+      {
 
-      //   http://www.usa.gov/citizens/holidays.shtml      
-      //   http://archive.opm.gov/operating_status_schedules/fedhol/2013.asp
+        //   http://www.usa.gov/citizens/holidays.shtml      
+        //   http://archive.opm.gov/operating_status_schedules/fedhol/2013.asp
 
-      // New Year's Day            Jan 1
-      HolidayList.Add(new DateTime(vYear, 1, 1));
+        // New Year's Day            Jan 1
+        new DateTime(vYear, 1, 1),
 
-      // Martin Luther King, Jr. third Mon in Jan
-      HolidayList.Add(GetNthDayOfNthWeek(new DateTime(vYear, 1, 1), (int)DayOfWeek.Monday, ThirdWeek));
+        // Martin Luther King, Jr. third Mon in Jan
+        GetNthDayOfNthWeek(new DateTime(vYear, 1, 1), (int)DayOfWeek.Monday, ThirdWeek),
 
-      // Washington's Birthday third Mon in Feb
-      HolidayList.Add(GetNthDayOfNthWeek(new DateTime(vYear, 2, 1), (int)DayOfWeek.Monday, ThirdWeek));
+        // Washington's Birthday third Mon in Feb
+        GetNthDayOfNthWeek(new DateTime(vYear, 2, 1), (int)DayOfWeek.Monday, ThirdWeek),
 
-      // Memorial Day          last Mon in May
-      HolidayList.Add(GetNthDayOfNthWeek(new DateTime(vYear, 5, 1), (int)DayOfWeek.Monday, LastWeek));
+        // Memorial Day          last Mon in May
+        GetNthDayOfNthWeek(new DateTime(vYear, 5, 1), (int)DayOfWeek.Monday, LastWeek),
 
-      // Independence Day      July 4
-      HolidayList.Add(new DateTime(vYear, 7, 4));
+        // Independence Day      July 4
+        new DateTime(vYear, 7, 4),
 
-      // Labor Day             first Mon in Sept
-      HolidayList.Add(GetNthDayOfNthWeek(new DateTime(vYear, 9, 1), (int)DayOfWeek.Monday, FirstWeek));
+        // Labor Day             first Mon in Sept
+        GetNthDayOfNthWeek(new DateTime(vYear, 9, 1), (int)DayOfWeek.Monday, FirstWeek),
 
-      // Columbus Day          second Mon in Oct
-      //HolidayList.Add(GetNthDayOfNthWeek(new DateTime(vYear, 10, 1), DayOfWeek.Monday, SecondWeek))
+        // Columbus Day          second Mon in Oct
+        //HolidayList.Add(GetNthDayOfNthWeek(new DateTime(vYear, 10, 1), DayOfWeek.Monday, SecondWeek))
 
-      // Veterans Day          Nov 11
-      HolidayList.Add(new DateTime(vYear, 11, 11));
+        // Veterans Day          Nov 11
+        new DateTime(vYear, 11, 11)
+      };
 
       // Thanksgiving Day      fourth Thur in Nov
-      System.DateTime ThanksGiving = GetNthDayOfNthWeek(new DateTime(vYear, 11, 1), (int)DayOfWeek.Thursday, FourthWeek);
+      DateTime ThanksGiving = GetNthDayOfNthWeek(new DateTime(vYear, 11, 1), (int)DayOfWeek.Thursday, FourthWeek);
       HolidayList.Add(ThanksGiving);
       HolidayList.Add(ThanksGiving.AddDays(+1));
       switch (vYear)

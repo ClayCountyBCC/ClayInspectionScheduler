@@ -10,6 +10,8 @@ namespace InspSched.UI
   "use strict";
   export let CurrentPermits: Array<Permit> = new Array<Permit>();
   export let CurrentInspections: Array<Inspection> = [];
+  export let PermitsWithOutInsp: Array<string> = [];
+
 
   export function Search(key: string)
   {
@@ -21,6 +23,7 @@ namespace InspSched.UI
     Hide('InspectionTable');
     Hide('SearchFailed');
     Hide('SuspendedContractor');
+    Hide('NoInspContainer');
     Show('Searching');
     
     let k: string = key.trim().toUpperCase();
@@ -202,7 +205,7 @@ namespace InspSched.UI
 
   export function GetInspList(key: string, permit?: Permit)
   {
-
+    
     document.getElementById('InspectionScheduler').removeAttribute("value");
     var saveButton: HTMLElement = (<HTMLElement>document.getElementById('SaveSchedule'));
     if (saveButton != undefined)
@@ -215,10 +218,12 @@ namespace InspSched.UI
     Hide('InspSched');
     Hide('InspListHeader');
     Hide('InspListData');
+    Hide('NoInspContainer');
     Hide('InspectionScheduler');
     Hide('SuspendedContractor');
-    clearElement(document.getElementById('InspListData'));
 
+    clearElement(document.getElementById('InspListData'));
+  
     transport.GetInspections(key).then(function (inspections: Array<Inspection>)
     {
       if (inspections.length > 0)
@@ -246,8 +251,17 @@ namespace InspSched.UI
 
   export function BuildInspectionList(inspections: Array<Inspection>, permit?: Permit)
   {
-    let completed: number = 0;
+    var LocalPermitsWithOutInsp: Array<string> = [];
     let NumFutureInsp: number = 0;
+
+
+    for (let p of InspSched.CurrentPermits)
+    {
+      LocalPermitsWithOutInsp.push(p.PermitNo);
+      
+    }
+    InspSched.UI.PermitsWithOutInsp = LocalPermitsWithOutInsp;
+    var PermitsNoInspCount = InspSched.UI.PermitsWithOutInsp.length;
 
     // Initialize element variable for list container 'InspListData'
     let InspList: HTMLTableElement = (<HTMLTableElement>document.getElementById('InspListData'));
@@ -259,19 +273,35 @@ namespace InspSched.UI
     // create (call BuildInspectioN()) and add inspection row to container InspList
     for (let inspection of inspections)
     {
+
       if (inspection.ResultADC)
       {
         InspList.appendChild(BuildCompletedInspection(inspection));
-        completed++;
+        if (InspSched.UI.PermitsWithOutInsp.indexOf(inspection.PermitNo, 0) > -1)
+        {
+          PermitsNoInspCount--;
+          delete InspSched.UI.PermitsWithOutInsp[(InspSched.UI.PermitsWithOutInsp.indexOf(inspection.PermitNo))];
+        }
       }
       else if (!inspection.ResultADC)
       {
         InspList.appendChild(BuildFutureInspRow(inspection, NumFutureInsp, InspSched.ThisPermit.IsExternalUser));
+        if (InspSched.UI.PermitsWithOutInsp.indexOf(inspection.PermitNo, 0) > -1)
+        {
+          PermitsNoInspCount--;
+          delete InspSched.UI.PermitsWithOutInsp[(InspSched.UI.PermitsWithOutInsp.indexOf(inspection.PermitNo))];
+
+        }
       }
 
     }
 
     InspList.style.removeProperty("display");
+
+    // Inform user of permits with no inspections. If no error text, show "New" button
+    if (PermitsNoInspCount > 0)
+      ShowPermitsWithNoInspections(PermitsNoInspCount);
+
     document.getElementById("InspSched").style.removeProperty("display");
     document.getElementById('PermitScreen').style.display = "flex";
 
@@ -285,6 +315,7 @@ namespace InspSched.UI
   function BuildCompletedInspection(inspection: Inspection)
   {
     let ShowCreateNewInsp: HTMLDivElement = (<HTMLDivElement>document.getElementById("CreateNew_" + inspection.PermitNo));
+
     let thisInspPermit: Permit;
     let inspRow: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
     if (inspection.ResultADC == 'A' || inspection.ResultADC == 'P')
@@ -326,6 +357,7 @@ namespace InspSched.UI
     let NewInspButtonDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
     NewInspButtonDiv.className = "large-2 medium-2 small-12  flex-container align-center ";
 
+    // Create New Button
     if (ShowCreateNewInsp==null)
     {
       for (let p of InspSched.CurrentPermits)
@@ -437,6 +469,80 @@ namespace InspSched.UI
 
     return thisinsp;
 
+  }
+
+  function ShowPermitsWithNoInspections(count: number): void
+  {
+    clearElement(document.getElementById('PermitsWithNoInspections'));
+
+    let inspRow: HTMLDivElement = (<HTMLDivElement>document.getElementById('PermitsWithNoInspections'));
+    inspRow.className = "NoInspRow large-12 medium-12 small-12 row flex-container align-middle align-center";
+
+   
+    let NewInspButtonDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
+    NewInspButtonDiv.className = "large-2 medium-2 small-5  flex-container align-center ";
+
+    for (let ni of InspSched.UI.PermitsWithOutInsp)
+    {
+
+
+      if (ni != undefined)
+      {
+        let permitDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
+        permitDiv.className = "large-5 medium-5 small-12 flex-container align-center align-middle row";
+        permitDiv.style.borderBottom = "1px solid lightgray";
+
+        let permitNumDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
+        permitNumDiv.innerText = "Permit #" + ni;
+        permitNumDiv.className = "large-5 medium-5 small-12 align-center flex-container";
+
+
+        let ShowCreateNewInsp: HTMLDivElement = (<HTMLDivElement>document.getElementById("CreateNew_" + ni));
+
+        if (ShowCreateNewInsp == null)
+        {
+
+          let thisInspPermit: Permit;
+
+
+          for (let p of InspSched.CurrentPermits)
+          {
+            if (p.PermitNo === ni.toString())
+            {
+              thisInspPermit = p;
+              break;
+            }
+          }
+
+          permitDiv.appendChild(permitNumDiv);
+
+
+          if (thisInspPermit.ErrorText == null)
+          {
+            let NewInspButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
+            NewInspButton.className = "align-self-center myButton small-12 NewInspButton";
+            NewInspButton.innerText = "New";
+            NewInspButton.value = ni;
+            NewInspButton.setAttribute("onclick",
+
+              "InspSched.UpdatePermitSelectList(this.value);"
+
+            );
+            NewInspButton.id = "CreateNew_" + ni;
+            NewInspButtonDiv.appendChild(NewInspButton);
+            permitDiv.appendChild(NewInspButtonDiv);
+
+          }
+
+        }
+
+        inspRow.appendChild(permitDiv);
+
+        document.getElementById('NoInspContainer').style.display = "flex";
+
+      }
+
+    } // end for loop (create row for each existing in PermitsWithNoInspections array)
   }
 
   /**********************************************
