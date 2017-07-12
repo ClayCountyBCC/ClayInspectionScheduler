@@ -115,6 +115,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="64.png" />
     <Content Include="Content\css\bootstrap-datepicker3.standalone.css" />
     <Content Include="Content\css\bootstrap-datepicker3.standalone.min.css" />
     <Content Include="Content\css\foundation-flex.css" />

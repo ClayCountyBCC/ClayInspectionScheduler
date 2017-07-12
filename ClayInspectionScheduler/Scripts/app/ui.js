@@ -16,9 +16,9 @@ var InspSched;
             Hide('InspectionScheduler');
             Hide('CurrentPermit');
             Hide('InspectionTable');
-            Show('Searching');
             Hide('SearchFailed');
             Hide('SuspendedContractor');
+            Show('Searching');
             var k = key.trim().toUpperCase();
             document.getElementById('PermitSearch').setAttribute("value", k);
             if (k.length == 8 && !isNaN(Number(k))) {
@@ -322,13 +322,8 @@ var InspSched;
          *********************************************/
         function BuildScheduler(inspections, key) {
             // Populate Inspection Type Select list
-            for (var _i = 0, _a = InspSched.CurrentPermits; _i < _a.length; _i++) {
-                var permit = _a[_i];
-                console.log(permit.PermitNo);
-            }
             LoadInspTypeSelect(key);
             document.getElementById('InspectionScheduler').setAttribute("value", key);
-            //permitSchedulingIssue(key);
         }
         UI.BuildScheduler = BuildScheduler;
         function LoadInspTypeSelect(key) {
@@ -458,26 +453,6 @@ var InspSched;
             document.getElementById("NotScheduled").style.display = "flex";
         }
         UI.InformUserOfError = InformUserOfError;
-        //function permitSchedulingIssue(key: string)
-        //{
-        //  let InspTypeList: HTMLSelectElement = (<HTMLSelectElement>document.getElementById('InspTypeSelect'));
-        //  clearElement(InspTypeList);
-        //  let e: HTMLElement = document.getElementById('SuspendedPermit');
-        //  clearElement(e);
-        //  let message: HTMLHeadingElement = (<HTMLHeadingElement>document.createElement("h5"));
-        //  message.appendChild(document.createTextNode("A new inspection cannot be scheduled for permit #" + key + "."));
-        //  message.appendChild(document.createElement("br"));
-        //  message.appendChild(document.createElement("br"));
-        //  message.appendChild(document.createTextNode(
-        //    "\nPlease contact the Building Department " +
-        //    "for assistance at 904-284-6307.  There are multiple " +
-        //    "reasons an inspection may not " +
-        //    "be scheduled on-line " +
-        //    "(fees due, permit problems, holds, or licensing issues)."
-        //  ));
-        //  e.appendChild(message);
-        //  document.getElementById('SuspendedContractor').style.removeProperty("display");
-        //}
         function IsGoodCancelDate(inspection, IsExternalUser) {
             var tomorrow = new Date();
             var inspDate = new Date(inspection.DisplaySchedDateTime);

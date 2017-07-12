@@ -49,6 +49,8 @@ namespace InspSched
   {
     document.getElementById('PermitScreen').style.display = "none";
 
+    $('#InspectionSchedulerTabs').foundation('selectTab', 'InspectionView', true);
+
     document.getElementById("NoInspections").style.display = "none";
 
     transport.GetPermit( InspSched.UI.Search( PermitSearchField.value ) ).then( function ( permits: Array<Permit> )
@@ -146,6 +148,7 @@ namespace InspSched
     let IssueContainer: HTMLDivElement = ( <HTMLDivElement>document.getElementById( "NotScheduled" ) )
     let IssuesDiv: HTMLDivElement = (<HTMLDivElement>document.getElementById('Reasons'));
     IssueContainer.style.display = "none";
+
     InspSched.UI.clearElement(IssuesDiv);
 
 

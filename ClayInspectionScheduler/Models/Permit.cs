@@ -138,16 +138,17 @@ namespace ClayInspectionScheduler.Models
           Has a hold that does not hold up the final inspection?
           If the user is external and a final inspection has already been completed
       */
+      if (this.IsExternalUser)
+      {
+        if (PassedFinal()) return;
+      }
       if (ChargesExist()) return;
 
       if (ContractorIssues()) return;
 
       if (HoldsExist()) return;
 
-      if (this.IsExternalUser)
-      {
-        if (PassedFinal()) return;
-      }
+
     }
 
     private bool ChargesExist()
@@ -272,7 +273,7 @@ namespace ClayInspectionScheduler.Models
         SELECT 
           COUNT(*) AS CNT 
         FROM bpINS_REQUEST I
-        INNER JOIN bpINS_REF IR ON I.InspectionCode = IR.InspCd AND Partial = 0
+        INNER JOIN bpINS_REF IR ON I.InspectionCode = IR.InspCd AND Final = 1
         WHERE 
           PermitNo = @PermitNo
           AND ResultADC IN ('A', 'P')";

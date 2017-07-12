@@ -226,12 +226,14 @@ namespace ClayInspectionScheduler.Models
          (PermitNo,
           InspectionCode,
           SchecDateTime,
+          ReqDateTime,
           BaseId, 
           PrivProvIRId)
         SELECT TOP 1
           @PermitNo,
           @InspCd,
           CAST(@SelectedDate AS DATE), 
+          GetDate(),
           B.BaseId,
           @IRID
         FROM bpBASE_PERMIT B

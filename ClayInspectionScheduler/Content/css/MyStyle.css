@@ -222,7 +222,7 @@ table tbody, table tfoot, table thead {
   width:100%;
 }
 .top-bar{
-height: 5em;
+  height: 5em;
 }
 .App-Container {
   min-height: calc(100% - 5em);
@@ -328,17 +328,14 @@ font-weight:500;
     line-height:  1.25em;
     padding: .5em 1em;
 }
-@media (max-width: 415px){
-  h2{
-    font-size: 1.75em;
-  }
 
-
-}
 @media (max-width: 639px){
   .InspResult,
   .InspDate{
     text-align:center;
+  }
+  h2 {
+    font-size: 1.75em;
   }
   .NewInspButton {
     height: 20px;

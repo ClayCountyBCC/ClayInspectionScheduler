@@ -19,10 +19,10 @@ namespace InspSched.UI
     Hide('InspectionScheduler');
     Hide('CurrentPermit')
     Hide('InspectionTable');
-    Show('Searching');
     Hide('SearchFailed');
     Hide('SuspendedContractor');
-
+    Show('Searching');
+    
     let k: string = key.trim().toUpperCase();
     document.getElementById('PermitSearch').setAttribute("value", k);
 
@@ -450,16 +450,10 @@ namespace InspSched.UI
   {
     
     // Populate Inspection Type Select list
-    for (var permit of InspSched.CurrentPermits)
-    {
-        console.log(permit.PermitNo);
-
-    }
     LoadInspTypeSelect(key);
 
     document.getElementById('InspectionScheduler').setAttribute("value", key);
       
-    //permitSchedulingIssue(key);
   }
 
   export function LoadInspTypeSelect(key: string)
@@ -628,31 +622,6 @@ namespace InspSched.UI
     
   }
 
-  //function permitSchedulingIssue(key: string)
-  //{
-  //  let InspTypeList: HTMLSelectElement = (<HTMLSelectElement>document.getElementById('InspTypeSelect'));
-  //  clearElement(InspTypeList);
-  //  let e: HTMLElement = document.getElementById('SuspendedPermit');
-  //  clearElement(e);
-  //  let message: HTMLHeadingElement = (<HTMLHeadingElement>document.createElement("h5"));
-  //  message.appendChild(document.createTextNode("A new inspection cannot be scheduled for permit #" + key + "."));
-  //  message.appendChild(document.createElement("br"));
-  //  message.appendChild(document.createElement("br"));
-
-  //  message.appendChild(document.createTextNode(
-
-  //    "\nPlease contact the Building Department " +
-  //    "for assistance at 904-284-6307.  There are multiple " +
-  //    "reasons an inspection may not " +
-  //    "be scheduled on-line " +
-  //    "(fees due, permit problems, holds, or licensing issues)."
-
-  //  ));
-
-  //  e.appendChild(message);
-  //  document.getElementById('SuspendedContractor').style.removeProperty("display");
-  //}
-
   function IsGoodCancelDate(inspection: Inspection, IsExternalUser: boolean): boolean
   {
     let tomorrow = new Date();
@@ -665,4 +634,5 @@ namespace InspSched.UI
 
     return true;
   }
+
 }
