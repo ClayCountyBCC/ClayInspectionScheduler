@@ -451,6 +451,7 @@ namespace InspSched.UI
     
     // Populate Inspection Type Select list
     LoadInspTypeSelect(key);
+    InspSched.BuildCalendar(InspSched.ThisPermit.ScheduleDates, InspSched.ThisPermit.ErrorText);
 
     document.getElementById('InspectionScheduler').setAttribute("value", key);
       

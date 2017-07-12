@@ -323,6 +323,7 @@ var InspSched;
         function BuildScheduler(inspections, key) {
             // Populate Inspection Type Select list
             LoadInspTypeSelect(key);
+            InspSched.BuildCalendar(InspSched.ThisPermit.ScheduleDates, InspSched.ThisPermit.ErrorText);
             document.getElementById('InspectionScheduler').setAttribute("value", key);
         }
         UI.BuildScheduler = BuildScheduler;

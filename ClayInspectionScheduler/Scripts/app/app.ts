@@ -326,6 +326,7 @@ namespace InspSched
 
   export function UpdatePermitSelectList(PermitNo: string):void
   {
+    document.getElementById("NotScheduled").style.display = "none";
 
     document.getElementById("SaveConfirmed").style.display = "none";
 
@@ -333,10 +334,19 @@ namespace InspSched
 
     selectedoption.selected = true;
 
-    $('#sandbox-container div').data('datepicker').clearDates();
+    for (let permit of InspSched.CurrentPermits) {
+      if (permit.PermitNo == permitNumSelect.value) {
+        InspSched.ThisPermit = permit;
+        InspSched.UI.LoadInspTypeSelect(permit.PermitNo);
+        InspSched.UI.BuildScheduler(InspSched.CurrentInspections, permit.PermitNo);
+      }
+    }
 
-    InspSched.UI.LoadInspTypeSelect(PermitNo);
-    InspSched.UI.BuildScheduler(InspSched.CurrentInspections, PermitNo);
+
+    if ($('#sandbox-container div').data('datepicker') != null && $('#sandbox-container div').data('datepicker') != undefined)
+      $('#sandbox-container div').data('datepicker').clearDates();
+
+
 
     $('#InspectionSchedulerTabs').foundation('selectTab', 'Scheduler', true);
 
@@ -362,7 +372,6 @@ namespace InspSched
       {
         InspSched.UI.GetInspList(PermitNo);
         BuildCalendar(ThisPermit.ScheduleDates);
-
       }
 
       else

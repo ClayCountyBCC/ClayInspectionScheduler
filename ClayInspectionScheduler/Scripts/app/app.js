@@ -209,12 +209,20 @@ var InspSched;
         return AdditionalDisabledDates;
     }
     function UpdatePermitSelectList(PermitNo) {
+        document.getElementById("NotScheduled").style.display = "none";
         document.getElementById("SaveConfirmed").style.display = "none";
         var selectedoption = document.getElementById("select_" + PermitNo);
         selectedoption.selected = true;
-        $('#sandbox-container div').data('datepicker').clearDates();
-        InspSched.UI.LoadInspTypeSelect(PermitNo);
-        InspSched.UI.BuildScheduler(InspSched.CurrentInspections, PermitNo);
+        for (var _i = 0, _a = InspSched.CurrentPermits; _i < _a.length; _i++) {
+            var permit = _a[_i];
+            if (permit.PermitNo == permitNumSelect.value) {
+                InspSched.ThisPermit = permit;
+                InspSched.UI.LoadInspTypeSelect(permit.PermitNo);
+                InspSched.UI.BuildScheduler(InspSched.CurrentInspections, permit.PermitNo);
+            }
+        }
+        if ($('#sandbox-container div').data('datepicker') != null && $('#sandbox-container div').data('datepicker') != undefined)
+            $('#sandbox-container div').data('datepicker').clearDates();
         $('#InspectionSchedulerTabs').foundation('selectTab', 'Scheduler', true);
         // clears Calendar of any chosen dates
     }
