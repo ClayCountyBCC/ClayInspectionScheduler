@@ -269,7 +269,7 @@ var InspSched;
                 }
                 if (thisInspPermit.ErrorText == null) {
                     var NewInspButton = document.createElement("button");
-                    NewInspButton.className = "align-self-center myButton small-12 NewInspButton";
+                    NewInspButton.className = "align-self-center myButton columns NewInspButton";
                     NewInspButton.innerText = "New";
                     NewInspButton.value = inspection.PermitNo;
                     NewInspButton.setAttribute("onclick", "InspSched.UpdatePermitSelectList(this.value);");

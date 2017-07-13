@@ -372,7 +372,7 @@ namespace InspSched.UI
       if (thisInspPermit.ErrorText == null)
       {
         let NewInspButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
-        NewInspButton.className = "align-self-center myButton small-12 NewInspButton";
+        NewInspButton.className = "align-self-center myButton columns NewInspButton";
         NewInspButton.innerText = "New";
         NewInspButton.value = inspection.PermitNo;
         NewInspButton.setAttribute("onclick",
