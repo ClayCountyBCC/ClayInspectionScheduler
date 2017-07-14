@@ -265,7 +265,7 @@ namespace InspSched.UI
 
     // Initialize element variable for list container 'InspListData'
     let InspList: HTMLTableElement = (<HTMLTableElement>document.getElementById('InspListData'));
-    let InspHeader: HTMLTableElement = (<HTMLTableElement>document.getElementById('InspListHeader'));
+    //let InspHeader: HTMLTableElement = (<HTMLTableElement>document.getElementById('InspListHeader'));
     let empty: HTMLElement = (<HTMLElement>document.createElement("tr"));
 
     // TODO: add Try/Catch
@@ -476,7 +476,7 @@ namespace InspSched.UI
     clearElement(document.getElementById('PermitsWithNoInspections'));
 
     let inspRow: HTMLDivElement = (<HTMLDivElement>document.getElementById('PermitsWithNoInspections'));
-    inspRow.className = "NoInspRow large-12 medium-12 small-12 row flex-container align-middle align-center";
+    inspRow.className = "large-12 medium-12 small-12 row flex-container align-middle align-center";
 
    
     let NewInspButtonDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));

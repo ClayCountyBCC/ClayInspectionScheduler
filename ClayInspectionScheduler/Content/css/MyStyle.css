@@ -1,6 +1,6 @@
 ﻿html,
 body{
-  height: 100%;
+  max-height: 100%;
   margin: 0;
 }
 
@@ -26,7 +26,7 @@ body{
   max-width: 16rem;
   min-width: 8rem;
   padding-right: 28px;
-  min-height: 50px;
+  height: 50px;
   font-size: 130%
 }
 
@@ -49,9 +49,10 @@ select > .selectPlaceholder {
 #InspListData {
   border-top: 1px solid lightgrey;
   border-bottom: 1px solid lightgrey;
-  padding-left:0;
-  margin:1rem;
+  padding-left: 0;
+  margin: 1rem;
 }
+
 @font-face {
   font-family: '[set]Foundicons';
   src: url('fonts/[set]_foundicons.eot');
@@ -228,9 +229,9 @@ table tbody, table tfoot, table thead {
   height: 5em;
 }
 .App-Container {
-  height: calc(100% - 5em);
   min-width: 320px;
 }
+
 .TypeSelectOption{
   margin-left:2rem;
 }
@@ -260,14 +261,14 @@ table tbody, table tfoot, table thead {
     color: rgba(256,256,256, .4);
   }
 
-.SuspendDiv2 {
+/*.SuspendDiv2 {
   background-color: lightpink;
   padding: 1rem;
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   margin-bottom: .5rem;
   height: 30rem;
-}
+}*/
 
 .inspRemarks {
   padding: 0 50px;
@@ -275,10 +276,10 @@ table tbody, table tfoot, table thead {
 }
 .PermitSelectDiv,
 .PermitAddressDiv {
-  min-height: 3rem;
+  min-height: 2rem;
 }
 #PermitInfoDiv {
- margin-top: 2rem;
+ margin-top: 1rem;
 }
 .CloseIssueListButton {
   max-height: 30px;
@@ -311,18 +312,18 @@ font-weight:500;
 .CancelRow,
 .InspRow {
   padding: 1rem;
-  border-left: 8px solid white;
+  border-left: 10px double black;
   border-bottom: 1px solid black;
   margin-bottom: 0px;
 }
-.NoInspRow{
-  
+.NoInspRow {
+  border-left: 10px double black;
 }
 .FailRow {
-  border-left-color: indianred;
+  border-left: 10px solid indianred;
 }
 .PassRow {
-  border-left-color: darkseagreen;
+  border-left: 10px solid darkseagreen;
 }
 
 
@@ -349,4 +350,9 @@ font-weight:500;
     padding: 0;
     font-size: .75em;
   }
+}
+.inspection-Table{
+  max-height:58%;
+  height:calc(52vh);
+  overflow-y:scroll;
 }

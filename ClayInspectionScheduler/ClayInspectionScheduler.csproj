@@ -551,7 +551,6 @@
     <TypeScriptCompile Include="Scripts\app\XHR.ts" />
     <TypeScriptCompile Include="Scripts\foundation.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\bootstrap.datepicker\bootstrap.datepicker.d.ts" />
-    <TypeScriptCompile Include="Scripts\typings\foundation\foundation.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
   </ItemGroup>
   <ItemGroup>

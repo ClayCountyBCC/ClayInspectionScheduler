@@ -164,7 +164,6 @@ var InspSched;
         $(dpCalendar).datepicker('destroy');
         if (errorText == null) {
             document.getElementById("NotScheduled").style.display = "none";
-            $(document).foundation();
             var additionalDisabledDates = GetAdditionalDisabledDates(dates);
             InspSched.InspectionDates = dates;
             InspSched.firstDay = InspSched.InspectionDates[0];

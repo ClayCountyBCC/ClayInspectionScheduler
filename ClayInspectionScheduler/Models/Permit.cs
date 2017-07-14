@@ -1,6 +1,12 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Web;
+using System.Data;
 using Dapper;
+
 
 namespace ClayInspectionScheduler.Models
 {
@@ -19,6 +25,20 @@ namespace ClayInspectionScheduler.Models
     private DateTime LiabilityExpirationDate { get; set; }
     private string ContractorStatus { get; set; }
 
+    //private string MasterPermitNo
+    //{
+    //  get
+    //  { var dbArgs = new DynamicParameters();
+    //    dbArgs.Add("@PermitNo", this.PermitNo);
+
+    //    string sql = @"
+    //      SELECT distinct MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = @PermitNo
+    //    ";
+
+    //    string MPermitNo = Constants.Get_Data<Permit>(sql, dbArgs).ToString();
+    //    return MPermitNo;
+    //  }
+    //}
     public List<string> ScheduleDates
     {
       get
@@ -133,24 +153,100 @@ namespace ClayInspectionScheduler.Models
           SuspendGraceDt + 15 days is past
 
         the Permit --
+          Check if the Master Permit is CO'd, if yes, then no inspections can be scheduled an any associated permit
           Has a charge associated with it
           Has a hold associated with it that is not ('1SWF', 'PPCC')
           Has a hold that does not hold up the final inspection?
           If the user is external and a final inspection has already been completed
       */
+      if (MasterIsCOd()) return;
+
       if (this.IsExternalUser)
       {
         if (PassedFinal()) return;
       }
-      if (ChargesExist()) return;
 
-      if (ContractorIssues()) return;
+      if (ChargesExist()) return;
 
       if (HoldsExist()) return;
 
+      if (ContractorIssues()) return;
+
+
 
     }
+    private bool MasterIsCOd()
+    {
+      try
+      {
+        var dp = new DynamicParameters();
+        dp.Add("@PermitNo", this.PermitNo);
 
+        string sql = $@"
+        use watsc;
+        DECLARE @MPermitNo CHAR(8) = (SELECT MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = @PermitNo);
+
+        select MPermitNo from
+        (
+        select distinct PermitNo, MPermitNo from bpASSOC_PERMIT
+        where MPermitNo in (
+        select PermitNo from bpMASTER_PERMIT
+        where (MPermitNo = @PermitNo or MPermitNo = @MPermitNo)
+        and CoClosed = 1)
+
+
+
+        union 
+
+        select PermitNo, PermitNo as MPermitNo
+        from bpMASTER_PERMIT
+        where PermitNo in 
+	        (select PermitNo 
+	        from bpMASTER_PERMIT
+	        where (permitno = @PermitNo 
+		        or PermitNo = @MPermitNo)
+		        and CoClosed = 1)
+
+        union
+
+        select distinct PermitNo, PermitNo as MPermitNo
+        from bpINS_REQUEST i
+        inner join bpINS_REF ir 
+	        on i.InspectionCode = ir.InspCd
+        where permitno =
+	        (select distinct ISNULL(MPermitNo,PermitNo) MPermitNo 
+	        from bpASSOC_PERMIT
+	        where permitno = @PermitNo)
+        and ir.final = 1
+        and LOWER(i.ResultADC) in ('a','p')
+        ) as tmp
+        order by PermitNo desc
+        ";
+
+        var i = Constants.Execute_Scalar<int>(sql, dp);
+        switch (i)
+        {
+          case -1:
+            ErrorText = $"There was an issue chacking " +
+                        $"the final inspection information " +
+                        $"for Permit #{this.PermitNo}";
+            return true;
+          case 0:
+            return false;
+          default:
+            ErrorText = $"Permit #{i} has passed the" +
+                        $" final inspection, no additional " +
+                        $"inspections can be scheduled for this job";
+            return true;
+        }
+      }
+      catch (Exception ex)
+      {
+        Constants.Log(ex);
+        ErrorText = $"There was an issue getting data for Permit #{this.PermitNo}";
+        return true;
+      }
+    }
     private bool ChargesExist()
     {
       // returns true if charges exist for this permit or there is an issue getting this data for the permit.
@@ -165,7 +261,7 @@ namespace ClayInspectionScheduler.Models
             COUNT(DISTINCT AssocKey) AS CNT
           FROM ccCashierItem 
           WHERE 
-            AssocKey = @PermitNo
+            AssocKey = @PermitNo  -- fix charge check to include looking for contractorId, and permits associated with a contractor ID
             AND Total > 0			    -- CHECKS IF TOTAL (owed) IS GREATER THAN ZERO
             AND CashierId IS NULL	-- CHECK IF CASHIER HAS SIGNED OFF ON CHARGE (IF NULL, THEN CHARGE IS STILL VALID)
             AND UnCollectable = 0

@@ -257,8 +257,6 @@ namespace InspSched
     {
       document.getElementById("NotScheduled").style.display = "none";
 
-      $(document).foundation();
-
       let additionalDisabledDates: string[] = GetAdditionalDisabledDates(dates);
 
       InspSched.InspectionDates = dates;

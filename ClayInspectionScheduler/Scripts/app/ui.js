@@ -193,7 +193,7 @@ var InspSched;
             var PermitsNoInspCount = InspSched.UI.PermitsWithOutInsp.length;
             // Initialize element variable for list container 'InspListData'
             var InspList = document.getElementById('InspListData');
-            var InspHeader = document.getElementById('InspListHeader');
+            //let InspHeader: HTMLTableElement = (<HTMLTableElement>document.getElementById('InspListHeader'));
             var empty = document.createElement("tr");
             // TODO: add Try/Catch
             // create (call BuildInspectioN()) and add inspection row to container InspList
@@ -337,7 +337,7 @@ var InspSched;
         function ShowPermitsWithNoInspections(count) {
             clearElement(document.getElementById('PermitsWithNoInspections'));
             var inspRow = document.getElementById('PermitsWithNoInspections');
-            inspRow.className = "NoInspRow large-12 medium-12 small-12 row flex-container align-middle align-center";
+            inspRow.className = "large-12 medium-12 small-12 row flex-container align-middle align-center";
             var NewInspButtonDiv = document.createElement("div");
             NewInspButtonDiv.className = "large-2 medium-2 small-5  flex-container align-center ";
             for (var _i = 0, _a = InspSched.UI.PermitsWithOutInsp; _i < _a.length; _i++) {
