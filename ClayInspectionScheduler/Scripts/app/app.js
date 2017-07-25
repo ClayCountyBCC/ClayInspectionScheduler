@@ -26,15 +26,30 @@ var InspSched;
     var IssuesDiv = document.getElementById('NotScheduled');
     var SaveInspectionButton = document.getElementById("SaveSchedule");
     function start() {
+        window.onhashchange = HandleHash;
+        if (location.hash.substring(1).length > 0)
+            HandleHash(); // if they pass something in the URL
         LoadData();
     } //  END start()
     InspSched.start = start;
+    function HandleHash() {
+        console.log('hash', location.hash);
+        var hash = location.hash;
+        var currentHash = new InspSched.LocationHash(location.hash.substring(1));
+        if (currentHash.Permit.length > 0) {
+            // if they entered a permit number, let's try and search for it
+            // do permitsearch here
+            PermitSearchField.value = currentHash.Permit;
+            SearchPermit();
+        }
+    }
+    InspSched.HandleHash = HandleHash;
     PermitSearchField.onkeydown = function (event) {
         if (event.keyCode == 13) {
-            $(PermitSearchButton).click();
+            SearchPermit();
         }
     };
-    PermitSearchButton.onclick = function () {
+    function SearchPermit() {
         document.getElementById('PermitScreen').style.display = "none";
         $('#InspectionSchedulerTabs').foundation('selectTab', 'InspectionView', true);
         document.getElementById("NoInspections").style.display = "none";
@@ -63,7 +78,8 @@ var InspSched;
             InspSched.UI.Hide('Searching');
             return false;
         });
-    };
+    }
+    InspSched.SearchPermit = SearchPermit;
     permitNumSelect.onchange = function () {
         document.getElementById("SaveConfirmed").style.display = "none";
         var permits = InspSched.CurrentPermits;
@@ -106,17 +122,18 @@ var InspSched;
             var thisHeading = document.getElementById('ErrorHeading');
             var IssueList = document.createElement('ul');
             if (issues.length > 0) {
-                thisHeading.innerText = "The following issue(s) prevented scheduling the requested inspection:";
-                if (issues.length > 0) {
-                    for (var i in issues) {
-                        var thisIssue = document.createElement('li');
-                        thisIssue.textContent = issues[i];
-                        thisIssue.style.marginLeft = "2rem;";
-                        IssueList.appendChild(thisIssue);
-                    }
-                    IssuesDiv.appendChild(IssueList);
-                    IssueContainer.style.removeProperty("display");
+                InspSched.UI.clearElement(thisHeading);
+                thisHeading.appendChild(document.createTextNode("The following issue(s) prevented scheduling the requested inspection:"));
+                //thisHeading.innerText = ;
+                for (var i in issues) {
+                    var thisIssue = document.createElement('li');
+                    thisIssue.appendChild(document.createTextNode(issues[i]));
+                    //thisIssue.textContent = issues[i];
+                    thisIssue.style.marginLeft = "2rem;";
+                    IssueList.appendChild(thisIssue);
                 }
+                IssuesDiv.appendChild(IssueList);
+                IssueContainer.style.removeProperty("display");
             }
             else {
                 //  Display safe confirm div
@@ -145,7 +162,6 @@ var InspSched;
     function LoadData() {
         SaveInspectionButton.setAttribute("disabled", "disabled");
         IssueContainer.style.display = "none";
-        SaveInspectionButton.setAttribute("disabled", "disabled");
         LoadInspectionTypes();
     }
     function LoadInspectionTypes() {

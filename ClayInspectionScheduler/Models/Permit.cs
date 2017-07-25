@@ -308,11 +308,6 @@ namespace ClayInspectionScheduler.Models
         ErrorText = "There is an issue with the contractor's status";
         return true;
       }
-      else if (this.SuspendGraceDate < DateTime.Today && this.SuspendGraceDate != DateTime.MinValue)
-      {
-        ErrorText = "The Grace Period for this permit has passed";
-        return true;
-      }
       // returns true if contractor issues exist for this permit.
       //"The grace period for this permit has passed."
       return false;

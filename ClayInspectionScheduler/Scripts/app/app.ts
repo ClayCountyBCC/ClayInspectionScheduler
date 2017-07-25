@@ -22,30 +22,45 @@ namespace InspSched
   export let CurrentPermits: Array<Permit> = [];
   export let CurrentInspections: Array<Inspection> = [];
   export let ThisPermit: Permit;
-  var InspectionTypeSelect = <HTMLSelectElement>document.getElementById( "InspTypeSelect" );
-  var PermitSearchButton = <HTMLButtonElement>document.getElementById( "PermitSearchButton" );
-  var CloseIssueDivButton = <HTMLButtonElement>document.getElementById( "CloseIssueList" );
-  var PermitSearchField = <HTMLInputElement>document.getElementById( "PermitSearch" );
-  var permitNumSelect = <HTMLSelectElement>document.getElementById( "PermitSelect" );
-  var inspScheduler = document.getElementById( "InspectionScheduler" );
-  var IssueContainer: HTMLDivElement = ( <HTMLDivElement>document.getElementById( "NotScheduled" ) );
+  let InspectionTypeSelect = <HTMLSelectElement>document.getElementById( "InspTypeSelect" );
+  let PermitSearchButton = <HTMLButtonElement>document.getElementById( "PermitSearchButton" );
+  let CloseIssueDivButton = <HTMLButtonElement>document.getElementById( "CloseIssueList" );
+  let PermitSearchField = <HTMLInputElement>document.getElementById( "PermitSearch" );
+  let permitNumSelect = <HTMLSelectElement>document.getElementById( "PermitSelect" );
+  let inspScheduler = document.getElementById( "InspectionScheduler" );
+  let IssueContainer: HTMLDivElement = ( <HTMLDivElement>document.getElementById( "NotScheduled" ) );
   let IssuesDiv: HTMLDivElement = ( <HTMLDivElement>document.getElementById( 'NotScheduled' ) );
-  var SaveInspectionButton = document.getElementById( "SaveSchedule" );
+  let SaveInspectionButton = document.getElementById( "SaveSchedule" );
 
 
   export function start(): void
   {
+    window.onhashchange = HandleHash;
+    if (location.hash.substring(1).length > 0) HandleHash(); // if they pass something in the URL
     LoadData();
-
   } //  END start()
+
+  export function HandleHash()
+  {
+    console.log('hash', location.hash);
+    let hash = location.hash;
+    let currentHash = new LocationHash(location.hash.substring(1));
+    if (currentHash.Permit.length > 0)
+    {
+      // if they entered a permit number, let's try and search for it
+      // do permitsearch here
+      PermitSearchField.value = currentHash.Permit;
+      SearchPermit();
+    }
+  }
 
   PermitSearchField.onkeydown = function (event) {
     if (event.keyCode == 13) {
-      $(PermitSearchButton).click();
+      SearchPermit();
     }
   };
 
-  PermitSearchButton.onclick = function ()
+  export function SearchPermit()
   {
     document.getElementById('PermitScreen').style.display = "none";
 
@@ -53,16 +68,16 @@ namespace InspSched
 
     document.getElementById("NoInspections").style.display = "none";
 
-    transport.GetPermit( InspSched.UI.Search( PermitSearchField.value ) ).then( function ( permits: Array<Permit> )
+    transport.GetPermit(InspSched.UI.Search(PermitSearchField.value)).then(function (permits: Array<Permit>)
     {
 
       InspSched.CurrentPermits = permits;
 
-      InspSched.UI.ProcessResults( permits, PermitSearchField.value );
+      InspSched.UI.ProcessResults(permits, PermitSearchField.value);
 
-      for ( let permit of permits )
+      for (let permit of permits)
       {
-        if ( permit.PermitNo == permitNumSelect.value )
+        if (permit.PermitNo == permitNumSelect.value)
         {
           InspSched.ThisPermit = permit;
           if (permit.ErrorText == null)
@@ -72,7 +87,7 @@ namespace InspSched
 
           else
           {
-              InspSched.UI.InformUserOfError(permit.PermitNo, permit.ErrorText);
+            InspSched.UI.InformUserOfError(permit.PermitNo, permit.ErrorText);
           }
           break;
         }
@@ -84,11 +99,11 @@ namespace InspSched
       function ()
       {
 
-        console.log( 'error getting permits' );
+        console.log('error getting permits');
         // do something with the error here
         // need to figure out how to detect if something wasn't found
         // versus an error.
-        InspSched.UI.Hide( 'Searching' );
+        InspSched.UI.Hide('Searching');
 
         return false;
       });
@@ -123,8 +138,6 @@ namespace InspSched
         break;
       }
     }
-    
-
   }
 
   InspectionTypeSelect.onchange = function ()
@@ -164,22 +177,22 @@ namespace InspSched
 
       if ( issues.length > 0 ) 
       {
-        thisHeading.innerText = "The following issue(s) prevented scheduling the requested inspection:";
-        if ( issues.length > 0 )
+        InspSched.UI.clearElement(thisHeading);
+        thisHeading.appendChild(document.createTextNode("The following issue(s) prevented scheduling the requested inspection:"));
+        //thisHeading.innerText = ;
+
+        for (let i in issues)
         {
+          let thisIssue: HTMLLIElement = (<HTMLLIElement>document.createElement('li'));
+          thisIssue.appendChild(document.createTextNode(issues[i]));
+          //thisIssue.textContent = issues[i];
+          thisIssue.style.marginLeft = "2rem;";
+          IssueList.appendChild(thisIssue);
 
-          for ( let i in issues )
-          {
-            let thisIssue: HTMLLIElement = ( <HTMLLIElement>document.createElement( 'li' ) );
-            thisIssue.textContent = issues[i];
-            thisIssue.style.marginLeft = "2rem;";
-            IssueList.appendChild( thisIssue );
-
-          }
-
-          IssuesDiv.appendChild( IssueList );
-          IssueContainer.style.removeProperty( "display" );
         }
+
+        IssuesDiv.appendChild(IssueList);
+        IssueContainer.style.removeProperty("display");
 
       }
       else
@@ -223,8 +236,6 @@ namespace InspSched
   {
     SaveInspectionButton.setAttribute( "disabled", "disabled" );
     IssueContainer.style.display = "none";
-    SaveInspectionButton.setAttribute( "disabled", "disabled" );
-
     LoadInspectionTypes();
 
   }

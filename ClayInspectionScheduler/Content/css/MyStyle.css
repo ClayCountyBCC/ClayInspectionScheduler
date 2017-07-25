@@ -310,14 +310,15 @@ font-weight:500;
   padding-left: 1rem;
 }
 .CancelRow,
-.InspRow {
+.InspRow
+{
   padding: 1rem;
-  border-left: 10px double black;
+  border-left: 10px solid mediumpurple;
   border-bottom: 1px solid black;
-  margin-bottom: 0px;
+  margin-bottom: 0;
 }
 .NoInspRow {
-  border-left: 10px double black;
+  border-left: 10px solid mediumpurple;
 }
 .FailRow {
   border-left: 10px solid indianred;

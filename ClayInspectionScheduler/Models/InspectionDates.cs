@@ -117,7 +117,10 @@ namespace ClayInspectionScheduler.Models
 
 
         var dTmp = DateTime.Today;
-
+        if(SuspendGraceDate.Date < DateTime.Today.AddDays(1))
+        {
+          SuspendGraceDate = DateTime.MinValue;
+        }
         // external rules: 
         // can schedule up to 9 days
         // can't schedule same day
