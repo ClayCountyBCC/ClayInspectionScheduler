@@ -1,5 +1,5 @@
 ﻿html,
-body{
+body {
   max-height: 100%;
   margin: 0;
 }
@@ -14,15 +14,17 @@ body{
 #SearchFailed {
   display: none;
 }
-#InspectionScheduler{
-  display:none;
+
+#InspectionScheduler {
+  display: none;
 }
+
 #SaveConfirmed {
-  display:none;
+  display: none;
   margin-top: 1.5em;
 }
-.ButtonContainer
-{
+
+.ButtonContainer {
   padding: 0 1rem 0 1rem;
 }
 
@@ -40,18 +42,22 @@ body{
   color: white;
   cursor: pointer;
 }
+
 .button {
   font-weight: bold;
   background-color: #3e9571;
-  margin:0;
+  margin: 0;
   cursor: pointer;
 }
-.button:hover {
-  background-color: #27ce89;
-}
+
+  .button:hover {
+    background-color: #27ce89;
+  }
+
 select > .selectPlaceholder {
   display: none;
 }
+
 #InspListData {
   border-top: 1px solid lightgrey;
   border-bottom: 1px solid lightgrey;
@@ -66,25 +72,26 @@ select > .selectPlaceholder {
   font-weight: normal;
   font-style: normal;
 }
-.foundicon-{
-    display: inline;
 
-    line-height: inherit;
-    vertical-align: baseline;
-    background-image: none;
-    background-position: 0 0;
-    background-repeat: repeat;
+.foundicon- {
+  display: inline;
+  line-height: inherit;
+  vertical-align: baseline;
+  background-image: none;
+  background-position: 0 0;
+  background-repeat: repeat;
 }
 
-    .foundicon-:before {
-        font-family: "[set]Foundicons";
-        font-weight: normal;
-        font-style: normal;
-        text-decoration: inherit;
-    }
-.SearchCard{
-    background-color:cadetblue;
-    border:none;
+  .foundicon-:before {
+    font-family: "[set]Foundicons";
+    font-weight: normal;
+    font-style: normal;
+    text-decoration: inherit;
+  }
+
+.SearchCard {
+  background-color: cadetblue;
+  border: none;
 }
 
 .MyLabel {
@@ -98,25 +105,27 @@ select > .selectPlaceholder {
   padding-bottom: .5rem;
   font-size: 1.25rem;
 }
+
 .infoDiv {
-    background-color: white;
-    border-bottom-left-radius: 5px;
-    border-bottom-right-radius: 5px;
+  background-color: white;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
 }
 
 
-details{
-  text-wrap:none;
-  overflow:visible;
+details {
+  text-wrap: none;
+  overflow: visible;
 }
 
 .SuspendDiv {
-  background-color:lightpink;
+  background-color: lightpink;
   padding: 1rem;
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   margin-bottom: .5rem;
 }
+
 span.prefix, label.prefix {
   background: #f2f2f2;
   border-right: none;
@@ -148,10 +157,9 @@ span.prefix, label.prefix {
 }
 
 
-#sandbox-container table, tbody, table tfoot{
+#sandbox-container table, tbody, table tfoot {
   border: none;
   background-color: white;
-
 }
 
 table {
@@ -165,11 +173,9 @@ table {
   border-radius: 0;
   direction: ltr;
   display: table;
-
 }
 
-  .datepicker table tr td, .datepicker table tr td.new
-  {
+  .datepicker table tr td, .datepicker table tr td.new {
     background-color: #3e9571;
     color: white;
     color: rgba(255,255,255, .8);
@@ -181,23 +187,21 @@ table {
       color: rgba(255,255,255, .8);
     }
 
-    .datepicker table tr td.active.day
-    {
+    .datepicker table tr td.active.day {
       background-color: #3e9571;
       max-width: 20rem;
     }
 
 
-  .datepicker-switch, .prev, .next{
-    background-color: #3e9571;
-    color: white;
-    border-radius: 0;
-    line-height:1.25;
-  }
-
-.datepicker .datepicker-switch:hover{
+.datepicker-switch, .prev, .next {
   background-color: #3e9571;
+  color: white;
+  border-radius: 0;
+  line-height: 1.25;
+}
 
+.datepicker .datepicker-switch:hover {
+  background-color: #3e9571;
 }
 
 .datepicker table tr td.active.active:hover,
@@ -214,34 +218,36 @@ table tbody, table tfoot, table thead {
   border: 0;
 }
 
-.datepicker table tr td.active:active, 
-.datepicker table tr td.active.highlighted:active, 
-.datepicker table tr td.active.active, 
+.datepicker table tr td.active:active,
+.datepicker table tr td.active.highlighted:active,
+.datepicker table tr td.active.active,
 .datepicker table tr td.active.highlighted.active {
   color: white;
   background-color: #59b790;
   border-color: #3e9571;
 }
 
-.datepicker table tr td.active:hover, 
-.datepicker table tr td.active.highlighted :hover{
+.datepicker table tr td.active:hover,
+.datepicker table tr td.active.highlighted :hover {
   color: white;
   background-color: #3e9571;
   border-color: #3e9571;
 }
 
-.datepicker-inline{
-  width:100%;
+.datepicker-inline {
+  width: 100%;
 }
-.top-bar{
+
+.top-bar {
   height: 5em;
 }
+
 .App-Container {
   min-width: 320px;
 }
 
-.TypeSelectOption{
-  margin-left:2rem;
+.TypeSelectOption {
+  margin-left: 2rem;
 }
 
 #NoInspections {
@@ -249,14 +255,16 @@ table tbody, table tfoot, table thead {
   padding: 1rem;
   font-weight: bold;
   margin-top: 2em;
-  text-align:center;
+  text-align: center;
 }
+
 #NotScheduled {
   background-color: lightpink;
   padding: 1rem;
   font-weight: bold;
   margin-top: 2em;
 }
+
 .datepicker table tr td.disabled {
   background-color: lightgray;
   color: rgb(104, 104, 104);
@@ -282,13 +290,16 @@ table tbody, table tfoot, table thead {
   padding: 0 50px;
   color: #bd3f52;
 }
+
 .PermitSelectDiv,
 .PermitAddressDiv {
   min-height: 2rem;
 }
+
 #PermitInfoDiv {
- margin-top: 1rem;
+  margin-top: 1rem;
 }
+
 .CloseIssueListButton {
   max-height: 30px;
   max-width: 30px;
@@ -296,19 +307,24 @@ table tbody, table tfoot, table thead {
   outline-color: none;
   text-align: right;
 }
-.CloseIssueListButton:hover {
-  cursor:pointer;
-}
+
+  .CloseIssueListButton:hover {
+    cursor: pointer;
+  }
+
 #NoInspections {
-  display:none;
+  display: none;
 }
+
 h2 {
   font-size: 2.5em;
 }
+
 h5 {
   font-size: 1.25em;
-font-weight:500;
+  font-weight: 500;
 }
+
 .InspPermit,
 .InspType,
 .InspInspector,
@@ -317,56 +333,63 @@ font-weight:500;
   border-right: 1px solid lightgrey;
   padding-left: 1rem;
 }
+
 .CancelRow,
-.InspRow
-{
+.InspRow {
   padding: 1rem;
   border-left: 10px solid mediumpurple;
   border-bottom: 1px solid black;
   margin-bottom: 0;
 }
+
 .NoInspRow {
   border-left: 10px solid mediumpurple;
 }
+
 .FailRow {
   border-left: 10px solid indianred;
 }
+
 .PassRow {
   border-left: 10px solid darkseagreen;
 }
 
 
 .tabs-title > a {
-    font-size: 1.25em;
-    line-height:  1.25em;
-    padding: .5em 1em;
+  font-size: 1.25em;
+  line-height: 1.25em;
+  padding: .5em 1em;
 }
 
-@media (max-width: 639px){
+@media (max-width: 639px) {
   .InspResult,
-  .InspDate{
-    text-align:center;
+  .InspDate {
+    text-align: center;
   }
+
   h2 {
     font-size: 1.75em;
   }
+
   .NewInspButton {
     height: 20px;
     background-color: #3e9571;
     color: white;
     cursor: pointer;
   }
+
   .inspRemarks {
     padding: 0;
     font-size: .75em;
   }
-  .ButtonContainer
-  {
+
+  .ButtonContainer {
     padding: 1rem 1rem 0 1rem;
   }
 }
-.inspection-Table{
-  max-height:58%;
-  height:calc(52vh);
-  overflow-y:scroll;
+
+.inspection-Table {
+  max-height: 58%;
+  height: calc(52vh);
+  overflow-y: scroll;
 }
