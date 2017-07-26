@@ -89,16 +89,34 @@ namespace ClayInspectionScheduler.Models
 
 
       string sql = @"
-        
         USE WATSC;
         DECLARE @MPermitNo CHAR(8) = (SELECT MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = @PermitNo);
 
         DECLARE @Today DATE = Cast(GetDate() as DATE);
+
+        WITH Permits(PermitNo) AS (
+          SELECT M.PermitNo
+          FROM bpMASTER_PERMIT M
+	        WHERE 
+            M.VoidDate IS NULL AND
+            (M.PermitNo = @MPermitNo 
+		        OR M.PermitNo = @PermitNo)
+          UNION ALL
+          SELECT A.PermitNo
+          FROM 
+            bpASSOC_PERMIT A
+          WHERE
+            A.VoidDate IS NULL AND
+            (A.PermitNo = @PermitNo 
+		        OR MPermitNo = @MPermitNo
+		        OR A.mPermitNo = @PermitNo)
+        )
+
         select 
-          i.InspReqID,
-          i.PermitNo, 
-          i.InspectionCode, 
-          ir.InsDesc, 
+          ISNULL(i.InspReqID, 99999999) InspReqID,
+          P.PermitNo, 
+          ISNULL(i.InspectionCode, '') InspectionCode, 
+          ISNULL(ir.InsDesc, 'No Inspections') InsDesc, 
           i.InspDateTime, 
           i.ResultADC,
           i.SchecDateTime SchedDateTime,
@@ -108,20 +126,12 @@ namespace ClayInspectionScheduler.Models
           ELSE '' END AS InspectorName,
           CASE WHEN CAST(i.SchecDateTime AS DATE) >= @Today AND ResultADC IS NULL
           THEN LTRIM(RTRIM(ip.PhoneNbr)) 
-          ELSE '' END AS PhoneNumber,
-          ir.partial
-        from bpINS_REQUEST i
-              LEFT OUTER JOIN bpINS_REF ir ON ir.InspCd = i.InspectionCode
-              LEFT OUTER JOIN bp_INSPECTORS ip ON i.Inspector = ip.Intl 
-        where baseID = (select distinct a.BaseID 
-                        from bpASSOC_PERMIT a 
-                        where a.permitno = @PermitNo 
-                           or a.MPermitNo = @PermitNo 
-                        union select m.BaseID 
-                        from bpMASTER_PERMIT m 
-                        where m.permitno = @PermitNo 
-                           or m.PermitNo = @MPermitNo)
-		    order by InspReqID DESC";
+          ELSE '' END AS PhoneNumber
+        FROM Permits P
+        LEFT OUTER JOIN bpINS_REQUEST i ON P.PermitNo = i.PermitNo
+        LEFT OUTER JOIN bpINS_REF ir ON ir.InspCd = i.InspectionCode
+        LEFT OUTER JOIN bp_INSPECTORS ip ON i.Inspector = ip.Intl 
+        ORDER BY InspReqID DESC";
       try
       {
         var li = Constants.Get_Data<Inspection>(sql, dbArgs);
@@ -131,7 +141,6 @@ namespace ClayInspectionScheduler.Models
       {
         Constants.Log(ex, sql);
         var li = new List<Inspection>();
-        li.Clear();
         return li;
       }
 

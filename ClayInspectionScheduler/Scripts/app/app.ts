@@ -389,10 +389,6 @@ namespace InspSched
 
       }
     }
-    else
-    {
-
-    }
   }
 
 }

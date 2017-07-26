@@ -258,8 +258,6 @@ var InspSched;
                 //display notification of failed delete
             }
         }
-        else {
-        }
     }
     InspSched.CancelInspection = CancelInspection;
 })(InspSched || (InspSched = {}));

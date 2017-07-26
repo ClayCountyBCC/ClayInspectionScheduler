@@ -21,6 +21,10 @@ body{
   display:none;
   margin-top: 1.5em;
 }
+.ButtonContainer
+{
+  padding: 0 1rem 0 1rem;
+}
 
 #PermitSelect {
   max-width: 16rem;
@@ -34,11 +38,13 @@ body{
   height: 20px;
   background-color: #3e9571;
   color: white;
+  cursor: pointer;
 }
 .button {
   font-weight: bold;
   background-color: #3e9571;
   margin:0;
+  cursor: pointer;
 }
 .button:hover {
   background-color: #27ce89;
@@ -49,7 +55,7 @@ select > .selectPlaceholder {
 #InspListData {
   border-top: 1px solid lightgrey;
   border-bottom: 1px solid lightgrey;
-  padding-left: 0;
+  padding: 0;
   margin: 1rem;
 }
 
@@ -162,19 +168,21 @@ table {
 
 }
 
-  .datepicker table tr td {
+  .datepicker table tr td, .datepicker table tr td.new
+  {
     background-color: #3e9571;
     color: white;
-    color: rgba(256,256,256, .8);
+    color: rgba(255,255,255, .8);
   }
 
     .datepicker table tr td.day:hover {
       background-color: #27ce89;
       color: white;
-      color: rgba(256,256,256, .8);
+      color: rgba(255,255,255, .8);
     }
 
-    .datepicker table tr td.active.day {
+    .datepicker table tr td.active.day
+    {
       background-color: #3e9571;
       max-width: 20rem;
     }
@@ -252,13 +260,13 @@ table tbody, table tfoot, table thead {
 .datepicker table tr td.disabled {
   background-color: lightgray;
   color: rgb(104, 104, 104);
-  color: rgba(256,256,256, .4);
+  color: rgba(255,255,255, .4);
 }
 
   .datepicker table tr td.disabled:hover {
     background-color: lightgray;
     color: rgb(104, 104, 104);
-    color: rgba(256,256,256, .4);
+    color: rgba(255,255,255, .4);
   }
 
 /*.SuspendDiv2 {
@@ -346,10 +354,15 @@ font-weight:500;
     height: 20px;
     background-color: #3e9571;
     color: white;
+    cursor: pointer;
   }
   .inspRemarks {
     padding: 0;
     font-size: .75em;
+  }
+  .ButtonContainer
+  {
+    padding: 1rem 1rem 0 1rem;
   }
 }
 .inspection-Table{
