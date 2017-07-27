@@ -173,7 +173,7 @@ namespace InspSched.UI
     option.setAttribute("value", permit.PermitNo.trim());
     option.setAttribute("label", permit.PermitNo + "  (" + label + ")");
     option.setAttribute("title", permit.PermitNo.trim());
-    option.textContent = permit.PermitNo + "  (" + label + ")";
+    option.appendChild(document.createTextNode(permit.PermitNo + "  (" + label + ")" ));
 
     option.id = "select_" + permit.PermitNo;
 
@@ -312,19 +312,16 @@ namespace InspSched.UI
     {
       let inspDateTime: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
       inspDateTime.appendChild(document.createTextNode(inspection.DisplayInspDateTime));
-      //inspDateTime.textContent = inspection.DisplayInspDateTime.trim();
       inspDateTime.className = "large-2 medium-6 small-6 column InspDate";
       dataColumn.appendChild(inspDateTime);
 
       let inspDesc: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
       inspDesc.appendChild(document.createTextNode(inspection.InsDesc.trim()));
-      //inspDesc.textContent = inspection.InsDesc.trim();
       inspDesc.className = "large-5 medium-6 small-6  InspType column";
       dataColumn.appendChild(inspDesc);
 
       let ResultADC: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
       ResultADC.appendChild(document.createTextNode(inspection.ResultDescription.trim()));
-      //ResultADC.textContent = inspection.ResultDescription.trim();
       ResultADC.className = "large-3 medium-6 small-6 InspResult column end";
 
       dataColumn.appendChild(ResultADC);
@@ -333,14 +330,12 @@ namespace InspSched.UI
     {
       let inspDesc: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
       inspDesc.appendChild(document.createTextNode(inspection.InsDesc.trim()));
-      //inspDesc.textContent = inspection.InsDesc.trim();
       inspDesc.className = "large-10 medium-6 small-6 InspType column";
       dataColumn.appendChild(inspDesc);
     }
     
     let NewInspButtonDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
     NewInspButtonDiv.className = "ButtonContainer large-2 medium-2 small-12 flex-container align-center ";
-    //NewInspButtonDiv.style.padding = "0 1rem 0 1rem";
 
     // Create New Button
     let ShowCreateNewInsp: HTMLDivElement = (<HTMLDivElement>document.getElementById("CreateNew_" + inspection.PermitNo));
@@ -364,7 +359,6 @@ namespace InspSched.UI
         "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"
         );
 
-
         NewInspButton.id = "CreateNew_" + inspection.PermitNo;
 
         NewInspButtonDiv.appendChild(NewInspButton);
@@ -380,14 +374,14 @@ namespace InspSched.UI
 
       if (inspection.Remarks !== null || inspection.Remarks === "")
       {
-        Remarks.textContent = "Remarks: " + inspection.Remarks.trim();
+        Remarks.appendChild(document.createTextNode("Remarks: " + inspection.Remarks.trim()));
 
       }
       else
       {
-        Remarks.textContent = "No remarks entered by the inspector. Please contact the Building Department " +
+        Remarks.appendChild(document.createTextNode("No remarks entered by the inspector. Please contact the Building Department " +
           "at 904-284-6307 or contact the inspector " +
-          "directly for assistance.";
+          "directly for assistance."));
       }
 
       Remarks.className = "large-12 medium-12 small-12 inspRemarks";
@@ -480,9 +474,8 @@ namespace InspSched.UI
     let optionLabel: HTMLOptionElement = (<HTMLOptionElement>document.createElement("option"));
 
     clearElement(InspTypeList);
-    optionLabel.textContent = label + " Inspections:";
-    //optionLabel.label += label +" Inspections:";
-    //optionLabel.innerText = optionLabel.label;
+    optionLabel.appendChild(document.createTextNode(label + " Inspections:"));
+
     optionLabel.className = "selectPlaceholder";
     optionLabel.selected;
     optionLabel.value = "";
@@ -497,7 +490,7 @@ namespace InspSched.UI
         option.value = type.InspCd;
         option.className = "TypeSelectOption";
         InspTypeList.appendChild(option);
-        option.innerText = type.InsDesc;
+        option.appendChild(document.createTextNode(type.InsDesc));
       }
     }
   }
@@ -626,9 +619,9 @@ namespace InspSched.UI
     let thisIssue: HTMLLIElement = (<HTMLLIElement>document.createElement('li'));
     InspSched.BuildCalendar(null, error);
 
-    thisHeading.innerText = "The following issue is preventing the ability to schedule an inspection:";
+    thisHeading.appendChild(document.createTextNode("The following issue is preventing the ability to schedule an inspection:"));
 
-    thisIssue.textContent = error;
+    thisIssue.appendChild(document.createTextNode(error));
     thisIssue.style.marginLeft = "2rem;";
 
     IssueList.appendChild(thisIssue);

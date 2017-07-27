@@ -174,17 +174,19 @@ table {
   direction: ltr;
   display: table;
 }
-
-  .datepicker table tr td, .datepicker table tr td.new {
-    background-color: #3e9571;
+.datepicker table tr td.old,
+.datepicker table tr td, 
+.datepicker table tr td.new,
+.day {
     color: white;
-    color: rgba(255,255,255, .8);
+  }
+ .datepicker table tr td, .datepicker table tr td.new {
+    background-color: #3e9571;
   }
 
     .datepicker table tr td.day:hover {
       background-color: #27ce89;
-      color: white;
-      color: rgba(255,255,255, .8);
+
     }
 
     .datepicker table tr td.active.day {

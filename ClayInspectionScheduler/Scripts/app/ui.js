@@ -124,7 +124,7 @@ var InspSched;
             option.setAttribute("value", permit.PermitNo.trim());
             option.setAttribute("label", permit.PermitNo + "  (" + label + ")");
             option.setAttribute("title", permit.PermitNo.trim());
-            option.textContent = permit.PermitNo + "  (" + label + ")";
+            option.appendChild(document.createTextNode(permit.PermitNo + "  (" + label + ")"));
             option.id = "select_" + permit.PermitNo;
             if (permit.PermitNo == key) {
                 option.value = permit.PermitNo.trim();
@@ -224,30 +224,25 @@ var InspSched;
             if (inspection.DisplaySchedDateTime.length > 0) {
                 var inspDateTime = document.createElement("div");
                 inspDateTime.appendChild(document.createTextNode(inspection.DisplayInspDateTime));
-                //inspDateTime.textContent = inspection.DisplayInspDateTime.trim();
                 inspDateTime.className = "large-2 medium-6 small-6 column InspDate";
                 dataColumn.appendChild(inspDateTime);
                 var inspDesc = document.createElement("div");
                 inspDesc.appendChild(document.createTextNode(inspection.InsDesc.trim()));
-                //inspDesc.textContent = inspection.InsDesc.trim();
                 inspDesc.className = "large-5 medium-6 small-6  InspType column";
                 dataColumn.appendChild(inspDesc);
                 var ResultADC = document.createElement("div");
                 ResultADC.appendChild(document.createTextNode(inspection.ResultDescription.trim()));
-                //ResultADC.textContent = inspection.ResultDescription.trim();
                 ResultADC.className = "large-3 medium-6 small-6 InspResult column end";
                 dataColumn.appendChild(ResultADC);
             }
             else {
                 var inspDesc = document.createElement("div");
                 inspDesc.appendChild(document.createTextNode(inspection.InsDesc.trim()));
-                //inspDesc.textContent = inspection.InsDesc.trim();
                 inspDesc.className = "large-10 medium-6 small-6 InspType column";
                 dataColumn.appendChild(inspDesc);
             }
             var NewInspButtonDiv = document.createElement("div");
             NewInspButtonDiv.className = "ButtonContainer large-2 medium-2 small-12 flex-container align-center ";
-            //NewInspButtonDiv.style.padding = "0 1rem 0 1rem";
             // Create New Button
             var ShowCreateNewInsp = document.getElementById("CreateNew_" + inspection.PermitNo);
             if (ShowCreateNewInsp == null) {
@@ -272,12 +267,12 @@ var InspSched;
             if (inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'N') {
                 var Remarks = document.createElement("div");
                 if (inspection.Remarks !== null || inspection.Remarks === "") {
-                    Remarks.textContent = "Remarks: " + inspection.Remarks.trim();
+                    Remarks.appendChild(document.createTextNode("Remarks: " + inspection.Remarks.trim()));
                 }
                 else {
-                    Remarks.textContent = "No remarks entered by the inspector. Please contact the Building Department " +
+                    Remarks.appendChild(document.createTextNode("No remarks entered by the inspector. Please contact the Building Department " +
                         "at 904-284-6307 or contact the inspector " +
-                        "directly for assistance.";
+                        "directly for assistance."));
                 }
                 Remarks.className = "large-12 medium-12 small-12 inspRemarks";
                 inspRow.appendChild(Remarks);
@@ -342,9 +337,7 @@ var InspSched;
             var InspTypeList = document.getElementById('InspTypeSelect');
             var optionLabel = document.createElement("option");
             clearElement(InspTypeList);
-            optionLabel.textContent = label + " Inspections:";
-            //optionLabel.label += label +" Inspections:";
-            //optionLabel.innerText = optionLabel.label;
+            optionLabel.appendChild(document.createTextNode(label + " Inspections:"));
             optionLabel.className = "selectPlaceholder";
             optionLabel.selected;
             optionLabel.value = "";
@@ -357,7 +350,7 @@ var InspSched;
                     option.value = type.InspCd;
                     option.className = "TypeSelectOption";
                     InspTypeList.appendChild(option);
-                    option.innerText = type.InsDesc;
+                    option.appendChild(document.createTextNode(type.InsDesc));
                 }
             }
         }
@@ -455,8 +448,8 @@ var InspSched;
             var IssueList = document.createElement('ul');
             var thisIssue = document.createElement('li');
             InspSched.BuildCalendar(null, error);
-            thisHeading.innerText = "The following issue is preventing the ability to schedule an inspection:";
-            thisIssue.textContent = error;
+            thisHeading.appendChild(document.createTextNode("The following issue is preventing the ability to schedule an inspection:"));
+            thisIssue.appendChild(document.createTextNode(error));
             thisIssue.style.marginLeft = "2rem;";
             IssueList.appendChild(thisIssue);
             reasons.appendChild(IssueList);
