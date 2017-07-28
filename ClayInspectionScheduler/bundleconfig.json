@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "outputFileName": "Scripts/app/bundle.js",
+    "inputFiles": [
+      "Scripts/app/LocationHash.js",
+      "Scripts/app/newinspection.js",
+      "Scripts/app/ui.js",
+      "Scripts/app/XHR.js",
+      "Scripts/app/transport.js",
+      "scripts/app/es6-promise.min.js",
+      "Scripts/app/app.js"
+    ]
+  },
+  {
+    "outputFileName": "Scripts/app/bundle.min.min.js",
+    "inputFiles": [
+      "Scripts/app/bundle.min.js"
+    ]
+  }
+]

@@ -204,7 +204,7 @@ namespace ClayInspectionScheduler.Models
       }
     }
 
-    public List<string> Save(bool IsExternalUser)
+    public List<string> Save(bool IsExternalUser, string name)
     {
 
       List<string> e = this.Validate(IsExternalUser);
@@ -218,7 +218,9 @@ namespace ClayInspectionScheduler.Models
       dbArgs.Add("@PermitNo", this.PermitNo);
       dbArgs.Add("@InspCd", this.InspectionCd);
       dbArgs.Add("@SelectedDate", this.SchecDateTime.Date);
+      dbArgs.Add("@userame", name);
       dbArgs.Add("@IRID", (IRID == -1) ? null : IRID.ToString());
+
 
       string sql =  $@"
       USE WATSC;      
@@ -227,7 +229,8 @@ namespace ClayInspectionScheduler.Models
           InspectionCode,
           SchecDateTime,
           ReqDateTime,
-          BaseId, 
+          BaseId,
+          ReceivedBy,
           PrivProvIRId)
         SELECT TOP 1
           @PermitNo,
@@ -235,11 +238,13 @@ namespace ClayInspectionScheduler.Models
           CAST(@SelectedDate AS DATE), 
           GetDate(),
           B.BaseId,
+          @username,
           @IRID
         FROM bpBASE_PERMIT B
         INNER JOIN bpMASTER_PERMIT M ON B.BaseID = M.BaseID
         LEFT OUTER JOIN bpASSOC_PERMIT A ON B.BaseID = A.BaseID AND M.PermitNo = A.MPermitNo
         WHERE (A.PermitNo = @PermitNo OR M.PermitNo = @PermitNo)
+
       ";
       try
       {

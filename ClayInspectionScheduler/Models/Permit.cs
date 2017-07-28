@@ -43,7 +43,7 @@ namespace ClayInspectionScheduler.Models
     {
       get
       {
-        return InspectionDates.GenerateShortDates(IsExternalUser, SuspendGraceDate);
+        return InspectionDates.GenerateShortDates(IsExternalUser, (ContractorStatus == "A"? DateTime.MinValue : SuspendGraceDate));
       }
     }
 

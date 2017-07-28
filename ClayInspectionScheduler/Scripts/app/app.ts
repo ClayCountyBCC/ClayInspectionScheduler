@@ -36,6 +36,8 @@ namespace InspSched
   export function start(): void
   {
     LoadData();
+    window.onhashchange = HandleHash;
+    if (location.hash.substring(1).length > 0) HandleHash(); // if they pass something in the URL
   } //  END start()
 
   export function HandleHash()
@@ -245,8 +247,7 @@ namespace InspSched
     {
 
       InspSched.InspectionTypes = insptypes;
-      window.onhashchange = HandleHash;
-      if (location.hash.substring(1).length > 0) HandleHash(); // if they pass something in the URL
+
 
     },
       function ()

@@ -368,26 +368,32 @@ namespace InspSched.UI
     inspRow.appendChild(dataColumn);
     inspRow.appendChild(NewInspButtonDiv);
 
-    if (inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'N')
+    let Remarks: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
+
+    if (inspection.Remarks !== null || inspection.Remarks === "")
     {
-      let Remarks: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
+      Remarks.appendChild(document.createTextNode("Remarks: " + inspection.Remarks.trim()));
+    }
+    //if (inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'N')
+    //{
+    //  let Remarks: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
 
-      if (inspection.Remarks !== null || inspection.Remarks === "")
-      {
-        Remarks.appendChild(document.createTextNode("Remarks: " + inspection.Remarks.trim()));
+    //  if (inspection.Remarks !== null || inspection.Remarks === "")
+    //  {
+    //    Remarks.appendChild(document.createTextNode("Remarks: " + inspection.Remarks.trim()));
+    //  }
+    //  else
+    //  {
+    //    Remarks.appendChild(document.createTextNode("No remarks entered by the inspector. Please contact the Building Department " +
+    //      "at 904-284-6307 or contact the inspector " +
+    //      "directly for assistance."));
+    //  }
 
-      }
-      else
-      {
-        Remarks.appendChild(document.createTextNode("No remarks entered by the inspector. Please contact the Building Department " +
-          "at 904-284-6307 or contact the inspector " +
-          "directly for assistance."));
-      }
+
+    //}
 
       Remarks.className = "large-12 medium-12 small-12 inspRemarks";
       inspRow.appendChild(Remarks);
-    }
-
     return inspRow;
   }
 
@@ -635,7 +641,6 @@ namespace InspSched.UI
     let tomorrow = new Date();
     let inspDate = new Date(inspection.DisplaySchedDateTime);
     var dayOfMonth = tomorrow.getDate() + 1;
-    //today.setDate( dayOfMonth - 20 );
 
     if (inspDate < tomorrow && IsExternalUser)
       return false;

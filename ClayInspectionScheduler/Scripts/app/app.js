@@ -27,6 +27,9 @@ var InspSched;
     var SaveInspectionButton = document.getElementById("SaveSchedule");
     function start() {
         LoadData();
+        window.onhashchange = HandleHash;
+        if (location.hash.substring(1).length > 0)
+            HandleHash(); // if they pass something in the URL
     } //  END start()
     InspSched.start = start;
     function HandleHash() {
@@ -164,9 +167,6 @@ var InspSched;
     function LoadInspectionTypes() {
         InspSched.transport.GetInspType().then(function (insptypes) {
             InspSched.InspectionTypes = insptypes;
-            window.onhashchange = HandleHash;
-            if (location.hash.substring(1).length > 0)
-                HandleHash(); // if they pass something in the URL
         }, function () {
             console.log('error in LoadInspectionTypes');
             // do something with the error here

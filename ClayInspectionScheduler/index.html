@@ -2,14 +2,19 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang='en-US'>
 <head>
   <title>InspectionScheduler</title>
+  <meta name="X-UA-Compatible" value="IE=11" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <link type="text/css" rel="stylesheet" xmlns="http://www.w3.org/1999/xhtml" />
   <meta name="description" content="Inspection Scheduler" />
 
   <link href="Content/css/jquery-ui.css" rel="stylesheet" />
   <link href="Content/css/bootstrap-datepicker3.standalone.css" rel="stylesheet" />
-  <link href="Content/css/foundation-flex.min.css" rel="stylesheet" />
+  <!--<link href="Content/css/foundation-flex.min.css" rel="stylesheet" />-->
+  <link href="//cdnjs.cloudflare.com/ajax/libs/foundation/6.3.1/css/foundation-flex.min.css" rel="stylesheet" />
   <link href="Content/css/foundation.min.css" rel="stylesheet" />
+  <!--<link href="//cdnjs.cloudflare.com/ajax/libs/foundation/6.3.1/css/foundation.min.css" rel="stylesheet" />-->
   <link href="Content/fonts/foundation-icons.css" rel="stylesheet" />
   <link href="Content/css/MyStyle.css" rel="stylesheet" />
 
@@ -34,7 +39,7 @@
         <span class="input-group-button" id="button">
           <button id="PermitSearchButton" 
                   onclick="return InspSched.SearchPermit();"
-                  type="submit" class="button fi-magnifying-glass end" value="Search" required />
+                  type="submit" class="button fi-magnifying-glass end" value="Search" required ></button>
         </span>
       </div>
     </div>
@@ -102,7 +107,7 @@
               <div class="row expanded" id="NotScheduled" style="display:none;">
 
                 <div class="large-12 medium-12 small-12 row align-justify">
-                  <h5 class="small-11 "id="ErrorHeading"></h5>
+                  <h5 class="small-11 " id="ErrorHeading"></h5>
                   <button type="button" class="CloseIssueListButton large-1 medium-1 small-1" style="border: 1px solid black; background-color:rgba(203, 33, 33, 0.83); color: white;text-align:center" id="CloseIssueList" aria-label="CloseIssuesList">
                     <span aria-hidden="true">×</span>
                   </button>
@@ -139,20 +144,6 @@
                     </div>                                                 <!-- End Scheduling Inspection Type Selector / Save button-->
                     
 
-                    <!--Suspended Contractor Container -->
-                    <!--<div class="large-10 medium-12 small-12 " id="SuspendedContractor">
-                      <div class="large-12 small-12 medium-12 ">
-                        <label class="large-12 row MyLabel" style="padding-left:1rem;padding-top:.5rem;">
-                          Issue Scheduling Inspection
-                        </label>
-                        <div class="large-12 medium-12 row SuspendDiv" style="padding-top:1rem;">
-                          <div class="large-12 medium-12 small-12   flex-container" id="SuspendedPermit"></div>
-                          <div class="large-12 medium-12 small-12  flex-container "></div>
-                        </div>
-                      </div>
-                    </div>-->
-
-
                   </div>
                 </div>
               </div><!-- End Inspection Shceduler Container -->
@@ -165,17 +156,11 @@
     </div>     <!--End Permit Information-->
 
   </div>     <!--End Inspection Scheduler-->
-  <script src="Scripts/app/LocationHash.js"></script>
-  <script src="Scripts/app/NewInspection.js"></script>
-  <script src="Scripts/app/UI.js"></script>
-  <script src="Scripts/app/XHR.js"></script>
-  <script src="Scripts/app/transport.js"></script>
-  <script src="Scripts/app/es6-promise.min.js"></script>
-  <script src="Scripts/app/app.js"></script>
-  <script src="Scripts/jquery-3.1.1.js"></script>
-  <script src="Scripts/moment.js"></script>
+  <script src="Scripts/app/bundle.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
   <script src="Scripts/bootstrap-datepicker.js"></script>
-  <script src="Scripts/foundation.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/foundation/6.3.1/js/foundation.min.js"></script>
   <script>$(document).foundation();</script>
   <script>
     document.addEventListener("DOMContentLoaded", function (event)

@@ -173,7 +173,7 @@ namespace ClayInspectionScheduler.Models
                        orderby d descending
                        select d).First();
 
-        if(SuspendGraceDate != DateTime.MinValue && maxDate > SuspendGraceDate)
+        if(SuspendGraceDate > minDate &&  SuspendGraceDate < maxDate)
         {
           maxDate = SuspendGraceDate;
         }
