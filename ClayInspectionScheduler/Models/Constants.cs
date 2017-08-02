@@ -29,7 +29,6 @@ namespace ClayInspectionScheduler.Models
           Console.WriteLine("MachineName = " + Environment.MachineName.ToUpper());
           return false;
 
-
         case "CLAYBCCIIS01":
         case "CLAYBCCDMZIIS01":
           Console.WriteLine("MachineName = " + Environment.MachineName.ToUpper());
@@ -84,40 +83,6 @@ namespace ClayInspectionScheduler.Models
       }
     }
 
-    public static List<T> Save_Data<T>(string insertQuery)
-    {
-      try
-      {
-        using (IDbConnection db = new SqlConnection(Get_ConnStr("Printing")))
-        {
-          return (List<T>)db.Query<T>(insertQuery);
-        }
-      }
-      catch (Exception ex)
-      {
-        Log(ex, insertQuery);
-        return null;
-      }
-    }
-
-    public static List<T> Save_Data<T>(string query, DynamicParameters dbA)
-    {
-      {
-        try
-        {
-          using (IDbConnection db = new SqlConnection(Get_ConnStr("WATSC" + (UseProduction() ? "Prod" : "QA"))))
-          {
-            return (List<T>)db.Query<T>(query, dbA);
-
-          }
-        }
-        catch (Exception ex)
-        {
-          Log(ex, query);
-          return null;
-        }
-      }
-    }
 
     public static int Execute(string query, DynamicParameters dbA)
     {

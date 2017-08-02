@@ -121,9 +121,9 @@ namespace ClayInspectionScheduler.Models
             Errors.Add("Invalid Inspection for this permit type");
           }
 
-          var e = Inspection.Get(CurrentPermit.PermitNo);
+          var inspections = Inspection.Get(CurrentPermit.PermitNo);
           bool IsFinal = false;
-          foreach (var i in e)
+          foreach (var i in inspections)
           {
             
             if (i.InspectionCode == this.InspectionCd && i.ResultADC == null)
@@ -207,10 +207,10 @@ namespace ClayInspectionScheduler.Models
     public List<string> Save(bool IsExternalUser, string name)
     {
 
-      List<string> e = this.Validate(IsExternalUser);
+      List<string> errors = this.Validate(IsExternalUser);
 
-      if (e.Count > 0)
-        return e;
+      if (errors.Count > 0)
+        return errors;
 
       int IRID = this.AddIRID();
 
@@ -218,7 +218,7 @@ namespace ClayInspectionScheduler.Models
       dbArgs.Add("@PermitNo", this.PermitNo);
       dbArgs.Add("@InspCd", this.InspectionCd);
       dbArgs.Add("@SelectedDate", this.SchecDateTime.Date);
-      dbArgs.Add("@Username", name);
+      dbArgs.Add("@Username", name, dbType: DbType.String, size: 7);
       dbArgs.Add("@IRID", (IRID == -1) ? null : IRID.ToString());
 
 
@@ -242,15 +242,19 @@ namespace ClayInspectionScheduler.Models
           @IRID
       FROM bpBASE_PERMIT B
       LEFT OUTER JOIN bpMASTER_PERMIT M ON M.BaseID = B.BaseID
-      INNER JOIN bpASSOC_PERMIT A ON B.BaseID = A.BaseID
+      LEFT OUTER JOIN bpASSOC_PERMIT A ON B.BaseID = A.BaseID
       WHERE (A.PermitNo = @PermitNo OR M.PermitNo = @PermitNo)
 
       ";
       try
       {
-        Constants.Save_Data<string>(sql, dbArgs);
+        int i = Constants.Execute(sql, dbArgs);
+        if(i<1)
+        {
+          errors.Add("No Record Saved, Please Try again. Contact the Building department if issues persist.");
+        }
 
-        return e;
+        return errors;
       }
       catch (Exception ex)
       {

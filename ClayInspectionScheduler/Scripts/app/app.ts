@@ -171,6 +171,7 @@ namespace InspSched
 
     var e = transport.SaveInspection(newInsp).then(function (issues: Array<string>)
     {
+      
       let thisHeading: HTMLHeadingElement = (<HTMLHeadingElement>document.getElementById('ErrorHeading'));
       let IssueList: HTMLUListElement = ( <HTMLUListElement>document.createElement( 'ul' ) );
 

@@ -19,10 +19,11 @@ namespace ClayInspectionScheduler.Models
     public string ProjCity { get; set; }
     public string ErrorText { get; set; }
 
+    private string ContractorId { get; set; }
     private int Confidential { get; set; }
     private DateTime SuspendGraceDate { get; set; } = DateTime.MinValue;
-    private DateTime WorkersCompExpirationDate { get; set; }
-    private DateTime LiabilityExpirationDate { get; set; }
+    private DateTime WorkersCompExpirationDate { get; set; } = DateTime.MaxValue;
+    private DateTime LiabilityExpirationDate { get; set; } = DateTime.MaxValue;
     private string ContractorStatus { get; set; }
 
     //private string MasterPermitNo
@@ -69,9 +70,10 @@ namespace ClayInspectionScheduler.Models
         B.ProjCity,
         CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) SuspendGraceDate,
         B.Confidential,
+        B.ContractorId,
         C.WC_ExpDt WorkersCompExpirationDate,
         C.LiabInsExpDt LiabilityExpirationDate,
-        C.Status ContractorStatus
+        ISNULL(C.Status, '') ContractorStatus
             
       FROM bpMASTER_PERMIT M
       LEFT OUTER JOIN 
@@ -95,9 +97,10 @@ namespace ClayInspectionScheduler.Models
         B.ProjCity,
         CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) SuspendGraceDate,
         B.Confidential,
+        A.ContractorId,
         C.WC_ExpDt WorkersCompExpirationDate,
         C.LiabInsExpDt LiabilityExpirationDate,
-        C.Status ContractorStatus
+        ISNULL(C.Status, '') ContractorStatus
            
       FROM 
         bpASSOC_PERMIT A
@@ -117,8 +120,8 @@ namespace ClayInspectionScheduler.Models
     ";
       try
       {
-        var lp = Constants.Get_Data<Permit>(sql, dbArgs);
-        foreach (Permit l in lp)
+        var permits = Constants.Get_Data<Permit>(sql, dbArgs);
+        foreach (Permit l in permits)
         {
           l.IsExternalUser = IsExternalUser;
 
@@ -131,14 +134,13 @@ namespace ClayInspectionScheduler.Models
           l.Validate();
 
         }
-        return lp;
+        return permits;
       }
       catch (Exception ex)
       {
         Constants.Log(ex);
         return null;
       }
-
 
     }
 
@@ -292,7 +294,12 @@ namespace ClayInspectionScheduler.Models
 
     private bool ContractorIssues()
     {
-
+      // Contractor Owners do not have any valid data for these fields
+      if (this.ContractorId.ToUpper() == "OWNER") 
+      {
+        return false;
+      } 
+      
       if (this.LiabilityExpirationDate <= DateTime.Today)
       {
         ErrorText = "The Contractor's Liability Insurance expiration date has passed";

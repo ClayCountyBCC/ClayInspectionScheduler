@@ -23,7 +23,7 @@ namespace ClayInspectionScheduler
       );
       config.Routes.MapHttpRoute(
         name: "NewInspectionApi",
-        routeTemplate: "API/NewInspection/{thisInspection} "
+        routeTemplate: "API/NewInspection/{thisInspection}"
       );
       config.Routes.MapHttpRoute(
         name: "ValidatePermitApi",

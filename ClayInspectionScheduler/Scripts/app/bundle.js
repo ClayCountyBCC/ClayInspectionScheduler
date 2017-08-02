@@ -239,6 +239,107 @@ var InspSched;
             document.getElementById('PermitScreen').style.display = "flex";
         }
         UI.BuildInspectionList = BuildInspectionList;
+        /* update BuildInspectionRow
+        function BuildInspectionRow(inspection: Inspection, IsExternalUser: boolean)
+        {
+          // create variables and get/create document elements
+          let thisInspPermit: Permit;
+          let inspRow: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
+          let dataColumn: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
+          let thisPermit: HTMLDivElement = (<HTMLDivElement>document.createElement('div'));
+          let inspDateTime: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
+          let inspDesc: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
+          let ResultADC: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
+          let NewInspButtonDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
+          let NewInspButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
+          let Remarks: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
+      
+      
+          // Set element classes
+          dataColumn.className = "large-10 medium-10 small-12 ";
+      
+          if (inspection.ResultADC == 'A' || inspection.ResultADC == 'P')
+            inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle PassRow";
+          else if (inspection.ResultADC == null || inspection.ResultADC == "")
+            inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle";
+          else if (inspection.ResultADC == 'C')
+            inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle CancelRow"
+          else if (inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'N')
+            inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle FailRow";
+      
+          thisPermit.className = "large-2 medium-6 small-6 column InspPermit ";
+          inspDateTime.className = "large-2 medium-6 small-6 column InspDate";
+          inspDesc.className = "large-5 medium-6 small-6  InspType column";
+          ResultADC.className = "large-3 medium-6 small-6 InspResult column end";
+          inspDesc.className = "large-10 medium-6 small-6 InspType column";
+          NewInspButtonDiv.className = "ButtonContainer large-2 medium-2 small-12 flex-container align-center ";
+          Remarks.className = "large-12 medium-12 small-12 inspRemarks";
+      
+          // add the text nodes
+          thisPermit.appendChild(document.createTextNode(inspection.PermitNo));
+          inspDateTime.appendChild(document.createTextNode((inspection.DisplayInspDateTime.length > 0) ? inspection.DisplayInspDateTime : inspection.DisplaySchedDateTime));
+          inspDesc.appendChild(document.createTextNode(inspection.InsDesc.trim()));
+          Remarks.appendChild(document.createTextNode("Remarks: " + (inspection.Remarks !== null || inspection.Remarks === "" ? inspection.Remarks.trim() : "N/A")));
+      
+          // Create function to make New/Cancel Button
+          //let ShowCreateNewInsp: HTMLDivElement = (<HTMLDivElement>document.getElementById("CreateNew_" + inspection.PermitNo));
+          //if (ShowCreateNewInsp == null)
+          //{
+          //
+          //  //for (let p of InspSched.CurrentPermits)
+          //  //{
+          //  //  if (p.PermitNo === inspection.PermitNo)
+          //  //  {
+          //  //    thisInspPermit = p;
+          //  //    break;
+          //  //  }
+          //  //}
+          //  //if (thisInspPermit.ErrorText == null)
+          //  //{
+          //  //  NewInspButton.className = "align-self-center columns NewInspButton";
+          //  //  NewInspButton.appendChild(document.createTextNode("New"));
+          //  //  NewInspButton.setAttribute("onclick",
+          //  //    "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"
+          //  //  );
+          //  //  NewInspButton.id = "CreateNew_" + inspection.PermitNo;
+          //  //
+          //  //}
+          //}
+      
+      
+          // add nodes to data column
+          dataColumn.appendChild(thisPermit);
+      
+          if (inspection.DisplayInspDateTime.length > 0)
+          {
+            dataColumn.appendChild(inspDateTime);
+            dataColumn.appendChild(inspDesc);
+            ResultADC.appendChild(document.createTextNode(inspection.ResultDescription.trim()));
+            dataColumn.appendChild(ResultADC);
+          }
+          else
+          {
+            dataColumn.appendChild(inspDesc);
+          }
+      
+      
+      
+          // NewInspButton = CreateMyButton()
+          if (NewInspButton !== null)
+            NewInspButtonDiv.appendChild(NewInspButton);
+      
+      
+          // Add dataColumn and ButtonDiv to row
+          inspRow.appendChild(dataColumn);
+          inspRow.appendChild(NewInspButtonDiv);
+      
+      
+      
+          inspRow.appendChild(Remarks);
+      
+          return inspRow;
+      
+        } */
         function BuildCompletedInspection(inspection) {
             var thisInspPermit;
             var inspRow = document.createElement("div");
@@ -304,20 +405,6 @@ var InspSched;
             if (inspection.Remarks !== null || inspection.Remarks === "") {
                 Remarks.appendChild(document.createTextNode("Remarks: " + inspection.Remarks.trim()));
             }
-            //if (inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'N')
-            //{
-            //  let Remarks: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-            //  if (inspection.Remarks !== null || inspection.Remarks === "")
-            //  {
-            //    Remarks.appendChild(document.createTextNode("Remarks: " + inspection.Remarks.trim()));
-            //  }
-            //  else
-            //  {
-            //    Remarks.appendChild(document.createTextNode("No remarks entered by the inspector. Please contact the Building Department " +
-            //      "at 904-284-6307 or contact the inspector " +
-            //      "directly for assistance."));
-            //  }
-            //}
             Remarks.className = "large-12 medium-12 small-12 inspRemarks";
             inspRow.appendChild(Remarks);
             return inspRow;
