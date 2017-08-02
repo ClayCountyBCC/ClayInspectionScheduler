@@ -218,32 +218,32 @@ namespace ClayInspectionScheduler.Models
       dbArgs.Add("@PermitNo", this.PermitNo);
       dbArgs.Add("@InspCd", this.InspectionCd);
       dbArgs.Add("@SelectedDate", this.SchecDateTime.Date);
-      dbArgs.Add("@userame", name);
+      dbArgs.Add("@Username", name);
       dbArgs.Add("@IRID", (IRID == -1) ? null : IRID.ToString());
 
 
       string sql =  $@"
       USE WATSC;      
       insert into bpINS_REQUEST
-         (PermitNo,
+          (PermitNo,
           InspectionCode,
           SchecDateTime,
           ReqDateTime,
           BaseId,
           ReceivedBy,
           PrivProvIRId)
-        SELECT TOP 1
+      SELECT TOP 1
           @PermitNo,
           @InspCd,
           CAST(@SelectedDate AS DATE), 
           GetDate(),
           B.BaseId,
-          @username,
+          @Username,
           @IRID
-        FROM bpBASE_PERMIT B
-        INNER JOIN bpMASTER_PERMIT M ON B.BaseID = M.BaseID
-        LEFT OUTER JOIN bpASSOC_PERMIT A ON B.BaseID = A.BaseID AND M.PermitNo = A.MPermitNo
-        WHERE (A.PermitNo = @PermitNo OR M.PermitNo = @PermitNo)
+      FROM bpBASE_PERMIT B
+      LEFT OUTER JOIN bpMASTER_PERMIT M ON M.BaseID = B.BaseID
+      INNER JOIN bpASSOC_PERMIT A ON B.BaseID = A.BaseID
+      WHERE (A.PermitNo = @PermitNo OR M.PermitNo = @PermitNo)
 
       ";
       try

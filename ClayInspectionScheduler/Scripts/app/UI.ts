@@ -18,12 +18,12 @@ namespace InspSched.UI
     clearElement(document.getElementById('SearchFailed'));
     Hide('PermitSelectContainer');
     Hide('CurrentPermitData')
-    Hide('InspectionScheduler');
     Hide('CurrentPermit')
     Hide('InspectionTable');
     Hide('SearchFailed');
     Hide('SuspendedContractor');
     Hide('NoInspContainer');
+    Hide('NotScheduled');
     Show('Searching');
     
     let k: string = key.trim().toUpperCase();
@@ -219,7 +219,6 @@ namespace InspSched.UI
     Hide('InspListHeader');
     Hide('InspListData');
     Hide('NoInspContainer');
-    Hide('InspectionScheduler');
     Hide('SuspendedContractor');
 
     clearElement(document.getElementById('InspListData'));
@@ -304,10 +303,6 @@ namespace InspSched.UI
     //thisPermit.innerText = inspection.PermitNo;
     thisPermit.className = "large-2 medium-6 small-6 column InspPermit ";
     dataColumn.appendChild(thisPermit);
-
-
-
-    
     if (inspection.DisplaySchedDateTime.length > 0)
     {
       let inspDateTime: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
@@ -613,7 +608,6 @@ namespace InspSched.UI
   export function InformUserOfError(permitno: string, error: string): void
   {
 
-    document.getElementById("InspectionScheduler").style.display = "none";
     clearElement(document.getElementById('InspTypeSelect'));
 
     let reasons: HTMLDivElement = (<HTMLDivElement>document.getElementById('Reasons'));

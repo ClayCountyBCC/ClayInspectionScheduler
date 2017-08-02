@@ -14,12 +14,12 @@ var InspSched;
             clearElement(document.getElementById('SearchFailed'));
             Hide('PermitSelectContainer');
             Hide('CurrentPermitData');
-            Hide('InspectionScheduler');
             Hide('CurrentPermit');
             Hide('InspectionTable');
             Hide('SearchFailed');
             Hide('SuspendedContractor');
             Hide('NoInspContainer');
+            Hide('NotScheduled');
             Show('Searching');
             var k = key.trim().toUpperCase();
             document.getElementById('PermitSearch').setAttribute("value", k);
@@ -160,7 +160,6 @@ var InspSched;
             Hide('InspListHeader');
             Hide('InspListData');
             Hide('NoInspContainer');
-            Hide('InspectionScheduler');
             Hide('SuspendedContractor');
             clearElement(document.getElementById('InspListData'));
             InspSched.transport.GetInspections(key).then(function (inspections) {
@@ -446,7 +445,6 @@ var InspSched;
             Show('SearchFailed');
         }
         function InformUserOfError(permitno, error) {
-            document.getElementById("InspectionScheduler").style.display = "none";
             clearElement(document.getElementById('InspTypeSelect'));
             var reasons = document.getElementById('Reasons');
             clearElement(reasons);

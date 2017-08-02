@@ -21,7 +21,9 @@ namespace InspSched
   export let GracePeriodDate: string = "";
   export let CurrentPermits: Array<Permit> = [];
   export let CurrentInspections: Array<Inspection> = [];
+  export let IssuesExist: Array<string> = [];
   export let ThisPermit: Permit;
+  let permitscreen = <HTMLDivElement>document.getElementById('PermitScreen');
   let InspectionTypeSelect = <HTMLSelectElement>document.getElementById( "InspTypeSelect" );
   let PermitSearchButton = <HTMLButtonElement>document.getElementById( "PermitSearchButton" );
   let CloseIssueDivButton = <HTMLButtonElement>document.getElementById( "CloseIssueList" );
@@ -29,8 +31,9 @@ namespace InspSched
   let permitNumSelect = <HTMLSelectElement>document.getElementById( "PermitSelect" );
   let inspScheduler = document.getElementById( "InspectionScheduler" );
   let IssueContainer: HTMLDivElement = ( <HTMLDivElement>document.getElementById( "NotScheduled" ) );
-  let IssuesDiv: HTMLDivElement = ( <HTMLDivElement>document.getElementById( 'NotScheduled' ) );
-  let SaveInspectionButton = document.getElementById( "SaveSchedule" );
+  let IssuesDiv: HTMLDivElement = ( <HTMLDivElement>document.getElementById( 'Reasons' ) );
+  let SaveInspectionButton = document.getElementById("SaveSchedule");
+  let confirmed = document.getElementById('SaveConfirmed');
 
 
   export function start(): void
@@ -62,15 +65,17 @@ namespace InspSched
 
   export function SearchPermit()
   {
-    document.getElementById('PermitScreen').style.display = "none";
+    permitscreen.style.display = "none";
+    UI.Hide('SaveConfirmed');
+
+    UI.Hide('NotScheduled');
 
     $('#InspectionSchedulerTabs').foundation('selectTab', 'InspectionView', true);
 
-    document.getElementById("NoInspections").style.display = "none";
 
     transport.GetPermit(InspSched.UI.Search(PermitSearchField.value)).then(function (permits: Array<Permit>)
     {
-
+  
       InspSched.CurrentPermits = permits;
 
       InspSched.UI.ProcessResults(permits, PermitSearchField.value);
@@ -113,7 +118,8 @@ namespace InspSched
 
   permitNumSelect.onchange = function ()
   {
-    document.getElementById("SaveConfirmed").style.display = "none";
+    IssueContainer.style.display = 'none';
+    confirmed.style.display = "none";
     let permits = InspSched.CurrentPermits;
     // TODO: Add code to check if there is a selected date;
     SaveInspectionButton.setAttribute( "disabled", "disabled" );
@@ -152,47 +158,39 @@ namespace InspSched
 
   SaveInspectionButton.onclick = function ()
   {
-
-    document.getElementById("SaveConfirmed").style.display = "none";
-
+    inspScheduler.style.display = "none";
+    confirmed.style.display = "none";
+    IssueContainer.style.display = "none";
+    InspSched.UI.clearElement(IssuesDiv);
+    
     let thisPermit: string = permitNumSelect.value;
     let thisInspCd: string = SaveInspectionButton.getAttribute("value");
     let thisInspDesc: HTMLSelectElement = (<HTMLSelectElement>document.getElementById("InspTypeSelect")); 
-    let IssueContainer: HTMLDivElement = ( <HTMLDivElement>document.getElementById( "NotScheduled" ) )
-    let IssuesDiv: HTMLDivElement = (<HTMLDivElement>document.getElementById('Reasons'));
-    IssueContainer.style.display = "none";
-
-    InspSched.UI.clearElement(IssuesDiv);
-
-
     let inspDesc: string = thisInspDesc.options[thisInspDesc.selectedIndex].textContent;
     newInsp = new NewInspection( thisPermit, thisInspCd, $( dpCalendar ).data( 'datepicker' ).getDate() );
-    //$( dpCalendar ).data( 'datepicker' ).clearDates();
 
-
-    var e = transport.SaveInspection( newInsp ).then( function ( issues: Array<string> )
+    var e = transport.SaveInspection(newInsp).then(function (issues: Array<string>)
     {
       let thisHeading: HTMLHeadingElement = (<HTMLHeadingElement>document.getElementById('ErrorHeading'));
       let IssueList: HTMLUListElement = ( <HTMLUListElement>document.createElement( 'ul' ) );
 
       if ( issues.length > 0 ) 
       {
+
         InspSched.UI.clearElement(thisHeading);
         thisHeading.appendChild(document.createTextNode("The following issue(s) prevented scheduling the requested inspection:"));
-        //thisHeading.innerText = ;
 
         for (let i in issues)
         {
           let thisIssue: HTMLLIElement = (<HTMLLIElement>document.createElement('li'));
           thisIssue.appendChild(document.createTextNode(issues[i]));
-          //thisIssue.textContent = issues[i];
           thisIssue.style.marginLeft = "2rem;";
           IssueList.appendChild(thisIssue);
 
         }
 
         IssuesDiv.appendChild(IssueList);
-        IssueContainer.style.removeProperty("display");
+        IssueContainer.style.display="flex";
 
       }
       else
@@ -205,15 +203,15 @@ namespace InspSched
         InspSched.UI.clearElement(inspPermitNo);
         InspSched.UI.clearElement(inspSchedDate);
 
-        inspType.innerText = inspDesc;
-        inspPermitNo.innerText = newInsp.PermitNo;
-        inspSchedDate.innerText = newInsp.SchecDateTime.toLocaleDateString();
+        inspType.appendChild(document.createTextNode(inspDesc));
+        inspPermitNo.appendChild(document.createTextNode(newInsp.PermitNo));
+        inspSchedDate.appendChild(document.createTextNode(newInsp.SchecDateTime.toLocaleDateString()));
 
         document.getElementById("SaveConfirmed").style.display = "flex";
 
       }
 
-      document.getElementById('InspectionScheduler').style.display = "flex";
+      
 
       return true;
 
@@ -221,10 +219,12 @@ namespace InspSched
       {
         console.log( 'error in Saving Inspection' );
         return false;
-    } );
+      });
 
+    if (IssuesExist.length > 0)
+      IssueContainer.style.display = 'flex';
+    
     InspSched.UI.GetInspList(thisPermit);
-
   }
 
   CloseIssueDivButton.onclick = function ()
@@ -265,11 +265,10 @@ namespace InspSched
   {
 
    
-    $( dpCalendar ).datepicker( 'destroy' );
+    $(dpCalendar).datepicker('destroy');
 
     if (errorText == null)
     {
-      document.getElementById("NotScheduled").style.display = "none";
 
       let additionalDisabledDates: string[] = GetAdditionalDisabledDates(dates);
 
@@ -299,10 +298,10 @@ namespace InspSched
         });
 
       };
-      document.getElementById('InspectionScheduler').style.display = "flex";
 
     }
 
+    document.getElementById('InspectionScheduler').style.display = "flex";
 
   }
 
