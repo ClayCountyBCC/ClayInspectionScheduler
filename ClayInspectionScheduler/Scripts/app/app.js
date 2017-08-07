@@ -58,6 +58,7 @@ var InspSched;
         InspSched.UI.Hide('NotScheduled');
         $('#InspectionSchedulerTabs').foundation('selectTab', 'InspectionView', true);
         InspSched.transport.GetPermit(InspSched.UI.Search(PermitSearchField.value)).then(function (permits) {
+            console.log(permits);
             InspSched.CurrentPermits = permits;
             InspSched.UI.ProcessResults(permits, PermitSearchField.value);
             for (var _i = 0, permits_1 = permits; _i < permits_1.length; _i++) {
@@ -85,6 +86,7 @@ var InspSched;
     }
     InspSched.SearchPermit = SearchPermit;
     permitNumSelect.onchange = function () {
+        $(dpCalendar).datepicker('destroy');
         IssueContainer.style.display = 'none';
         confirmed.style.display = "none";
         var permits = InspSched.CurrentPermits;
@@ -94,11 +96,12 @@ var InspSched;
             var permit = permits_2[_i];
             if (permit.PermitNo == permitNumSelect.value) {
                 InspSched.ThisPermit = permit;
-                if (permit.ErrorText != null) {
+                if (permit.ErrorText !== null) {
                     InspSched.UI.InformUserOfError(permit.PermitNo, permit.ErrorText);
                 }
                 else {
-                    InspSched.UI.LoadInspTypeSelect(permit.PermitNo);
+                    if (InspSched.ThisPermit.ErrorText === null)
+                        InspSched.UI.LoadInspTypeSelect(permit.PermitNo);
                     BuildCalendar(permit.ScheduleDates);
                 }
                 break;
@@ -201,8 +204,8 @@ var InspSched;
                 });
             }
             ;
+            document.getElementById('InspectionScheduler').style.display = "flex";
         }
-        document.getElementById('InspectionScheduler').style.display = "flex";
     }
     InspSched.BuildCalendar = BuildCalendar;
     function EnableSaveButton() {

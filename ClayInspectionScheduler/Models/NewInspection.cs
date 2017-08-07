@@ -122,7 +122,7 @@ namespace ClayInspectionScheduler.Models
           }
 
           var inspections = Inspection.Get(CurrentPermit.PermitNo);
-          bool IsFinal = false;
+          //bool IsFinal = false;
           foreach (var i in inspections)
           {
             
@@ -132,13 +132,16 @@ namespace ClayInspectionScheduler.Models
               break;
             }
 
-            // Adds functionality to return error when saving an inspection for permit that has already passed a final inspection.
-            if(!IsFinal && i.InsDesc.ToLower().Contains("final") && (i.ResultADC  == "A" || i.ResultADC == "P" ))
-            {
-              Errors.Add( "Permit has already passed final inspection." );
-              IsFinal = true;
-            }
 
+            // Adds functionality to return error when saving an inspection for permit that has already passed a final inspection.
+            var types = InspType.Get(IsExternalUser);
+            foreach (var t in types)
+            {
+              if (t.InspCd == i.InspectionCode && t.Final && (i.ResultADC == "A" || i.ResultADC == "P"))
+              {
+
+              }
+            }
           }
         }
         Console.Write(Errors);

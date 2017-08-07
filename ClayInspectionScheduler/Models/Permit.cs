@@ -161,6 +161,8 @@ namespace ClayInspectionScheduler.Models
           Has a hold that does not hold up the final inspection?
           If the user is external and a final inspection has already been completed
       */
+      if (PermitIsNotIssued()) return;
+
       if (MasterIsCOd()) return;
 
       if (this.IsExternalUser)
@@ -173,8 +175,54 @@ namespace ClayInspectionScheduler.Models
       if (HoldsExist()) return;
 
       if (ContractorIssues()) return;
+      
+    }
 
+    private bool PermitIsNotIssued()
+    {
+      try
+      {
+        var dp = new DynamicParameters();
+        dp.Add("@PermitNo", this.PermitNo);
 
+        string sql = $@"
+        use watsc;
+        DECLARE @MPermitNo CHAR(8) = (SELECT MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = @PermitNo);
+
+        SELECT COUNT(*) AS CNT FROM (
+        select PermitNo, CAST(IssueDate AS DATE) AS IssueDate from bpASSOC_PERMIT A 
+        WHERE IssueDate IS NULL AND PermitNo = @PermitNo
+        UNION
+        SELECT PermitNo, CAST(IssueDate AS DATE) AS IssueDate FROM bpMASTER_PERMIT M
+        WHERE PermitNo = @MPermitNo OR PermitNo = @PermitNo) AS tmp 
+        WHERE IssueDate IS NULL AND PERMITNO = @PermitNo
+
+        ";
+
+        var i = Constants.Execute_Scalar<int>(sql, dp);
+
+        switch (i)
+        {
+          case -1:
+            ErrorText = $"There was an issue checking " +
+                        $"final inspection information " +
+                        $"for Permit #{this.PermitNo}";
+            return true;
+          case 0:
+            return false;
+          default:
+            ErrorText = $"Permit #{this.PermitNo} has not yet" +
+                        $" been issued. Please contact the" +
+                        $" building department for assistance";
+            return true;
+        }
+      }
+      catch (Exception ex)
+      {
+        Constants.Log(ex);
+        ErrorText = $"There was an issue getting data for Permit #{this.PermitNo}";
+        return true;
+      }
 
     }
     private bool MasterIsCOd()
@@ -229,8 +277,8 @@ namespace ClayInspectionScheduler.Models
         switch (i)
         {
           case -1:
-            ErrorText = $"There was an issue chacking " +
-                        $"the final inspection information " +
+            ErrorText = $"There was an issue checking " +
+                        $"final inspection information " +
                         $"for Permit #{this.PermitNo}";
             return true;
           case 0:
@@ -249,6 +297,7 @@ namespace ClayInspectionScheduler.Models
         return true;
       }
     }
+    
     private bool ChargesExist()
     {
       // returns true if charges exist for this permit or there is an issue getting this data for the permit.
@@ -330,8 +379,9 @@ namespace ClayInspectionScheduler.Models
         from bpHOLD h
         where 
           h.PermitNo = @PermitNo
-          AND HldDate IS NULL
-          AND H.HldCd NOT IN ('1SWF','PPCC')
+          AND h.HldDate IS NULL
+          AND h.Deleted IS NULL
+          AND h.HldCd NOT IN ('1SWF','PPCC')
       ";
       // Revisit this when the changes are made to the bpHold_REF table
       // to add hte additional column to check if a hold will prevent
@@ -397,7 +447,6 @@ namespace ClayInspectionScheduler.Models
         return true;
       }
     }
-
 
   }
 }

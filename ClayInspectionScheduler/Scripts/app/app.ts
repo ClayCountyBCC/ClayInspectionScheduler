@@ -65,6 +65,7 @@ namespace InspSched
 
   export function SearchPermit()
   {
+
     permitscreen.style.display = "none";
     UI.Hide('SaveConfirmed');
 
@@ -75,7 +76,8 @@ namespace InspSched
 
     transport.GetPermit(InspSched.UI.Search(PermitSearchField.value)).then(function (permits: Array<Permit>)
     {
-  
+      console.log(permits);
+
       InspSched.CurrentPermits = permits;
 
       InspSched.UI.ProcessResults(permits, PermitSearchField.value);
@@ -118,18 +120,21 @@ namespace InspSched
 
   permitNumSelect.onchange = function ()
   {
+    $(dpCalendar).datepicker('destroy');
+
     IssueContainer.style.display = 'none';
     confirmed.style.display = "none";
     let permits = InspSched.CurrentPermits;
     // TODO: Add code to check if there is a selected date;
-    SaveInspectionButton.setAttribute( "disabled", "disabled" );
+    SaveInspectionButton.setAttribute("disabled", "disabled");
 
     for ( let permit of permits )
     {
       if (permit.PermitNo == permitNumSelect.value)
       {
+
         InspSched.ThisPermit = permit;
-        if (permit.ErrorText != null)
+        if (permit.ErrorText !== null)
         {
           InspSched.UI.InformUserOfError(permit.PermitNo, permit.ErrorText);
 
@@ -137,7 +142,8 @@ namespace InspSched
         else
         {
 
-          InspSched.UI.LoadInspTypeSelect(permit.PermitNo);
+          if (ThisPermit.ErrorText === null)
+            InspSched.UI.LoadInspTypeSelect(permit.PermitNo);
           BuildCalendar(permit.ScheduleDates);
 
         }
@@ -264,13 +270,11 @@ namespace InspSched
 
   export function BuildCalendar( dates: Array<string>, errorText?: string )
   {
-
-   
     $(dpCalendar).datepicker('destroy');
 
     if (errorText == null)
     {
-
+      
       let additionalDisabledDates: string[] = GetAdditionalDisabledDates(dates);
 
       InspSched.InspectionDates = dates;
@@ -300,9 +304,10 @@ namespace InspSched
 
       };
 
+      document.getElementById('InspectionScheduler').style.display = "flex";
     }
 
-    document.getElementById('InspectionScheduler').style.display = "flex";
+
 
   }
 

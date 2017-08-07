@@ -15,6 +15,9 @@ namespace ClayInspectionScheduler.Models
 
     public string InspCd { get; set; }
 
+    public bool Final { get; set; }
+
+
     public static List<InspType> Get(bool IsExternalUser)
     {
       
@@ -24,7 +27,8 @@ namespace ClayInspectionScheduler.Models
 
         SELECT
           DISTINCT I.InsDesc,
-          LTRIM(RTRIM(I.InspCd)) InspCd
+          LTRIM(RTRIM(I.InspCd)) InspCd,
+          Final
         FROM
                 bpINS_REF I
         WHERE
@@ -35,10 +39,7 @@ namespace ClayInspectionScheduler.Models
       
       var lp = Constants.Get_Data<InspType>(sql);
 
-      if(IsExternalUser)
-      {
-        // remove Permit Information Inspections here
-      }
+
 
       return lp;
     }

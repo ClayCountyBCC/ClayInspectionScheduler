@@ -190,226 +190,110 @@ var InspSched;
             console.log('inspections', inspections);
             for (var _i = 0, inspections_1 = inspections; _i < inspections_1.length; _i++) {
                 var inspection = inspections_1[_i];
-                if (inspection.ResultADC || inspection.DisplaySchedDateTime.length === 0) {
-                    InspList.appendChild(BuildCompletedInspection(inspection));
-                }
-                else if (!inspection.ResultADC) {
-                    InspList.appendChild(BuildFutureInspRow(inspection, InspSched.ThisPermit.IsExternalUser));
-                }
+                InspList.appendChild(BuildInspectionRow(inspection));
             }
             InspList.style.removeProperty("display");
             document.getElementById("InspSched").style.removeProperty("display");
             document.getElementById('PermitScreen').style.display = "flex";
         }
         UI.BuildInspectionList = BuildInspectionList;
-        /* update BuildInspectionRow
-        function BuildInspectionRow(inspection: Inspection, IsExternalUser: boolean)
-        {
-          // create variables and get/create document elements
-          let thisInspPermit: Permit;
-          let inspRow: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-          let dataColumn: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-          let thisPermit: HTMLDivElement = (<HTMLDivElement>document.createElement('div'));
-          let inspDateTime: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-          let inspDesc: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-          let ResultADC: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-          let NewInspButtonDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-          let NewInspButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
-          let Remarks: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-      
-      
-          // Set element classes
-          dataColumn.className = "large-10 medium-10 small-12 ";
-      
-          if (inspection.ResultADC == 'A' || inspection.ResultADC == 'P')
-            inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle PassRow";
-          else if (inspection.ResultADC == null || inspection.ResultADC == "")
-            inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle";
-          else if (inspection.ResultADC == 'C')
-            inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle CancelRow"
-          else if (inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'N')
-            inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle FailRow";
-      
-          thisPermit.className = "large-2 medium-6 small-6 column InspPermit ";
-          inspDateTime.className = "large-2 medium-6 small-6 column InspDate";
-          inspDesc.className = "large-5 medium-6 small-6  InspType column";
-          ResultADC.className = "large-3 medium-6 small-6 InspResult column end";
-          inspDesc.className = "large-10 medium-6 small-6 InspType column";
-          NewInspButtonDiv.className = "ButtonContainer large-2 medium-2 small-12 flex-container align-center ";
-          Remarks.className = "large-12 medium-12 small-12 inspRemarks";
-      
-          // add the text nodes
-          thisPermit.appendChild(document.createTextNode(inspection.PermitNo));
-          inspDateTime.appendChild(document.createTextNode((inspection.DisplayInspDateTime.length > 0) ? inspection.DisplayInspDateTime : inspection.DisplaySchedDateTime));
-          inspDesc.appendChild(document.createTextNode(inspection.InsDesc.trim()));
-          Remarks.appendChild(document.createTextNode("Remarks: " + (inspection.Remarks !== null || inspection.Remarks === "" ? inspection.Remarks.trim() : "N/A")));
-      
-          // Create function to make New/Cancel Button
-          //let ShowCreateNewInsp: HTMLDivElement = (<HTMLDivElement>document.getElementById("CreateNew_" + inspection.PermitNo));
-          //if (ShowCreateNewInsp == null)
-          //{
-          //
-          //  //for (let p of InspSched.CurrentPermits)
-          //  //{
-          //  //  if (p.PermitNo === inspection.PermitNo)
-          //  //  {
-          //  //    thisInspPermit = p;
-          //  //    break;
-          //  //  }
-          //  //}
-          //  //if (thisInspPermit.ErrorText == null)
-          //  //{
-          //  //  NewInspButton.className = "align-self-center columns NewInspButton";
-          //  //  NewInspButton.appendChild(document.createTextNode("New"));
-          //  //  NewInspButton.setAttribute("onclick",
-          //  //    "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"
-          //  //  );
-          //  //  NewInspButton.id = "CreateNew_" + inspection.PermitNo;
-          //  //
-          //  //}
-          //}
-      
-      
-          // add nodes to data column
-          dataColumn.appendChild(thisPermit);
-      
-          if (inspection.DisplayInspDateTime.length > 0)
-          {
-            dataColumn.appendChild(inspDateTime);
-            dataColumn.appendChild(inspDesc);
-            ResultADC.appendChild(document.createTextNode(inspection.ResultDescription.trim()));
-            dataColumn.appendChild(ResultADC);
-          }
-          else
-          {
-            dataColumn.appendChild(inspDesc);
-          }
-      
-      
-      
-          // NewInspButton = CreateMyButton()
-          if (NewInspButton !== null)
-            NewInspButtonDiv.appendChild(NewInspButton);
-      
-      
-          // Add dataColumn and ButtonDiv to row
-          inspRow.appendChild(dataColumn);
-          inspRow.appendChild(NewInspButtonDiv);
-      
-      
-      
-          inspRow.appendChild(Remarks);
-      
-          return inspRow;
-      
-        } */
-        function BuildCompletedInspection(inspection) {
+        // update BuildInspectionRow
+        function BuildInspectionRow(inspection) {
+            // create variables and get/create document elements
             var thisInspPermit;
             var inspRow = document.createElement("div");
-            if (inspection.ResultADC == 'A' || inspection.ResultADC == 'P')
-                inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle PassRow";
-            else if (inspection.ResultADC == null || inspection.ResultADC == "")
+            var dataColumn = document.createElement("div");
+            var remarkrow = document.createElement("div");
+            var remarkColumn = document.createElement("div");
+            var thisPermit = document.createElement('div');
+            var inspDateTime = document.createElement("div");
+            var inspDesc = document.createElement("div");
+            var inspector = document.createElement("div");
+            var InspButtonDiv = document.createElement("div");
+            var InspButton = document.createElement("button");
+            var Remarks = document.createElement("div");
+            var ResultADC = document.createElement("div");
+            // Set element classes 
+            dataColumn.className = "large-10 medium-10 small-12 ";
+            remarkColumn.className = "large-10 medium-10 small-12 ";
+            if (inspection.ResultADC == null || inspection.ResultADC == "")
                 inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle";
+            else if (inspection.ResultADC == 'A' || inspection.ResultADC == 'P')
+                inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle PassRow";
             else if (inspection.ResultADC == 'C')
                 inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle CancelRow";
             else if (inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'N')
                 inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle FailRow";
-            var dataColumn = document.createElement("div");
-            dataColumn.className = "large-10 medium-10 small-12 ";
-            var thisPermit = document.createElement('div');
-            thisPermit.appendChild(document.createTextNode(inspection.PermitNo));
-            //thisPermit.innerText = inspection.PermitNo;
             thisPermit.className = "large-2 medium-6 small-6 column InspPermit ";
-            dataColumn.appendChild(thisPermit);
-            if (inspection.DisplaySchedDateTime.length > 0) {
-                var inspDateTime = document.createElement("div");
-                inspDateTime.appendChild(document.createTextNode(inspection.DisplayInspDateTime));
-                inspDateTime.className = "large-2 medium-6 small-6 column InspDate";
-                dataColumn.appendChild(inspDateTime);
-                var inspDesc = document.createElement("div");
-                inspDesc.appendChild(document.createTextNode(inspection.InsDesc.trim()));
-                inspDesc.className = "large-5 medium-6 small-6  InspType column";
-                dataColumn.appendChild(inspDesc);
-                var ResultADC = document.createElement("div");
-                ResultADC.appendChild(document.createTextNode(inspection.ResultDescription.trim()));
-                ResultADC.className = "large-3 medium-6 small-6 InspResult column end";
-                dataColumn.appendChild(ResultADC);
-            }
-            else {
-                var inspDesc = document.createElement("div");
-                inspDesc.appendChild(document.createTextNode(inspection.InsDesc.trim()));
-                inspDesc.className = "large-10 medium-6 small-6 InspType column";
-                dataColumn.appendChild(inspDesc);
-            }
-            var NewInspButtonDiv = document.createElement("div");
-            NewInspButtonDiv.className = "ButtonContainer large-2 medium-2 small-12 flex-container align-center ";
-            // Create New Button
-            var ShowCreateNewInsp = document.getElementById("CreateNew_" + inspection.PermitNo);
-            if (ShowCreateNewInsp == null) {
-                for (var _i = 0, _a = InspSched.CurrentPermits; _i < _a.length; _i++) {
-                    var p = _a[_i];
-                    if (p.PermitNo === inspection.PermitNo) {
-                        thisInspPermit = p;
-                        break;
+            inspDateTime.className = "large-2 medium-6 small-6 column InspDate";
+            inspector.className = "large-3 medium-6 small-12 InspResult column end";
+            InspButtonDiv.className = "ButtonContainer large-2 medium-2 small-12 flex-container align-center ";
+            Remarks.className = "large-9 medium-6 small-6 inspRemarks column";
+            ResultADC.className = "large-3 medium-6 small-6 InspResult column end";
+            // add the text nodes
+            thisPermit.appendChild(document.createTextNode(inspection.PermitNo));
+            inspDateTime.appendChild(document.createTextNode((inspection.DisplayInspDateTime.length > 0) ? inspection.DisplayInspDateTime : inspection.DisplaySchedDateTime));
+            inspDesc.appendChild(document.createTextNode(inspection.InsDesc.trim()));
+            Remarks.appendChild(document.createTextNode("Remarks: " + (inspection.Remarks !== null || inspection.Remarks === "" ? inspection.Remarks.trim() : "N/A")));
+            ResultADC.appendChild(document.createTextNode(inspection.ResultDescription.trim()));
+            inspector.appendChild(document.createTextNode((inspection.InspectorName.trim.length == 0 ? "Unassigned" : inspection.InspectorName.trim())));
+            //Create function to make New/Cancel Button
+            if (inspection.ResultADC || inspection.DisplaySchedDateTime.length === 0) {
+                var ShowCreateNewInsp = document.getElementById("CreateNew_" + inspection.PermitNo);
+                if (ShowCreateNewInsp == null) {
+                    for (var _i = 0, _a = InspSched.CurrentPermits; _i < _a.length; _i++) {
+                        var p = _a[_i];
+                        if (p.PermitNo === inspection.PermitNo) {
+                            thisInspPermit = p;
+                            break;
+                        }
+                    }
+                    if (thisInspPermit.ErrorText == null) {
+                        InspButton.className = "align-self-center columns NewInspButton";
+                        InspButton.appendChild(document.createTextNode("New"));
+                        InspButton.setAttribute("onclick", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');");
+                        InspButton.id = "CreateNew_" + inspection.PermitNo;
+                        InspButtonDiv.appendChild(InspButton);
                     }
                 }
-                if (thisInspPermit.ErrorText == null) {
-                    var NewInspButton = document.createElement("button");
-                    NewInspButton.className = "align-self-center columns NewInspButton";
-                    NewInspButton.appendChild(document.createTextNode("New"));
-                    NewInspButton.setAttribute("onclick", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');");
-                    NewInspButton.id = "CreateNew_" + inspection.PermitNo;
-                    NewInspButtonDiv.appendChild(NewInspButton);
+            }
+            else if (!inspection.ResultADC) {
+                clearElement(inspector);
+                remarkrow.style.display = "none";
+                inspector.appendChild(document.createTextNode("Unassigned"));
+                var InspButton_1 = document.createElement("button");
+                InspButton_1.className = "align-self-center small-12 NewInspButton";
+                InspButton_1.innerText = "Cancel";
+                //thisinspCancelButton.value = inspection.PermitNo;
+                InspButton_1.setAttribute("onclick", 
+                // cancels inspection then re-fetch inspections
+                "InspSched.CancelInspection('" + inspection.InspReqID + "', '" + inspection.PermitNo + "');");
+                // Display cancel button if good date
+                if (IsGoodCancelDate(inspection, InspSched.ThisPermit.IsExternalUser))
+                    InspButtonDiv.appendChild(InspButton_1);
+            }
+            dataColumn.appendChild(thisPermit);
+            dataColumn.appendChild(inspDateTime);
+            dataColumn.appendChild(inspDesc);
+            dataColumn.appendChild(inspector);
+            inspRow.appendChild(dataColumn);
+            inspRow.appendChild(InspButtonDiv);
+            inspRow.appendChild(remarkrow);
+            if (inspection.DisplayInspDateTime.length > 0) {
+                if (inspection.InspReqID !== "99999999") {
+                    inspDesc.className = "large-5 medium-6 small-6  InspType column";
+                    remarkrow.className = " large-12 medium-12 small-12 row flex-container";
+                    remarkColumn.appendChild(Remarks);
+                    remarkColumn.appendChild(ResultADC);
+                    remarkrow.appendChild(remarkColumn);
+                }
+                else {
+                    inspector.style.display = 'none';
+                    inspDateTime.style.display = 'none';
+                    inspDesc.className = "large-10 medium-6 small-6 InspType InspResult column";
                 }
             }
-            inspRow.appendChild(dataColumn);
-            inspRow.appendChild(NewInspButtonDiv);
-            var Remarks = document.createElement("div");
-            if (inspection.Remarks !== null || inspection.Remarks === "") {
-                Remarks.appendChild(document.createTextNode("Remarks: " + inspection.Remarks.trim()));
-            }
-            Remarks.className = "large-12 medium-12 small-12 inspRemarks";
-            inspRow.appendChild(Remarks);
             return inspRow;
-        }
-        function BuildFutureInspRow(inspection, IsExternalUser) {
-            var schedBody = document.getElementById('InspSchedBody');
-            var thisinsp = document.createElement("div");
-            thisinsp.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle";
-            var thisPermit = document.createElement('div');
-            thisPermit.innerText = inspection.PermitNo;
-            thisPermit.className = "large-2 medium-6 small-6 column InspPermit";
-            var thisinspDate = document.createElement("div");
-            thisinspDate.className = "large-2 medium-6 small-6 column InspDate ";
-            thisinspDate.innerText = inspection.DisplaySchedDateTime;
-            var thisinspType = document.createElement("div");
-            thisinspType.className = "large-5 medium-6 small-12 column InspType";
-            thisinspType.innerText = inspection.InsDesc;
-            var thisinspInspector = document.createElement("div");
-            thisinspInspector.className = "large-3 medium-6  hide-for-small-only column InspInspector";
-            thisinspInspector.innerText = inspection.InspectorName;
-            //thisinspInspector.setAttribute("style", "float:left;");
-            var thisinspCancelDiv = document.createElement("div");
-            thisinspCancelDiv.className = "ButtonContainer large-2 medium-2 small-12  flex-container align-center";
-            var thisinspCancelButton = document.createElement("button");
-            thisinspCancelButton.className = "align-self-center small-12 NewInspButton";
-            thisinspCancelButton.innerText = "Cancel";
-            //thisinspCancelButton.value = inspection.PermitNo;
-            thisinspCancelButton.setAttribute("onclick", 
-            // cancels inspection then re-fetch inspections
-            "InspSched.CancelInspection('" + inspection.InspReqID + "', '" + inspection.PermitNo + "');");
-            // Display cancel button if good date
-            if (IsGoodCancelDate(inspection, IsExternalUser))
-                thisinspCancelDiv.appendChild(thisinspCancelButton);
-            var dataColumn = document.createElement("div");
-            dataColumn.className = "large-10 medium-10 small-12";
-            dataColumn.appendChild(thisPermit);
-            dataColumn.appendChild(thisinspDate);
-            dataColumn.appendChild(thisinspType);
-            dataColumn.appendChild(thisinspInspector);
-            thisinsp.appendChild(dataColumn);
-            thisinsp.appendChild(thisinspCancelDiv);
-            return thisinsp;
         }
         /**********************************************
          *
@@ -532,6 +416,7 @@ var InspSched;
             Show('SearchFailed');
         }
         function InformUserOfError(permitno, error) {
+            Hide("InspectionScheduler");
             clearElement(document.getElementById('InspTypeSelect'));
             var reasons = document.getElementById('Reasons');
             clearElement(reasons);
@@ -539,7 +424,6 @@ var InspSched;
             clearElement(thisHeading);
             var IssueList = document.createElement('ul');
             var thisIssue = document.createElement('li');
-            InspSched.BuildCalendar(null, error);
             thisHeading.appendChild(document.createTextNode("The following issue is preventing the ability to schedule an inspection:"));
             thisIssue.appendChild(document.createTextNode(error));
             thisIssue.style.marginLeft = "2rem;";

@@ -129,6 +129,7 @@ namespace ClayInspectionScheduler.Models
     public static bool CheckIsExternalUser(string name)
     {
       return name.Length == 0;
+      //return false;
     }
 
     #region Log Code

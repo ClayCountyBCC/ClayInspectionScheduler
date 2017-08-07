@@ -113,25 +113,27 @@ namespace ClayInspectionScheduler.Models
         )
 
         select 
-          ISNULL(i.InspReqID, 99999999) InspReqID,
-          P.PermitNo, 
-          ISNULL(i.InspectionCode, '') InspectionCode, 
-          ISNULL(ir.InsDesc, 'No Inspections') InsDesc, 
-          i.InspDateTime, 
-          i.ResultADC,
-          i.SchecDateTime SchedDateTime,
-          i.Remarks,
-          CASE WHEN CAST(i.SchecDateTime AS DATE) >= @Today AND ResultADC IS NULL
-          THEN LTRIM(RTRIM(ip.name)) 
-          ELSE '' END AS InspectorName,
-          CASE WHEN CAST(i.SchecDateTime AS DATE) >= @Today AND ResultADC IS NULL
-          THEN LTRIM(RTRIM(ip.PhoneNbr)) 
-          ELSE '' END AS PhoneNumber
+            ISNULL(i.InspReqID, 99999999) InspReqID,
+            P.PermitNo, 
+            ISNULL(i.InspectionCode, '') InspectionCode, 
+            ISNULL(ir.InsDesc, 'No Inspections') InsDesc, 
+            i.InspDateTime, 
+            i.ResultADC,
+            i.SchecDateTime SchedDateTime,
+            i.Remarks,
+            CASE WHEN CAST(i.SchecDateTime AS DATE) >= @Today AND ResultADC IS NULL
+            THEN LTRIM(RTRIM(ip.name)) 
+            ELSE '' END AS InspectorName,
+            CASE WHEN CAST(i.SchecDateTime AS DATE) >= @Today AND ResultADC IS NULL
+            THEN LTRIM(RTRIM(ip.PhoneNbr)) 
+            ELSE '' END AS PhoneNumber
         FROM Permits P
         LEFT OUTER JOIN bpINS_REQUEST i ON P.PermitNo = i.PermitNo
         LEFT OUTER JOIN bpINS_REF ir ON ir.InspCd = i.InspectionCode
         LEFT OUTER JOIN bp_INSPECTORS ip ON i.Inspector = ip.Intl 
         ORDER BY InspReqID DESC";
+
+
       try
       {
         var li = Constants.Get_Data<Inspection>(sql, dbArgs);
@@ -163,11 +165,11 @@ namespace ClayInspectionScheduler.Models
           USE WATSC;
         
           Update bpINS_REQUEST
-          set RESULTADC = 'C'
+          set RESULTADC = 'C', InspDateTime = GetDate()
           where PermitNo = @PermitNo AND InspReqID = @ID
             
           update bpPrivateProviderInsp
-          SET Result = 'C'
+          SET Result = 'C', InspDt = GetDate()
           WHERE IRId = (SELECT PrivProvIRId FROM bpINS_REQUEST WHERE InspReqID = @ID);";
 
         try

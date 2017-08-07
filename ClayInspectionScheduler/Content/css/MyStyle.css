@@ -289,7 +289,6 @@ table tbody, table tfoot, table thead {
 }*/
 
 .inspRemarks {
-  padding: 0 50px;
   color: #bd3f52;
 }
 
@@ -336,8 +335,7 @@ h5 {
   padding-left: 1rem;
 }
 
-.CancelRow,
-.InspRow {
+  .CancelRow, .InspRow {
   padding: 1rem;
   border-left: 10px solid mediumpurple;
   border-bottom: 1px solid black;
@@ -355,19 +353,20 @@ h5 {
 .PassRow {
   border-left: 10px solid darkseagreen;
 }
-
-
-.tabs-title > a {
+.inspRemarks {
+  border-right: 1px solid lightgrey;
+  margin: 0;
+  padding: 0;
+  padding-left: 1em;
+}
+  .tabs-title > a {
   font-size: 1.25em;
   line-height: 1.25em;
   padding: .5em 1em;
 }
 
 @media (max-width: 639px) {
-  .InspResult,
-  .InspDate {
-    text-align: center;
-  }
+
 
   h2 {
     font-size: 1.75em;
@@ -392,6 +391,6 @@ h5 {
 
 .inspection-Table {
   max-height: 58%;
-  height: calc(52vh);
+  max-height: calc(55vh);
   overflow-y: scroll;
 }
