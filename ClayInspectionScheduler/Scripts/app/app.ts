@@ -181,7 +181,7 @@ namespace InspSched
       let thisHeading: HTMLHeadingElement = (<HTMLHeadingElement>document.getElementById('ErrorHeading'));
       let IssueList: HTMLUListElement = ( <HTMLUListElement>document.createElement( 'ul' ) );
 
-      if ( issues.length > 0 ) 
+      if ( issues[0] !== "success") 
       {
 
         InspSched.UI.clearElement(thisHeading);
@@ -202,23 +202,11 @@ namespace InspSched
       }
       else
       {
-        //  Display safe confirm div
-        let inspType: HTMLSpanElement = (<HTMLSpanElement>document.getElementById("InspSaveDesc"));
-        let inspPermitNo: HTMLSpanElement = (<HTMLSpanElement>document.getElementById("InspSavePermitNo"));
-        let inspSchedDate: HTMLSpanElement = (<HTMLSpanElement>document.getElementById("InspSaveDate"));
-        InspSched.UI.clearElement(inspType);
-        InspSched.UI.clearElement(inspPermitNo);
-        InspSched.UI.clearElement(inspSchedDate);
-
-        inspType.appendChild(document.createTextNode(inspDesc));
-        inspPermitNo.appendChild(document.createTextNode(newInsp.PermitNo));
-        inspSchedDate.appendChild(document.createTextNode(newInsp.SchecDateTime.toLocaleDateString()));
-
+        let savesuccess: HTMLParagraphElement = (<HTMLParagraphElement>document.getElementById("SaveSuccess"));
+        InspSched.UI.clearElement(savesuccess);
+        savesuccess.appendChild(document.createTextNode(inspDesc + " " + issues[1]));
         document.getElementById("SaveConfirmed").style.display = "flex";
-
       }
-
-      
 
       return true;
 

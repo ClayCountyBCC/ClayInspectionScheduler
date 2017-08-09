@@ -24,22 +24,14 @@ namespace ClayInspectionScheduler.Models
     private DateTime SuspendGraceDate { get; set; } = DateTime.MinValue;
     private DateTime WorkersCompExpirationDate { get; set; } = DateTime.MaxValue;
     private DateTime LiabilityExpirationDate { get; set; } = DateTime.MaxValue;
-    private string ContractorStatus { get; set; }
+    private DateTime PermitIssueDate { get; set; } = DateTime.MaxValue; // check if permt
+    private bool HoldStopAll { get; set; } // add check for all stop hold
+    private bool HoldStopFinal { get; set; } // check for final stop hold
+    //private bool ChargesExist { get; set; } // check for charges
+    private bool MasterCoClosed { get; set; } // check if master is Co'd
+    private string ContractorStatus { get; set; } // check if Contractor is active
 
-    //private string MasterPermitNo
-    //{
-    //  get
-    //  { var dbArgs = new DynamicParameters();
-    //    dbArgs.Add("@PermitNo", this.PermitNo);
 
-    //    string sql = @"
-    //      SELECT distinct MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = @PermitNo
-    //    ";
-
-    //    string MPermitNo = Constants.Get_Data<Permit>(sql, dbArgs).ToString();
-    //    return MPermitNo;
-    //  }
-    //}
     public List<string> ScheduleDates
     {
       get
@@ -55,10 +47,20 @@ namespace ClayInspectionScheduler.Models
 
     public static List<Permit> Get(string AssocKey, bool IsExternalUser)
     {
-
+      /**
+       * Need to add the following functionality to this
+       * query:
+       * 
+       *    1. check if the permit has been issued (DateTime PermitIssueDate)
+       *    2. check if holds exist
+       *      a. does hold stop final? (bool HoldStopAll) -- This may be unecessary
+       *      b. does hold stop all?  (bool HoldStopFinal)
+       *    3. check if there are charges (bool ChargesExist)
+       *    4. Is Master Permit Co'd? (bool MasterCoClosed)
+       *    
+       **/
       var dbArgs = new DynamicParameters();
       dbArgs.Add("@PermitNo", AssocKey);
-
       string sql = @"
       USE WATSC;
       DECLARE @MPermitNo CHAR(8) = (SELECT MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = @PermitNo);
@@ -71,6 +73,7 @@ namespace ClayInspectionScheduler.Models
         CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) SuspendGraceDate,
         B.Confidential,
         B.ContractorId,
+        M.CoClosed,
         C.WC_ExpDt WorkersCompExpirationDate,
         C.LiabInsExpDt LiabilityExpirationDate,
         ISNULL(C.Status, '') ContractorStatus
@@ -98,6 +101,7 @@ namespace ClayInspectionScheduler.Models
         CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) SuspendGraceDate,
         B.Confidential,
         A.ContractorId,
+        NULL AS CoClosed,
         C.WC_ExpDt WorkersCompExpirationDate,
         C.LiabInsExpDt LiabilityExpirationDate,
         ISNULL(C.Status, '') ContractorStatus
@@ -204,16 +208,17 @@ namespace ClayInspectionScheduler.Models
         switch (i)
         {
           case -1:
-            ErrorText = $"There was an issue checking " +
-                        $"final inspection information " +
-                        $"for Permit #{this.PermitNo}";
+            ErrorText = $@"There was an issue checking
+                        issue data information 
+                        for Permit # {this.PermitNo}";
+
             return true;
           case 0:
             return false;
           default:
-            ErrorText = $"Permit #{this.PermitNo} has not yet" +
-                        $" been issued. Please contact the" +
-                        $" building department for assistance";
+            ErrorText = $@"Permit #{this.PermitNo} has 
+                        not yet been issued. Please contact 
+                        the building department for assistance";
             return true;
         }
       }
@@ -225,6 +230,7 @@ namespace ClayInspectionScheduler.Models
       }
 
     }
+
     private bool MasterIsCOd()
     {
       try
@@ -243,11 +249,7 @@ namespace ClayInspectionScheduler.Models
         select PermitNo from bpMASTER_PERMIT
         where (MPermitNo = @PermitNo or MPermitNo = @MPermitNo)
         and CoClosed = 1)
-
-
-
         union 
-
         select PermitNo, PermitNo as MPermitNo
         from bpMASTER_PERMIT
         where PermitNo in 

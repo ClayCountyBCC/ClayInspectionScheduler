@@ -275,7 +275,6 @@ namespace InspSched.UI
   function BuildInspectionRow(inspection: Inspection)
   {
     // create variables and get/create document elements
-    let thisInspPermit: Permit;
     let inspRow: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
 
     let dataColumn: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
@@ -287,7 +286,6 @@ namespace InspSched.UI
     let inspDesc: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
     let inspector: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
     let InspButtonDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-    let InspButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
     let Remarks: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
     let ResultADC: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
 
@@ -318,55 +316,26 @@ namespace InspSched.UI
     inspDesc.appendChild(document.createTextNode(inspection.InsDesc.trim()));
     Remarks.appendChild(document.createTextNode("Remarks: " + (inspection.Remarks !== null || inspection.Remarks === "" ? inspection.Remarks.trim() : "N/A")));
     ResultADC.appendChild(document.createTextNode(inspection.ResultDescription.trim()));
-    inspector.appendChild(document.createTextNode((inspection.InspectorName.trim.length == 0? "Unassigned" : inspection.InspectorName.trim())));
+    inspector.appendChild(document.createTextNode(inspection.InspectorName.trim()));
 
 
     //Create function to make New/Cancel Button
     if (inspection.ResultADC || inspection.DisplaySchedDateTime.length === 0)
     {
+
       let ShowCreateNewInsp: HTMLDivElement = (<HTMLDivElement>document.getElementById("CreateNew_" + inspection.PermitNo));
       if (ShowCreateNewInsp == null)
       {
-
-        for (let p of InspSched.CurrentPermits)
-        {
-          if (p.PermitNo === inspection.PermitNo)
-          {
-            thisInspPermit = p;
-            break;
-          }
-        }
-        if (thisInspPermit.ErrorText == null)
-        {
-          InspButton.className = "align-self-center columns NewInspButton";
-          InspButton.appendChild(document.createTextNode("New"));
-          InspButton.setAttribute("onclick",
-            "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"
-          );
-          InspButton.id = "CreateNew_" + inspection.PermitNo;
-          InspButtonDiv.appendChild(InspButton);
-
-        }
+        InspButtonDiv.appendChild(BuildButton(inspection.PermitNo, "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
       }
+
     }
-    else if (!inspection.ResultADC)
+    else if (!inspection.ResultADC && IsGoodCancelDate(inspection, InspSched.ThisPermit.IsExternalUser))
     {
-      clearElement(inspector);
+
       remarkrow.style.display = "none";
+      InspButtonDiv.appendChild(BuildButton(inspection.PermitNo, "Cancel", "InspSched.CancelInspection('" + inspection.InspReqID + "', '" + inspection.PermitNo + "');"));
 
-      inspector.appendChild(document.createTextNode("Unassigned"));
-
-      let InspButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
-      InspButton.className = "align-self-center small-12 NewInspButton";
-      InspButton.innerText = "Cancel";
-      //thisinspCancelButton.value = inspection.PermitNo;
-      InspButton.setAttribute("onclick",
-        // cancels inspection then re-fetch inspections
-        "InspSched.CancelInspection('" + inspection.InspReqID + "', '" + inspection.PermitNo + "');");
-
-      // Display cancel button if good date
-      if (IsGoodCancelDate(inspection, InspSched.ThisPermit.IsExternalUser))
-        InspButtonDiv.appendChild(InspButton);
     }
 
     dataColumn.appendChild(thisPermit);
@@ -410,7 +379,43 @@ namespace InspSched.UI
     return inspRow;
 
   }
-  
+
+  function BuildButton(permitno: string, label: string, functionCall: string): HTMLButtonElement
+  {
+    let thisInspPermit: Permit;
+    let InspButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
+    InspButton.id = "";
+    if (label === "New")
+    {
+
+      for (let p of InspSched.CurrentPermits)
+      {
+        if (p.PermitNo === permitno)
+        {
+          thisInspPermit = p;
+          break;
+        }
+      }
+      if (thisInspPermit.ErrorText == null)
+      {
+        InspButton.id = "CreateNew_" + permitno;
+      }
+    }
+    else if (label === "Cancel")
+    {
+      InspButton.id = "CancelInspection";
+    }
+
+    if (InspButton.id.length > 0)
+    {
+      InspButton.className = "align-self-center columns NewInspButton";
+      InspButton.appendChild(document.createTextNode(label));
+      InspButton.setAttribute("onclick", functionCall);
+      return InspButton;
+    }
+
+    return null
+  }
   /**********************************************
    *
    * Build Scheduler

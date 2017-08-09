@@ -200,7 +200,6 @@ var InspSched;
         // update BuildInspectionRow
         function BuildInspectionRow(inspection) {
             // create variables and get/create document elements
-            var thisInspPermit;
             var inspRow = document.createElement("div");
             var dataColumn = document.createElement("div");
             var remarkrow = document.createElement("div");
@@ -210,7 +209,6 @@ var InspSched;
             var inspDesc = document.createElement("div");
             var inspector = document.createElement("div");
             var InspButtonDiv = document.createElement("div");
-            var InspButton = document.createElement("button");
             var Remarks = document.createElement("div");
             var ResultADC = document.createElement("div");
             // Set element classes 
@@ -236,41 +234,17 @@ var InspSched;
             inspDesc.appendChild(document.createTextNode(inspection.InsDesc.trim()));
             Remarks.appendChild(document.createTextNode("Remarks: " + (inspection.Remarks !== null || inspection.Remarks === "" ? inspection.Remarks.trim() : "N/A")));
             ResultADC.appendChild(document.createTextNode(inspection.ResultDescription.trim()));
-            inspector.appendChild(document.createTextNode((inspection.InspectorName.trim.length == 0 ? "Unassigned" : inspection.InspectorName.trim())));
+            inspector.appendChild(document.createTextNode(inspection.InspectorName.trim()));
             //Create function to make New/Cancel Button
             if (inspection.ResultADC || inspection.DisplaySchedDateTime.length === 0) {
                 var ShowCreateNewInsp = document.getElementById("CreateNew_" + inspection.PermitNo);
                 if (ShowCreateNewInsp == null) {
-                    for (var _i = 0, _a = InspSched.CurrentPermits; _i < _a.length; _i++) {
-                        var p = _a[_i];
-                        if (p.PermitNo === inspection.PermitNo) {
-                            thisInspPermit = p;
-                            break;
-                        }
-                    }
-                    if (thisInspPermit.ErrorText == null) {
-                        InspButton.className = "align-self-center columns NewInspButton";
-                        InspButton.appendChild(document.createTextNode("New"));
-                        InspButton.setAttribute("onclick", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');");
-                        InspButton.id = "CreateNew_" + inspection.PermitNo;
-                        InspButtonDiv.appendChild(InspButton);
-                    }
+                    InspButtonDiv.appendChild(BuildButton(inspection.PermitNo, "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
                 }
             }
-            else if (!inspection.ResultADC) {
-                clearElement(inspector);
+            else if (!inspection.ResultADC && IsGoodCancelDate(inspection, InspSched.ThisPermit.IsExternalUser)) {
                 remarkrow.style.display = "none";
-                inspector.appendChild(document.createTextNode("Unassigned"));
-                var InspButton_1 = document.createElement("button");
-                InspButton_1.className = "align-self-center small-12 NewInspButton";
-                InspButton_1.innerText = "Cancel";
-                //thisinspCancelButton.value = inspection.PermitNo;
-                InspButton_1.setAttribute("onclick", 
-                // cancels inspection then re-fetch inspections
-                "InspSched.CancelInspection('" + inspection.InspReqID + "', '" + inspection.PermitNo + "');");
-                // Display cancel button if good date
-                if (IsGoodCancelDate(inspection, InspSched.ThisPermit.IsExternalUser))
-                    InspButtonDiv.appendChild(InspButton_1);
+                InspButtonDiv.appendChild(BuildButton(inspection.PermitNo, "Cancel", "InspSched.CancelInspection('" + inspection.InspReqID + "', '" + inspection.PermitNo + "');"));
             }
             dataColumn.appendChild(thisPermit);
             dataColumn.appendChild(inspDateTime);
@@ -294,6 +268,33 @@ var InspSched;
                 }
             }
             return inspRow;
+        }
+        function BuildButton(permitno, label, functionCall) {
+            var thisInspPermit;
+            var InspButton = document.createElement("button");
+            InspButton.id = "";
+            if (label === "New") {
+                for (var _i = 0, _a = InspSched.CurrentPermits; _i < _a.length; _i++) {
+                    var p = _a[_i];
+                    if (p.PermitNo === permitno) {
+                        thisInspPermit = p;
+                        break;
+                    }
+                }
+                if (thisInspPermit.ErrorText == null) {
+                    InspButton.id = "CreateNew_" + permitno;
+                }
+            }
+            else if (label === "Cancel") {
+                InspButton.id = "CancelInspection";
+            }
+            if (InspButton.id.length > 0) {
+                InspButton.className = "align-self-center columns NewInspButton";
+                InspButton.appendChild(document.createTextNode(label));
+                InspButton.setAttribute("onclick", functionCall);
+                return InspButton;
+            }
+            return null;
         }
         /**********************************************
          *

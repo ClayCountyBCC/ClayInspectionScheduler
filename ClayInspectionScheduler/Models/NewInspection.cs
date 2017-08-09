@@ -223,7 +223,9 @@ namespace ClayInspectionScheduler.Models
       dbArgs.Add("@SelectedDate", this.SchecDateTime.Date);
       dbArgs.Add("@Username", name, dbType: DbType.String, size: 7);
       dbArgs.Add("@IRID", (IRID == -1) ? null : IRID.ToString());
+      dbArgs.Add("@SavedInspID",-1, dbType: DbType.AnsiString, direction: ParameterDirection.Output,size:8);
 
+      string SavedInsp = "";
 
       string sql =  $@"
       USE WATSC;      
@@ -248,22 +250,53 @@ namespace ClayInspectionScheduler.Models
       LEFT OUTER JOIN bpASSOC_PERMIT A ON B.BaseID = A.BaseID
       WHERE (A.PermitNo = @PermitNo OR M.PermitNo = @PermitNo)
 
+      set @SavedInspID = LTRIM(RTRIM(CAST(SCOPE_IDENTITY() as CHAR)));
       ";
       try
       {
-        int i = Constants.Execute(sql, dbArgs);
-        if(i<1)
+        var i = Constants.Execute(sql, dbArgs);
+        if (i > -1)
         {
-          errors.Add("No Record Saved, Please Try again. Contact the Building department if issues persist.");
+          SavedInsp = dbArgs.Get<string>("@SavedInspID");
+          if (SavedInsp != null && SavedInsp != "-1")
+          {
+            errors.Add("success");
+            errors.Add("inspection has been scheduled for permit #" + this.PermitNo + ", on " + this.SchecDateTime.ToShortDateString() + ".");
+            return errors;
+
+          }
+          else
+          {
+            return null;
+          }
+        }
+        else
+        {
+          return null;
+
         }
 
-        return errors;
       }
       catch (Exception ex)
       {
         Constants.Log(ex, sql);
         return null;
       }
+      //try
+      //{
+      //  int i = Constants.Execute(sql, dbArgs);
+      //  if(i<1)
+      //  {
+      //    errors.Add("No Record Saved, Please Try again. Contact the Building department if issues persist.");
+      //  }
+
+      //  return errors;
+      //}
+      //catch (Exception ex)
+      //{
+      //  Constants.Log(ex, sql);
+      //  return null;
+      //}
 
 
 

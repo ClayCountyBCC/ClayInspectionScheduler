@@ -127,7 +127,7 @@ var InspSched;
         var e = InspSched.transport.SaveInspection(InspSched.newInsp).then(function (issues) {
             var thisHeading = document.getElementById('ErrorHeading');
             var IssueList = document.createElement('ul');
-            if (issues.length > 0) {
+            if (issues[0] !== "success") {
                 InspSched.UI.clearElement(thisHeading);
                 thisHeading.appendChild(document.createTextNode("The following issue(s) prevented scheduling the requested inspection:"));
                 for (var i in issues) {
@@ -140,16 +140,9 @@ var InspSched;
                 IssueContainer.style.display = "flex";
             }
             else {
-                //  Display safe confirm div
-                var inspType = document.getElementById("InspSaveDesc");
-                var inspPermitNo = document.getElementById("InspSavePermitNo");
-                var inspSchedDate = document.getElementById("InspSaveDate");
-                InspSched.UI.clearElement(inspType);
-                InspSched.UI.clearElement(inspPermitNo);
-                InspSched.UI.clearElement(inspSchedDate);
-                inspType.appendChild(document.createTextNode(inspDesc));
-                inspPermitNo.appendChild(document.createTextNode(InspSched.newInsp.PermitNo));
-                inspSchedDate.appendChild(document.createTextNode(InspSched.newInsp.SchecDateTime.toLocaleDateString()));
+                var savesuccess = document.getElementById("SaveSuccess");
+                InspSched.UI.clearElement(savesuccess);
+                savesuccess.appendChild(document.createTextNode(inspDesc + " " + issues[1]));
                 document.getElementById("SaveConfirmed").style.display = "flex";
             }
             return true;

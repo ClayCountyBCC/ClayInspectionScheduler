@@ -60,7 +60,7 @@ namespace ClayInspectionScheduler.Models
         if (this.ResultADC == "C")
           return (InspDateTime == DateTime.MinValue) ? "N/A" : InspDateTime.ToString("MM/dd/yyyy");
 
-        return (InspDateTime == DateTime.MinValue) ? "Not Completed" : InspDateTime.ToString("MM/dd/yyyy");
+        return (InspDateTime == DateTime.MinValue) ? "Incomplete" : InspDateTime.ToString("MM/dd/yyyy");
 
       }
 
@@ -120,13 +120,9 @@ namespace ClayInspectionScheduler.Models
             i.InspDateTime, 
             i.ResultADC,
             i.SchecDateTime SchedDateTime,
+	        i.Poster,
             i.Remarks,
-            CASE WHEN CAST(i.SchecDateTime AS DATE) >= @Today AND ResultADC IS NULL
-            THEN LTRIM(RTRIM(ip.name)) 
-            ELSE '' END AS InspectorName,
-            CASE WHEN CAST(i.SchecDateTime AS DATE) >= @Today AND ResultADC IS NULL
-            THEN LTRIM(RTRIM(ip.PhoneNbr)) 
-            ELSE '' END AS PhoneNumber
+            ISNULL(ip.name, 'Unassigned') as InspectorName
         FROM Permits P
         LEFT OUTER JOIN bpINS_REQUEST i ON P.PermitNo = i.PermitNo
         LEFT OUTER JOIN bpINS_REF ir ON ir.InspCd = i.InspectionCode
