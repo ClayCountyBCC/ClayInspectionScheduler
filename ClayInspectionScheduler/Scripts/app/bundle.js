@@ -814,7 +814,7 @@ var InspSched;
             else {
                 var savesuccess = document.getElementById("SaveSuccess");
                 InspSched.UI.clearElement(savesuccess);
-                savesuccess.appendChild(document.createTextNode(inspDesc + " " + issues[1]));
+                savesuccess.appendChild(document.createTextNode(getInspectionDescription(issues[1]) + " " + issues[2]));
                 document.getElementById("SaveConfirmed").style.display = "flex";
             }
             return true;
@@ -845,6 +845,14 @@ var InspSched;
             //Hide('Searching');
             InspSched.InspectionTypes = [];
         });
+    }
+    function getInspectionDescription(InspCode) {
+        for (var _i = 0, _a = InspSched.InspectionTypes; _i < _a.length; _i++) {
+            var it = _a[_i];
+            if (it.InspCd == InspCode)
+                return it.InsDesc;
+        }
+        return "Unknown";
     }
     function BuildCalendar(dates, errorText) {
         $(dpCalendar).datepicker('destroy');

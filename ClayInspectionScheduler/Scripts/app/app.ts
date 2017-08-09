@@ -204,7 +204,7 @@ namespace InspSched
       {
         let savesuccess: HTMLParagraphElement = (<HTMLParagraphElement>document.getElementById("SaveSuccess"));
         InspSched.UI.clearElement(savesuccess);
-        savesuccess.appendChild(document.createTextNode(inspDesc + " " + issues[1]));
+        savesuccess.appendChild(document.createTextNode(getInspectionDescription(issues[1]) + " " + issues[2]));
         document.getElementById("SaveConfirmed").style.display = "flex";
       }
 
@@ -256,7 +256,17 @@ namespace InspSched
       } );
   }
 
-  export function BuildCalendar( dates: Array<string>, errorText?: string )
+  function getInspectionDescription(InspCode: string): string
+  {
+  
+    for (let it of InspSched.InspectionTypes)
+    {
+      if (it.InspCd == InspCode)
+        return it.InsDesc;
+    }
+    return "Unknown";
+  }
+  export function BuildCalendar(dates: Array<string>, errorText?: string )
   {
     $(dpCalendar).datepicker('destroy');
 
@@ -312,6 +322,8 @@ namespace InspSched
       }
     }
   }
+
+
 
   function GetAdditionalDisabledDates( dates: Array<string> ): Array<string>
   {

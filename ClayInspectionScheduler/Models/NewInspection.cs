@@ -261,6 +261,7 @@ namespace ClayInspectionScheduler.Models
           if (SavedInsp != null && SavedInsp != "-1")
           {
             errors.Add("success");
+            errors.Add(this.InspectionCd);
             errors.Add("inspection has been scheduled for permit #" + this.PermitNo + ", on " + this.SchecDateTime.ToShortDateString() + ".");
             return errors;
 
