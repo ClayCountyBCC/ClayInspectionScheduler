@@ -230,7 +230,7 @@ var InspSched;
             ResultADC.className = "large-3 medium-6 small-6 InspResult column end";
             // add the text nodes
             thisPermit.appendChild(document.createTextNode(inspection.PermitNo));
-            inspDateTime.appendChild(document.createTextNode((inspection.DisplayInspDateTime.length > 0) ? inspection.DisplayInspDateTime : inspection.DisplaySchedDateTime));
+            inspDateTime.appendChild(document.createTextNode((inspection.DisplayInspDateTime.toLowerCase() == "incomplete") ? inspection.DisplayInspDateTime : inspection.DisplaySchedDateTime));
             inspDesc.appendChild(document.createTextNode(inspection.InsDesc.trim()));
             Remarks.appendChild(document.createTextNode("Remarks: " + (inspection.Remarks !== null || inspection.Remarks === "" ? inspection.Remarks.trim() : "N/A")));
             ResultADC.appendChild(document.createTextNode(inspection.ResultDescription.trim()));

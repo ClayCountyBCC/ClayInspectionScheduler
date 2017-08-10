@@ -266,7 +266,8 @@ namespace InspSched
     }
     return "Unknown";
   }
-  export function BuildCalendar(dates: Array<string>, errorText?: string )
+
+  export function BuildCalendar(dates: Array<string>, errorText?: string)
   {
     $(dpCalendar).datepicker('destroy');
 

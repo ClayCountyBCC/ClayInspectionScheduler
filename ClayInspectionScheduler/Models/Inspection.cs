@@ -122,7 +122,7 @@ namespace ClayInspectionScheduler.Models
             i.SchecDateTime SchedDateTime,
 	        i.Poster,
             i.Remarks,
-            ISNULL(ip.name, 'Unassigned') as InspectorName
+            ip.name as InspectorName
         FROM Permits P
         LEFT OUTER JOIN bpINS_REQUEST i ON P.PermitNo = i.PermitNo
         LEFT OUTER JOIN bpINS_REF ir ON ir.InspCd = i.InspectionCode
