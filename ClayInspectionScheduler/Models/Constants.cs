@@ -28,7 +28,7 @@ namespace ClayInspectionScheduler.Models
           // Test Environment Machines
           Console.WriteLine("MachineName = " + Environment.MachineName.ToUpper());
           return false;
-
+        case "MISHL05":
         case "CLAYBCCIIS01":
         case "CLAYBCCDMZIIS01":
           Console.WriteLine("MachineName = " + Environment.MachineName.ToUpper());
@@ -129,7 +129,6 @@ namespace ClayInspectionScheduler.Models
     public static bool CheckIsExternalUser(string name)
     {
       return name.Length == 0;
-      //return false;
     }
 
     #region Log Code

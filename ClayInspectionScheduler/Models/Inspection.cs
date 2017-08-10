@@ -60,7 +60,7 @@ namespace ClayInspectionScheduler.Models
         if (this.ResultADC == "C")
           return (InspDateTime == DateTime.MinValue) ? "N/A" : InspDateTime.ToString("MM/dd/yyyy");
 
-        return (InspDateTime == DateTime.MinValue) ? "Incomplete" : InspDateTime.ToString("MM/dd/yyyy");
+        return (InspDateTime == DateTime.MinValue) ? "incomplete" : InspDateTime.ToString("MM/dd/yyyy");
 
       }
 

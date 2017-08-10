@@ -312,9 +312,16 @@ namespace InspSched.UI
 
     // add the text nodes
     thisPermit.appendChild(document.createTextNode(inspection.PermitNo));
-    inspDateTime.appendChild(document.createTextNode((inspection.DisplayInspDateTime.toLowerCase() == "incomplete") ? inspection.DisplayInspDateTime : inspection.DisplaySchedDateTime));
+    if (inspection.DisplayInspDateTime.toLowerCase() == 'incomplete')
+    {
+      inspDateTime.appendChild(document.createTextNode(inspection.DisplaySchedDateTime));
+    }
+    else
+    {
+      inspDateTime.appendChild(document.createTextNode(inspection.DisplayInspDateTime));
+    }
     inspDesc.appendChild(document.createTextNode(inspection.InsDesc.trim()));
-    Remarks.appendChild(document.createTextNode("Remarks: " + (inspection.Remarks !== null || inspection.Remarks === "" ? inspection.Remarks.trim() : "N/A")));
+    Remarks.appendChild(document.createTextNode("Remarks: " + (inspection.Remarks !== null && inspection.Remarks === "" ? inspection.Remarks.trim() : "N/A")));
     ResultADC.appendChild(document.createTextNode(inspection.ResultDescription.trim()));
     inspector.appendChild(document.createTextNode(inspection.InspectorName.trim()));
 
@@ -330,12 +337,11 @@ namespace InspSched.UI
       }
 
     }
-    else if (!inspection.ResultADC && IsGoodCancelDate(inspection, InspSched.ThisPermit.IsExternalUser))
+    else if (!inspection.ResultADC)
     {
-
       remarkrow.style.display = "none";
-      InspButtonDiv.appendChild(BuildButton(inspection.PermitNo, "Cancel", "InspSched.CancelInspection('" + inspection.InspReqID + "', '" + inspection.PermitNo + "');"));
-
+      if (IsGoodCancelDate(inspection, InspSched.ThisPermit.IsExternalUser))
+        InspButtonDiv.appendChild(BuildButton(inspection.PermitNo, "Cancel", "InspSched.CancelInspection('" + inspection.InspReqID + "', '" + inspection.PermitNo + "');"));
     }
 
     dataColumn.appendChild(thisPermit);
