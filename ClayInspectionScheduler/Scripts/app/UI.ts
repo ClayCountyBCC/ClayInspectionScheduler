@@ -327,13 +327,14 @@ namespace InspSched.UI
 
 
     //Create function to make New/Cancel Button
-    if (inspection.ResultADC || inspection.DisplaySchedDateTime.length === 0)
+    let permit: Permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === inspection.PermitNo })[0];
+    if (!permit.ErrorText && (inspection.ResultADC || inspection.DisplaySchedDateTime.length === 0))
     {
-
-      let ShowCreateNewInsp: HTMLDivElement = (<HTMLDivElement>document.getElementById("CreateNew_" + inspection.PermitNo));
-      if (ShowCreateNewInsp == null)
+      let buttonId: string = "CreateNew_" + inspection.PermitNo;
+      console.log('button status', document.getElementById(buttonId));
+      if (!document.getElementById(buttonId))
       {
-        InspButtonDiv.appendChild(BuildButton(inspection.PermitNo, "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
+        InspButtonDiv.appendChild(BuildButton(buttonId, "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
       }
 
     }
@@ -341,7 +342,7 @@ namespace InspSched.UI
     {
       remarkrow.style.display = "none";
       if (IsGoodCancelDate(inspection, InspSched.ThisPermit.IsExternalUser))
-        InspButtonDiv.appendChild(BuildButton(inspection.PermitNo, "Cancel", "InspSched.CancelInspection('" + inspection.InspReqID + "', '" + inspection.PermitNo + "');"));
+        InspButtonDiv.appendChild(BuildButton("", "Cancel", "InspSched.CancelInspection('" + inspection.InspReqID + "', '" + inspection.PermitNo + "');"));
     }
 
     dataColumn.appendChild(thisPermit);
@@ -386,41 +387,14 @@ namespace InspSched.UI
 
   }
 
-  function BuildButton(permitno: string, label: string, functionCall: string): HTMLButtonElement
+  function BuildButton(buttonId: string, label: string, functionCall: string): HTMLButtonElement
   {
-    let thisInspPermit: Permit;
     let InspButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
-    InspButton.id = "";
-    if (label === "New")
-    {
-
-      for (let p of InspSched.CurrentPermits)
-      {
-        if (p.PermitNo === permitno)
-        {
-          thisInspPermit = p;
-          break;
-        }
-      }
-      if (thisInspPermit.ErrorText == null)
-      {
-        InspButton.id = "CreateNew_" + permitno;
-      }
-    }
-    else if (label === "Cancel")
-    {
-      InspButton.id = "CancelInspection";
-    }
-
-    if (InspButton.id.length > 0)
-    {
-      InspButton.className = "align-self-center columns NewInspButton";
-      InspButton.appendChild(document.createTextNode(label));
-      InspButton.setAttribute("onclick", functionCall);
-      return InspButton;
-    }
-
-    return null
+    InspButton.id = buttonId; 
+    InspButton.className = "align-self-center columns NewInspButton";
+    InspButton.appendChild(document.createTextNode(label));
+    InspButton.setAttribute("onclick", functionCall);
+    return InspButton;
   }
   /**********************************************
    *
