@@ -42,7 +42,7 @@ var InspSched;
         if (currentHash.Permit.length > 0) {
             // if they entered a permit number, let's try and search for it
             // do permitsearch here
-            PermitSearchField.value = currentHash.Permit;
+            PermitSearchField.value = currentHash.Permit.trim();
             SearchPermit();
         }
     }
@@ -57,13 +57,14 @@ var InspSched;
         InspSched.UI.Hide('SaveConfirmed');
         InspSched.UI.Hide('NotScheduled');
         $('#InspectionSchedulerTabs').foundation('selectTab', 'InspectionView', true);
-        InspSched.transport.GetPermit(InspSched.UI.Search(PermitSearchField.value)).then(function (permits) {
+        var permitno = PermitSearchField.value.trim();
+        InspSched.transport.GetPermit(InspSched.UI.Search(permitno)).then(function (permits) {
             console.log(permits);
             InspSched.CurrentPermits = permits;
-            InspSched.UI.ProcessResults(permits, PermitSearchField.value);
+            InspSched.UI.ProcessResults(permits, permitno);
             for (var _i = 0, permits_1 = permits; _i < permits_1.length; _i++) {
                 var permit = permits_1[_i];
-                if (permit.PermitNo == permitNumSelect.value) {
+                if (permit.PermitNo == permitno) {
                     InspSched.ThisPermit = permit;
                     if (permit.ErrorText == null) {
                         BuildCalendar(permit.ScheduleDates);

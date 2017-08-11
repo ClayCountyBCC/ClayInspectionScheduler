@@ -3,7 +3,9 @@ body {
   max-height: 100%;
   margin: 0;
 }
-
+.column, .columns {
+  min-height: 1px;
+}
 #PermitScreen,
 #SearchSelect,
 #CurrentPermitData,

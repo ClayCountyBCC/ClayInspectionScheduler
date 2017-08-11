@@ -274,15 +274,15 @@ var InspSched;
                 inspDateTime.appendChild(document.createTextNode(inspection.DisplayInspDateTime));
             }
             inspDesc.appendChild(document.createTextNode(inspection.InsDesc.trim()));
-            Remarks.appendChild(document.createTextNode("Remarks: " + (inspection.Remarks !== null && inspection.Remarks === "" ? inspection.Remarks.trim() : "N/A")));
+            Remarks.appendChild(document.createTextNode((inspection.Remarks !== null && inspection.Remarks !== "" ? "Remarks: " + inspection.Remarks.trim() : "")));
             ResultADC.appendChild(document.createTextNode(inspection.ResultDescription.trim()));
             inspector.appendChild(document.createTextNode(inspection.InspectorName.trim()));
             //Create function to make New/Cancel Button
             var permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === inspection.PermitNo; })[0];
-            if (!permit.ErrorText && (inspection.ResultADC || inspection.DisplaySchedDateTime.length === 0)) {
+            if ((inspection.ResultADC || inspection.DisplaySchedDateTime.length === 0)) {
                 var buttonId = "CreateNew_" + inspection.PermitNo;
                 console.log('button status', document.getElementById(buttonId));
-                if (!document.getElementById(buttonId)) {
+                if (!document.getElementById(buttonId) && !permit.ErrorText) {
                     InspButtonDiv.appendChild(BuildButton(buttonId, "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
                 }
             }
@@ -703,7 +703,7 @@ var InspSched;
         if (currentHash.Permit.length > 0) {
             // if they entered a permit number, let's try and search for it
             // do permitsearch here
-            PermitSearchField.value = currentHash.Permit;
+            PermitSearchField.value = currentHash.Permit.trim();
             SearchPermit();
         }
     }
@@ -718,13 +718,14 @@ var InspSched;
         InspSched.UI.Hide('SaveConfirmed');
         InspSched.UI.Hide('NotScheduled');
         $('#InspectionSchedulerTabs').foundation('selectTab', 'InspectionView', true);
-        InspSched.transport.GetPermit(InspSched.UI.Search(PermitSearchField.value)).then(function (permits) {
+        var permitno = PermitSearchField.value.trim();
+        InspSched.transport.GetPermit(InspSched.UI.Search(permitno)).then(function (permits) {
             console.log(permits);
             InspSched.CurrentPermits = permits;
-            InspSched.UI.ProcessResults(permits, PermitSearchField.value);
+            InspSched.UI.ProcessResults(permits, permitno);
             for (var _i = 0, permits_1 = permits; _i < permits_1.length; _i++) {
                 var permit = permits_1[_i];
-                if (permit.PermitNo == permitNumSelect.value) {
+                if (permit.PermitNo == permitno) {
                     InspSched.ThisPermit = permit;
                     if (permit.ErrorText == null) {
                         BuildCalendar(permit.ScheduleDates);

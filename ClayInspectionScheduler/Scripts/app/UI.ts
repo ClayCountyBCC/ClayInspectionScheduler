@@ -321,22 +321,22 @@ namespace InspSched.UI
       inspDateTime.appendChild(document.createTextNode(inspection.DisplayInspDateTime));
     }
     inspDesc.appendChild(document.createTextNode(inspection.InsDesc.trim()));
-    Remarks.appendChild(document.createTextNode("Remarks: " + (inspection.Remarks !== null && inspection.Remarks === "" ? inspection.Remarks.trim() : "N/A")));
+    Remarks.appendChild(document.createTextNode((inspection.Remarks !== null && inspection.Remarks !== "" ?"Remarks: " + inspection.Remarks.trim() : "")));
     ResultADC.appendChild(document.createTextNode(inspection.ResultDescription.trim()));
     inspector.appendChild(document.createTextNode(inspection.InspectorName.trim()));
 
 
     //Create function to make New/Cancel Button
     let permit: Permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === inspection.PermitNo })[0];
-    if (!permit.ErrorText && (inspection.ResultADC || inspection.DisplaySchedDateTime.length === 0))
+    if ((inspection.ResultADC || inspection.DisplaySchedDateTime.length === 0))
     {
+
       let buttonId: string = "CreateNew_" + inspection.PermitNo;
       console.log('button status', document.getElementById(buttonId));
-      if (!document.getElementById(buttonId))
+      if (!document.getElementById(buttonId) && !permit.ErrorText)
       {
         InspButtonDiv.appendChild(BuildButton(buttonId, "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
       }
-
     }
     else if (!inspection.ResultADC)
     {

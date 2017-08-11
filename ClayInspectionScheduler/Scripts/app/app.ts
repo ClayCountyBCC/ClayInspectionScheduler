@@ -52,7 +52,7 @@ namespace InspSched
     {
       // if they entered a permit number, let's try and search for it
       // do permitsearch here
-      PermitSearchField.value = currentHash.Permit;
+      PermitSearchField.value = currentHash.Permit.trim();
       SearchPermit();
     }
   }
@@ -73,18 +73,18 @@ namespace InspSched
 
     $('#InspectionSchedulerTabs').foundation('selectTab', 'InspectionView', true);
 
-
-    transport.GetPermit(InspSched.UI.Search(PermitSearchField.value)).then(function (permits: Array<Permit>)
+    let permitno: string = PermitSearchField.value.trim()
+    transport.GetPermit(InspSched.UI.Search(permitno)).then(function (permits: Array<Permit>)
     {
       console.log(permits);
 
       InspSched.CurrentPermits = permits;
 
-      InspSched.UI.ProcessResults(permits, PermitSearchField.value);
+      InspSched.UI.ProcessResults(permits, permitno);
 
       for (let permit of permits)
       {
-        if (permit.PermitNo == permitNumSelect.value)
+        if (permit.PermitNo == permitno)
         {
           InspSched.ThisPermit = permit;
           if (permit.ErrorText == null)

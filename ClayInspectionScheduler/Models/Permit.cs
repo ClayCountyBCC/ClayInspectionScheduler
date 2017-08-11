@@ -385,9 +385,11 @@ namespace ClayInspectionScheduler.Models
           AND h.Deleted IS NULL
           AND h.HldCd NOT IN ('1SWF','PPCC')
       ";
+
+      // Need to only check against active hold codes.
       // Revisit this when the changes are made to the bpHold_REF table
       // to add hte additional column to check if a hold will prevent
-      // the permit from having a final inspection.
+      // the permit from having a final inspection or all inspections.
       try
       {
         int i = Constants.Execute_Scalar<int>(sql, dp);
