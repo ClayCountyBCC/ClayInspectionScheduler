@@ -14,6 +14,7 @@ namespace InspSched
     ProjCity: string;
     Confidential: number;
     ErrorText: string;
+    NoFinalInspections: boolean;
     ScheduleDates: string[];
 
 
@@ -27,6 +28,7 @@ namespace InspSched
     public ProjCity: string;
     public Confidential: number;
     public ErrorText: string;
+    public NoFinalInspections: boolean;
     public ScheduleDates: string[];
 
     constructor( IsExternalUser: boolean) 

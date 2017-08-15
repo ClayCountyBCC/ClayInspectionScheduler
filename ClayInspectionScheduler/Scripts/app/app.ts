@@ -45,7 +45,6 @@ namespace InspSched
 
   export function HandleHash()
   {
-    console.log('hash', location.hash);
     let hash = location.hash;
     let currentHash = new LocationHash(location.hash.substring(1));
     if (currentHash.Permit.length > 0)
@@ -86,9 +85,11 @@ namespace InspSched
       {
         if (permit.PermitNo == permitno)
         {
+          console.log('our permits match');
           InspSched.ThisPermit = permit;
-          if (permit.ErrorText == null)
+          if (permit.ErrorText.length === 0)
           {
+            console.log('build this calendar, yall');
             BuildCalendar(permit.ScheduleDates);
           }
 
@@ -134,16 +135,14 @@ namespace InspSched
       {
 
         InspSched.ThisPermit = permit;
-        if (permit.ErrorText !== null)
+        if (permit.ErrorText.length > 0)
         {
           InspSched.UI.InformUserOfError(permit.PermitNo, permit.ErrorText);
 
         }
         else
         {
-
-          if (ThisPermit.ErrorText === null)
-            InspSched.UI.LoadInspTypeSelect(permit.PermitNo);
+          InspSched.UI.LoadInspTypeSelect(permit.PermitNo);
           BuildCalendar(permit.ScheduleDates);
 
         }
@@ -240,7 +239,7 @@ namespace InspSched
 
     transport.GetInspType().then( function ( insptypes: Array<InspType> )
     {
-
+      console.log('inspection types', insptypes);
       InspSched.InspectionTypes = insptypes;
 
 
@@ -267,11 +266,11 @@ namespace InspSched
     return "Unknown";
   }
 
-  export function BuildCalendar(dates: Array<string>, errorText?: string)
+  export function BuildCalendar(dates: Array<string>, errorText: string = "")
   {
     $(dpCalendar).datepicker('destroy');
 
-    if (errorText == null)
+    if (errorText.length === 0)
     {
       
       let additionalDisabledDates: string[] = GetAdditionalDisabledDates(dates);

@@ -68,8 +68,7 @@ namespace ClayInspectionScheduler.Models
       try
       {
         using (IDbConnection db =
-          new SqlConnection(
-            Get_ConnStr("WATSC" + (UseProduction() ? "Prod" : "QA"))))
+          new SqlConnection(Get_ConnStr("WATSC" + (UseProduction() ? "Prod" : "QA"))))
         {
           return (List<T>)db.Query<T>(query, dbA);
         }
@@ -77,16 +76,12 @@ namespace ClayInspectionScheduler.Models
       catch (Exception ex)
       {
         // TODO: no connection alert
-
-
         Log(ex, query);
         return null;
-
       }
     }
 
-
-    public static int Get_Data(string query, DynamicParameters dbA)
+    public static int Exec_Query(string query, DynamicParameters dbA)
     {
       {
         try

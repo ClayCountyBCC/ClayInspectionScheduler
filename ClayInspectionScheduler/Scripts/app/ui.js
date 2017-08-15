@@ -244,8 +244,7 @@ var InspSched;
             var permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === inspection.PermitNo; })[0];
             if ((inspection.ResultADC || inspection.DisplaySchedDateTime.length === 0)) {
                 var buttonId = "CreateNew_" + inspection.PermitNo;
-                console.log('button status', document.getElementById(buttonId));
-                if (!document.getElementById(buttonId) && !permit.ErrorText) {
+                if (!document.getElementById(buttonId) && permit.ErrorText.length === 0) {
                     InspButtonDiv.appendChild(BuildButton(buttonId, "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
                 }
             }
@@ -309,15 +308,27 @@ var InspSched;
             optionLabel.selected;
             optionLabel.value = "";
             InspTypeList.appendChild(optionLabel);
-            for (var _i = 0, _a = InspSched.InspectionTypes; _i < _a.length; _i++) {
-                var type = _a[_i];
+            var permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === key; })[0];
+            var filteredInspectionTypes = InspSched.InspectionTypes.filter(function (inspectionType) {
+                if (inspectionType.InspCd[0] === thistype) {
+                    if (permit.NoFinalInspections) {
+                        return !inspectionType.Final;
+                    }
+                    else {
+                        return true;
+                    }
+                }
+            });
+            //for (let type of InspSched.InspectionTypes)
+            for (var _i = 0, filteredInspectionTypes_1 = filteredInspectionTypes; _i < filteredInspectionTypes_1.length; _i++) {
+                var type = filteredInspectionTypes_1[_i];
                 if (type.InspCd[0] == thistype) {
                     var option = document.createElement("option");
                     option.label = type.InsDesc;
                     option.value = type.InspCd;
                     option.className = "TypeSelectOption";
-                    InspTypeList.appendChild(option);
                     option.appendChild(document.createTextNode(type.InsDesc));
+                    InspTypeList.appendChild(option);
                 }
             }
         }

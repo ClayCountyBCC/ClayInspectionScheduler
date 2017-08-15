@@ -332,8 +332,7 @@ namespace InspSched.UI
     {
 
       let buttonId: string = "CreateNew_" + inspection.PermitNo;
-      console.log('button status', document.getElementById(buttonId));
-      if (!document.getElementById(buttonId) && !permit.ErrorText)
+      if (!document.getElementById(buttonId) && permit.ErrorText.length === 0)
       {
         InspButtonDiv.appendChild(BuildButton(buttonId, "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
       }
@@ -431,16 +430,34 @@ namespace InspSched.UI
     optionLabel.value = "";
     InspTypeList.appendChild(optionLabel);
 
-    for (let type of InspSched.InspectionTypes)
+    let permit: Permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === key })[0];
+    let filteredInspectionTypes = InspSched.InspectionTypes.filter(
+      function (inspectionType)
+      {
+        if (inspectionType.InspCd[0] === thistype)
+        {
+          if (permit.NoFinalInspections)
+          {
+            return !inspectionType.Final;
+          }
+          else
+          {
+            return true;
+          }
+        }
+      });
+
+    //for (let type of InspSched.InspectionTypes)
+    for (let type of filteredInspectionTypes)
     {
       if (type.InspCd[0] == thistype)
       {
         let option: HTMLOptionElement = <HTMLOptionElement>document.createElement("option");
         option.label = type.InsDesc;
         option.value = type.InspCd;
-        option.className = "TypeSelectOption";
-        InspTypeList.appendChild(option);
+        option.className = "TypeSelectOption";        
         option.appendChild(document.createTextNode(type.InsDesc));
+        InspTypeList.appendChild(option);
       }
     }
   }

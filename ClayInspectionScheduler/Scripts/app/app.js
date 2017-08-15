@@ -36,7 +36,6 @@ var InspSched;
     } //  END start()
     InspSched.start = start;
     function HandleHash() {
-        console.log('hash', location.hash);
         var hash = location.hash;
         var currentHash = new InspSched.LocationHash(location.hash.substring(1));
         if (currentHash.Permit.length > 0) {
@@ -65,8 +64,10 @@ var InspSched;
             for (var _i = 0, permits_1 = permits; _i < permits_1.length; _i++) {
                 var permit = permits_1[_i];
                 if (permit.PermitNo == permitno) {
+                    console.log('our permits match');
                     InspSched.ThisPermit = permit;
-                    if (permit.ErrorText == null) {
+                    if (permit.ErrorText.length === 0) {
+                        console.log('build this calendar, yall');
                         BuildCalendar(permit.ScheduleDates);
                     }
                     else {
@@ -97,12 +98,11 @@ var InspSched;
             var permit = permits_2[_i];
             if (permit.PermitNo == permitNumSelect.value) {
                 InspSched.ThisPermit = permit;
-                if (permit.ErrorText !== null) {
+                if (permit.ErrorText.length > 0) {
                     InspSched.UI.InformUserOfError(permit.PermitNo, permit.ErrorText);
                 }
                 else {
-                    if (InspSched.ThisPermit.ErrorText === null)
-                        InspSched.UI.LoadInspTypeSelect(permit.PermitNo);
+                    InspSched.UI.LoadInspTypeSelect(permit.PermitNo);
                     BuildCalendar(permit.ScheduleDates);
                 }
                 break;
@@ -165,6 +165,7 @@ var InspSched;
     }
     function LoadInspectionTypes() {
         InspSched.transport.GetInspType().then(function (insptypes) {
+            console.log('inspection types', insptypes);
             InspSched.InspectionTypes = insptypes;
         }, function () {
             console.log('error in LoadInspectionTypes');
@@ -184,8 +185,9 @@ var InspSched;
         return "Unknown";
     }
     function BuildCalendar(dates, errorText) {
+        if (errorText === void 0) { errorText = ""; }
         $(dpCalendar).datepicker('destroy');
-        if (errorText == null) {
+        if (errorText.length === 0) {
             var additionalDisabledDates = GetAdditionalDisabledDates(dates);
             InspSched.InspectionDates = dates;
             InspSched.firstDay = InspSched.InspectionDates[0];

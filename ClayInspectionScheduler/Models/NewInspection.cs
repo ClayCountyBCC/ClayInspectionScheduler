@@ -180,7 +180,7 @@ namespace ClayInspectionScheduler.Models
         SET @IRID = SCOPE_IDENTITY();";
       try
       {
-        var i = Constants.Get_Data(sqlPP, dbArgs);
+        var i = Constants.Exec_Query(sqlPP, dbArgs);
         if (i > -1)
         {
           IRID = dbArgs.Get<long?>( "@IRID" );
@@ -254,7 +254,7 @@ namespace ClayInspectionScheduler.Models
       ";
       try
       {
-        var i = Constants.Get_Data(sql, dbArgs);
+        var i = Constants.Exec_Query(sql, dbArgs);
         if (i > -1)
         {
           SavedInsp = dbArgs.Get<string>("@SavedInspID");
