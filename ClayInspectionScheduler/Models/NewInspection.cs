@@ -126,7 +126,7 @@ namespace ClayInspectionScheduler.Models
           foreach (var i in inspections)
           {
             
-            if (i.InspectionCode == this.InspectionCd && i.ResultADC == null)
+            if (i.InspectionCode == this.InspectionCd && i.ResultADC == null && i.PermitNo == CurrentPermit.PermitNo)
             {
               Errors.Add("Inspection type exists on permit");
               break;
@@ -134,14 +134,14 @@ namespace ClayInspectionScheduler.Models
 
 
             // Adds functionality to return error when saving an inspection for permit that has already passed a final inspection.
-            var types = InspType.Get(IsExternalUser);
-            foreach (var t in types)
-            {
-              if (t.InspCd == i.InspectionCode && t.Final && (i.ResultADC == "A" || i.ResultADC == "P"))
-              {
+            //var types = InspType.Get(IsExternalUser);
+            //foreach (var t in types)
+            //{
+            //  if (t.InspCd == i.InspectionCode && t.Final && (i.ResultADC == "A" || i.ResultADC == "P"))
+            //  {
 
-              }
-            }
+            //  }
+            //}
           }
         }
         Console.Write(Errors);
@@ -180,7 +180,7 @@ namespace ClayInspectionScheduler.Models
         SET @IRID = SCOPE_IDENTITY();";
       try
       {
-        var i = Constants.Execute(sqlPP, dbArgs);
+        var i = Constants.Get_Data(sqlPP, dbArgs);
         if (i > -1)
         {
           IRID = dbArgs.Get<long?>( "@IRID" );
@@ -254,7 +254,7 @@ namespace ClayInspectionScheduler.Models
       ";
       try
       {
-        var i = Constants.Execute(sql, dbArgs);
+        var i = Constants.Get_Data(sql, dbArgs);
         if (i > -1)
         {
           SavedInsp = dbArgs.Get<string>("@SavedInspID");

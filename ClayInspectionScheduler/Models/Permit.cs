@@ -25,12 +25,11 @@ namespace ClayInspectionScheduler.Models
     private DateTime WorkersCompExpirationDate { get; set; } = DateTime.MaxValue;
     private DateTime LiabilityExpirationDate { get; set; } = DateTime.MaxValue;
     private DateTime PermitIssueDate { get; set; } = DateTime.MaxValue; // check if permt
-    private bool HoldStopAll { get; set; } // add check for all stop hold
-    private bool HoldStopFinal { get; set; } // check for final stop hold
     //private bool ChargesExist { get; set; } // check for charges
     private bool MasterCoClosed { get; set; } // check if master is Co'd
     private string ContractorStatus { get; set; } // check if Contractor is active
-
+    private List<Hold> Holds { get; set; }
+    
 
     public List<string> ScheduleDates
     {
@@ -40,6 +39,7 @@ namespace ClayInspectionScheduler.Models
       }
     }
 
+   
     public Permit()
     {
 
@@ -128,15 +128,12 @@ namespace ClayInspectionScheduler.Models
         foreach (Permit l in permits)
         {
           l.IsExternalUser = IsExternalUser;
-
           if (l.Confidential == 1 && IsExternalUser)
           {
             l.ProjAddrCombined = "Confidential";
             l.ProjCity = "Confidential";
           }
-
           l.Validate();
-
         }
         return permits;
       }
@@ -176,7 +173,7 @@ namespace ClayInspectionScheduler.Models
 
       if (ChargesExist()) return;
 
-      if (HoldsExist()) return;
+      //if (HoldsExist()) return;
 
       if (ContractorIssues()) return;
       
@@ -371,49 +368,49 @@ namespace ClayInspectionScheduler.Models
       return false;
     }
 
-    private bool HoldsExist()
-    {
-      var dp = new DynamicParameters();
-      dp.Add("@PermitNo", this.PermitNo);
-      string sql = $@"
-        select 
-          COUNT(*) AS CNT 
-        from bpHOLD h
-        where 
-          h.PermitNo = @PermitNo
-          AND h.HldDate IS NULL
-          AND h.Deleted IS NULL
-          AND h.HldCd NOT IN ('1SWF','PPCC')
-      ";
+    //private bool HoldsExist()
+    //{
+    //  var dp = new DynamicParameters();
+    //  dp.Add("@PermitNo", this.PermitNo);
+    //  string sql = $@"
+    //    select 
+    //      COUNT(*) AS CNT 
+    //    from bpHOLD h
+    //    where 
+    //      h.PermitNo = @PermitNo
+    //      AND h.HldDate IS NULL
+    //      AND h.Deleted IS NULL
+    //      AND h.HldCd NOT IN ('1SWF','PPCC')
+    //  ";
 
-      // Need to only check against active hold codes.
-      // Revisit this when the changes are made to the bpHold_REF table
-      // to add hte additional column to check if a hold will prevent
-      // the permit from having a final inspection or all inspections.
-      try
-      {
-        int i = Constants.Execute_Scalar<int>(sql, dp);
+    //  // Need to only check against active hold codes.
+    //  // Revisit this when the changes are made to the bpHold_REF table
+    //  // to add hte additional column to check if a hold will prevent
+    //  // the permit from having a final inspection or all inspections.
+    //  try
+    //  {
+    //    int i = Constants.Execute_Scalar<int>(sql, dp);
 
-        switch (i)
-        {
-          case -1:
-            ErrorText = $"There was an issue checking for holds for Permit #{this.PermitNo}";
-            return true;
-          case 0:
-            return false;
-          default:
-            ErrorText = $"There is a hold associated with Permit #{this.PermitNo}";
-            return true;
-        }
+    //    switch (i)
+    //    {
+    //      case -1:
+    //        ErrorText = $"There was an issue checking for holds for Permit #{this.PermitNo}";
+    //        return true;
+    //      case 0:
+    //        return false;
+    //      default:
+    //        ErrorText = $"There is a hold associated with Permit #{this.PermitNo}";
+    //        return true;
+    //    }
 
-      }
-      catch (Exception ex)
-      {
-        Constants.Log(ex);
-        ErrorText = $"There was an issue checking for holds for Permit #{this.PermitNo}";
-        return true;
-      }
-    }
+    //  }
+    //  catch (Exception ex)
+    //  {
+    //    Constants.Log(ex);
+    //    ErrorText = $"There was an issue checking for holds for Permit #{this.PermitNo}";
+    //    return true;
+    //  }
+    //}
 
     private bool PassedFinal()
     {

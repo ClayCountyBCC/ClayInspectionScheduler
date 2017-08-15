@@ -171,7 +171,7 @@ namespace ClayInspectionScheduler.Models
         try
         {
 
-          return Constants.Execute(sql, dbArgs) > 0;
+          return Constants.Get_Data(sql, dbArgs) > 0;
 
         }
         catch (Exception ex)
