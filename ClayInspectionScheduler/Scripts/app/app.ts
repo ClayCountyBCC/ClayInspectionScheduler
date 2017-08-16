@@ -43,10 +43,16 @@ namespace InspSched
     if (location.hash.substring(1).length > 0) HandleHash(); // if they pass something in the URL
   } //  END start()
 
-  function updateHash(permit: string)
+  export function updateHash(permit: string)
   {
     let hash = new LocationHash(location.hash.substring(1));
     location.hash = hash.update(permit);
+    let newhash = new LocationHash(location.hash.substring(1));
+    console.log('newhash', newhash, 'oldhash', hash);
+    if (newhash.Permit === hash.Permit)
+    {
+      SearchPermit();
+    }
   }
 
   export function HandleHash()

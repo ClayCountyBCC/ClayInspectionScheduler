@@ -738,7 +738,13 @@ var InspSched;
     function updateHash(permit) {
         var hash = new InspSched.LocationHash(location.hash.substring(1));
         location.hash = hash.update(permit);
+        var newhash = new InspSched.LocationHash(location.hash.substring(1));
+        console.log('newhash', newhash, 'oldhash', hash);
+        if (newhash.Permit === hash.Permit) {
+            SearchPermit();
+        }
     }
+    InspSched.updateHash = updateHash;
     function HandleHash() {
         var hash = location.hash;
         var currentHash = new InspSched.LocationHash(location.hash.substring(1));
