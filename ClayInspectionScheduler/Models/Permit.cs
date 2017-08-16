@@ -19,7 +19,7 @@ namespace ClayInspectionScheduler.Models
     public string ProjCity { get; set; }
     public string ErrorText { get; set; } = "";
     public bool NoFinalInspections { get; set; } // If this is true, they can't schedule a final inspection on the client.
-
+    public string URL { get; set; } = "";
     private string ContractorId { get; set; }
     private int Confidential { get; set; }
     private DateTime SuspendGraceDate { get; set; } = DateTime.MinValue;
@@ -48,7 +48,7 @@ namespace ClayInspectionScheduler.Models
 
     }
 
-    public static List<Permit> Get(string AssocKey, bool IsExternalUser)
+    public static List<Permit> Get(string AssocKey, bool IsExternalUser, bool isSupervisor)
     {
       /**
        * Need to add the following functionality to this
@@ -148,6 +148,7 @@ namespace ClayInspectionScheduler.Models
         permits = BulkValidate(permits);
         foreach (Permit l in permits)
         {
+          l.URL = isSupervisor ? $"http://claybccims/WATSWeb/Permit/Inspection/Inspection.aspx?PermitNo={l.PermitNo}&OperId=&Nav=BL" : "";
           l.IsExternalUser = IsExternalUser;
           if (l.Confidential == 1 && IsExternalUser)
           {

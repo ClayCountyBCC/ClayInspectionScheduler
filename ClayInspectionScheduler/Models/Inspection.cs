@@ -86,8 +86,6 @@ namespace ClayInspectionScheduler.Models
       var dbArgs = new Dapper.DynamicParameters();
       dbArgs.Add("@PermitNo", key);
 
-
-
       string sql = @"
         USE WATSC;
         DECLARE @MPermitNo CHAR(8) = (SELECT MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = @PermitNo);

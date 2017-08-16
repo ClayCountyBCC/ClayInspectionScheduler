@@ -46,7 +46,7 @@ namespace ClayInspectionScheduler.Models
       this.SchecDateTime = SchecDateTime;
     }
 
-    public List<string> Validate(bool IsExternalUser)
+    public List<string> Validate(bool IsExternalUser, List<InspType> inspTypes)
     {
       // List of things that need to be validated:
       // 0) Make sure the permit is able to be scheduled to be inspected.
@@ -61,9 +61,9 @@ namespace ClayInspectionScheduler.Models
       // 0)
 
       
-      List<InspType> inspTypes = (List<InspType>)MyCache.GetItem("inspectiontypes,"+IsExternalUser.ToString());
+       //= (List<InspType>)MyCache.GetItem("inspectiontypes,"+IsExternalUser.ToString());
 
-      var Permits = (from p in Permit.Get(this.PermitNo, IsExternalUser)
+      var Permits = (from p in Permit.Get(this.PermitNo, IsExternalUser, false)
                      where p.PermitNo == this.PermitNo
                      select p).ToList();
 
@@ -80,7 +80,7 @@ namespace ClayInspectionScheduler.Models
       else
       {
         CurrentPermit = Permits.First();
-        if (CurrentPermit.ErrorText != null)
+        if (CurrentPermit.ErrorText.Length > 0)
         {
           Errors.Add(CurrentPermit.ErrorText);
           return Errors;
@@ -209,8 +209,8 @@ namespace ClayInspectionScheduler.Models
 
     public List<string> Save(bool IsExternalUser, string name)
     {
-
-      List<string> errors = this.Validate(IsExternalUser);
+      List<InspType> inspTypes = (List<InspType>)MyCache.GetItem("inspectiontypes," + IsExternalUser.ToString());
+      List<string> errors = this.Validate(IsExternalUser, inspTypes);
 
       if (errors.Count > 0)
         return errors;
@@ -223,9 +223,9 @@ namespace ClayInspectionScheduler.Models
       dbArgs.Add("@SelectedDate", this.SchecDateTime.Date);
       dbArgs.Add("@Username", name, dbType: DbType.String, size: 7);
       dbArgs.Add("@IRID", (IRID == -1) ? null : IRID.ToString());
-      dbArgs.Add("@SavedInspID",-1, dbType: DbType.AnsiString, direction: ParameterDirection.Output,size:8);
+      dbArgs.Add("@SavedInspID",-1, dbType: DbType.Int32, direction: ParameterDirection.Output,size:8);
 
-      string SavedInsp = "";
+      
 
       string sql =  $@"
       USE WATSC;      
@@ -250,39 +250,31 @@ namespace ClayInspectionScheduler.Models
       LEFT OUTER JOIN bpASSOC_PERMIT A ON B.BaseID = A.BaseID
       WHERE (A.PermitNo = @PermitNo OR M.PermitNo = @PermitNo)
 
-      set @SavedInspID = LTRIM(RTRIM(CAST(SCOPE_IDENTITY() as CHAR)));
+      SET @SavedInspID = SCOPE_IDENTITY();
       ";
       try
       {
         var i = Constants.Exec_Query(sql, dbArgs);
         if (i > -1)
         {
-          SavedInsp = dbArgs.Get<string>("@SavedInspID");
-          if (SavedInsp != null && SavedInsp != "-1")
-          {
-            errors.Add("success");
-            errors.Add(this.InspectionCd);
-            errors.Add("inspection has been scheduled for permit #" + this.PermitNo + ", on " + this.SchecDateTime.ToShortDateString() + ".");
-            return errors;
-
-          }
-          else
-          {
-            return null;
-          }
+          int SavedInspectionId = dbArgs.Get<int>("@SavedInspID");
+          string inspDesc = (from it in inspTypes
+                             where it.InspCd == this.InspectionCd
+                             select it.InsDesc).First();
+          errors.Add(inspDesc + " inspection has been scheduled for permit #" + this.PermitNo + ", on " + this.SchecDateTime.ToShortDateString() + ". This was saved with request id " + SavedInspectionId + ".");
         }
         else
         {
-          return null;
-
+          errors.Add("No Record Saved, Please Try again. Contact the Building department if issues persist.");
         }
 
       }
       catch (Exception ex)
       {
         Constants.Log(ex, sql);
-        return null;
+        errors.Add("No Record Saved, Please Try again. Contact the Building department if issues persist.");
       }
+      return errors;
       //try
       //{
       //  int i = Constants.Execute(sql, dbArgs);

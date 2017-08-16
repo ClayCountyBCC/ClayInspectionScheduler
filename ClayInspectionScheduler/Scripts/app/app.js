@@ -128,7 +128,9 @@ var InspSched;
         var e = InspSched.transport.SaveInspection(InspSched.newInsp).then(function (issues) {
             var thisHeading = document.getElementById('ErrorHeading');
             var IssueList = document.createElement('ul');
-            if (issues[0] !== "success") {
+            if (issues.length === 0)
+                issues.push("A system error has occurred. Please check your request and try again.");
+            if (issues[0].toLowerCase().indexOf("inspection has been scheduled") === -1) {
                 InspSched.UI.clearElement(thisHeading);
                 thisHeading.appendChild(document.createTextNode("The following issue(s) prevented scheduling the requested inspection:"));
                 for (var i in issues) {
@@ -143,7 +145,7 @@ var InspSched;
             else {
                 var savesuccess = document.getElementById("SaveSuccess");
                 InspSched.UI.clearElement(savesuccess);
-                savesuccess.appendChild(document.createTextNode(getInspectionDescription(issues[1]) + " " + issues[2]));
+                savesuccess.appendChild(document.createTextNode(issues[0]));
                 document.getElementById("SaveConfirmed").style.display = "flex";
             }
             return true;
@@ -175,14 +177,6 @@ var InspSched;
             //Hide('Searching');
             InspSched.InspectionTypes = [];
         });
-    }
-    function getInspectionDescription(InspCode) {
-        for (var _i = 0, _a = InspSched.InspectionTypes; _i < _a.length; _i++) {
-            var it = _a[_i];
-            if (it.InspCd == InspCode)
-                return it.InsDesc;
-        }
-        return "Unknown";
     }
     function BuildCalendar(dates, errorText) {
         if (errorText === void 0) { errorText = ""; }

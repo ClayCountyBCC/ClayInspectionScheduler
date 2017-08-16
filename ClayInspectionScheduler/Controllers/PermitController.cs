@@ -13,7 +13,10 @@ namespace ClayInspectionScheduler.Controllers
     public IHttpActionResult Get(string id)
     {
 
-      List<Permit> lp = Permit.Get(id, Constants.CheckIsExternalUser(User.Identity.Name));
+      List<Permit> lp = Permit.Get(
+        id, 
+        Constants.CheckIsExternalUser(User.Identity.Name), 
+        Constants.CheckIsSupervisor(User.Identity.Name));
       if( lp == null)
       {
         return InternalServerError();

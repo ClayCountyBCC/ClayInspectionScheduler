@@ -91,15 +91,24 @@ var InspSched;
         function UpdatePermitData(key, permits) {
             var street = document.getElementById('ProjAddrCombined');
             var city = document.getElementById('ProjCity');
-            for (var _i = 0, permits_2 = permits; _i < permits_2.length; _i++) {
-                var permit = permits_2[_i];
-                if (permit.PermitNo == key) {
-                    Show('PermitSelectContainer');
-                    street.innerHTML = permit.ProjAddrCombined.trim();
-                    city.innerHTML = permit.ProjCity.trim();
-                    break;
-                }
+            var permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === key; })[0];
+            if (permit.URL.length > 0) {
+                var streetlink = document.createElement("a");
+                streetlink.style.textDecoration = "underline";
+                streetlink.href = permit.URL;
+                streetlink.appendChild(document.createTextNode(permit.ProjAddrCombined.trim()));
+                var citylink = document.createElement("a");
+                citylink.style.textDecoration = "underline";
+                citylink.href = permit.URL;
+                citylink.appendChild(document.createTextNode(permit.ProjCity.trim()));
+                street.appendChild(streetlink);
+                city.appendChild(citylink);
             }
+            else {
+                street.appendChild(document.createTextNode(permit.ProjAddrCombined.trim()));
+                city.appendChild(document.createTextNode(permit.ProjCity.trim()));
+            }
+            Show('PermitSelectContainer');
         }
         UI.UpdatePermitData = UpdatePermitData;
         function buildPermitSelectOptGroup(lbl, val) {
@@ -228,8 +237,18 @@ var InspSched;
             InspButtonDiv.className = "ButtonContainer large-2 medium-2 small-12 flex-container align-center ";
             Remarks.className = "large-9 medium-6 small-6 inspRemarks column";
             ResultADC.className = "large-3 medium-6 small-6 InspResult column end";
+            var permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === inspection.PermitNo; })[0];
             // add the text nodes
-            thisPermit.appendChild(document.createTextNode(inspection.PermitNo));
+            if (!permit.IsExternalUser) {
+                var link = document.createElement("a");
+                link.style.textDecoration = "underline";
+                link.href = "http://claybccims/WATSWeb/Permit/MainBL.aspx?Nav=BL&PermitNo=" + inspection.PermitNo;
+                link.appendChild(document.createTextNode(inspection.PermitNo));
+                thisPermit.appendChild(link);
+            }
+            else {
+                thisPermit.appendChild(document.createTextNode(inspection.PermitNo));
+            }
             if (inspection.DisplayInspDateTime.toLowerCase() == 'incomplete') {
                 inspDateTime.appendChild(document.createTextNode(inspection.DisplaySchedDateTime));
             }
@@ -241,7 +260,6 @@ var InspSched;
             ResultADC.appendChild(document.createTextNode(inspection.ResultDescription.trim()));
             inspector.appendChild(document.createTextNode(inspection.InspectorName.trim()));
             //Create function to make New/Cancel Button
-            var permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === inspection.PermitNo; })[0];
             if ((inspection.ResultADC || inspection.DisplaySchedDateTime.length === 0)) {
                 var buttonId = "CreateNew_" + inspection.PermitNo;
                 if (!document.getElementById(buttonId) && permit.ErrorText.length === 0) {

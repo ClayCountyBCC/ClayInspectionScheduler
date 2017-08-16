@@ -18,6 +18,7 @@ namespace ClayInspectionScheduler.Models
   public static class Constants
   {
     public const int appId = 20024;
+    public static readonly string[] Supervisors = { "westje", "mccartneyd", "naglet", "parkern" };
 
     public static bool UseProduction()
     {
@@ -126,6 +127,11 @@ namespace ClayInspectionScheduler.Models
     public static bool CheckIsExternalUser(string name)
     {
       return name.Length == 0;
+    }
+
+    public static bool CheckIsSupervisor(string name)
+    {
+      return Supervisors.Contains(name.ToLower().Replace(@"claybcc\", ""));
     }
 
     #region Log Code

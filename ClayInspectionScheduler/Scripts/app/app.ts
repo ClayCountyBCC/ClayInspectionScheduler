@@ -179,10 +179,10 @@ namespace InspSched
       
       let thisHeading: HTMLHeadingElement = (<HTMLHeadingElement>document.getElementById('ErrorHeading'));
       let IssueList: HTMLUListElement = ( <HTMLUListElement>document.createElement( 'ul' ) );
-
-      if ( issues[0] !== "success") 
+      if (issues.length === 0) issues.push("A system error has occurred. Please check your request and try again.");
+      if (issues[0].toLowerCase().indexOf("inspection has been scheduled") === -1) 
       {
-
+        
         InspSched.UI.clearElement(thisHeading);
         thisHeading.appendChild(document.createTextNode("The following issue(s) prevented scheduling the requested inspection:"));
 
@@ -196,14 +196,14 @@ namespace InspSched
         }
 
         IssuesDiv.appendChild(IssueList);
-        IssueContainer.style.display="flex";
+        IssueContainer.style.display = "flex";
 
       }
       else
       {
         let savesuccess: HTMLParagraphElement = (<HTMLParagraphElement>document.getElementById("SaveSuccess"));
         InspSched.UI.clearElement(savesuccess);
-        savesuccess.appendChild(document.createTextNode(getInspectionDescription(issues[1]) + " " + issues[2]));
+        savesuccess.appendChild(document.createTextNode(issues[0]));
         document.getElementById("SaveConfirmed").style.display = "flex";
       }
 
@@ -253,17 +253,6 @@ namespace InspSched
         //Hide('Searching');
         InspSched.InspectionTypes = [];
       } );
-  }
-
-  function getInspectionDescription(InspCode: string): string
-  {
-  
-    for (let it of InspSched.InspectionTypes)
-    {
-      if (it.InspCd == InspCode)
-        return it.InsDesc;
-    }
-    return "Unknown";
   }
 
   export function BuildCalendar(dates: Array<string>, errorText: string = "")

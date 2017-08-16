@@ -128,16 +128,30 @@ namespace InspSched.UI
     let street: HTMLElement = (<HTMLElement>document.getElementById('ProjAddrCombined'));
     let city: HTMLElement = (<HTMLElement>document.getElementById('ProjCity'));
 
-    for (let permit of permits)
+    let permit: Permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === key })[0];
+    if (permit.URL.length > 0)
     {
-      if (permit.PermitNo == key) 
-      {
-        Show('PermitSelectContainer');
-        street.innerHTML = permit.ProjAddrCombined.trim();
-        city.innerHTML = permit.ProjCity.trim();
-        break;
-      }
+      let streetlink = <HTMLAnchorElement>document.createElement("a");
+      streetlink.style.textDecoration = "underline";
+      streetlink.href = permit.URL;
+      streetlink.appendChild(document.createTextNode(permit.ProjAddrCombined.trim()));
+      
+      let citylink = <HTMLAnchorElement>document.createElement("a");
+      citylink.style.textDecoration = "underline";
+      citylink.href = permit.URL;
+      citylink.appendChild(document.createTextNode(permit.ProjCity.trim()));
+      street.appendChild(streetlink);
+      city.appendChild(citylink);
     }
+    else
+    {
+      street.appendChild(document.createTextNode(permit.ProjAddrCombined.trim()));
+      city.appendChild(document.createTextNode(permit.ProjCity.trim()));
+    }
+
+    Show('PermitSelectContainer');
+
+    
   }
 
   function buildPermitSelectOptGroup(lbl: string, val: string): HTMLElement
@@ -309,9 +323,21 @@ namespace InspSched.UI
     Remarks.className = "large-9 medium-6 small-6 inspRemarks column";
     ResultADC.className = "large-3 medium-6 small-6 InspResult column end";
 
-
+    let permit: Permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === inspection.PermitNo })[0];
     // add the text nodes
-    thisPermit.appendChild(document.createTextNode(inspection.PermitNo));
+    if (!permit.IsExternalUser)
+    {
+      let link = <HTMLAnchorElement>document.createElement("a");
+      link.style.textDecoration = "underline";
+      link.href = "http://claybccims/WATSWeb/Permit/MainBL.aspx?Nav=BL&PermitNo=" + inspection.PermitNo;
+      link.appendChild(document.createTextNode(inspection.PermitNo));
+      thisPermit.appendChild(link);
+    }
+    else
+    {
+      thisPermit.appendChild(document.createTextNode(inspection.PermitNo));
+    }
+    
     if (inspection.DisplayInspDateTime.toLowerCase() == 'incomplete')
     {
       inspDateTime.appendChild(document.createTextNode(inspection.DisplaySchedDateTime));
@@ -327,7 +353,7 @@ namespace InspSched.UI
 
 
     //Create function to make New/Cancel Button
-    let permit: Permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === inspection.PermitNo })[0];
+    
     if ((inspection.ResultADC || inspection.DisplaySchedDateTime.length === 0))
     {
 
