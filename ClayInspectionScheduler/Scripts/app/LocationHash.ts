@@ -27,6 +27,15 @@
       
     }
 
+    update(permit: string)
+    { // this function is going to take the current LocationHash
+      // and using its current properties, going to emit an updated hash
+      // with a new EmailId.
+      let h: string = "";
+      if (permit.length > 0) h += "&permit=" + permit;
+      return h.substring(1);
+    }
+
 
 
   }

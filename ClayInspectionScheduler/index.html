@@ -38,7 +38,7 @@
         <input id="PermitSearch" type="search" class="input-group-field columns" placeholder="   Permit Number" />
         <span class="input-group-button" id="button">
           <button id="PermitSearchButton" 
-                  onclick="return InspSched.SearchPermit();"
+                  onclick="location.hash = '#permit=' + document.getElementById('PermitSearch').value;"
                   type="submit" class="button fi-magnifying-glass end" value="Search" required ></button>
         </span>
       </div>

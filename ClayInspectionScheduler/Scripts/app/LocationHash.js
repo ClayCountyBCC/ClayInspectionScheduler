@@ -14,6 +14,14 @@ var InspSched;
                 }
             }
         }
+        LocationHash.prototype.update = function (permit) {
+            // and using its current properties, going to emit an updated hash
+            // with a new EmailId.
+            var h = "";
+            if (permit.length > 0)
+                h += "&permit=" + permit;
+            return h.substring(1);
+        };
         return LocationHash;
     }());
     InspSched.LocationHash = LocationHash;

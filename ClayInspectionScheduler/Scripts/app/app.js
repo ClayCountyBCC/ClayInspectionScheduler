@@ -35,6 +35,10 @@ var InspSched;
             HandleHash(); // if they pass something in the URL
     } //  END start()
     InspSched.start = start;
+    function updateHash(permit) {
+        var hash = new InspSched.LocationHash(location.hash.substring(1));
+        location.hash = hash.update(permit);
+    }
     function HandleHash() {
         var hash = location.hash;
         var currentHash = new InspSched.LocationHash(location.hash.substring(1));
@@ -48,7 +52,8 @@ var InspSched;
     InspSched.HandleHash = HandleHash;
     PermitSearchField.onkeydown = function (event) {
         if (event.keyCode == 13) {
-            SearchPermit();
+            //SearchPermit();
+            updateHash(PermitSearchField.value);
         }
     };
     function SearchPermit() {

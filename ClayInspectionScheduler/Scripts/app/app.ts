@@ -43,6 +43,12 @@ namespace InspSched
     if (location.hash.substring(1).length > 0) HandleHash(); // if they pass something in the URL
   } //  END start()
 
+  function updateHash(permit: string)
+  {
+    let hash = new LocationHash(location.hash.substring(1));
+    location.hash = hash.update(permit);
+  }
+
   export function HandleHash()
   {
     let hash = location.hash;
@@ -58,7 +64,8 @@ namespace InspSched
 
   PermitSearchField.onkeydown = function (event) {
     if (event.keyCode == 13) {
-      SearchPermit();
+      //SearchPermit();
+      updateHash(PermitSearchField.value);
     }
   };
 

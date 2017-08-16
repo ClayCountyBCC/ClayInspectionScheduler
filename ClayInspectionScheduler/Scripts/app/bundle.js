@@ -14,6 +14,14 @@ var InspSched;
                 }
             }
         }
+        LocationHash.prototype.update = function (permit) {
+            // and using its current properties, going to emit an updated hash
+            // with a new EmailId.
+            var h = "";
+            if (permit.length > 0)
+                h += "&permit=" + permit;
+            return h.substring(1);
+        };
         return LocationHash;
     }());
     InspSched.LocationHash = LocationHash;
@@ -128,6 +136,8 @@ var InspSched;
         function UpdatePermitData(key, permits) {
             var street = document.getElementById('ProjAddrCombined');
             var city = document.getElementById('ProjCity');
+            clearElement(street);
+            clearElement(city);
             var permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === key; })[0];
             if (permit.URL.length > 0) {
                 var streetlink = document.createElement("a");
@@ -725,6 +735,10 @@ var InspSched;
             HandleHash(); // if they pass something in the URL
     } //  END start()
     InspSched.start = start;
+    function updateHash(permit) {
+        var hash = new InspSched.LocationHash(location.hash.substring(1));
+        location.hash = hash.update(permit);
+    }
     function HandleHash() {
         var hash = location.hash;
         var currentHash = new InspSched.LocationHash(location.hash.substring(1));
@@ -738,7 +752,8 @@ var InspSched;
     InspSched.HandleHash = HandleHash;
     PermitSearchField.onkeydown = function (event) {
         if (event.keyCode == 13) {
-            SearchPermit();
+            //SearchPermit();
+            updateHash(PermitSearchField.value);
         }
     };
     function SearchPermit() {

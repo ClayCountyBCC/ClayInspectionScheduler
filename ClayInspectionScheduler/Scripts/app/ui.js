@@ -91,6 +91,8 @@ var InspSched;
         function UpdatePermitData(key, permits) {
             var street = document.getElementById('ProjAddrCombined');
             var city = document.getElementById('ProjCity');
+            clearElement(street);
+            clearElement(city);
             var permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === key; })[0];
             if (permit.URL.length > 0) {
                 var streetlink = document.createElement("a");

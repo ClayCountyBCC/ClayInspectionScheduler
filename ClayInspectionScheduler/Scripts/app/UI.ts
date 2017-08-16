@@ -127,6 +127,8 @@ namespace InspSched.UI
 
     let street: HTMLElement = (<HTMLElement>document.getElementById('ProjAddrCombined'));
     let city: HTMLElement = (<HTMLElement>document.getElementById('ProjCity'));
+    clearElement(street);
+    clearElement(city);
 
     let permit: Permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === key })[0];
     if (permit.URL.length > 0)
@@ -140,6 +142,7 @@ namespace InspSched.UI
       citylink.style.textDecoration = "underline";
       citylink.href = permit.URL;
       citylink.appendChild(document.createTextNode(permit.ProjCity.trim()));
+
       street.appendChild(streetlink);
       city.appendChild(citylink);
     }
