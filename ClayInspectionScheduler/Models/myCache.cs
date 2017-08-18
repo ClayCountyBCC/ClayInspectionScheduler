@@ -59,7 +59,7 @@ namespace ClayInspectionScheduler.Models
     {
       return new CacheItemPolicy()
       {
-        AbsoluteExpiration = DateTime.Today.AddDays(1)
+        AbsoluteExpiration = DateTime.Now.AddHours(4)
       };
     }
 
