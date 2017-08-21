@@ -36,8 +36,16 @@ var InspSched;
         function ProcessResults(permits, key) {
             var tbl = document.getElementById('InspectionTable');
             AddPermit(permits, key);
-            UpdatePermitData(key, permits);
-            if (permits.length == 0) {
+            var IsPermitVoid = true;
+            for (var _i = 0, permits_1 = permits; _i < permits_1.length; _i++) {
+                var p = permits_1[_i];
+                if (p.PermitNo == key) {
+                    UpdatePermitData(key, permits);
+                    IsPermitVoid = false;
+                    break;
+                }
+            }
+            if (permits.length == 0 || IsPermitVoid) {
                 UpdateSearchFailed(key);
             }
             else {
@@ -76,8 +84,8 @@ var InspSched;
             if (permits.length > 1) {
                 container.appendChild(related);
             }
-            for (var _i = 0, permits_1 = permits; _i < permits_1.length; _i++) {
-                var permit = permits_1[_i];
+            for (var _i = 0, permits_2 = permits; _i < permits_2.length; _i++) {
+                var permit = permits_2[_i];
                 if (permit.PermitNo == key) {
                     current.appendChild(buildPermitSelectOption(permit, key));
                     GetInspList(key, permit);

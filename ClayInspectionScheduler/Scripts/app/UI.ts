@@ -45,11 +45,21 @@ namespace InspSched.UI
 
   export function ProcessResults(permits: Array<Permit>, key: string)
   {
+    
     let tbl: HTMLTableElement = (<HTMLTableElement>document.getElementById('InspectionTable'));
     AddPermit(permits, key);
-    UpdatePermitData(key, permits);
+    let IsPermitVoid: boolean = true;
+    for (let p of permits)
+    {
+      if (p.PermitNo == key)
+      {
+        UpdatePermitData(key, permits);
+        IsPermitVoid = false
+        break;
+      }
+    }
 
-    if (permits.length == 0) 
+    if (permits.length == 0 || IsPermitVoid)
     {
       UpdateSearchFailed(key);
     }

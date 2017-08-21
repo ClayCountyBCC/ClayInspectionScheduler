@@ -25,13 +25,14 @@ namespace ClayInspectionScheduler.Models
       switch (Environment.MachineName.ToUpper())
       {
         case "CLAYBCCDV10":
-        case "MISHL05":
+        case "MISHL05": 
         case "MISML01":     
           // Test Environment Machines
           Console.WriteLine("MachineName = " + Environment.MachineName.ToUpper());
           return false;
 
- 
+               
+
         case "CLAYBCCIIS01":
         case "CLAYBCCDMZIIS01":
           Console.WriteLine("MachineName = " + Environment.MachineName.ToUpper());

@@ -27,6 +27,7 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <TypeScriptToolsVersion>2.2</TypeScriptToolsVersion>
+    <Use64BitIISExpress />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -140,9 +141,6 @@
     <Content Include="Scripts\app\bundle.min.js">
       <DependentUpon>bundle.js</DependentUpon>
     </Content>
-    <Content Include="Scripts\app\bundle.min.min.js">
-      <DependentUpon>bundle.min.js</DependentUpon>
-    </Content>
     <Content Include="Scripts\app\es6-promise.min.js" />
     <Content Include="Scripts\app\tsconfig.json" />
     <Content Include="Scripts\app\tslint.json" />
@@ -226,7 +224,7 @@
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
-          <UseIIS>True</UseIIS>
+          <UseIIS>False</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>58766</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>

@@ -12,11 +12,14 @@ namespace ClayInspectionScheduler.Controllers
   {
     public IHttpActionResult Get(string id)
     {
+      var IsExternal = Constants.CheckIsExternalUser(User.Identity.Name);
+      var IsSupervisor = Constants.CheckIsSupervisor(User.Identity.Name);
 
       List<Permit> lp = Permit.Get(
         id, 
-        Constants.CheckIsExternalUser(User.Identity.Name), 
-        Constants.CheckIsSupervisor(User.Identity.Name));
+        IsExternal, 
+        (IsExternal ? false : IsSupervisor));
+
       if( lp == null)
       {
         return InternalServerError();

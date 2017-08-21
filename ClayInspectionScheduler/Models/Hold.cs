@@ -39,13 +39,15 @@ namespace ClayInspectionScheduler.Models
             H.Deleted IS NULL 
             AND h.HldDate IS NULL
 	          AND HR.Active = 1
-	          AND	H.PermitNo IN @permits";
+	          AND	H.PermitNo IN @permits
+            and (HR.SatFinalFlg = 1 or HR.SatNoInspection = 1)";
       try
       {
         using (IDbConnection db =
           new SqlConnection(Constants.Get_ConnStr("WATSC" + (Constants.UseProduction() ? "Prod" : "QA"))))
         {
-          return db.Query<Hold>(sql, new { permits = Permits }).ToList();
+          var holds = db.Query<Hold>(sql, new { permits = Permits }).ToList();
+          return holds;
         }
       }
       catch (Exception ex)
