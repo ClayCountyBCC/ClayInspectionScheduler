@@ -158,7 +158,20 @@ namespace ClayInspectionScheduler.Models
           if (l.ErrorText.Length == 0) l.Validate();
         }
 
-        return permits;
+
+
+        if(permits.Any(p => p.PermitNo == AssocKey))
+        {
+          return permits;
+        }
+        else
+        {
+          permits.Clear();
+          return permits;
+        }
+        
+
+       
       }
       catch (Exception ex)
       {
@@ -169,6 +182,8 @@ namespace ClayInspectionScheduler.Models
 
     public static List<Permit> BulkValidate(List<Permit> permits)
     {
+    
+
       var p = IsMasterClosed(permits);
       if (p.Count() > 0) return p;
       p = HoldsOrChargesExist(permits);
@@ -321,6 +336,7 @@ namespace ClayInspectionScheduler.Models
           Has a hold that does not hold up the final inspection?
           If the user is external and a final inspection has already been completed
       */
+      
       if (PermitIsNotIssued()) return;
 
       if (this.IsExternalUser)
