@@ -180,11 +180,9 @@ namespace ClayInspectionScheduler.Models
       var holds = Hold.Get((from prmt in permits
                             select prmt.PermitNo).ToList<string>());
 
-      var MasterPermits = (from prmt in permits
-                           where prmt.CoClosed != -1
-                           select prmt).ToList();
-
-      int MasterPermitIndex = permits.IndexOf(MasterPermits.First(), 0);
+      var MasterPermit = (from prmt in permits 
+                          where prmt.CoClosed != -1 
+                          select prmt.PermitNo).DefaultIfEmpty("").First();
 
       var NoInspections = (from h in holds
                            where h.SatNoInspection == 1
