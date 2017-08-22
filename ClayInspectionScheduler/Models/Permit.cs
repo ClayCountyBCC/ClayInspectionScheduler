@@ -182,11 +182,27 @@ namespace ClayInspectionScheduler.Models
 
     public static List<Permit> BulkValidate(List<Permit> permits)
     {
-    
+      var holds = Hold.Get((from prmt in permits
+                            select prmt.PermitNo).ToList<string>());
+
+      var MasterPermits = (from prmt in permits
+                           where prmt.CoClosed != -1
+                           select prmt).ToList();
+
+      int MasterPermitIndex = permits.IndexOf(MasterPermits.First(), 0);
+
+      var NoInspections = (from h in holds
+                           where h.SatNoInspection == 1
+                           select h.PermitNo).ToList();
+
+      var ChargePermits = (from prmt in permits
+                           where prmt.TotalCharges > 0
+                           select prmt.PermitNo).ToList();
 
       var p = IsMasterClosed(permits);
       if (p.Count() > 0) return p;
-      p = HoldsOrChargesExist(permits);
+      p = HoldsExist(permits,holds,NoInspections, MasterPermits);
+      p = ChargesExist(p, ChargePermits,MasterPermits);
       if (p.Count() > 0) return p;
       return permits;
     }
@@ -212,10 +228,9 @@ namespace ClayInspectionScheduler.Models
       return new List<Permit>();
     }
 
-    public static List<Permit> HoldsOrChargesExist(List<Permit> permits)
+    private static List<Permit> HoldsExist(List<Permit> permits, List<Hold>holds,List<string> NoInspections,List<Permit>MasterPermits)
     {
-      var holds = Hold.Get((from p in permits
-                            select p.PermitNo).ToList<string>());
+
       Console.WriteLine("Holds: " + holds);
 
       // first let's check for any SatFinalflg holds and update the permits
@@ -228,22 +243,6 @@ namespace ClayInspectionScheduler.Models
         p.NoFinalInspections = NoFinals.Contains(p.PermitNo);
       }
 
-
-
-
-      var MasterPermits = (from p in permits
-                           where p.CoClosed != -1
-                           select p).ToList();
-    
-      int MasterPermitIndex = permits.IndexOf(MasterPermits.First(), 0);
-
-      var NoInspections = (from h in holds
-                           where h.SatNoInspection == 1
-                           select h.PermitNo).ToList();
-      var ChargePermits = (from p in permits
-                           where p.TotalCharges > 0
-                           select p.PermitNo).ToList();
-
       // Now let's check to see if we have any master permits that have
       // any holds or charges
       if (MasterPermits.Count() > 0)
@@ -253,7 +252,6 @@ namespace ClayInspectionScheduler.Models
         {
           if ((from h in holds
                where h.PermitNo == MasterPermits.First().PermitNo
-
                select h).Count() > 0)
           {
             var Error = $@"Permit #{ MasterPermits.First().PermitNo } has a hold, no inspections can be scheduled.";
@@ -261,17 +259,7 @@ namespace ClayInspectionScheduler.Models
           }
         }
 
-        // check for charges on the master permit
-        if (ChargePermits.Count > 0)
-        {
-          if ((from p in permits
-               where p.PermitNo == MasterPermits.First().PermitNo
-               select p).Count() > 0)
-          {
-            var Error = $"There are unpaid charges associated with Permit #{ MasterPermits.First().PermitNo }, no inspections can be scheduled.";
-            return BulkUpdateError(permits, Error);
-          }
-        }
+        
       }
       // Do any permits have a hold where the flag SatNoInspection = 1?
       // Any permits that have a hold with this flag cannot have inspections scheduled.
@@ -281,7 +269,8 @@ namespace ClayInspectionScheduler.Models
         if (p.ErrorText.Length == 0)
         {
           if (NoInspections.Contains(p.PermitNo))
-          {
+          {      
+            int MasterPermitIndex = permits.IndexOf(MasterPermits.First(), 0);
             p.ErrorText = $@"Permit #{ p.PermitNo } has a hold, no inspections can be scheduled.";
             if (MasterPermitIndex != -1 && permits[MasterPermitIndex].ErrorText.Length == 0)
             {
@@ -289,16 +278,42 @@ namespace ClayInspectionScheduler.Models
             }
           }
         }
+       
+      }
+      return permits;
+    }
+
+    private static List<Permit> ChargesExist(List<Permit> permits, List<string>ChargePermits, List<Permit> MasterPermits)
+    {
+      // Now let's check to see if we have any master permits that have
+      // any holds or charges
+      if (MasterPermits.Count() > 0)
+      {
+
+        // check for charges on the master permit
+        if (ChargePermits.Count > 0)
+        {
+          if (ChargePermits.Contains( MasterPermits.First().PermitNo))
+          {
+            var Error = $"There are unpaid charges associated with Permit #{ MasterPermits.First().PermitNo }, no inspections can be scheduled.";
+            return BulkUpdateError(permits, Error);
+          }
+        }
+      }
 
 
-        // check for charges on permits...  this will prevent inspections on the associated permit and master permit only.
-        // all other associated permits can schedule inspections up to and including a final
+
+      // check for charges on permits...  this will prevent inspections on the associated permit and master permit only.
+      // all other associated permits can schedule inspections up to and including a final
+      foreach (Permit p in permits)
+      {
         if (p.ErrorText.Length == 0)
         {
           if (ChargePermits.Contains(p.PermitNo))
           {
             p.ErrorText = $@"There are unpaid charges on an associated with permit #{p.PermitNo}, no inpspections can be scheduled.";
 
+            int MasterPermitIndex = permits.IndexOf(MasterPermits.First(), 0);
             if (MasterPermitIndex != -1 && permits[MasterPermitIndex].ErrorText.Length == 0)
             {
               permits[MasterPermitIndex].ErrorText = "There is an unpaid charge on an associated permit, no inspections can be scheduled";
@@ -306,8 +321,10 @@ namespace ClayInspectionScheduler.Models
           }
         }
       }
+
       return permits;
     }
+
 
     private static List<Permit> BulkUpdateError(List<Permit> permits, string ErrorText)
     {
