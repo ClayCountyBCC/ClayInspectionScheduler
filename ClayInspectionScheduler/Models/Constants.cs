@@ -127,7 +127,7 @@ namespace ClayInspectionScheduler.Models
     // return true if name.length > 0
     public static bool CheckIsExternalUser(string name)
     {
-      return true;// name.Length == 0;
+      return name.Length == 0;
     }
 
     public static bool CheckIsSupervisor(string name)
