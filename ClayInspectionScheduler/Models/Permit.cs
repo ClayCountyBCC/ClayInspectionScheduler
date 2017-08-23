@@ -31,7 +31,28 @@ namespace ClayInspectionScheduler.Models
     private int CoClosed { get; set; } // check if master is Co'd
     private int TotalFinalInspections { get; set; } // Count the total final inspections for this permit
     private string ContractorStatus { get; set; } // check if Contractor is active
-    
+    private string PrivProvFieldName
+    {
+      get
+      {
+        switch (this.PermitNo[0])
+        {
+          case '0':
+          case '1':
+          case '9':
+            return "PrivProvBL";
+          case '2':
+            return "PrivProvEL";
+          case '3':
+            return "PrivProvPL";
+          case '4':
+            return "PrivProvME";
+          default:
+            return "";
+        }
+      }
+    }
+
     private List<Hold> Holds { get; set; }
     
 
@@ -332,8 +353,7 @@ namespace ClayInspectionScheduler.Models
       return permits;
 
     }
-
-
+    
     private static List<Permit> BulkUpdateError(List<Permit> permits, string ErrorText)
     {
       foreach (Permit p in permits)
@@ -356,23 +376,67 @@ namespace ClayInspectionScheduler.Models
 
         the Permit --
           Check if the Master Permit is CO'd, if yes, then no inspections can be scheduled an any associated permit
+          Check if private provider is being used for the permit- User must call to schedule or request inspections for Private provider permits
           Has a charge associated with it
           Has a hold associated with it that is not ('1SWF', 'PPCC')
           Has a hold that does not hold up the final inspection?
           If the user is external and a final inspection has already been completed
       */
-      
+
       if (PermitIsNotIssued()) return;
+
+      if(CheckPrivProv()) return;
 
       if (this.IsExternalUser)
       {
         if (PassedFinal()) return;
       }
-
       //if (ChargesExist()) return;
 
       if (ContractorIssues()) return;
       
+    }
+
+    private bool CheckPrivProv()
+    {
+      // assign string DB fieldname to variable based on permit type;
+      var dbArgs = new Dapper.DynamicParameters();
+      dbArgs.Add("@PermitNo", this.PermitNo);
+      dbArgs.Add("@PRIVPROV", dbType: DbType.Int64, direction: ParameterDirection.Output);
+
+      string sqlPP = $@"
+        USE WATSC;
+        DECLARE @MPermitNo CHAR(8) = (SELECT MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = @PermitNo);
+
+        SELECT {this.PrivProvFieldName} FROM bpMASTER_PERMIT
+        WHERE PermitNo = @MPermitNo OR PermitNo = @PermitNo
+        ";
+      try
+      {
+        var i = Constants.Execute_Scalar<int>(sqlPP, dbArgs);
+        if (this.IsExternalUser && i == 1 && this.ErrorText.Length ==0)
+        {
+          this.ErrorText = $@"A private Provider is being used to 
+                              complete inspections on this permit. 
+                              Please contact the Building Department
+                              if you would like to schedule any inspections.";
+          return true;
+        }
+        else
+        {
+          return false;
+        }
+      }
+      catch (Exception ex)
+      {
+        Constants.Log(ex, sqlPP);
+        this.ErrorText = $@"There was an issue getting data for permit #{this.PermitNo}.
+                          Please try again. If the issue persists, please contact the
+                          Building Department for assistance.";
+        return true;
+
+      }
+
     }
 
     private bool PermitIsNotIssued()
@@ -385,12 +449,6 @@ namespace ClayInspectionScheduler.Models
       return false;
      
     }
-
-    //private static List<Permit> ChargesExist(List<Permit> permits, List<Permit> ChargePermits, List<Permit> masterPermit)
-    //{
-   
-    //  return permits;
-    //}
 
     private bool ContractorIssues()
     {
@@ -431,4 +489,5 @@ namespace ClayInspectionScheduler.Models
     }
 
   }
+
 }
