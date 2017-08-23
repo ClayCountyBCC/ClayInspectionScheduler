@@ -160,8 +160,9 @@ namespace ClayInspectionScheduler.Models
         else
         {
           permits = BulkValidate(permits);
-
-
+          var PrivProvCheck = (from prmt in permits
+                          where prmt.CoClosed != -1
+                          select prmt.PrivateProvider).DefaultIfEmpty("").First();
 
           foreach (Permit l in permits)
           {
@@ -173,8 +174,7 @@ namespace ClayInspectionScheduler.Models
               l.ProjCity = "Confidential";
             }
 
-            if (l.ErrorText.Length == 0) l.Validate((from prmt in permits where prmt.CoClosed != -1
-                                                     select prmt.PrivateProvider).First());
+            if (l.ErrorText.Length == 0) l.Validate(PrivProvCheck);
           }
         }
 
@@ -395,7 +395,7 @@ namespace ClayInspectionScheduler.Models
     private bool CheckPrivProv(string PrivProvValidate)
     {
 
-      if (PrivProvValidate.Contains(this.PermitNo[0]) && ErrorText.Length == 0)
+      if (PrivProvValidate.Contains(this.PermitNo[0]))
       {
         this.ErrorText = $@"A private Provider is being used to 
                               complete inspections on this permit. 
