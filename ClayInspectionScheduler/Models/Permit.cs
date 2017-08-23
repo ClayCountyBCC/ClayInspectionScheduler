@@ -31,28 +31,7 @@ namespace ClayInspectionScheduler.Models
     private int CoClosed { get; set; } // check if master is Co'd
     private int TotalFinalInspections { get; set; } // Count the total final inspections for this permit
     private string ContractorStatus { get; set; } // check if Contractor is active
-    private string PrivProvFieldName
-    {
-      get
-      {
-        switch (this.PermitNo[0])
-        {
-          case '0':
-          case '1':
-          case '9':
-            return "PrivProvBL";
-          case '2':
-            return "PrivProvEL";
-          case '3':
-            return "PrivProvPL";
-          case '4':
-            return "PrivProvME";
-          default:
-            return "";
-        }
-      }
-    }
-
+    private string PrivateProvider { get; set; } = "";
     private List<Hold> Holds { get; set; }
     
 
@@ -124,7 +103,13 @@ namespace ClayInspectionScheduler.Models
         C.LiabInsExpDt LiabilityExpirationDate,
         ISNULL(C.Status, '') ContractorStatus,
         ISNULL(TC.TotalCharges, 0) TotalCharges,
-        ISNULL(PF.TotalFinalInspections, 0) TotalFinalInspections
+        ISNULL(PF.TotalFinalInspections, 0) TotalFinalInspections, 
+
+        CASE WHEN M.PrivProvBL = 1 THEN '019' ELSE '' END + 
+        CASE WHEN M.PrivProvEL = 1 THEN '2' ELSE '' END + 
+        CASE WHEN M.PrivProvPL = 1 THEN '3' ELSE '' END + 
+        CASE WHEN M.PrivProvME = 1 THEN '4' ELSE '' END PrivateProvider
+
       FROM bpMASTER_PERMIT M
       LEFT OUTER JOIN bpBASE_PERMIT B ON M.BaseID = B.BaseID
       LEFT OUTER JOIN clContractor C ON B.ContractorId = C.ContractorCd 
@@ -151,7 +136,8 @@ namespace ClayInspectionScheduler.Models
         C.LiabInsExpDt LiabilityExpirationDate,
         ISNULL(C.Status, '') ContractorStatus,
         ISNULL(TC.TotalCharges, 0) TotalCharges,
-        ISNULL(PF.TotalFinalInspections, 0) TotalFinalInspections
+        ISNULL(PF.TotalFinalInspections, 0) TotalFinalInspections,
+        '' PrivateProvider
       FROM 
         bpASSOC_PERMIT A
       LEFT OUTER JOIN bpBASE_PERMIT B ON A.BaseID = B.BaseID
@@ -166,6 +152,7 @@ namespace ClayInspectionScheduler.Models
       try
       {
         var permits = Constants.Get_Data<Permit>(sql, dbArgs);
+
         if (!permits.Any(p => p.PermitNo == AssocKey))
         {
           return new List<Permit>();          
@@ -173,6 +160,9 @@ namespace ClayInspectionScheduler.Models
         else
         {
           permits = BulkValidate(permits);
+
+
+
           foreach (Permit l in permits)
           {
             l.URL = isSupervisor ? $@"http://claybccims/WATSWeb/Permit/Inspection/Inspection.aspx?PermitNo={l.PermitNo}&OperId=&Nav=BL" : "";
@@ -182,7 +172,9 @@ namespace ClayInspectionScheduler.Models
               l.ProjAddrCombined = "Confidential";
               l.ProjCity = "Confidential";
             }
-            if (l.ErrorText.Length == 0) l.Validate();
+
+            if (l.ErrorText.Length == 0) l.Validate((from prmt in permits where prmt.CoClosed != -1
+                                                     select prmt.PrivateProvider).First());
           }
         }
 
@@ -364,8 +356,10 @@ namespace ClayInspectionScheduler.Models
       return permits;
     }
 
-    public void Validate()
+    public void Validate(string PrivateProvider)
     {
+     
+
       /*
       They cannot schedule an inspection if:
         the Contractor associated with permit --
@@ -385,58 +379,31 @@ namespace ClayInspectionScheduler.Models
 
       if (PermitIsNotIssued()) return;
 
-      if(CheckPrivProv()) return;
-
       if (this.IsExternalUser)
       {
         if (PassedFinal()) return;
+        if (PrivateProvider.Length > 0)
+        {
+          if (CheckPrivProv(PrivateProvider)) return;
+        }
       }
-      //if (ChargesExist()) return;
 
       if (ContractorIssues()) return;
       
     }
 
-    private bool CheckPrivProv()
+    private bool CheckPrivProv(string PrivProvValidate)
     {
-      // assign string DB fieldname to variable based on permit type;
-      var dbArgs = new Dapper.DynamicParameters();
-      dbArgs.Add("@PermitNo", this.PermitNo);
-      dbArgs.Add("@PRIVPROV", dbType: DbType.Int64, direction: ParameterDirection.Output);
 
-      string sqlPP = $@"
-        USE WATSC;
-        DECLARE @MPermitNo CHAR(8) = (SELECT MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = @PermitNo);
-
-        SELECT {this.PrivProvFieldName} FROM bpMASTER_PERMIT
-        WHERE PermitNo = @MPermitNo OR PermitNo = @PermitNo
-        ";
-      try
+      if (PrivProvValidate.Contains(this.PermitNo[0]) && ErrorText.Length == 0)
       {
-        var i = Constants.Execute_Scalar<int>(sqlPP, dbArgs);
-        if (this.IsExternalUser && i == 1 && this.ErrorText.Length ==0)
-        {
-          this.ErrorText = $@"A private Provider is being used to 
+        this.ErrorText = $@"A private Provider is being used to 
                               complete inspections on this permit. 
                               Please contact the Building Department
-                              if you would like to schedule any inspections.";
-          return true;
-        }
-        else
-        {
-          return false;
-        }
-      }
-      catch (Exception ex)
-      {
-        Constants.Log(ex, sqlPP);
-        this.ErrorText = $@"There was an issue getting data for permit #{this.PermitNo}.
-                          Please try again. If the issue persists, please contact the
-                          Building Department for assistance.";
+                              if you would like to schedule an inspection.";
         return true;
-
       }
-
+      return false;
     }
 
     private bool PermitIsNotIssued()
