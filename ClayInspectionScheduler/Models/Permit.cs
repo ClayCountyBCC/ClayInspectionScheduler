@@ -17,7 +17,18 @@ namespace ClayInspectionScheduler.Models
     public string PermitNo { get; set; }
     public string ProjAddrCombined { get; set; }
     public string ProjCity { get; set; }
-    public string ErrorText { get; set; } = "";
+    public string ErrorText 
+    {
+      get
+      {
+        return PermitIsNotIssued();
+      }
+      set
+      {
+        this.ErrorText = ErrorText;  
+      }
+    }
+
     public bool NoFinalInspections { get; set; } // If this is true, they can't schedule a final inspection on the client.
     public string URL { get; set; } = "";
     private string ContractorId { get; set; }
@@ -173,7 +184,6 @@ namespace ClayInspectionScheduler.Models
               l.ProjAddrCombined = "Confidential";
               l.ProjCity = "Confidential";
             }
-
             if (l.ErrorText.Length == 0) l.Validate(PrivProvCheck);
           }
         }
@@ -375,9 +385,13 @@ namespace ClayInspectionScheduler.Models
           Has a hold associated with it that is not ('1SWF', 'PPCC')
           Has a hold that does not hold up the final inspection?
           If the user is external and a final inspection has already been completed
+          
+
+           WILL NEED TO UPDATE TO INCLUDE A CHECK IF THE MASTER PERMIT HAS BEEN ISSUED
+           IF NOT, BULK UPDATE ASSOC PERMITS TO DISPLAY ERROR
       */
 
-      if (PermitIsNotIssued()) return;
+      
 
       if (this.IsExternalUser)
       {
@@ -406,14 +420,14 @@ namespace ClayInspectionScheduler.Models
       return false;
     }
 
-    private bool PermitIsNotIssued()
+    private string PermitIsNotIssued()
     {
       if (this.IssueDate == DateTime.MinValue)
       {
-        ErrorText = $@"Permit #{this.PermitNo} has not yet been issued. Please contact the building department for assistance";
-        return true;
+        return $@"Permit #{this.PermitNo} has not yet been issued. Please contact the building department for assistance";
       }
-      return false;
+
+      return "";
      
     }
 
