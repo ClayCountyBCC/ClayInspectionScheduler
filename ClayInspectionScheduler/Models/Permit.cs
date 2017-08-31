@@ -17,18 +17,7 @@ namespace ClayInspectionScheduler.Models
     public string PermitNo { get; set; }
     public string ProjAddrCombined { get; set; }
     public string ProjCity { get; set; }
-    public string ErrorText 
-    {
-      get
-      {
-        return PermitIsNotIssued();
-      }
-      set
-      {
-        this.ErrorText = ErrorText;  
-      }
-    }
-
+    public string ErrorText { get; set; } = "";
     public bool NoFinalInspections { get; set; } // If this is true, they can't schedule a final inspection on the client.
     public string URL { get; set; } = "";
     private string ContractorId { get; set; }
@@ -172,8 +161,8 @@ namespace ClayInspectionScheduler.Models
         {
           permits = BulkValidate(permits);
           var PrivProvCheck = (from prmt in permits
-                          where prmt.CoClosed != -1
-                          select prmt.PrivateProvider).DefaultIfEmpty("").First();
+                               where prmt.CoClosed != -1
+                               select prmt.PrivateProvider).DefaultIfEmpty("").First();
 
           foreach (Permit l in permits)
           {
@@ -184,7 +173,7 @@ namespace ClayInspectionScheduler.Models
               l.ProjAddrCombined = "Confidential";
               l.ProjCity = "Confidential";
             }
-            if (l.ErrorText.Length == 0) l.Validate(PrivProvCheck);
+            l.Validate(PrivProvCheck);
           }
         }
 
@@ -299,8 +288,7 @@ namespace ClayInspectionScheduler.Models
           }
         }
       }
-
-
+      
 
 
 
@@ -368,7 +356,7 @@ namespace ClayInspectionScheduler.Models
 
     public void Validate(string PrivateProvider)
     {
-     
+
 
       /*
       They cannot schedule an inspection if:
@@ -390,8 +378,11 @@ namespace ClayInspectionScheduler.Models
            WILL NEED TO UPDATE TO INCLUDE A CHECK IF THE MASTER PERMIT HAS BEEN ISSUED
            IF NOT, BULK UPDATE ASSOC PERMITS TO DISPLAY ERROR
       */
-
-      
+      if (this.IssueDate == DateTime.MinValue)
+      {
+        this.ErrorText = $"Permit #{this.PermitNo} has not yet been issued. Please contact the building department for assistance";
+      }
+      if (ErrorText.Length > 0) return;
 
       if (this.IsExternalUser)
       {
@@ -418,17 +409,6 @@ namespace ClayInspectionScheduler.Models
         return true;
       }
       return false;
-    }
-
-    private string PermitIsNotIssued()
-    {
-      if (this.IssueDate == DateTime.MinValue)
-      {
-        return $@"Permit #{this.PermitNo} has not yet been issued. Please contact the building department for assistance";
-      }
-
-      return "";
-     
     }
 
     private bool ContractorIssues()
