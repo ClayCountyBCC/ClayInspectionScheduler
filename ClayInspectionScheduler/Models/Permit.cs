@@ -105,7 +105,7 @@ namespace ClayInspectionScheduler.Models
         ISNULL(TC.TotalCharges, 0) TotalCharges,
         ISNULL(PF.TotalFinalInspections, 0) TotalFinalInspections, 
 
-        CASE WHEN M.PrivProvBL = 1 THEN '019' ELSE '' END + 
+        CASE WHEN M.PrivProvBL = 1 THEN '0196' ELSE '' END + 
         CASE WHEN M.PrivProvEL = 1 THEN '2' ELSE '' END + 
         CASE WHEN M.PrivProvPL = 1 THEN '3' ELSE '' END + 
         CASE WHEN M.PrivProvME = 1 THEN '4' ELSE '' END PrivateProvider
@@ -381,8 +381,8 @@ namespace ClayInspectionScheduler.Models
       if (this.IssueDate == DateTime.MinValue)
       {
         this.ErrorText = $"Permit #{this.PermitNo} has not yet been issued. Please contact the building department for assistance";
+        return;
       }
-      if (ErrorText.Length > 0) return;
 
       if (this.IsExternalUser)
       {
@@ -402,10 +402,7 @@ namespace ClayInspectionScheduler.Models
 
       if (PrivProvValidate.Contains(this.PermitNo[0]))
       {
-        this.ErrorText = $@"A private Provider is being used to 
-                              complete inspections on this permit. 
-                              Please contact the Building Department
-                              if you would like to schedule an inspection.";
+        this.ErrorText = $"A private Provider is being used to complete inspections on this permit. Please contact the Building Department if you would like to schedule an inspection.";
         return true;
       }
       return false;
