@@ -221,7 +221,7 @@ namespace ClayInspectionScheduler.Models
       dbArgs.Add("@PermitNo", this.PermitNo);
       dbArgs.Add("@InspCd", this.InspectionCd);
       dbArgs.Add("@SelectedDate", this.SchecDateTime.Date);
-      dbArgs.Add("@Username", name, dbType: DbType.String, size: 7);
+      dbArgs.Add("@Username", name.Trim(), dbType: DbType.String, size: 7);
       dbArgs.Add("@IRID", (IRID == -1) ? null : IRID.ToString());
       dbArgs.Add("@SavedInspID",-1, dbType: DbType.Int32, direction: ParameterDirection.Output,size:8);
 

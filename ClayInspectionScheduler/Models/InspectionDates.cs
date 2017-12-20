@@ -68,6 +68,10 @@ namespace ClayInspectionScheduler.Models
 
       // Christmas Day         Dec 25
       HolidayList.Add(new DateTime(vYear, 12, 25));
+      if (vYear == 2017)
+      {
+        HolidayList.Add(new DateTime(vYear, 12, 26));  
+      }
 
       //saturday holidays are moved to Fri; Sun to Mon
       for (int i = 0; i <= HolidayList.Count - 1; i++)
@@ -81,6 +85,7 @@ namespace ClayInspectionScheduler.Models
         {
           HolidayList[i] = dt.AddDays(1);
         }
+
       }
       return HolidayList;
 
