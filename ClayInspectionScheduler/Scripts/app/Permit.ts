@@ -16,7 +16,8 @@ namespace InspSched
     ErrorText: string;
     NoFinalInspections: boolean;
     ScheduleDates: string[];
-    URL: string;
+    Supervisor_URL: string;
+    Permit_URL: string;
 
 
   }
@@ -31,7 +32,8 @@ namespace InspSched
     public ErrorText: string;
     public NoFinalInspections: boolean;
     public ScheduleDates: string[];
-    public URL: string;
+    public Supervisor_URL: string;
+    public Permit_URL: string;
     constructor( IsExternalUser: boolean) 
     {
 

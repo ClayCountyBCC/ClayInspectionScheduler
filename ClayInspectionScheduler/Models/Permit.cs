@@ -19,7 +19,8 @@ namespace ClayInspectionScheduler.Models
     public string ProjCity { get; set; }
     public string ErrorText { get; set; } = "";
     public bool NoFinalInspections { get; set; } // If this is true, they can't schedule a final inspection on the client.
-    public string URL { get; set; } = "";
+    public string Supervisor_URL { get; set; } = "";
+    public string Permit_URL { get; set; } = "";
     private string ContractorId { get; set; }
     private int Confidential { get; set; }
     private DateTime SuspendGraceDate { get; set; } = DateTime.MinValue;
@@ -33,8 +34,8 @@ namespace ClayInspectionScheduler.Models
     private string ContractorStatus { get; set; } // check if Contractor is active
     private string PrivateProvider { get; set; } = "";
     private List<Hold> Holds { get; set; }
-    
 
+    
     public List<string> ScheduleDates
     {
       get
@@ -163,13 +164,32 @@ namespace ClayInspectionScheduler.Models
 
           foreach (Permit l in permits)
           {
-            l.URL = isSupervisor ? $@"http://claybccims/WATSWeb/Permit/Inspection/Inspection.aspx?PermitNo={l.PermitNo}&OperId=&Nav=BL" : "";
-            l.IsExternalUser = IsExternalUser;
-            if (l.Confidential == 1 && IsExternalUser)
+
+            if (Constants.UseProduction() == true)
             {
-              l.ProjAddrCombined = "Confidential";
-              l.ProjCity = "Confidential";
+              l.Supervisor_URL = isSupervisor ? $@"http://claybccims/WATSWeb/Permit/Inspection/Inspection.aspx?PermitNo={l.PermitNo}&OperId=&Nav=BL" : "";
+              l.Permit_URL = $@"http://claybccims/WATSWeb/Permit/MainBL.aspx?PermitNo={l.PermitNo}&Nav=BL&OperId=";
+
             }
+            else
+            {
+              l.Supervisor_URL = isSupervisor ? $@"http://claybccimstrn/WATSWeb/Permit/Inspection/Inspection.aspx?PermitNo={l.PermitNo}&OperId=&Nav=BL" : "";
+              l.Permit_URL = $@"http://claybccimstrn/WATSWeb/Permit/MainBL.aspx?PermitNo={l.PermitNo}&Nav=BL&OperId=";
+
+            }
+
+            l.IsExternalUser = IsExternalUser;
+            if(IsExternalUser)
+            {
+              l.Permit_URL = "";
+              if (l.Confidential == 1)
+              {
+                l.ProjAddrCombined = "Confidential";
+                l.ProjCity = "Confidential";
+              }
+            }
+
+
             l.Validate(PrivProvCheck);
           }
         }

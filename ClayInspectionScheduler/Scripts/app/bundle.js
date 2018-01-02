@@ -138,14 +138,14 @@ var InspSched;
             clearElement(street);
             clearElement(city);
             var permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === key; })[0];
-            if (permit.URL.length > 0) {
+            if (permit.Supervisor_URL.length > 0) {
                 var streetlink = document.createElement("a");
                 streetlink.style.textDecoration = "underline";
-                streetlink.href = permit.URL;
+                streetlink.href = permit.Supervisor_URL;
                 streetlink.appendChild(document.createTextNode(permit.ProjAddrCombined.trim()));
                 var citylink = document.createElement("a");
                 citylink.style.textDecoration = "underline";
-                citylink.href = permit.URL;
+                citylink.href = permit.Supervisor_URL;
                 citylink.appendChild(document.createTextNode(permit.ProjCity.trim()));
                 street.appendChild(streetlink);
                 city.appendChild(citylink);
@@ -288,7 +288,7 @@ var InspSched;
             if (!permit.IsExternalUser) {
                 var link = document.createElement("a");
                 link.style.textDecoration = "underline";
-                link.href = "http://claybccims/WATSWeb/Permit/MainBL.aspx?Nav=BL&PermitNo=" + inspection.PermitNo;
+                link.href = permit.Permit_URL;
                 link.appendChild(document.createTextNode(inspection.PermitNo));
                 thisPermit.appendChild(link);
             }
