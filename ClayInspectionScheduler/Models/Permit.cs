@@ -40,7 +40,12 @@ namespace ClayInspectionScheduler.Models
     {
       get
       {
-        return InspectionDates.GenerateShortDates(IsExternalUser, (ContractorStatus == "A"? DateTime.MinValue : SuspendGraceDate));
+        // SuspendGraceDate if not ==  DateTime.MinValue, is calculated as SuspendGraceDate + 15 in GetPermit
+        // this statement is designed to check the pre-calculated SuspendGraceDate against the boundaries 
+        // of the internal/external user allowed dates
+        var UpdatedSuspendGraceDate = SuspendGraceDate > DateTime.Today ? SuspendGraceDate : DateTime.MinValue ;
+        
+        return CalendarDate.GetCachedDates(IsExternalUser, UpdatedSuspendGraceDate);
       }
     }
    

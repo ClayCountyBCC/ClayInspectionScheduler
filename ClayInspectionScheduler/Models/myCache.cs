@@ -66,12 +66,15 @@ namespace ClayInspectionScheduler.Models
     private static object InitItem(string key)
     {
       string[] s = key.Split(new[] { "," }, StringSplitOptions.None);
+      bool IsExternal = bool.Parse(s[1]);
 
-      switch( s[ 0 ].ToLower() )
+      switch ( s[ 0 ].ToLower() )
       {
         case "inspectiontypes":
-          bool IsExternal = bool.Parse(s[ 1 ]);
           return InspType.Get(IsExternal);
+        case "calendardate":
+          DateTime SuspendGraceDate = DateTime.Parse(s[2]);
+          return CalendarDate.GenerateShortDates(IsExternal, SuspendGraceDate);
         default:
           return null;
       }

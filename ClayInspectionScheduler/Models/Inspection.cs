@@ -23,6 +23,8 @@ namespace ClayInspectionScheduler.Models
 
     public string ResultADC { get; set; }
 
+    public string SetResult_URL { get; set; } = "";
+
     public string ResultDescription
     {
       get
@@ -37,6 +39,8 @@ namespace ClayInspectionScheduler.Models
             return "Denied";
           case "P":
             return "Pass";
+          case "N":
+            return "Not Performed";
           default:
             return "";
 
@@ -131,6 +135,20 @@ namespace ClayInspectionScheduler.Models
       try
       {
         var li = Constants.Get_Data<Inspection>(sql, dbArgs);
+        foreach (var l in li)
+        {
+          if (l.ResultDescription == "")
+          {
+            if (Constants.UseProduction() == true)
+            {
+              l.SetResult_URL = $@"http://claybccims/WATSWeb/Permit/Inspection/Inspection.aspx?InspReqId={l.InspReqID}&PermitNo={l.PermitNo}&OperId=&Type=Bldg&Desc={l.InsDesc}";
+            }
+            else
+            {
+              l.SetResult_URL = $@"http://claybccimstrn/WATSWeb/Permit/Inspection/Inspection.aspx?InspReqId={l.InspReqID}&PermitNo={l.PermitNo}&OperId=&Type=Bldg&Desc={l.InsDesc}";
+            }
+          }
+        }
         return li;
       }
       catch (Exception ex)

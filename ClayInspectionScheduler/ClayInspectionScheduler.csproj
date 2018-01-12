@@ -20,7 +20,7 @@
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
-    <IISExpressAnonymousAuthentication>disabled</IISExpressAnonymousAuthentication>
+    <IISExpressAnonymousAuthentication>enabled</IISExpressAnonymousAuthentication>
     <IISExpressWindowsAuthentication>enabled</IISExpressWindowsAuthentication>
     <IISExpressUseClassicPipelineMode />
     <UseGlobalApplicationHostFile />
@@ -106,9 +106,9 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\CalendarDate.cs" />
     <Compile Include="Models\Hold.cs" />
     <Compile Include="Models\Constants.cs" />
-    <Compile Include="Models\InspectionDates.cs" />
     <Compile Include="Models\ErrorLog.cs" />
     <Compile Include="Models\Inspection.cs" />
     <Compile Include="Models\InspType.cs" />
