@@ -7,7 +7,6 @@ using System.Web;
 using System.Data;
 using Dapper;
 
-
 namespace ClayInspectionScheduler.Models
 {
   public class Permit
@@ -21,7 +20,7 @@ namespace ClayInspectionScheduler.Models
     public bool NoFinalInspections { get; set; } // If this is true, they can't schedule a final inspection on the client.
     public string Supervisor_URL { get; set; } = "";
     public string Permit_URL { get; set; } = "";
-    private string ContractorId { get; set; }
+    private string ContractorId { get; set; } = "";
     private int Confidential { get; set; }
     private DateTime SuspendGraceDate { get; set; } = DateTime.MinValue;
     private DateTime WorkersCompExpirationDate { get; set; } = DateTime.MaxValue;
@@ -34,21 +33,34 @@ namespace ClayInspectionScheduler.Models
     private string ContractorStatus { get; set; } // check if Contractor is active
     private string PrivateProvider { get; set; } = "";
     private List<Hold> Holds { get; set; }
-
-    
-    public List<string> ScheduleDates
+    private string PermitTypeString
     {
       get
       {
-        // SuspendGraceDate if not ==  DateTime.MinValue, is calculated as SuspendGraceDate + 15 in GetPermit
-        // this statement is designed to check the pre-calculated SuspendGraceDate against the boundaries 
-        // of the internal/external user allowed dates
-        var UpdatedSuspendGraceDate = SuspendGraceDate > DateTime.Today ? SuspendGraceDate : DateTime.MinValue ;
-        
-        return CalendarDate.GetCachedDates(IsExternalUser, UpdatedSuspendGraceDate);
+        switch(this.PermitNo[0].ToString())
+        {
+          case "2":
+            return "EL";
+          case "3":
+            return "PL";
+          case "4":
+            return "ME";
+          case "6":
+            return "FR";
+          default:
+            return "BL";
+        }
       }
     }
-   
+
+    public DateCache Dates
+    {
+      get
+      {
+        return DateCache.getDateCache(IsExternalUser, SuspendGraceDate);
+      }
+    }
+
     public Permit()
     {
 
@@ -172,15 +184,27 @@ namespace ClayInspectionScheduler.Models
 
             if (Constants.UseProduction() == true)
             {
-              l.Supervisor_URL = isSupervisor ? $@"http://claybccims/WATSWeb/Permit/Inspection/Inspection.aspx?PermitNo={l.PermitNo}&OperId=&Nav=BL" : "";
-              l.Permit_URL = $@"http://claybccims/WATSWeb/Permit/MainBL.aspx?PermitNo={l.PermitNo}&Nav=BL&OperId=";
-
+              l.Supervisor_URL = isSupervisor ? $@"http://claybccims/WATSWeb/Permit/Inspection/Inspection.aspx?PermitNo={l.PermitNo}" : "";
+              if (l.PermitTypeString == "BL")
+              {
+                l.Permit_URL = $@"http://claybccims/WATSWeb/Permit/MainBL.aspx?PermitNo={l.PermitNo}&Nav=PL&OperId=&PopUp=";
+              }
+              else
+              {
+                l.Permit_URL = $@"http://claybccims/WATSWeb/Permit/APermit{l.PermitTypeString}.aspx?PermitNo={l.PermitNo}";
+              }
             }
             else
             {
               l.Supervisor_URL = isSupervisor ? $@"http://claybccimstrn/WATSWeb/Permit/Inspection/Inspection.aspx?PermitNo={l.PermitNo}&OperId=&Nav=BL" : "";
-              l.Permit_URL = $@"http://claybccimstrn/WATSWeb/Permit/MainBL.aspx?PermitNo={l.PermitNo}&Nav=BL&OperId=";
-
+              if (l.PermitTypeString == "BL")
+              {
+                l.Permit_URL = $@"http://claybccimstrn/WATSWeb/Permit/MainBL.aspx?PermitNo={l.PermitNo}";
+              }
+              else
+              {
+                l.Permit_URL = $@"http://claybccimstrn/WATSWeb/Permit/APermit{l.PermitTypeString}.aspx?PermitNo={l.PermitNo}";
+              }
             }
 
             l.IsExternalUser = IsExternalUser;
@@ -407,16 +431,18 @@ namespace ClayInspectionScheduler.Models
       }
 
       if (this.IsExternalUser)
-      {
+      { 
         if (PassedFinal()) return;
         if (PrivateProvider.Length > 0)
         {
           if (CheckPrivProv(PrivateProvider)) return;
         }
+        if (CheckSuspendGraceDate(this.SuspendGraceDate)) return;
+
+
       }
 
       if (ContractorIssues()) return;
-      
     }
 
     private bool CheckPrivProv(string PrivProvValidate)
@@ -430,6 +456,16 @@ namespace ClayInspectionScheduler.Models
       return false;
     }
 
+    private bool CheckSuspendGraceDate(DateTime SuspendGraceDate)
+    {
+      if (SuspendGraceDate.ToShortDateString() == DateTime.Today.ToShortDateString())
+      {
+        this.ErrorText = "The Grace Date for this contractor has passed. Please contact the Building Department for assistance.";
+        return true;
+      }      return false;
+        
+    }
+
     private bool ContractorIssues()
     {
       // Contractor Owners do not have any valid data for these fields
@@ -437,8 +473,12 @@ namespace ClayInspectionScheduler.Models
       {
         return false;
       }
-
-      if (this.ContractorStatus != "A")
+      if(ContractorId == "")
+      {
+        ErrorText = "There is no contractor selected on this permit. Please contact the Building Department if you would like to schedule an inspection.";
+      }
+      
+      if (this.ContractorStatus != "A" )
       {
         ErrorText = "There is an issue with the contractor's status";
         return true;

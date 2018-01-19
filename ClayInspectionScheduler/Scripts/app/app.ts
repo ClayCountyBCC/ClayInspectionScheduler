@@ -13,12 +13,8 @@ namespace InspSched
   "use strict";
 
   let dpCalendar = null;
-  export let InspectionDates: Array<string> = [];
   export let InspectionTypes: Array<InspType> = [];
-  export let firstDay: string;
-  export let lastDay: string;
   export let newInsp: NewInspection;
-  export let GracePeriodDate: string = "";
   export let CurrentPermits: Array<Permit> = [];
   export let CurrentInspections: Array<Inspection> = [];
   export let IssuesExist: Array<string> = [];
@@ -274,19 +270,13 @@ namespace InspSched
 
     if (errorText.length === 0)
     {
-      
-      let additionalDisabledDates: string[] = GetAdditionalDisabledDates(dates);
-
-      InspSched.InspectionDates = dates;
-      InspSched.firstDay = InspSched.InspectionDates[0];
-      InspSched.lastDay = InspSched.InspectionDates[dates.length - 1];
 
       dpCalendar = $('#sandbox-container div').datepicker(
         <DatepickerOptions>
         {
-          startDate: InspSched.firstDay,
-          datesDisabled: additionalDisabledDates,
-          endDate: InspSched.lastDay,
+          startDate: InspSched.ThisPermit.Dates.minDate_string,
+          datesDisabled: InspSched.ThisPermit.Dates.badDates_string,
+          endDate: InspSched.ThisPermit.Dates.maxDate_string,
           maxViewMode: 0,
           toggleActive: true,
 
@@ -323,24 +313,6 @@ namespace InspSched
         SaveInspectionButton.setAttribute( "disabled", "disabled" );
       }
     }
-  }
-
-
-
-  function GetAdditionalDisabledDates( dates: Array<string> ): Array<string>
-  {
-    var AdditionalDisabledDates: Array<string> = [];
-    if ( dates.length > 2 )
-    {
-      for ( let d: number = 1; d < dates.length - 1; d++ )
-      {
-        AdditionalDisabledDates.push( dates[d] );
-
-      }
-
-    }
-
-    return AdditionalDisabledDates;
   }
 
   export function UpdatePermitSelectList(PermitNo: string):void
@@ -390,7 +362,7 @@ namespace InspSched
       if (isDeleted)
       {
         InspSched.UI.GetInspList(PermitNo);
-        BuildCalendar(ThisPermit.ScheduleDates);
+        BuildCalendar(InspSched.ThisPermit.ScheduleDates);
       }
 
       else
