@@ -59,8 +59,6 @@ namespace ClayInspectionScheduler.Models
       get
       {
         var dc = DateCache.getDateCache(this.IsExternalUser, this.SuspendGraceDate);
-
-
         return dc;
       }
     }
