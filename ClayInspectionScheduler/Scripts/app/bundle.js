@@ -710,9 +710,7 @@ var InspSched;
 (function (InspSched) {
     "use strict";
     var dpCalendar = null;
-    InspSched.InspectionDates = [];
     InspSched.InspectionTypes = [];
-    InspSched.GracePeriodDate = "";
     InspSched.CurrentPermits = [];
     InspSched.CurrentInspections = [];
     InspSched.IssuesExist = [];
@@ -892,14 +890,10 @@ var InspSched;
         if (errorText === void 0) { errorText = ""; }
         $(dpCalendar).datepicker('destroy');
         if (errorText.length === 0) {
-            var additionalDisabledDates = GetAdditionalDisabledDates(dates);
-            InspSched.InspectionDates = dates;
-            InspSched.firstDay = InspSched.InspectionDates[0];
-            InspSched.lastDay = InspSched.InspectionDates[dates.length - 1];
             dpCalendar = $('#sandbox-container div').datepicker({
-                startDate: InspSched.firstDay,
-                datesDisabled: additionalDisabledDates,
-                endDate: InspSched.lastDay,
+                startDate: InspSched.ThisPermit.Dates.minDate_string,
+                datesDisabled: InspSched.ThisPermit.Dates.badDates_string,
+                endDate: InspSched.ThisPermit.Dates.maxDate_string,
                 maxViewMode: 0,
                 toggleActive: true,
             });
@@ -925,15 +919,6 @@ var InspSched;
                 SaveInspectionButton.setAttribute("disabled", "disabled");
             }
         }
-    }
-    function GetAdditionalDisabledDates(dates) {
-        var AdditionalDisabledDates = [];
-        if (dates.length > 2) {
-            for (var d = 1; d < dates.length - 1; d++) {
-                AdditionalDisabledDates.push(dates[d]);
-            }
-        }
-        return AdditionalDisabledDates;
     }
     function UpdatePermitSelectList(PermitNo) {
         document.getElementById("NotScheduled").style.display = "none";

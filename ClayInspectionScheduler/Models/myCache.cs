@@ -72,9 +72,8 @@ namespace ClayInspectionScheduler.Models
       {
         case "inspectiontypes":
           return InspType.Get(IsExternal);
-        case "calendardate":
-          DateTime SuspendGraceDate = DateTime.Parse(s[2]);
-          return CalendarDate.GenerateShortDates(IsExternal, SuspendGraceDate);
+        case "datecache":
+          return new DateCache(IsExternal);
         default:
           return null;
       }

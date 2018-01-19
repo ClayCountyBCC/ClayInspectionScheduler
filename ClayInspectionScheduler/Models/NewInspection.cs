@@ -88,9 +88,9 @@ namespace ClayInspectionScheduler.Models
 
         // validate user selected date
 
-        var start = DateTime.Parse(CurrentPermit.ScheduleDates.First());
-        var end = DateTime.Parse(CurrentPermit.ScheduleDates.Last());
-        var badDates = (from d in CurrentPermit.ScheduleDates
+        var start = DateTime.Parse(CurrentPermit.Dates.minDate_string);
+        var end = DateTime.Parse(CurrentPermit.Dates.maxDate_string);
+        var badDates = (from d in CurrentPermit.Dates.badDates_string
                         where DateTime.Parse(d) != start &&
                         DateTime.Parse(d) != end
                         select d).ToList<string>();
@@ -275,22 +275,6 @@ namespace ClayInspectionScheduler.Models
         errors.Add("No Record Saved, Please Try again. Contact the Building department if issues persist.");
       }
       return errors;
-      //try
-      //{
-      //  int i = Constants.Execute(sql, dbArgs);
-      //  if(i<1)
-      //  {
-      //    errors.Add("No Record Saved, Please Try again. Contact the Building department if issues persist.");
-      //  }
-
-      //  return errors;
-      //}
-      //catch (Exception ex)
-      //{
-      //  Constants.Log(ex, sql);
-      //  return null;
-      //}
-
 
 
     }

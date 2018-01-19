@@ -45,10 +45,6 @@ namespace InspSched.UI
 
   export function ProcessResults(permits: Array<Permit>, key: string)
   {
-    
-
-    
-
 
     if (permits.length == 0)
     {
@@ -63,9 +59,7 @@ namespace InspSched.UI
       ShowTable(key, permits);
 
     }
-
-
-
+    
   }
 
   /**********************************
