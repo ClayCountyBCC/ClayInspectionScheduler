@@ -4,6 +4,8 @@ using Dapper;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.Caching;
+
 
 namespace ClayInspectionScheduler.Models
 {
@@ -12,7 +14,6 @@ namespace ClayInspectionScheduler.Models
     private DateTime baseMinDate { get; set; }
     private DateTime baseMaxDate { get; set; }
     private DateTime maxDate { get; set; }
-    private DateTime SuspendGraceDate { get; set; } = DateTime.MinValue;
 
     public string minDate_string
     {
@@ -39,21 +40,13 @@ namespace ClayInspectionScheduler.Models
       }
     }
     
-    public void SetMaxDate()
+    private void SetMaxDate(DateTime SuspendGraceDt)
     {
-      if (SuspendGraceDate >= goodDates.First())
-      {
-        goodDates.RemoveAll(x => x > SuspendGraceDate);
-      }
       // do all the funky stuff in here
-      if (SuspendGraceDate >= goodDates.First())
+      if (SuspendGraceDt > goodDates.First() && SuspendGraceDt < goodDates.Last())
       {
-        goodDates.RemoveAll(x => x > SuspendGraceDate);
-      }
-
-      if (goodDates.Count() == 1 && baseMaxDate == DateTime.MinValue)
-      {
-
+        maxDate = SuspendGraceDt;
+        //goodDates.RemoveAll(x => x > SuspendGraceDt);
       }
       else
       {
@@ -61,8 +54,12 @@ namespace ClayInspectionScheduler.Models
       }
 
     }
+    public static DateCache CacheDates(bool IsExternalUser)
+    {
+      return new DateCache(IsExternalUser);
+    }
 
-    public DateCache (bool isExternal)
+    public DateCache(bool isExternal)
     {
       var dbArgs = new DynamicParameters();
       dbArgs.Add("@Start", isExternal ? DateTime.Today.AddDays(1) : DateTime.Today);
@@ -77,58 +74,36 @@ namespace ClayInspectionScheduler.Models
           day_of_week 
         FROM Dates
         WHERE calendar_date BETWEEN @Start AND @End";
-      try
-      {
-        var datelist = Constants.Get_Data<CalendarDate>(sql, dbArgs); // fix this
+
+      var datelist = Constants.Get_Data<CalendarDate>(sql, dbArgs); // fix this
 
         
-        badDates = (from d in datelist
-                    where d.day_of_week == 1 ||
-                     d.day_of_week == 7 ||
-                     d.observed_holiday == 1
+      badDates = (from d in datelist
+                  where d.day_of_week == 1 ||
+                    d.day_of_week == 7 ||
+                    d.observed_holiday == 1
+                  select d.calendar_date).ToList();
+
+      goodDates = (from d in datelist
+                    where d.day_of_week != 1 &&
+                      d.day_of_week != 7 &&
+                      d.observed_holiday != 1
                     select d.calendar_date).ToList();
 
-        goodDates = (from d in datelist
-                     where d.day_of_week != 1 &&
-                       d.day_of_week != 7 &&
-                       d.observed_holiday != 1
-                     select d.calendar_date).ToList();
+      var dl = (from g in goodDates
+                orderby g ascending
+                select g);
 
-        var dl = (from g in goodDates
-                  orderby g ascending
-                  select g);
+      baseMinDate = dl.First();
+      baseMaxDate = dl.Last();
 
-        baseMinDate = dl.First();
-        baseMaxDate = dl.Last();
-      }catch(Exception ex)
-      {
-        // This area sets dates to Today during unless it is the weekend for Testing. Calendar DB does not exist in CLAYBCCIMSTRN\SQLEXPRESS.
-        badDates = new List<DateTime>();
-
-        goodDates = new List<DateTime>();
-
-        if (DateTime.Today.DayOfWeek.ToString() != "Saturday" && DateTime.Today.DayOfWeek.ToString() != "Sunday")
-        {
-          goodDates.Add(DateTime.Today);
-          baseMinDate = DateTime.Today;
-          baseMaxDate = DateTime.Today;
-        }
-        else
-        {
-          goodDates.Add(DateTime.Today);
-          baseMinDate = DateTime.Today;
-          baseMaxDate = DateTime.MinValue;
-        }
-        Constants.Log(ex, sql);
-      }
     }
 
-    public static DateCache getDateCache(bool IsExternalUser, DateTime suspendGraceDate)
+    public static DateCache getDateCache(bool IsExternalUser, DateTime SuspendGraceDt)
     {
-      var dc = (DateCache)MyCache.GetItem("datecache," + IsExternalUser.ToString());
-      dc.SuspendGraceDate = suspendGraceDate;
-      dc.SetMaxDate();
-
+      var CIP = new CacheItemPolicy() { AbsoluteExpiration = DateTime.Today.AddDays(1) };
+      var dc = (DateCache)MyCache.GetItem("datecache," + IsExternalUser.ToString(), CIP);
+      dc.SetMaxDate(SuspendGraceDt);
       return dc;
     }
 

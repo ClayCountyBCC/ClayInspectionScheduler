@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Web;
 using System.Data;
+using System.Runtime.Caching;
 using Dapper;
 
 namespace ClayInspectionScheduler.Models
@@ -57,7 +58,8 @@ namespace ClayInspectionScheduler.Models
     {
       get
       {
-        return DateCache.getDateCache(IsExternalUser, SuspendGraceDate);
+        var dc = DateCache.getDateCache(this.IsExternalUser, this.SuspendGraceDate);
+        return dc;
       }
     }
 
@@ -473,7 +475,7 @@ namespace ClayInspectionScheduler.Models
       {
         return false;
       }
-      if(ContractorId == "")
+      if(this.ContractorId == "" || this.ContractorId == null)
       {
         ErrorText = "There is no contractor selected on this permit. Please contact the Building Department if you would like to schedule an inspection.";
       }
