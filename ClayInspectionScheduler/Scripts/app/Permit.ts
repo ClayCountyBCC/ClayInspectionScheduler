@@ -18,7 +18,7 @@ namespace InspSched
     ScheduleDates: string[];
     Supervisor_URL: string;
     Permit_URL: string;
-
+    Dates: DateCache;
 
   }
 
@@ -34,6 +34,8 @@ namespace InspSched
     public ScheduleDates: string[];
     public Supervisor_URL: string;
     public Permit_URL: string;
+    public Dates: DateCache;
+
     constructor( IsExternalUser: boolean) 
     {
 
