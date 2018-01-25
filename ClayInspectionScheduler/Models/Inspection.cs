@@ -55,8 +55,7 @@ namespace ClayInspectionScheduler.Models
     public string Phone { get; set; } = " ";
 
     public string InspectorName { get; set; } = "Unassigned";
-
-
+   
     public string DisplayInspDateTime
     {
       get
@@ -159,6 +158,79 @@ namespace ClayInspectionScheduler.Models
       }
 
     }
+
+
+    public static bool UpdateInspectionResult(string PermitNo, string InspID, char Result, string Remark, string Username)
+    {
+      /**
+       * 
+       * Set inspection result
+       * A simple Cancel should not do be done with the set result screen.
+       *    That is easily done using the 'Cancel' button 
+       *    on the View Inspection Screen. 
+       * 
+       * Only use the Set Result screen if a note needs to be added to a cancel.
+       * 
+       * I HAVE INQUIRED AS TO WHETHER THERE IS A DOCUMENT, PHYSICAL OR DIGITAL, 
+       * REPRESENTING THE INSPECTION AND ALL MARKS FROM THE INSPECTOR THAT MAY
+       * NEED TO BE VIEWED. NOT TRYING TO ADD ADDITIONAL FUNCTIONALITY BUT I WAS NOT SURE
+       * IF THIS FUNCTIONALITY ALREADY EXISTS, WHICH WOULD NECESSITATE A LINK TO THE DOC
+       * 
+       * ALSO, WHEN THE INSPECTOR SAVES THE RESULT, WHERE WILL THE PROGRAM DIRECT THE USER?
+       *  WILL IT LOAD INSPECTION SCHEDULER WITH THE PERMIT NUMBER FROM THE INSPECTION AND SHOW THE LIST OF INSPECTIONS?
+       *  OR WILL IT DIRECT THE INSPECTOR BACK TO THE MAP/BULK LIST OF THEIR INSPECTIONS TO COMPLETE FOR THE DAY?
+       *  
+       * Options available on the Set Result screen:
+       * FOR THOSE INSPECTED BY COUNTY INSPECTORS:
+       *  APPROVE - Set ResultADC = 'A'
+       *  DISSAPROVE - Set ResultADC = 'D'; ASSESS RE-INSPECTION FEE
+       * 
+       *  INSPECTION FEE IS FLAT $35.00 ASSESSED WHEN RESULT 'D' IS SELECTED AND SAVED
+       *  CURRENTLY CALLING A STORED PROCEDURE TO ADD CHARGE ROW TO WATSC.dbo.ccCashierItem TABLE
+       * 
+       * FOR THOSE INSPECTED BY PRIVATE PROVIDERS
+       *  PERFORMED -  SET ResultADC = 'P'
+       *  NOT PERFORMED - SET ResultADC = 'N; NO RE-INSPECTION FEE ASSESSED  
+       * 
+       * REMARKS FIELD:
+       *  FIELD AND FUNCTIONALITY WILL REMAIN THE SAME AS OLD IMS VERSION. 
+       *  RESULT IS NECESSARY TO SAVE
+       *  REMARKS BY INSPECTOR ARE NOT REQUIRED TO SAVE
+       *    (CHECK WITH BLDG DEPT IF REMARK SHOULD BE REQ. IF RESULT IS 'D' OR 'N')
+       *  
+       * COMMENTS: 
+       *  1. ONLY VISIBLE IF INTERNAL
+       *  2. PREVIOUS COMMENTS CANNOT BE DELETED
+       *  3. NEW COMMENTS APPENDED TO FIELD
+       *    a. INCLUDE TIMESTAMP
+       *    b. INCLUDE USERNAME IF INTERNAL / INITIAL IF EXTERNAL
+       *    
+       * ADDITIONAL FUNCTIONS:
+       *  1. CREATE HOLD (STORED PROCEDURE: WATSC.dbo.prc_upd_ir)
+       *      @HoldId = SELECT HoldId FROM bpHOLD WHERE HOLD_InspReqId = INSP_InspReqId
+       *      IF @HoldId IS NULL
+       *        INSERT INTO bpHOLD
+			 *         (BaseID, PermitNo, HldCd, InspReqID, InspReqChrg, HldInput)
+       *         SET @HoldId = SCOPE_IDENTITY();
+       *      IF HoldId IS NOT NULL
+       *       UPDATE bpHOLD
+			 *       SET  InspReqID = @InspReqID, InspReqChrg = @Amt, HldInput = @HldInput+@Amt
+			 *       WHERE HoldID = @HoldId
+       *  2. CREATE CHARGE
+       *       @HldInput = PermitNo + ' ' + 
+       *                  InspectionCode + ' ' + 
+       *                  cast(MONTH(SchecDateTime) as varchar(2)) + '/' + 
+       *                  cast(DAY(SchecDateTime) as varchar(2))+ '/' + 
+       *                  cast(Year(SchecDateTime) as varchar(4)) + ' $',
+			 *                  @PermitNo=PermitNo
+       *       INSERT INTO ccCashierItem (NTUser, CatCode, Assoc, AssocKey, BaseFee, Total, Variable, Narrative, HoldID)
+       *       VALUES (@UserName,@CatCd,@AlphaPermitType,@PermitNo,@Amt,@Amt,1,@HldInput, @HoldId)
+       *       
+      **/
+
+      return false;
+    }
+
 
 
     public static bool Cancel(string PermitNo, string InspID)

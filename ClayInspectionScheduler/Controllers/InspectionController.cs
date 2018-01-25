@@ -23,17 +23,47 @@ namespace ClayInspectionScheduler.Controllers
         return Ok ( lp );
       }
     }
-    public IHttpActionResult Delete( string id , string InspId)
+
+
+    // Calls a function to set the result of an inspection
+    public IHttpActionResult Update(string PermitNo, string InspID, char ResultADC, string Remark)
     {
-      
-      bool lp = Inspection.Cancel ( id  ,InspId);
-      if (!lp )
+      var CanSetResult = true;
+      if (CanSetResult)
       {
-        return InternalServerError ( );
+        bool sr = Inspection.UpdateInspectionResult(
+                   PermitNo,
+                   InspID,
+                   ResultADC,
+                   Remark,
+                   User.Identity.Name);
+        if (!sr)
+        {
+          return InternalServerError();
+        }
+        else
+        {
+          return Ok(sr);
+        }
+      }
+      return Ok(false);
+    }
+
+
+    // Incorrectly named
+    // The called function does not delete the inspection row, 
+    // only changes ResultADC of the inspection to 'C' (Cancel.)
+    public IHttpActionResult Delete(string id, string InspId)
+    {
+
+      bool lp = Inspection.Cancel(id, InspId);
+      if (!lp)
+      {
+        return InternalServerError();
       }
       else
       {
-        return Ok ( lp );
+        return Ok(lp);
       }
 
     }
