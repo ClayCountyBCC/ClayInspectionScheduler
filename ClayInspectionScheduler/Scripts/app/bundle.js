@@ -1,7 +1,7 @@
 var InspSched;
 (function (InspSched) {
     var LocationHash // implements ILocationHash
-     = (function () {
+     = /** @class */ (function () {
         function LocationHash(locationHash) {
             this.Permit = "";
             var ha = locationHash.split("&");
@@ -32,7 +32,7 @@ var InspSched;
 /// <reference path="ui.ts" />
 var InspSched;
 (function (InspSched) {
-    var NewInspection = (function () {
+    var NewInspection = /** @class */ (function () {
         function NewInspection(PermitNo, InspectionCd, SchecDateTime) {
             this.PermitNo = PermitNo;
             this.InspectionCd = InspectionCd;
@@ -516,7 +516,7 @@ var InspSched;
  */
 var XHR;
 (function (XHR) {
-    var Header = (function () {
+    var Header = /** @class */ (function () {
         function Header(header, data) {
             this.header = header;
             this.data = data;
@@ -524,7 +524,7 @@ var XHR;
         return Header;
     }());
     XHR.Header = Header;
-    var Data = (function () {
+    var Data = /** @class */ (function () {
         function Data() {
         }
         return Data;

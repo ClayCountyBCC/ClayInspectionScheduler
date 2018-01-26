@@ -83,11 +83,10 @@ namespace ClayInspectionScheduler.Models
 
     }
 
-    public static List<Inspection> Get(string key)
+    private static List<Inspection> GetRaw(string PermitNumber)
     {
-
       var dbArgs = new Dapper.DynamicParameters();
-      dbArgs.Add("@PermitNo", key);
+      dbArgs.Add("@PermitNo", PermitNumber);
 
       string sql = @"
         USE WATSC;
@@ -129,11 +128,16 @@ namespace ClayInspectionScheduler.Models
         LEFT OUTER JOIN bpINS_REF ir ON ir.InspCd = i.InspectionCode
         LEFT OUTER JOIN bp_INSPECTORS ip ON i.Inspector = ip.Intl 
         ORDER BY InspReqID DESC";
+      return Constants.Get_Data<Inspection>(sql, dbArgs);
+    }
 
-
+    public static List<Inspection> Get(string PermitNumber)
+    {
       try
       {
-        var li = Constants.Get_Data<Inspection>(sql, dbArgs);
+        var li = GetRaw(PermitNumber);
+        if (li == null) return new List<Inspection>();
+
         foreach (var l in li)
         {
           if (l.ResultDescription == "")
@@ -152,7 +156,7 @@ namespace ClayInspectionScheduler.Models
       }
       catch (Exception ex)
       {
-        Constants.Log(ex, sql);
+        Constants.Log(ex, "");
         var li = new List<Inspection>();
         return li;
       }
@@ -248,13 +252,22 @@ namespace ClayInspectionScheduler.Models
 
           USE WATSC;
         
-          Update bpINS_REQUEST
-          set RESULTADC = 'C', InspDateTime = GetDate()
-          where PermitNo = @PermitNo AND InspReqID = @ID
+          UPDATE bpINS_REQUEST
+          SET 
+            RESULTADC = 'C', 
+            InspDateTime = GetDate()
+          WHERE 
+            PermitNo = @PermitNo 
+            AND InspReqID = @ID
+            AND ResultADC IS NULL;
             
-          update bpPrivateProviderInsp
-          SET Result = 'C', InspDt = GetDate()
-          WHERE IRId = (SELECT PrivProvIRId FROM bpINS_REQUEST WHERE InspReqID = @ID);";
+          UPDATE bpPrivateProviderInsp
+          SET 
+            Result = 'C', 
+            InspDt = GetDate()
+          WHERE 
+            IRId = (SELECT PrivProvIRId FROM bpINS_REQUEST WHERE InspReqID = @ID)
+            AND Result IS NULL;";
 
         try
         {

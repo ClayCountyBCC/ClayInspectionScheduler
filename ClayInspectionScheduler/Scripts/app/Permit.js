@@ -2,7 +2,7 @@
 /// <reference path="ui.ts" />
 var InspSched;
 (function (InspSched) {
-    var Permit = (function () {
+    var Permit = /** @class */ (function () {
         function Permit(IsExternalUser) {
             this.IsExternalUser = true;
         }

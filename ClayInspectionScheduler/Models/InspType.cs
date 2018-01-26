@@ -17,6 +17,8 @@ namespace ClayInspectionScheduler.Models
 
     public bool Final { get; set; }
 
+    // fee on fail
+
 
     public static List<InspType> Get(bool IsExternalUser)
     {

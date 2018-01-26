@@ -1,7 +1,7 @@
 var InspSched;
 (function (InspSched) {
     var LocationHash // implements ILocationHash
-     = (function () {
+     = /** @class */ (function () {
         function LocationHash(locationHash) {
             this.Permit = "";
             var ha = locationHash.split("&");
