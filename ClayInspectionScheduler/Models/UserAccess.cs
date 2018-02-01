@@ -6,9 +6,11 @@ using System.DirectoryServices.AccountManagement;
 
 namespace ClayInspectionScheduler.Models
 {
-  class UserAccess
+  public class UserAccess
   {
     private const string basic_access_group = "gInspectionAppAccess"; // We may make this an argument if we end up using this code elsewhere.
+    private const string inspector_access_group = "gInspectionAppInspectors";
+    private const string mis_access_group = "gICT";
     public bool authenticated { get; set; } = false;
     public string user_name { get; set; }
     public int employee_id { get; set; } = 0;
@@ -17,16 +19,21 @@ namespace ClayInspectionScheduler.Models
     {
       no_access = 0, // denied access
       public_access = 1, // They get treated like public users.
-      basic_access = 2
+      basic_access = 2,
+      inspector_access = 3
     }
     public access_type current_access { get; set; } = access_type.public_access; // default to public access.
 
     public UserAccess(string name)
     {
       user_name = name;
-      display_name = name;
-      if (name.Length > 0)
+      if(user_name.Length == 0)
       {
+        display_name = "Public User";
+      }
+      else
+      {
+        display_name = name;
         using (PrincipalContext pc = new PrincipalContext(ContextType.Domain))
         {
           try
@@ -63,9 +70,16 @@ namespace ClayInspectionScheduler.Models
           employee_id = int.Parse(up.EmployeeId);
           var groups = (from g in up.GetAuthorizationGroups()
                         select g.Name).ToList();
-          if (groups.Contains(basic_access_group))
+          if(groups.Contains(mis_access_group) | groups.Contains(inspector_access_group))
           {
-            current_access = access_type.basic_access;
+            current_access = access_type.inspector_access;
+          }
+          else
+          {
+            if (groups.Contains(basic_access_group))
+            {
+              current_access = access_type.basic_access;
+            }
           }
         }
       }
@@ -75,28 +89,36 @@ namespace ClayInspectionScheduler.Models
       }
     }
 
+    private static void ParseGroup(string group, ref Dictionary<string, UserAccess> d)
+    {
+      using (PrincipalContext pc = new PrincipalContext(ContextType.Domain))
+      {
+        using (GroupPrincipal gp = GroupPrincipal.FindByIdentity(pc, basic_access_group))
+        {
+          if (gp != null)
+          {
+            foreach (UserPrincipal up in gp.GetMembers())
+            {
+              if (up != null)
+              {
+                d.Add(up.SamAccountName.ToLower(), new UserAccess(up));
+              }
+            }
+          }
+        }
+      }
+    }
+
     public static Dictionary<string, UserAccess> GetAllUserAccess()
     {
       var d = new Dictionary<string, UserAccess>();
 
       try
       {
-        using (PrincipalContext pc = new PrincipalContext(ContextType.Domain))
-        {
-          using (GroupPrincipal gp = GroupPrincipal.FindByIdentity(pc, basic_access_group))
-          {
-            if (gp != null)
-            {
-              foreach (UserPrincipal up in gp.GetMembers())
-              {
-                if (up != null)
-                {
-                  d.Add(up.SamAccountName.ToLower(), new UserAccess(up));
-                }
-              }
-            }
-          }
-        }
+        ParseGroup(basic_access_group, ref d);
+        ParseGroup(inspector_access_group, ref d);
+        ParseGroup(mis_access_group, ref d);
+        d[""] = new UserAccess(""); // for the anonymous users
         return d;
       }
       catch (Exception ex)
@@ -104,6 +126,16 @@ namespace ClayInspectionScheduler.Models
         new ErrorLog(ex);
         return null;
       }
+    }
+
+    public static UserAccess GetUserAccess(string Username)
+    {
+      return GetCachedAllUserAccess()[Username];
+    }
+
+    public static Dictionary<string, UserAccess> GetCachedAllUserAccess()
+    {
+      return (Dictionary<string, UserAccess>)MyCache.GetItem("useraccess");
     }
 
   }

@@ -39,6 +39,8 @@ namespace ClayInspectionScheduler.Models
       }
     }
 
+    public string Comment { get; set; }
+
     public NewInspection(string PermitNo, string InspectionCd, DateTime SchecDateTime)
     {
       this.PermitNo = PermitNo;
@@ -46,7 +48,7 @@ namespace ClayInspectionScheduler.Models
       this.SchecDateTime = SchecDateTime;
     }
 
-    public List<string> Validate(bool IsExternalUser, List<InspType> inspTypes)
+    public List<string> Validate(UserAccess.access_type CurrentAccess, List<InspType> inspTypes)
     {
       // List of things that need to be validated:
       // 0) Make sure the permit is able to be scheduled to be inspected.
@@ -63,7 +65,7 @@ namespace ClayInspectionScheduler.Models
       
        //= (List<InspType>)MyCache.GetItem("inspectiontypes,"+IsExternalUser.ToString());
 
-      var Permits = (from p in Permit.Get(this.PermitNo, IsExternalUser, false)
+      var Permits = (from p in Permit.Get(this.PermitNo, CurrentAccess)
                      where p.PermitNo == this.PermitNo
                      select p).ToList();
 
@@ -207,29 +209,32 @@ namespace ClayInspectionScheduler.Models
       }
     }
 
-    public List<string> Save(bool IsExternalUser, string name)
+    public List<string> Save(UserAccess ua)
     {
-      List<InspType> inspTypes = (List<InspType>)MyCache.GetItem("inspectiontypes," + IsExternalUser.ToString());
-      List<string> errors = this.Validate(IsExternalUser, inspTypes);
+      List<InspType> inspTypes = InspType.GetCachedInspectionTypes();
+      List<string> errors = this.Validate(ua.current_access, inspTypes);
 
       if (errors.Count > 0)
         return errors;
 
       int IRID = this.AddIRID();
+      string InitialComment = "Inspection Request created.";
 
       var dbArgs = new Dapper.DynamicParameters();
       dbArgs.Add("@PermitNo", this.PermitNo);
       dbArgs.Add("@InspCd", this.InspectionCd);
       dbArgs.Add("@SelectedDate", this.SchecDateTime.Date);
-      dbArgs.Add("@Username", name.Trim(), dbType: DbType.String, size: 7);
+      dbArgs.Add("@Username", ua.user_name.Trim(), dbType: DbType.String, size: 7);
+      dbArgs.Add("@DisplayName", ua.display_name);
       dbArgs.Add("@IRID", (IRID == -1) ? null : IRID.ToString());
-      dbArgs.Add("@SavedInspID",-1, dbType: DbType.Int32, direction: ParameterDirection.Output,size:8);
-
-      
+      dbArgs.Add("@InitialComment", InitialComment);
+      dbArgs.Add("@Comment", Comment);
+      dbArgs.Add("@SavedInspectionID",-1, dbType: DbType.Int32, direction: ParameterDirection.Output,size:8);
 
       string sql =  $@"
-      USE WATSC;      
-      insert into bpINS_REQUEST
+      USE WATSC;     
+
+      INSERT INTO bpINS_REQUEST
           (PermitNo,
           InspectionCode,
           SchecDateTime,
@@ -241,7 +246,7 @@ namespace ClayInspectionScheduler.Models
           @PermitNo,
           @InspCd,
           CAST(@SelectedDate AS DATE), 
-          GetDate(),
+          @When,
           B.BaseId,
           @Username,
           @IRID
@@ -250,14 +255,15 @@ namespace ClayInspectionScheduler.Models
       LEFT OUTER JOIN bpASSOC_PERMIT A ON B.BaseID = A.BaseID
       WHERE (A.PermitNo = @PermitNo OR M.PermitNo = @PermitNo)
 
-      SET @SavedInspID = SCOPE_IDENTITY();
-      ";
+      SET @SavedInspectionID = SCOPE_IDENTITY();
+
+      EXEC add_inspection_comment @DisplayName, @SavedInspectionID, @InitialComment, @Comment;";
       try
       {
         var i = Constants.Exec_Query(sql, dbArgs);
         if (i > -1)
         {
-          int SavedInspectionId = dbArgs.Get<int>("@SavedInspID");
+          int SavedInspectionId = dbArgs.Get<int>("@SavedInspectionID");
           string inspDesc = (from it in inspTypes
                              where it.InspCd == this.InspectionCd
                              select it.InsDesc).First();

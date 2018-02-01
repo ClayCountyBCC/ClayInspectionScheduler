@@ -12,7 +12,7 @@ namespace ClayInspectionScheduler.Controllers
   {
     public IHttpActionResult Get()
     {
-      List<InspType> lp = (List<InspType>)MyCache.GetItem("inspectiontypes," + Constants.CheckIsExternalUser(User.Identity.Name));
+      List<InspType> lp = InspType.GetCachedInspectionTypes();
       if (lp == null)
       {
         return InternalServerError();

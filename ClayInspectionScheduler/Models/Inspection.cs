@@ -21,7 +21,7 @@ namespace ClayInspectionScheduler.Models
 
     public DateTime InspDateTime { get; set; } = DateTime.MinValue;
 
-    public string ResultADC { get; set; }
+    public string ResultADC { get; set; }    
 
     public string SetResult_URL { get; set; } = "";
 
@@ -38,7 +38,7 @@ namespace ClayInspectionScheduler.Models
           case "D":
             return "Denied";
           case "P":
-            return "Pass";
+            return "Performed";
           case "N":
             return "Not Performed";
           default:
@@ -47,8 +47,10 @@ namespace ClayInspectionScheduler.Models
         }
       }
     }
-
+        
     public string Remarks { get; set; } = null;
+
+    public string Comments { get; set; } = "";
 
     public DateTime SchedDateTime { get; set; }
 
@@ -76,6 +78,8 @@ namespace ClayInspectionScheduler.Models
         return SchedDateTime == DateTime.MinValue ? "" : SchedDateTime.ToString("MM/dd/yyyy");
       }
     }
+
+    public List<string> Errors { get; set; } = new List<string>();
 
     public Inspection()
     {
@@ -120,8 +124,9 @@ namespace ClayInspectionScheduler.Models
             i.InspDateTime, 
             i.ResultADC,
             i.SchecDateTime SchedDateTime,
-	        i.Poster,
+	          i.Poster,
             i.Remarks,
+            i.Comment,
             ip.name as InspectorName
         FROM Permits P
         LEFT OUTER JOIN bpINS_REQUEST i ON P.PermitNo = i.PermitNo
@@ -136,23 +141,15 @@ namespace ClayInspectionScheduler.Models
       try
       {
         var li = GetRaw(PermitNumber);
-        if (li == null) return new List<Inspection>();
-
-        foreach (var l in li)
+        if (li == null)
         {
-          if (l.ResultDescription == "")
-          {
-            if (Constants.UseProduction() == true)
-            {
-              l.SetResult_URL = $@"http://claybccims/WATSWeb/Permit/Inspection/Inspection.aspx?InspReqId={l.InspReqID}&PermitNo={l.PermitNo}&OperId=&Type=Bldg&Desc={l.InsDesc}";
-            }
-            else
-            {
-              l.SetResult_URL = $@"http://claybccimstrn/WATSWeb/Permit/Inspection/Inspection.aspx?InspReqId={l.InspReqID}&PermitNo={l.PermitNo}&OperId=&Type=Bldg&Desc={l.InsDesc}";
-            }
-          }
+          return new List<Inspection>();
         }
-        return li;
+        else
+        {
+          return li;
+        }
+        
       }
       catch (Exception ex)
       {
@@ -164,7 +161,36 @@ namespace ClayInspectionScheduler.Models
     }
 
 
-    public static bool UpdateInspectionResult(string PermitNo, string InspID, char Result, string Remark, string Username)
+    public static bool AddComment(
+      long InspectionId, 
+      string Comment, 
+      UserAccess ua)
+    {
+      if(ua.current_access == UserAccess.access_type.public_access | 
+        ua.current_access == UserAccess.access_type.no_access)
+      {
+        return false;
+      }
+      else
+      {
+        string sp = "add_inspection_comment";
+        var dp = new DynamicParameters();
+        dp.Add("@Username", ua.display_name);
+        dp.Add("@InspectionId", InspectionId);
+        dp.Add("@FirstComment", Comment);
+        int i = Constants.Exec_Query_SP(sp, dp);
+        return i > 0;
+      }
+    }
+
+
+    public static List<string> UpdateInspectionResult(
+      string PermitNumber, 
+      long InspectionId, 
+      char? Result, 
+      string Remark, 
+      string Comment,
+      UserAccess User)
     {
       /**
        * 
@@ -237,13 +263,13 @@ namespace ClayInspectionScheduler.Models
 
 
 
-    public static bool Cancel(string PermitNo, string InspID)
+    public static bool Cancel(string PermitNo, long InspID)
     {
       if (PermitNo != null && InspID != null)
       {
 
 
-        var dbArgs = new Dapper.DynamicParameters();
+        var dbArgs = new DynamicParameters();
         dbArgs.Add("@PermitNo", PermitNo);
         dbArgs.Add("@ID", InspID);
 

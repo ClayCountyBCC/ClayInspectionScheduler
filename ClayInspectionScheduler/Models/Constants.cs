@@ -101,6 +101,24 @@ namespace ClayInspectionScheduler.Models
       }
     }
 
+    public static int Exec_Query_SP(string query, DynamicParameters dbA)
+    {
+      {
+        try // This function is for stored procedures
+        {
+          using (IDbConnection db = new SqlConnection(Get_ConnStr("WATSC" + (UseProduction() ? "Prod" : "QA"))))
+          {
+            return db.Execute(query, dbA, commandType: CommandType.StoredProcedure);
+          }
+        }
+        catch (Exception ex)
+        {
+          Log(ex, query);
+          return -1;
+        }
+      }
+    }
+
     public static T Execute_Scalar<T>(string query, DynamicParameters dbA)
     {
       {
@@ -122,17 +140,6 @@ namespace ClayInspectionScheduler.Models
     public static string Get_ConnStr(string cs)
     {
       return ConfigurationManager.ConnectionStrings[cs].ConnectionString;
-    }
-
-    // return true if name.length > 0
-    public static bool CheckIsExternalUser(string name)
-    {
-      return name.Length == 0;
-    }
-
-    public static bool CheckIsSupervisor(string name)
-    {
-      return Supervisors.Contains(name.ToLower().Replace(@"claybcc\", ""));
     }
 
     #region Log Code

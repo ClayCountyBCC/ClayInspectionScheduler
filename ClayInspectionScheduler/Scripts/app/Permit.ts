@@ -5,10 +5,17 @@
 namespace InspSched 
 {
 
+  enum access_type 
+  {
+    no_access = 0, // denied access
+    public_access = 1, // They get treated like public users.
+    basic_access = 2,
+    inspector_access = 3
+  };
+
   interface IPermit 
   {
-      IsExternalUser: boolean;
-
+    access: access_type;
     PermitNo: string;
     ProjAddrCombined: string;
     ProjCity: string;
@@ -24,7 +31,8 @@ namespace InspSched
 
   export class Permit implements IPermit 
   {
-    public IsExternalUser: boolean = true;
+
+    public access: access_type;
     public PermitNo: string;
     public ProjAddrCombined: string;
     public ProjCity: string;

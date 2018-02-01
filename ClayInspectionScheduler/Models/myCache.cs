@@ -70,8 +70,10 @@ namespace ClayInspectionScheduler.Models
 
       switch ( s[ 0 ].ToLower() )
       {
+        case "useraccess":
+          return UserAccess.GetAllUserAccess();
         case "inspectiontypes":
-          return InspType.Get(IsExternal);
+          return InspType.Get();
         case "datecache":
           return new DateCache(IsExternal);
         default:
