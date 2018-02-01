@@ -27,7 +27,7 @@ namespace ClayInspectionScheduler.Controllers
 
     // Calls a function to set the result of an inspection
     public IHttpActionResult Comment(
-      long InspectionId, 
+      int InspectionId, 
       string Comment)
     {
       var ua = new UserAccess(User.Identity.ToString());
@@ -44,8 +44,8 @@ namespace ClayInspectionScheduler.Controllers
 
     public IHttpActionResult Update((
       string permitNumber,
-      long inspectionId,
-      char? resultCode,
+      int inspectionId,
+      string resultCode,
       string remark,
       string comment
       ) result)
@@ -53,35 +53,15 @@ namespace ClayInspectionScheduler.Controllers
       var ua = new UserAccess(User.Identity.ToString());
 
       var sr = Inspection.UpdateInspectionResult(
-        result.permitNumber,
+        result.permitNumber.Trim(),
         result.inspectionId,
-        result.resultCode,
-        result.remark,
-        result.comment,
+        result.resultCode.Trim(),
+        result.remark.Trim(),
+        result.comment.Trim(),
         ua);
 
       return Ok(sr);
     }
-
-
-    // Incorrectly named
-    // The called function does not delete the inspection row, 
-    // only changes ResultADC of the inspection to 'C' (Cancel.)
-    public IHttpActionResult Cancel(string id, string InspId)
-    {
-
-      bool lp = Inspection.Cancel(id, InspId);
-      if (!lp)
-      {
-        return InternalServerError();
-      }
-      else
-      {
-        return Ok(lp);
-      }
-
-    }
-
   }
 
 

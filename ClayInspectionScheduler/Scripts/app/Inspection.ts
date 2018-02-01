@@ -15,6 +15,7 @@ namespace InspSched
     ResultADC: string;
     ResultDescription: string;
     Remarks: string;
+    Comments: string;
     SchedDateTime: Date;
     DisplaySchedDateTime: string;
     Initials: string;
@@ -22,8 +23,7 @@ namespace InspSched
     InspectorName: string;
     myBool: boolean;
     Delete: boolean;
-
-
+    PrivateProviderInspectionRequestId: number;
   }
 
   export class Inspection implements IInspection
@@ -37,6 +37,7 @@ namespace InspSched
     public ResultADC: string;
     public ResultDescription: string;
     public Remarks: string;
+    public Comments: string;
     public SchedDateTime: Date;
     public DisplaySchedDateTime: string;
     public Initials: string;
@@ -44,8 +45,7 @@ namespace InspSched
     public InspectorName: string;
     public myBool: boolean;
     public Delete: boolean;
-
-
+    public PrivateProviderInspectionRequestId: number;
 
     constructor()
     {

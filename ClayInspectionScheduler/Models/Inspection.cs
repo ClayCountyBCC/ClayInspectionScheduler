@@ -12,6 +12,29 @@ namespace ClayInspectionScheduler.Models
   public class Inspection
   {
     public string PermitNo { get; set; }
+    private string PermitTypeString
+    {
+      get
+      {
+        return GetPermitType(PermitNo);
+      }
+    }
+    private static string GetPermitType(string PermitNumber)
+    {
+      switch (PermitNumber[0].ToString())
+      {
+        case "2":
+          return "EL";
+        case "3":
+          return "PL";
+        case "4":
+          return "ME";
+        case "6":
+          return "FR";
+        default:
+          return "BL";
+      }
+    }
 
     public string InspReqID { get; set; }
 
@@ -21,40 +44,48 @@ namespace ClayInspectionScheduler.Models
 
     public DateTime InspDateTime { get; set; } = DateTime.MinValue;
 
-    public string ResultADC { get; set; }    
+    public string ResultADC { get; set; } = "";
 
     public string SetResult_URL { get; set; } = "";
+
+    public int PrivateProviderInspectionRequestId { get; set; } = 0;
 
     public string ResultDescription
     {
       get
       {
-        switch (ResultADC)
-        {
-          case "A":
-            return "Approved";
-          case "C":
-            return "Canceled";
-          case "D":
-            return "Denied";
-          case "P":
-            return "Performed";
-          case "N":
-            return "Not Performed";
-          default:
-            return "";
-
-        }
+        return GetResultDescription(ResultADC);
       }
     }
-        
+       
+    private static string GetResultDescription(string ResultCode)
+    {
+      switch (ResultCode)
+      {
+        case "A":
+          return "Approved";
+        case "C":
+          return "Canceled";
+        case "D":
+          return "Denied";
+        case "P":
+          return "Performed";
+        case "N":
+          return "Not Performed";
+        case "":
+          return "Incomplete";
+        default:
+          return "";
+
+      }
+    }
     public string Remarks { get; set; } = null;
 
     public string Comments { get; set; } = "";
 
     public DateTime SchedDateTime { get; set; }
 
-    public string Phone { get; set; } = " ";
+    public string Phone { get; set; } = "";
 
     public string InspectorName { get; set; } = "Unassigned";
    
@@ -85,6 +116,35 @@ namespace ClayInspectionScheduler.Models
     {
 
 
+    }
+
+    private static List<Inspection> GetRaw(int InspectionId)
+    {
+      var dbArgs = new DynamicParameters();
+      dbArgs.Add("@InspectionId", InspectionId);
+
+      string sql = @"
+        USE WATSC;
+
+        SELECT
+          i.InspReqID,
+          i.PermitNo, 
+          ISNULL(i.InspectionCode, '') InspectionCode, 
+          ISNULL(ir.InsDesc, 'No Inspections') InsDesc, 
+          i.InspDateTime, 
+          LTRIM(RTRIM(ISNULL(i.ResultADC, ''))) ResultADC,
+          i.SchecDateTime SchedDateTime,
+	        i.Poster,
+          i.Remarks,
+          i.Comment,
+          ip.name as InspectorName,
+          PrivProvIRId PrivateProviderInspectionRequestId
+        FROM bpINS_REQUEST i 
+        LEFT OUTER JOIN bpINS_REF ir ON ir.InspCd = i.InspectionCode
+        LEFT OUTER JOIN bp_INSPECTORS ip ON i.Inspector = ip.Intl 
+        WHERE I.InspReqID = @InspectionId
+        ORDER BY InspReqID DESC";
+      return Constants.Get_Data<Inspection>(sql, dbArgs);
     }
 
     private static List<Inspection> GetRaw(string PermitNumber)
@@ -122,12 +182,13 @@ namespace ClayInspectionScheduler.Models
             ISNULL(i.InspectionCode, '') InspectionCode, 
             ISNULL(ir.InsDesc, 'No Inspections') InsDesc, 
             i.InspDateTime, 
-            i.ResultADC,
+            LTRIM(RTRIM(ISNULL(i.ResultADC, ''))) ResultADC,
             i.SchecDateTime SchedDateTime,
 	          i.Poster,
             i.Remarks,
             i.Comment,
-            ip.name as InspectorName
+            ip.name as InspectorName,
+            PrivProvIRId PrivateProviderInspectionRequestId
         FROM Permits P
         LEFT OUTER JOIN bpINS_REQUEST i ON P.PermitNo = i.PermitNo
         LEFT OUTER JOIN bpINS_REF ir ON ir.InspCd = i.InspectionCode
@@ -136,33 +197,35 @@ namespace ClayInspectionScheduler.Models
       return Constants.Get_Data<Inspection>(sql, dbArgs);
     }
 
+    public static Inspection Get(int InspectionId)
+    {
+      var t = GetRaw(InspectionId);
+      if(t.Count() == 1)
+      {
+        return t.First();
+      }
+      else
+      {
+        return null;
+      }
+    }
+
     public static List<Inspection> Get(string PermitNumber)
     {
-      try
+      var li = GetRaw(PermitNumber);
+      if (li == null)
       {
-        var li = GetRaw(PermitNumber);
-        if (li == null)
-        {
-          return new List<Inspection>();
-        }
-        else
-        {
-          return li;
-        }
-        
+        return new List<Inspection>();
       }
-      catch (Exception ex)
+      else
       {
-        Constants.Log(ex, "");
-        var li = new List<Inspection>();
         return li;
       }
-
     }
 
 
     public static bool AddComment(
-      long InspectionId, 
+      int InspectionId, 
       string Comment, 
       UserAccess ua)
     {
@@ -184,12 +247,12 @@ namespace ClayInspectionScheduler.Models
     }
 
 
-    public static List<string> UpdateInspectionResult(
+    public static Inspection UpdateInspectionResult(
       string PermitNumber, 
-      long InspectionId, 
-      char? Result, 
-      string Remark, 
-      string Comment,
+      int InspectionId, 
+      string ResultCode, 
+      string Remarks, 
+      string Comments,
       UserAccess User)
     {
       /**
@@ -258,57 +321,229 @@ namespace ClayInspectionScheduler.Models
        *       
       **/
 
-      return false;
-    }
-
-
-
-    public static bool Cancel(string PermitNo, long InspID)
-    {
-      if (PermitNo != null && InspID != null)
+      var current = Get(InspectionId);
+      if(current == null)
       {
-
-
-        var dbArgs = new DynamicParameters();
-        dbArgs.Add("@PermitNo", PermitNo);
-        dbArgs.Add("@ID", InspID);
-
-
-        string sql = @"
-
-          USE WATSC;
-        
-          UPDATE bpINS_REQUEST
-          SET 
-            RESULTADC = 'C', 
-            InspDateTime = GetDate()
-          WHERE 
-            PermitNo = @PermitNo 
-            AND InspReqID = @ID
-            AND ResultADC IS NULL;
-            
-          UPDATE bpPrivateProviderInsp
-          SET 
-            Result = 'C', 
-            InspDt = GetDate()
-          WHERE 
-            IRId = (SELECT PrivProvIRId FROM bpINS_REQUEST WHERE InspReqID = @ID)
-            AND Result IS NULL;";
-
-        try
+        return null;
+      }
+      if (current.Validate(PermitNumber, ResultCode, User))
+      {
+        // let's do some saving
+        switch (ResultCode)
         {
-
-          return Constants.Exec_Query(sql, dbArgs) > 0;
-
-        }
-        catch (Exception ex)
-        {
-          Constants.Log(ex, sql);
-          return false;
+          case "A":
+          case "P":
+          case "N":
+          case "C":
+            if (!UpdateStatus(InspectionId, ResultCode, current.ResultADC, Remarks, Comments, current.PrivateProviderInspectionRequestId, User))
+            {
+              current.Errors.Add("Error saving your changes, please try again. If this message recurs, please contact the helpdesk.");
+            }
+            return current;
+          case "D":
+            string HoldInput = current.PermitNo + " " + current.InspectionCode + " $35";
+            if (!UpdateStatus(InspectionId, ResultCode, current.ResultADC, Remarks, Comments, current.PrivateProviderInspectionRequestId, User, PermitNumber, HoldInput))
+            {
+              current.Errors.Add("Error saving your changes, please try again. If this message recurs, please contact the helpdesk.");
+            }
+            else
+            {
+              // now add the hold and fees
+            }
+            return current;
         }
       }
+      return current;
+    }
+
+    private static bool UpdateStatus(int InspectionId,
+      string ResultCode,
+      string OldResult,
+      string Remarks,
+      string Comments,
+      int PrivateProviderInspectionId,
+      UserAccess User,
+      string PermitNumber = "",
+      string HoldInput = "")
+    {
+      var dp = new DynamicParameters();
+      dp.Add("@InspectionId", InspectionId);
+      dp.Add("@Remarks", Remarks);
+      dp.Add("@ResultCode", ResultCode);
+      dp.Add("@Poster", User.user_name);
+      dp.Add("@User", User.display_name);
+      if(ResultCode != OldResult)
+      {
+        dp.Add("@FirstComment", $"Status changed from {GetResultDescription(OldResult)} to {GetResultDescription(ResultCode)}.");
+        dp.Add("@SecondComment", Comments);
+      }
       else
+      {
+        dp.Add("@FirstComment", Comments);
+        dp.Add("@SecondComment", "");
+      }
+
+      
+
+      string sql = @"
+        USE WATSC;
+        UPDATE bpINS_Request
+        SET 
+          ResultADC = @ResultCode,
+          InspDateTime = GETDATE(),
+          Remarks = @Remarks,
+          Poster = @Poster,
+          ChrgCode = @ChargeCode
+        WHERE
+          InspReqId=@InspectionId;
+
+        EXEC add_inspection_comment @User, @InspectionId, @FirstComment, @SecondComment;";
+
+      if (PrivateProviderInspectionId > 0)
+      {
+        sql += GetPrivateProviderQuery();
+        dp.Add("@PrivateProviderInspectionId", PrivateProviderInspectionId);
+      }
+
+      if (ResultCode == "D")
+      {
+        dp.Add("@ChargeCode", "T");
+        sql += GetDenialQueries();
+        dp.Add("@Amount", 35);
+        dp.Add("@HoldInput", HoldInput);
+        dp.Add("@PermitNumber", PermitNumber);
+        dp.Add("@PermitType", GetPermitType(PermitNumber));
+      }
+      else
+      {
+        dp.Add("@ChargeCode", null);
+      }
+
+
+
+      int i = Constants.Exec_Query(sql, dp);
+      return i > 0;
+
+    }
+
+    private bool Validate(string PermitNumber, string ResultCode, UserAccess User)
+    {
+      if(PermitNumber != PermitNo)
+      {
+        Errors.Add("The permit number does not match the inspection, please check your request and try again.");
         return false;
+      }
+      switch (ResultCode.Trim())
+      {
+        case "A":
+        case "": // result is not set
+        case "D":
+        case "P":
+        case "N":
+          // only inspectors can change the result
+          if (User.current_access == UserAccess.access_type.inspector_access)
+          {
+            Errors.Add("Unauthorized Access.");
+            return false;
+          }
+          // If they are trying to change something that was completed before today.
+          if (InspDateTime != DateTime.MinValue && InspDateTime.Date < DateTime.Today.Date)
+          {
+            Errors.Add("Inspections completed prior to Today's date cannot be changed.");
+            return false;
+          }
+          if(ResultCode == "D" & Remarks.Length == 0)
+          {
+            Errors.Add("Disapprovals must have remarks included in order to be saved.");
+            return false;
+          }
+          return true;
+
+        case "C":
+          if (User.current_access == UserAccess.access_type.public_access |
+            User.current_access == UserAccess.access_type.basic_access |
+            User.current_access == UserAccess.access_type.inspector_access)
+          {
+            if(ResultADC.Length != 0)
+            {
+              Errors.Add("Cannot cancel a completed inspection.  This inspection was completed on: " + InspDateTime.ToShortDateString());
+              return false;
+            }
+            if(Remarks.Trim().Length == 0 && User.current_access != UserAccess.access_type.public_access)
+            {
+              Errors.Add("You must include a reason why this inspection is being cancelled in the Remarks field.");
+              return false;
+            }
+            return true;
+          }
+          else
+          {
+            Errors.Add("Unauthorized Access.");
+            return false;
+          }
+        default:
+          Errors.Add("Unauthorized Access.");
+          return false;          
+      }
+    }
+
+    private static string GetPrivateProviderQuery()
+    {
+      string sql = @"
+        UPDATE bpPrivateProviderInsp
+        SET 
+          Result = @ResultCode, 
+          InspDt = GetDate()
+        WHERE 
+          IRId = @PrivateProviderInspectionId
+          AND ResultADC IS NULL;";
+      return sql;
+    }
+
+    private static string GetDenialQueries()
+    {
+      string sql = @"
+		DECLARE @HoldId int;
+		SELECT 
+      @HoldId = HoldId 
+    FROM dbo.bpHOLD 
+    WHERE 
+      InspReqID = @InspectionId 
+      AND HldCd = '1REI';
+
+		IF @HoldId IS NULL
+		  BEGIN
+			  INSERT INTO bpHOLD
+				  (BaseID, PermitNo, HldCd, InspReqID, InspReqChrg, HldInput)
+        SELECT
+          BaseId, 
+          PermitNo, 
+          '1REI', 
+          @InspectionId, 
+          @Amount, 
+          @HoldInput
+        FROM dbo.bpINS_REQUEST 
+        WHERE 
+          InspReqID = @InspReqID;
+
+        SET @HoldId = SCOPE_IDENTITY();
+		  END
+
+		ELSE
+
+		  BEGIN
+  	    UPDATE bpHOLD
+			  SET
+          InspReqID = @InspectionId, 
+          InspReqChrg = @Amount, 
+          HldInput = @HldInput + @Amt
+			  WHERE 
+          HoldID = @HoldId 
+		  END
+	  END
+		INSERT INTO ccCashierItem (NTUser, CatCode, Assoc, AssocKey, BaseFee, Total, Variable, Narrative, HoldID) 
+    VALUES (@Poster,'REI',@PermitType,@PermitNumber,@Amount,@Amount,1, @HoldInput, @HoldId)";
+      return sql;
     }
 
   }
