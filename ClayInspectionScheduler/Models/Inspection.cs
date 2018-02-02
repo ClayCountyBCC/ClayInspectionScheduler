@@ -224,25 +224,47 @@ namespace ClayInspectionScheduler.Models
     }
 
 
-    public static bool AddComment(
+    public static Inspection AddComment(
       int InspectionId, 
       string Comment, 
       UserAccess ua)
     {
+      Comment = Comment.Trim();
       if(ua.current_access == UserAccess.access_type.public_access | 
         ua.current_access == UserAccess.access_type.no_access)
       {
-        return false;
+        return null;
       }
       else
       {
-        string sp = "add_inspection_comment";
+        string sp = "dbo.add_inspection_comment";
         var dp = new DynamicParameters();
         dp.Add("@Username", ua.display_name);
         dp.Add("@InspectionId", InspectionId);
         dp.Add("@FirstComment", Comment);
-        int i = Constants.Exec_Query_SP(sp, dp);
-        return i > 0;
+        int i;
+        try // This function is for stored procedures
+        {
+          string cs = Constants.Get_ConnStr("WATSC" + (Constants.UseProduction() ? "Prod" : "QA"));
+          using (IDbConnection db = new SqlConnection(cs))
+          {
+            i = db.Execute(sp, dp, commandType: CommandType.StoredProcedure);
+          }
+        }
+        catch (Exception ex)
+        {
+          new ErrorLog(ex, "");
+          i = 0;
+        }
+        //int i = Constants.Exec_Query_SP(sp, dp);
+        if (i == -1 )
+        {
+          return Inspection.Get(InspectionId);
+        }
+        else
+        {
+          return null;
+        }
       }
     }
 
@@ -255,105 +277,49 @@ namespace ClayInspectionScheduler.Models
       string Comments,
       UserAccess User)
     {
-      /**
-       * 
-       * Set inspection result
-       * A simple Cancel should not do be done with the set result screen.
-       *    That is easily done using the 'Cancel' button 
-       *    on the View Inspection Screen. 
-       * 
-       * Only use the Set Result screen if a note needs to be added to a cancel.
-       * 
-       * I HAVE INQUIRED AS TO WHETHER THERE IS A DOCUMENT, PHYSICAL OR DIGITAL, 
-       * REPRESENTING THE INSPECTION AND ALL MARKS FROM THE INSPECTOR THAT MAY
-       * NEED TO BE VIEWED. NOT TRYING TO ADD ADDITIONAL FUNCTIONALITY BUT I WAS NOT SURE
-       * IF THIS FUNCTIONALITY ALREADY EXISTS, WHICH WOULD NECESSITATE A LINK TO THE DOC
-       * 
-       * ALSO, WHEN THE INSPECTOR SAVES THE RESULT, WHERE WILL THE PROGRAM DIRECT THE USER?
-       *  WILL IT LOAD INSPECTION SCHEDULER WITH THE PERMIT NUMBER FROM THE INSPECTION AND SHOW THE LIST OF INSPECTIONS?
-       *  OR WILL IT DIRECT THE INSPECTOR BACK TO THE MAP/BULK LIST OF THEIR INSPECTIONS TO COMPLETE FOR THE DAY?
-       *  
-       * Options available on the Set Result screen:
-       * FOR THOSE INSPECTED BY COUNTY INSPECTORS:
-       *  APPROVE - Set ResultADC = 'A'
-       *  DISSAPROVE - Set ResultADC = 'D'; ASSESS RE-INSPECTION FEE
-       * 
-       *  INSPECTION FEE IS FLAT $35.00 ASSESSED WHEN RESULT 'D' IS SELECTED AND SAVED
-       *  CURRENTLY CALLING A STORED PROCEDURE TO ADD CHARGE ROW TO WATSC.dbo.ccCashierItem TABLE
-       * 
-       * FOR THOSE INSPECTED BY PRIVATE PROVIDERS
-       *  PERFORMED -  SET ResultADC = 'P'
-       *  NOT PERFORMED - SET ResultADC = 'N; NO RE-INSPECTION FEE ASSESSED  
-       * 
-       * REMARKS FIELD:
-       *  FIELD AND FUNCTIONALITY WILL REMAIN THE SAME AS OLD IMS VERSION. 
-       *  RESULT IS NECESSARY TO SAVE
-       *  REMARKS BY INSPECTOR ARE NOT REQUIRED TO SAVE
-       *    (CHECK WITH BLDG DEPT IF REMARK SHOULD BE REQ. IF RESULT IS 'D' OR 'N')
-       *  
-       * COMMENTS: 
-       *  1. ONLY VISIBLE IF INTERNAL
-       *  2. PREVIOUS COMMENTS CANNOT BE DELETED
-       *  3. NEW COMMENTS APPENDED TO FIELD
-       *    a. INCLUDE TIMESTAMP
-       *    b. INCLUDE USERNAME IF INTERNAL / INITIAL IF EXTERNAL
-       *    
-       * ADDITIONAL FUNCTIONS:
-       *  1. CREATE HOLD (STORED PROCEDURE: WATSC.dbo.prc_upd_ir)
-       *      @HoldId = SELECT HoldId FROM bpHOLD WHERE HOLD_InspReqId = INSP_InspReqId
-       *      IF @HoldId IS NULL
-       *        INSERT INTO bpHOLD
-			 *         (BaseID, PermitNo, HldCd, InspReqID, InspReqChrg, HldInput)
-       *         SET @HoldId = SCOPE_IDENTITY();
-       *      IF HoldId IS NOT NULL
-       *       UPDATE bpHOLD
-			 *       SET  InspReqID = @InspReqID, InspReqChrg = @Amt, HldInput = @HldInput+@Amt
-			 *       WHERE HoldID = @HoldId
-       *  2. CREATE CHARGE
-       *       @HldInput = PermitNo + ' ' + 
-       *                  InspectionCode + ' ' + 
-       *                  cast(MONTH(SchecDateTime) as varchar(2)) + '/' + 
-       *                  cast(DAY(SchecDateTime) as varchar(2))+ '/' + 
-       *                  cast(Year(SchecDateTime) as varchar(4)) + ' $',
-			 *                  @PermitNo=PermitNo
-       *       INSERT INTO ccCashierItem (NTUser, CatCode, Assoc, AssocKey, BaseFee, Total, Variable, Narrative, HoldID)
-       *       VALUES (@UserName,@CatCd,@AlphaPermitType,@PermitNo,@Amt,@Amt,1,@HldInput, @HoldId)
-       *       
-      **/
-
-      var current = Get(InspectionId);
-      if(current == null)
+      PermitNumber = PermitNumber.Trim();
+      ResultCode = ResultCode.Trim();
+      Remarks = Remarks.Trim();
+      Comments = Comments.Trim();
+      try
       {
+        var current = Get(InspectionId);
+        if (current == null)
+        {
+          return null;
+        }
+
+        if (current.Validate(PermitNumber, ResultCode, Remarks, User))
+        {
+          // let's do some saving
+          switch (ResultCode)
+          {
+            case "A":
+            case "P":
+            case "N":
+            case "C":
+              if (!UpdateStatus(InspectionId, ResultCode, current.ResultADC, Remarks, Comments, current.PrivateProviderInspectionRequestId, User))
+              {
+                current.Errors.Add("Error saving your changes, please try again. If this message recurs, please contact the helpdesk.");
+              }
+              break;
+
+            case "D":
+              string HoldInput = current.PermitNo + " " + current.InspectionCode + " $35";
+              if (!UpdateStatus(InspectionId, ResultCode, current.ResultADC, Remarks, Comments, current.PrivateProviderInspectionRequestId, User, PermitNumber, HoldInput))
+              {
+                current.Errors.Add("Error saving your changes, please try again. If this message recurs, please contact the helpdesk.");
+              }
+              break;
+          }
+        }
+        return current;
+      }
+      catch (Exception ex)
+      {
+        new ErrorLog(ex, "");
         return null;
       }
-      if (current.Validate(PermitNumber, ResultCode, User))
-      {
-        // let's do some saving
-        switch (ResultCode)
-        {
-          case "A":
-          case "P":
-          case "N":
-          case "C":
-            if (!UpdateStatus(InspectionId, ResultCode, current.ResultADC, Remarks, Comments, current.PrivateProviderInspectionRequestId, User))
-            {
-              current.Errors.Add("Error saving your changes, please try again. If this message recurs, please contact the helpdesk.");
-            }
-            return current;
-          case "D":
-            string HoldInput = current.PermitNo + " " + current.InspectionCode + " $35";
-            if (!UpdateStatus(InspectionId, ResultCode, current.ResultADC, Remarks, Comments, current.PrivateProviderInspectionRequestId, User, PermitNumber, HoldInput))
-            {
-              current.Errors.Add("Error saving your changes, please try again. If this message recurs, please contact the helpdesk.");
-            }
-            else
-            {
-              // now add the hold and fees
-            }
-            return current;
-        }
-      }
-      return current;
     }
 
     private static bool UpdateStatus(int InspectionId,
@@ -426,7 +392,7 @@ namespace ClayInspectionScheduler.Models
 
     }
 
-    private bool Validate(string PermitNumber, string ResultCode, UserAccess User)
+    private bool Validate(string PermitNumber, string ResultCode, string UserRemarks, UserAccess User)
     {
       if(PermitNumber != PermitNo)
       {
@@ -441,18 +407,28 @@ namespace ClayInspectionScheduler.Models
         case "P":
         case "N":
           // only inspectors can change the result
-          if (User.current_access == UserAccess.access_type.inspector_access)
+          if (User.current_access != UserAccess.access_type.inspector_access)
           {
             Errors.Add("Unauthorized Access.");
             return false;
           }
+
+          if(ResultCode == "A" | ResultCode == "D")
+          {
+            if(PrivateProviderInspectionRequestId > 0)
+            {
+              Errors.Add("Private provider inspections must be marked as Not Performed or Performed.");
+              return false;
+            }
+          }
+
           // If they are trying to change something that was completed before today.
           if (InspDateTime != DateTime.MinValue && InspDateTime.Date < DateTime.Today.Date)
           {
             Errors.Add("Inspections completed prior to Today's date cannot be changed.");
             return false;
           }
-          if(ResultCode == "D" & Remarks.Length == 0)
+          if(ResultCode == "D" & UserRemarks.Length == 0)
           {
             Errors.Add("Disapprovals must have remarks included in order to be saved.");
             return false;
@@ -469,7 +445,7 @@ namespace ClayInspectionScheduler.Models
               Errors.Add("Cannot cancel a completed inspection.  This inspection was completed on: " + InspDateTime.ToShortDateString());
               return false;
             }
-            if(Remarks.Trim().Length == 0 && User.current_access != UserAccess.access_type.public_access)
+            if(UserRemarks.Trim().Length == 0 && User.current_access != UserAccess.access_type.public_access)
             {
               Errors.Add("You must include a reason why this inspection is being cancelled in the Remarks field.");
               return false;
@@ -496,53 +472,53 @@ namespace ClayInspectionScheduler.Models
           InspDt = GetDate()
         WHERE 
           IRId = @PrivateProviderInspectionId
-          AND ResultADC IS NULL;";
+          AND Result IS NULL;";
       return sql;
     }
 
     private static string GetDenialQueries()
     {
       string sql = @"
-		DECLARE @HoldId int;
-		SELECT 
-      @HoldId = HoldId 
-    FROM dbo.bpHOLD 
-    WHERE 
-      InspReqID = @InspectionId 
-      AND HldCd = '1REI';
-
-		IF @HoldId IS NULL
-		  BEGIN
-			  INSERT INTO bpHOLD
-				  (BaseID, PermitNo, HldCd, InspReqID, InspReqChrg, HldInput)
-        SELECT
-          BaseId, 
-          PermitNo, 
-          '1REI', 
-          @InspectionId, 
-          @Amount, 
-          @HoldInput
-        FROM dbo.bpINS_REQUEST 
+		    DECLARE @HoldId int;
+		    SELECT 
+          @HoldId = HoldId 
+        FROM dbo.bpHOLD 
         WHERE 
-          InspReqID = @InspReqID;
+          InspReqID = @InspectionId 
+          AND HldCd = '1REI';
 
-        SET @HoldId = SCOPE_IDENTITY();
-		  END
+		    IF @HoldId IS NULL
+		      BEGIN
+			      INSERT INTO bpHOLD
+				      (BaseID, PermitNo, HldCd, InspReqID, InspReqChrg, HldInput)
+            SELECT
+              BaseId, 
+              PermitNo, 
+              '1REI', 
+              @InspectionId, 
+              @Amount, 
+              @HoldInput
+            FROM dbo.bpINS_REQUEST 
+            WHERE 
+              InspReqID = @InspectionId;
 
-		ELSE
+            SET @HoldId = SCOPE_IDENTITY();
+		      END
 
-		  BEGIN
-  	    UPDATE bpHOLD
-			  SET
-          InspReqID = @InspectionId, 
-          InspReqChrg = @Amount, 
-          HldInput = @HldInput + @Amt
-			  WHERE 
-          HoldID = @HoldId 
-		  END
-	  END
-		INSERT INTO ccCashierItem (NTUser, CatCode, Assoc, AssocKey, BaseFee, Total, Variable, Narrative, HoldID) 
-    VALUES (@Poster,'REI',@PermitType,@PermitNumber,@Amount,@Amount,1, @HoldInput, @HoldId)";
+		    ELSE
+
+		      BEGIN
+  	        UPDATE bpHOLD
+			      SET
+              InspReqID = @InspectionId, 
+              InspReqChrg = @Amount, 
+              HldInput = @HoldInput + @Amount
+			      WHERE 
+              HoldID = @HoldId 
+		      END
+		    
+        INSERT INTO ccCashierItem (NTUser, CatCode, Assoc, AssocKey, BaseFee, Total, Variable, Narrative, HoldID) 
+        VALUES (@Poster,'REI',@PermitType,@PermitNumber,@Amount,@Amount,1, @HoldInput, @HoldId)";
       return sql;
     }
 

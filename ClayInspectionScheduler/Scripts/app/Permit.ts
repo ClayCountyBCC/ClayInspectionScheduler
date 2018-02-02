@@ -4,14 +4,14 @@
 
 namespace InspSched 
 {
-
-  enum access_type 
+  export enum access_type 
   {
     no_access = 0, // denied access
     public_access = 1, // They get treated like public users.
     basic_access = 2,
     inspector_access = 3
-  };
+  }
+
 
   interface IPermit 
   {
@@ -23,7 +23,6 @@ namespace InspSched
     ErrorText: string;
     NoFinalInspections: boolean;
     ScheduleDates: string[];
-    Supervisor_URL: string;
     Permit_URL: string;
     Dates: DateCache;
 
@@ -31,7 +30,6 @@ namespace InspSched
 
   export class Permit implements IPermit 
   {
-
     public access: access_type;
     public PermitNo: string;
     public ProjAddrCombined: string;
@@ -40,7 +38,6 @@ namespace InspSched
     public ErrorText: string;
     public NoFinalInspections: boolean;
     public ScheduleDates: string[];
-    public Supervisor_URL: string;
     public Permit_URL: string;
     public Dates: DateCache;
 

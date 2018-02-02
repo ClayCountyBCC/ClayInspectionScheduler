@@ -9,31 +9,36 @@ using ClayInspectionScheduler.Models;
 
 namespace ClayInspectionScheduler.Controllers
 {
+  [RoutePrefix("API/Inspection")]
   public class InspectionController : ApiController
   {
-    public IHttpActionResult Get( string id )
+    [HttpGet]
+    [Route("Permit/{PermitNumber}")]
+    public IHttpActionResult Permit(string PermitNumber)
     {
-      List<Inspection> lp = Inspection.Get ( id );
-      if ( lp == null )
+      List<Inspection> lp = Inspection.Get(PermitNumber);
+      if (lp == null)
       {
-        return InternalServerError ( );
+        return InternalServerError();
       }
       else
       {
-        return Ok ( lp );
+        return Ok(lp);
       }
     }
 
 
     // Calls a function to set the result of an inspection
-    public IHttpActionResult Comment(
-      int InspectionId, 
-      string Comment)
+    [HttpPost]
+    [Route("Comment")]
+    public IHttpActionResult Comment(dynamic CommentData)
     {
-      var ua = new UserAccess(User.Identity.ToString());
-      if (Inspection.AddComment(InspectionId, Comment, ua))
+      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+      var i = Inspection.AddComment((int)CommentData.InspectionId, (string)CommentData.Comment, ua);
+
+      if (i != null)
       {
-        return Ok();      
+        return Ok(i);
       }
       else
       {
@@ -42,27 +47,46 @@ namespace ClayInspectionScheduler.Controllers
 
     }
 
-    public IHttpActionResult Update((
-      string permitNumber,
-      int inspectionId,
-      string resultCode,
-      string remark,
-      string comment
-      ) result)
+    [HttpPost]
+    [Route("Update")]
+    public IHttpActionResult Update(dynamic InspectionData)
     {
-      var ua = new UserAccess(User.Identity.ToString());
+
+      //string permitNumber,
+      //int inspectionId,
+      //string resultCode,
+      //string remark,
+      //string comment
+      var ua = UserAccess.GetUserAccess(User.Identity.Name);
 
       var sr = Inspection.UpdateInspectionResult(
-        result.permitNumber.Trim(),
-        result.inspectionId,
-        result.resultCode.Trim(),
-        result.remark.Trim(),
-        result.comment.Trim(),
+        (string)InspectionData.permitNumber,
+        (int)InspectionData.inspectionId,
+        (string)InspectionData.resultCode,
+        (string)InspectionData.remark,
+        (string)InspectionData.comment,
         ua);
 
       return Ok(sr);
     }
+
+    [HttpPost]
+    [Route("PublicCancel/{permitNumber}/{inspectionId}")]
+    public IHttpActionResult PublicCancel(string permitNumber, int inspectionId)
+    {
+      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+
+      var sr = Inspection.UpdateInspectionResult(
+        permitNumber.Trim(),
+        inspectionId,
+        "C",
+        "",
+        "",
+        ua);
+
+      return Ok(sr);
+    }
+
+
   }
-
-
 }

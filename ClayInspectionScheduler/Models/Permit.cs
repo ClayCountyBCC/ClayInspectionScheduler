@@ -428,8 +428,6 @@ namespace ClayInspectionScheduler.Models
           if (CheckPrivProv(PrivateProvider)) return;
         }
         if (CheckSuspendGraceDate(this.SuspendGraceDate)) return;
-
-
       }
 
       if (ContractorIssues()) return;

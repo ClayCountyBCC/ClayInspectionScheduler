@@ -246,7 +246,7 @@ namespace ClayInspectionScheduler.Models
           @PermitNo,
           @InspCd,
           CAST(@SelectedDate AS DATE), 
-          @When,
+          GETDATE(),
           B.BaseId,
           @Username,
           @IRID

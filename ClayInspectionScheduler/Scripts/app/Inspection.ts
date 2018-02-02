@@ -21,9 +21,8 @@ namespace InspSched
     Initials: string;
     Phone: string;
     InspectorName: string;
-    myBool: boolean;
-    Delete: boolean;
     PrivateProviderInspectionRequestId: number;
+    Errors: string[];
   }
 
   export class Inspection implements IInspection
@@ -43,9 +42,8 @@ namespace InspSched
     public Initials: string;
     public Phone: string;
     public InspectorName: string;
-    public myBool: boolean;
-    public Delete: boolean;
     public PrivateProviderInspectionRequestId: number;
+    public Errors: string[];
 
     constructor()
     {

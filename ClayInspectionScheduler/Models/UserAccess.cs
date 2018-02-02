@@ -60,14 +60,13 @@ namespace ClayInspectionScheduler.Models
       {
         if (up != null)
         {
+          user_name = up.SamAccountName.ToLower();
           authenticated = true;
           display_name = up.DisplayName;
           if (int.TryParse(up.EmployeeId, out int eid))
           {
             employee_id = eid;
           }
-
-          employee_id = int.Parse(up.EmployeeId);
           var groups = (from g in up.GetAuthorizationGroups()
                         select g.Name).ToList();
           if(groups.Contains(mis_access_group) | groups.Contains(inspector_access_group))
@@ -93,7 +92,7 @@ namespace ClayInspectionScheduler.Models
     {
       using (PrincipalContext pc = new PrincipalContext(ContextType.Domain))
       {
-        using (GroupPrincipal gp = GroupPrincipal.FindByIdentity(pc, basic_access_group))
+        using (GroupPrincipal gp = GroupPrincipal.FindByIdentity(pc, group))
         {
           if (gp != null)
           {
@@ -130,7 +129,24 @@ namespace ClayInspectionScheduler.Models
 
     public static UserAccess GetUserAccess(string Username)
     {
-      return GetCachedAllUserAccess()[Username];
+      try
+      {
+        var d = GetCachedAllUserAccess();
+        string un = Username.Replace(@"CLAYBCC\", "").ToLower();
+        if (d.ContainsKey(un))
+        {
+          return d[un]; // we're dun
+        }
+        else
+        {
+          return d[""];
+        }
+      }
+      catch(Exception ex)
+      {
+        new ErrorLog(ex, "");
+        return null;
+      }
     }
 
     public static Dictionary<string, UserAccess> GetCachedAllUserAccess()

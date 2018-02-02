@@ -8,12 +8,15 @@ using ClayInspectionScheduler.Models;
 
 namespace ClayInspectionScheduler.Controllers
 {
+  [RoutePrefix("API/Permit")]
   public class PermitController : ApiController
   {
-    public IHttpActionResult Get(string id)
+    [HttpGet]
+    [Route("Get/{PermitNumber}")]
+    public IHttpActionResult Get(string PermitNumber)
     {
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
-      List<Permit> lp = Permit.Get(id, ua.current_access);
+      List<Permit> lp = Permit.Get(PermitNumber, ua.current_access);
 
       if( lp == null)
       {

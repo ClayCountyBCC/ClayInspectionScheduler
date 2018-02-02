@@ -344,7 +344,7 @@ namespace InspSched
       // clears Calendar of any chosen dates
   }
 
-  export function CancelInspection(InspID?: string, PermitNo?: string)
+  export function CancelInspection(InspID?: number, PermitNo?: string)
   {
 
     document.getElementById('NotScheduled').style.display = "none";

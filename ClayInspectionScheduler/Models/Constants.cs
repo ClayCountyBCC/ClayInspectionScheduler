@@ -18,7 +18,6 @@ namespace ClayInspectionScheduler.Models
   public static class Constants
   {
     public const int appId = 20024;
-    public static readonly string[] Supervisors = { "westje", "mccartneyd", "naglet", "parkern" };
 
     public static bool UseProduction()
     {
@@ -103,19 +102,17 @@ namespace ClayInspectionScheduler.Models
 
     public static int Exec_Query_SP(string query, DynamicParameters dbA)
     {
+      try // This function is for stored procedures
       {
-        try // This function is for stored procedures
+        using (IDbConnection db = new SqlConnection(Get_ConnStr("WATSC" + (UseProduction() ? "Prod" : "QA"))))
         {
-          using (IDbConnection db = new SqlConnection(Get_ConnStr("WATSC" + (UseProduction() ? "Prod" : "QA"))))
-          {
-            return db.Execute(query, dbA, commandType: CommandType.StoredProcedure);
-          }
+          return db.Execute(query, dbA, commandType: CommandType.StoredProcedure);
         }
-        catch (Exception ex)
-        {
-          Log(ex, query);
-          return -1;
-        }
+      }
+      catch (Exception ex)
+      {
+        Log(ex, query);
+        return -1;
       }
     }
 
