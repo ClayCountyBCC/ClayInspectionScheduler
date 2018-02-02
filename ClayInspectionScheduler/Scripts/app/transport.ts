@@ -109,22 +109,20 @@ namespace InspSched.transport
 
   export function CancelInspection(InspectionId: number, PermitNumber: string)
   {
-    AddComment(InspectionId, "A second for the commenting system.");
-    // original, commented out for testing.
-    //var x = XHR.Post("API/Inspection/PublicCancel/" + PermitNumber + "/" + InspectionId);
-    //return new Promise(function (resolve, reject)
-    //{
-    //  x.then(function (response)
-    //  {
-    //    var di = JSON.parse(response.Text);
-    //    resolve(di);
+    var x = XHR.Post("API/Inspection/PublicCancel/" + PermitNumber + "/" + InspectionId);
+    return new Promise(function (resolve, reject)
+    {
+      x.then(function (response)
+      {
+        var di = JSON.parse(response.Text);
+        resolve(di);
 
-    //  }).catch(function ()
-    //  {
-    //    console.log("error in GetInspections");
-    //    reject(null);
-    //  });
-    //});
+      }).catch(function ()
+      {
+        console.log("error in GetInspections");
+        reject(null);
+      });
+    });
   }
 
   export function UpdateInspection(

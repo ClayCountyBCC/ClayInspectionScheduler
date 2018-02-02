@@ -711,21 +711,16 @@ var InspSched;
         }
         transport.AddComment = AddComment;
         function CancelInspection(InspectionId, PermitNumber) {
-            AddComment(InspectionId, "A second for the commenting system.");
-            // original, commented out for testing.
-            //var x = XHR.Post("API/Inspection/PublicCancel/" + PermitNumber + "/" + InspectionId);
-            //return new Promise(function (resolve, reject)
-            //{
-            //  x.then(function (response)
-            //  {
-            //    var di = JSON.parse(response.Text);
-            //    resolve(di);
-            //  }).catch(function ()
-            //  {
-            //    console.log("error in GetInspections");
-            //    reject(null);
-            //  });
-            //});
+            var x = XHR.Post("API/Inspection/PublicCancel/" + PermitNumber + "/" + InspectionId);
+            return new Promise(function (resolve, reject) {
+                x.then(function (response) {
+                    var di = JSON.parse(response.Text);
+                    resolve(di);
+                }).catch(function () {
+                    console.log("error in GetInspections");
+                    reject(null);
+                });
+            });
         }
         transport.CancelInspection = CancelInspection;
         function UpdateInspection(PermitNumber, InspectionId, ResultCode, Remarks, Comments) {
