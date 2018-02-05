@@ -9,55 +9,15 @@ using ClayInspectionScheduler.Models;
 
 namespace ClayInspectionScheduler.Controllers
 {
+  [RoutePrefix("API/Inspection")]
   public class InspectionController : ApiController
   {
-    public IHttpActionResult Get( string id )
+    [HttpGet]
+    [Route("Permit/{PermitNumber}")]
+    public IHttpActionResult Permit(string PermitNumber)
     {
-      List<Inspection> lp = Inspection.Get ( id );
-      if ( lp == null )
-      {
-        return InternalServerError ( );
-      }
-      else
-      {
-        return Ok ( lp );
-      }
-    }
-
-
-    // Calls a function to set the result of an inspection
-    public IHttpActionResult Update(string PermitNo, string InspID, char ResultADC, string Remark)
-    {
-      var CanSetResult = true;
-      if (CanSetResult)
-      {
-        bool sr = Inspection.UpdateInspectionResult(
-                   PermitNo,
-                   InspID,
-                   ResultADC,
-                   Remark,
-                   User.Identity.Name);
-        if (!sr)
-        {
-          return InternalServerError();
-        }
-        else
-        {
-          return Ok(sr);
-        }
-      }
-      return Ok(false);
-    }
-
-
-    // Incorrectly named
-    // The called function does not delete the inspection row, 
-    // only changes ResultADC of the inspection to 'C' (Cancel.)
-    public IHttpActionResult Delete(string id, string InspId)
-    {
-
-      bool lp = Inspection.Cancel(id, InspId);
-      if (!lp)
+      List<Inspection> lp = Inspection.Get(PermitNumber);
+      if (lp == null)
       {
         return InternalServerError();
       }
@@ -65,10 +25,68 @@ namespace ClayInspectionScheduler.Controllers
       {
         return Ok(lp);
       }
+    }
+
+
+    // Calls a function to set the result of an inspection
+    [HttpPost]
+    [Route("Comment")]
+    public IHttpActionResult Comment(dynamic CommentData)
+    {
+      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+      var i = Inspection.AddComment((int)CommentData.InspectionId, (string)CommentData.Comment, ua);
+
+      if (i != null)
+      {
+        return Ok(i);
+      }
+      else
+      {
+        return InternalServerError();
+      }
 
     }
 
+    [HttpPost]
+    [Route("Update")]
+    public IHttpActionResult Update(dynamic InspectionData)
+    {
+
+      //string permitNumber,
+      //int inspectionId,
+      //string resultCode,
+      //string remark,
+      //string comment
+      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+
+      var sr = Inspection.UpdateInspectionResult(
+        (string)InspectionData.permitNumber,
+        (int)InspectionData.inspectionId,
+        (string)InspectionData.resultCode,
+        (string)InspectionData.remark,
+        (string)InspectionData.comment,
+        ua);
+
+      return Ok(sr);
+    }
+
+    [HttpPost]
+    [Route("PublicCancel/{permitNumber}/{inspectionId}")]
+    public IHttpActionResult PublicCancel(string permitNumber, int inspectionId)
+    {
+      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+
+      var sr = Inspection.UpdateInspectionResult(
+        permitNumber.Trim(),
+        inspectionId,
+        "C",
+        "",
+        "",
+        ua);
+
+      return Ok(sr);
+    }
+
+
   }
-
-
 }

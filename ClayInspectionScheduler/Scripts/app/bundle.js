@@ -53,6 +53,7 @@ var InspSched;
 (function (InspSched) {
     var NewInspection = /** @class */ (function () {
         function NewInspection(PermitNo, InspectionCd, SchecDateTime, Comment) {
+
             this.PermitNo = PermitNo;
             this.InspectionCd = InspectionCd;
             this.SchecDateTime = SchecDateTime;
@@ -63,6 +64,25 @@ var InspSched;
     InspSched.NewInspection = NewInspection;
 })(InspSched || (InspSched = {}));
 //# sourceMappingURL=newinspection.js.map
+/// <reference path="transport.ts" />
+/// <reference path="ui.ts" />
+var InspSched;
+(function (InspSched) {
+    var access_type;
+    (function (access_type) {
+        access_type[access_type["no_access"] = 0] = "no_access";
+        access_type[access_type["public_access"] = 1] = "public_access";
+        access_type[access_type["basic_access"] = 2] = "basic_access";
+        access_type[access_type["inspector_access"] = 3] = "inspector_access";
+    })(access_type = InspSched.access_type || (InspSched.access_type = {}));
+    var Permit = /** @class */ (function () {
+        function Permit(IsExternalUser) {
+        }
+        return Permit;
+    }());
+    InspSched.Permit = Permit;
+})(InspSched || (InspSched = {}));
+//# sourceMappingURL=Permit.js.map
 /// <reference path="app.ts" />
 /// <reference path="Permit.ts" />
 /// <reference path="newinspection.ts" />
@@ -158,22 +178,24 @@ var InspSched;
             clearElement(street);
             clearElement(city);
             var permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === key; })[0];
-            if (permit.Supervisor_URL.length > 0) {
-                var streetlink = document.createElement("a");
-                streetlink.style.textDecoration = "underline";
-                streetlink.href = permit.Supervisor_URL;
-                streetlink.appendChild(document.createTextNode(permit.ProjAddrCombined.trim()));
-                var citylink = document.createElement("a");
-                citylink.style.textDecoration = "underline";
-                citylink.href = permit.Supervisor_URL;
-                citylink.appendChild(document.createTextNode(permit.ProjCity.trim()));
-                street.appendChild(streetlink);
-                city.appendChild(citylink);
-            }
-            else {
-                street.appendChild(document.createTextNode(permit.ProjAddrCombined.trim()));
-                city.appendChild(document.createTextNode(permit.ProjCity.trim()));
-            }
+            //if (permit.Supervisor_URL.length > 0)
+            //{
+            //  let streetlink = <HTMLAnchorElement>document.createElement("a");
+            //  streetlink.style.textDecoration = "underline";
+            //  streetlink.href = permit.Supervisor_URL;
+            //  streetlink.appendChild(document.createTextNode(permit.ProjAddrCombined.trim()));
+            //  let citylink = <HTMLAnchorElement>document.createElement("a");
+            //  citylink.style.textDecoration = "underline";
+            //  citylink.href = permit.Supervisor_URL;
+            //  citylink.appendChild(document.createTextNode(permit.ProjCity.trim()));
+            //  street.appendChild(streetlink);
+            //  city.appendChild(citylink);
+            //}
+            //else
+            //{
+            street.appendChild(document.createTextNode(permit.ProjAddrCombined.trim()));
+            city.appendChild(document.createTextNode(permit.ProjCity.trim()));
+            //}
             Show('PermitSelectContainer');
         }
         UI.UpdatePermitData = UpdatePermitData;
@@ -289,7 +311,7 @@ var InspSched;
                 inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle PassRow";
             else if (inspection.ResultADC == 'C')
                 inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle CancelRow";
-            else if (inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'N')
+            else if (inspection.ResultADC == 'D' || inspection.ResultADC == 'N')
                 inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle FailRow";
             // #region DataRow
             //*******************************************************************************************
@@ -427,6 +449,7 @@ var InspSched;
             // #endregion Comment Secion
             //*********************************************
             // Set permit number as link if internal user 
+
             if (permit.access !== InspSched.access_type.public_access) {
                 var link = document.createElement("a");
                 link.style.textDecoration = "underline";
@@ -488,6 +511,7 @@ var InspSched;
                     }
                     InspButtonDiv.appendChild(detailButton);
                 }
+
             }
             DataRow.appendChild(InspButtonDiv);
             if (inspection.DisplayInspDateTime.length > 0) {
@@ -887,7 +911,7 @@ var InspSched;
     (function (transport) {
         "use strict";
         function GetPermit(key) {
-            var x = XHR.Get("API/Permit/" + key);
+            var x = XHR.Get("API/Permit/Get/" + key);
             return new Promise(function (resolve, reject) {
                 x.then(function (response) {
                     var pl = JSON.parse(response.Text);
@@ -913,7 +937,7 @@ var InspSched;
         }
         transport.GetInspType = GetInspType;
         function GetInspections(key) {
-            var x = XHR.Get("API/Inspection/" + key);
+            var x = XHR.Get("API/Inspection/Permit/" + key);
             return new Promise(function (resolve, reject) {
                 x.then(function (response) {
                     var il = JSON.parse(response.Text);
@@ -940,13 +964,26 @@ var InspSched;
             });
         }
         transport.SaveInspection = SaveInspection;
-        function SaveInspectionResult(inspection) {
-            var thisString = "";
-            return thisString;
+
+        function AddComment(InspectionId, Comment) {
+            var data = {
+                'InspectionId': InspectionId,
+                'Comment': Comment
+            };
+            var x = XHR.Post("API/Inspection/Comment/", JSON.stringify(data));
+            return new Promise(function (resolve, reject) {
+                x.then(function (response) {
+                    var di = JSON.parse(response.Text);
+                    resolve(di);
+                }).catch(function () {
+                    console.log("error in Post Comment");
+                    reject(null);
+                });
+            });
         }
-        transport.SaveInspectionResult = SaveInspectionResult;
-        function CancelInspection(InspID, key) {
-            var x = XHR.Delete("API/Inspection/" + key + "/" + InspID);
+        transport.AddComment = AddComment;
+        function CancelInspection(InspectionId, PermitNumber) {
+            var x = XHR.Post("API/Inspection/PublicCancel/" + PermitNumber + "/" + InspectionId);
             return new Promise(function (resolve, reject) {
                 x.then(function (response) {
                     var di = JSON.parse(response.Text);
@@ -958,6 +995,26 @@ var InspSched;
             });
         }
         transport.CancelInspection = CancelInspection;
+        function UpdateInspection(PermitNumber, InspectionId, ResultCode, Remarks, Comments) {
+            var data = {
+                'permitNumber': PermitNumber,
+                'inspectionId': InspectionId,
+                'resultCode': ResultCode,
+                'remark': Remarks,
+                'comment': Comments
+            };
+            var x = XHR.Post("API/Inspection/Update/", JSON.stringify(data));
+            return new Promise(function (resolve, reject) {
+                x.then(function (response) {
+                    var di = JSON.parse(response.Text);
+                    resolve(di);
+                }).catch(function () {
+                    console.log("error in Inspection Update");
+                    reject(null);
+                });
+            });
+        }
+        transport.UpdateInspection = UpdateInspection;
     })(transport = InspSched.transport || (InspSched.transport = {}));
 })(InspSched || (InspSched = {}));
 //# sourceMappingURL=transport.js.map

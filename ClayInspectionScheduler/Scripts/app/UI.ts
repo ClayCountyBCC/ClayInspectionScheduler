@@ -147,9 +147,10 @@ namespace InspSched.UI
     }
     else
     {
+r
       street.appendChild(document.createTextNode(permit.ProjAddrCombined.trim()));
       city.appendChild(document.createTextNode(permit.ProjCity.trim()));
-    }
+    //}
 
     Show('PermitSelectContainer');
 
@@ -294,6 +295,7 @@ namespace InspSched.UI
   // update BuildInspectionRow
   function BuildInspectionRow(inspection: Inspection)
   {
+    
     let permit: Permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === inspection.PermitNo })[0];
     //permit.access = access_type.inspector_access;
 
@@ -310,7 +312,7 @@ namespace InspSched.UI
       inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle PassRow";
     else if (inspection.ResultADC == 'C')
       inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle CancelRow"
-    else if (inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'N')
+    else if (inspection.ResultADC == 'D' || inspection.ResultADC == 'N')
       inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle FailRow";
 
 
@@ -506,6 +508,8 @@ namespace InspSched.UI
 
     //*********************************************
     // Set permit number as link if internal user 
+
+
     if (permit.access !== access_type.public_access)
     {
       let link = <HTMLAnchorElement>document.createElement("a");
@@ -576,6 +580,10 @@ namespace InspSched.UI
     else if (inspection.ResultADC.length == 0)
     {
       let detailButton = BuildButton(inspection.InspReqID + "_details_btn", "Details", "InspSched.UI.ToggleInspDetails(this.value)", inspection.InspReqID)
+      remarkrow.style.display = "none";
+      if (IsGoodCancelDate(inspection, InspSched.ThisPermit.access == access_type.public_access))
+        InspButtonDiv.appendChild(BuildButton("", "Cancel", "InspSched.CancelInspection('" + inspection.InspReqID + "', '" + inspection.PermitNo + "');"));
+    }
 
       // element "remarkrow" will be visible/hidden when new Details button is clicked.
 

@@ -20,9 +20,8 @@ namespace ClayInspectionScheduler.Controllers
       }
       else
       {
-        bool isexternal = Constants.CheckIsExternalUser(User.Identity.Name);
-        var e = thisInspection.Save(isexternal, (isexternal ? "OLP": User.Identity.Name.ToLower().Replace(@"claybcc\", "")));
-
+        var ua = UserAccess.GetUserAccess(User.Identity.Name);
+        var e = thisInspection.Save(ua);
         return Ok(e);
       }
     }

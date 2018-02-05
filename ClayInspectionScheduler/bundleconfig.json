@@ -5,6 +5,7 @@
       "Scripts/app/Permit.js",
       "Scripts/app/LocationHash.js",
       "Scripts/app/newinspection.js",
+      "Scripts/app/Permit.js",
       "Scripts/app/ui.js",
       "Scripts/app/XHR.js",
       "Scripts/app/transport.js",
@@ -14,11 +15,10 @@
       "Scripts/moment.min.js",
       "Scripts/bootstrap-datepicker.js",
       "Scripts/foundation.min.js"
-
     ]
   },
   {
-    "outputFileName": "Scripts/app/bundle.min.min.js",
+    "outputFileName": "Scripts/app/bundle.min.js",
     "inputFiles": [
       "Scripts/app/bundle.min.js"
     ]
