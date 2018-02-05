@@ -17,8 +17,12 @@ namespace ClayInspectionScheduler.Models
 
     public bool Final { get; set; }
 
+    public InspType()
+    {
 
-    public static List<InspType> Get(bool IsExternalUser)
+    }
+    
+    public static List<InspType> Get()
     {
       
       string sql = @"
@@ -30,20 +34,20 @@ namespace ClayInspectionScheduler.Models
           LTRIM(RTRIM(I.InspCd)) InspCd,
           Final
         FROM
-                bpINS_REF I
+          bpINS_REF I
         WHERE
-                I.Retired != 1
+          I.Retired != 1
         ORDER BY 
-          I.InsDesc
-        ";
+          I.InsDesc";
       
       var lp = Constants.Get_Data<InspType>(sql);
-
-
-
       return lp;
     }
 
+    public static List<InspType> GetCachedInspectionTypes()
+    {
+      return (List<InspType>)MyCache.GetItem("inspectiontypes");
+    }
 
 
   }

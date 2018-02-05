@@ -2,7 +2,7 @@
 /// <reference path="ui.ts" />
 var InspSched;
 (function (InspSched) {
-    var Dates = (function () {
+    var Dates = /** @class */ (function () {
         function Dates() {
         }
         return Dates;

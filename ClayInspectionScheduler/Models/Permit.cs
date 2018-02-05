@@ -13,13 +13,12 @@ namespace ClayInspectionScheduler.Models
   public class Permit
   {
     // Had to make public in order to allow me to update the cancel button
-    public bool IsExternalUser { get; set; }
+    public UserAccess.access_type access { get; set; }
     public string PermitNo { get; set; }
     public string ProjAddrCombined { get; set; }
     public string ProjCity { get; set; }
     public string ErrorText { get; set; } = "";
     public bool NoFinalInspections { get; set; } // If this is true, they can't schedule a final inspection on the client.
-    public string Supervisor_URL { get; set; } = "";
     public string Permit_URL { get; set; } = "";
     private string ContractorId { get; set; } = "";
     private int Confidential { get; set; }
@@ -58,7 +57,7 @@ namespace ClayInspectionScheduler.Models
     {
       get
       {
-        var dc = DateCache.getDateCache(this.IsExternalUser, this.SuspendGraceDate);
+        var dc = DateCache.getDateCache(this.access == UserAccess.access_type.public_access, this.SuspendGraceDate);
         return dc;
       }
     }
@@ -68,22 +67,10 @@ namespace ClayInspectionScheduler.Models
 
     }
 
-    public static List<Permit> Get(string AssocKey, bool IsExternalUser, bool isSupervisor)
+    private static List<Permit> GetRaw(string PermitNumber)
     {
-      /**
-       * Need to add the following functionality to this
-       * query:
-       * 
-       *    1. check if the permit has been issued (DateTime PermitIssueDate)
-       *    2. check if holds exist
-       *      a. does hold stop final? (bool HoldStopAll) -- This may be unecessary
-       *      b. does hold stop all?  (bool HoldStopFinal)
-       *    3. check if there are charges (bool ChargesExist)
-       *    4. Is Master Permit Co'd? (bool MasterCoClosed)
-       *    
-       **/
       var dbArgs = new DynamicParameters();
-      dbArgs.Add("@PermitNo", AssocKey);
+      dbArgs.Add("@PermitNo", PermitNumber);
       string sql = @"
       USE WATSC;
       DECLARE @MPermitNo CHAR(8) = (SELECT MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = @PermitNo);
@@ -166,10 +153,29 @@ namespace ClayInspectionScheduler.Models
 		        OR MPermitNo = @MPermitNo
 		        OR A.mPermitNo = @PermitNo)
    		    AND A.VoidDate IS NULL";
+      return Constants.Get_Data<Permit>(sql, dbArgs);
+    }
+
+    public static List<Permit> Get(
+      string AssocKey, 
+      UserAccess.access_type CurrentAccess)
+    {
+      /**
+       * Need to add the following functionality to this
+       * query:
+       * 
+       *    1. check if the permit has been issued (DateTime PermitIssueDate)
+       *    2. check if holds exist
+       *      a. does hold stop final? (bool HoldStopAll) -- This may be unecessary
+       *      b. does hold stop all?  (bool HoldStopFinal)
+       *    3. check if there are charges (bool ChargesExist)
+       *    4. Is Master Permit Co'd? (bool MasterCoClosed)
+       *    
+       **/
+
       try
       {
-        var permits = Constants.Get_Data<Permit>(sql, dbArgs);
-
+        var permits = GetRaw(AssocKey);
         if (!permits.Any(p => p.PermitNo == AssocKey))
         {
           return new List<Permit>();          
@@ -181,36 +187,19 @@ namespace ClayInspectionScheduler.Models
                                where prmt.CoClosed != -1
                                select prmt.PrivateProvider).DefaultIfEmpty("").First();
 
+          string host = Constants.UseProduction() ? "claybccims" : "claybccimstrn";
           foreach (Permit l in permits)
           {
-
-            if (Constants.UseProduction() == true)
+            if (l.PermitTypeString == "BL")
             {
-              l.Supervisor_URL = isSupervisor ? $@"http://claybccims/WATSWeb/Permit/Inspection/Inspection.aspx?PermitNo={l.PermitNo}" : "";
-              if (l.PermitTypeString == "BL")
-              {
-                l.Permit_URL = $@"http://claybccims/WATSWeb/Permit/MainBL.aspx?PermitNo={l.PermitNo}&Nav=PL&OperId=&PopUp=";
-              }
-              else
-              {
-                l.Permit_URL = $@"http://claybccims/WATSWeb/Permit/APermit{l.PermitTypeString}.aspx?PermitNo={l.PermitNo}";
-              }
+              l.Permit_URL = $@"http://{host}/WATSWeb/Permit/MainBL.aspx?PermitNo={l.PermitNo}&Nav=PL&OperId=&PopUp=";
             }
             else
             {
-              l.Supervisor_URL = isSupervisor ? $@"http://claybccimstrn/WATSWeb/Permit/Inspection/Inspection.aspx?PermitNo={l.PermitNo}&OperId=&Nav=BL" : "";
-              if (l.PermitTypeString == "BL")
-              {
-                l.Permit_URL = $@"http://claybccimstrn/WATSWeb/Permit/MainBL.aspx?PermitNo={l.PermitNo}";
-              }
-              else
-              {
-                l.Permit_URL = $@"http://claybccimstrn/WATSWeb/Permit/APermit{l.PermitTypeString}.aspx?PermitNo={l.PermitNo}";
-              }
+              l.Permit_URL = $@"http://{host}/WATSWeb/Permit/APermit{l.PermitTypeString}.aspx?PermitNo={l.PermitNo}";
             }
-
-            l.IsExternalUser = IsExternalUser;
-            if(IsExternalUser)
+            l.access = CurrentAccess;
+            if(l.access  == UserAccess.access_type.public_access)
             {
               l.Permit_URL = "";
               if (l.Confidential == 1)
@@ -219,7 +208,6 @@ namespace ClayInspectionScheduler.Models
                 l.ProjCity = "Confidential";
               }
             }
-
 
             l.Validate(PrivProvCheck);
           }
@@ -432,7 +420,7 @@ namespace ClayInspectionScheduler.Models
         return;
       }
 
-      if (this.IsExternalUser)
+      if (this.access == UserAccess.access_type.public_access)
       { 
         if (PassedFinal()) return;
         if (PrivateProvider.Length > 0)
@@ -440,8 +428,6 @@ namespace ClayInspectionScheduler.Models
           if (CheckPrivProv(PrivateProvider)) return;
         }
         if (CheckSuspendGraceDate(this.SuspendGraceDate)) return;
-
-
       }
 
       if (ContractorIssues()) return;

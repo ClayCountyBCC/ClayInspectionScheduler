@@ -93,22 +93,24 @@ var InspSched;
             clearElement(street);
             clearElement(city);
             var permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === key; })[0];
-            if (permit.Supervisor_URL.length > 0) {
-                var streetlink = document.createElement("a");
-                streetlink.style.textDecoration = "underline";
-                streetlink.href = permit.Supervisor_URL;
-                streetlink.appendChild(document.createTextNode(permit.ProjAddrCombined.trim()));
-                var citylink = document.createElement("a");
-                citylink.style.textDecoration = "underline";
-                citylink.href = permit.Supervisor_URL;
-                citylink.appendChild(document.createTextNode(permit.ProjCity.trim()));
-                street.appendChild(streetlink);
-                city.appendChild(citylink);
-            }
-            else {
-                street.appendChild(document.createTextNode(permit.ProjAddrCombined.trim()));
-                city.appendChild(document.createTextNode(permit.ProjCity.trim()));
-            }
+            //if (permit.Supervisor_URL.length > 0)
+            //{
+            //  let streetlink = <HTMLAnchorElement>document.createElement("a");
+            //  streetlink.style.textDecoration = "underline";
+            //  streetlink.href = permit.Supervisor_URL;
+            //  streetlink.appendChild(document.createTextNode(permit.ProjAddrCombined.trim()));
+            //  let citylink = <HTMLAnchorElement>document.createElement("a");
+            //  citylink.style.textDecoration = "underline";
+            //  citylink.href = permit.Supervisor_URL;
+            //  citylink.appendChild(document.createTextNode(permit.ProjCity.trim()));
+            //  street.appendChild(streetlink);
+            //  city.appendChild(citylink);
+            //}
+            //else
+            //{
+            street.appendChild(document.createTextNode(permit.ProjAddrCombined.trim()));
+            city.appendChild(document.createTextNode(permit.ProjCity.trim()));
+            //}
             Show('PermitSelectContainer');
         }
         UI.UpdatePermitData = UpdatePermitData;
@@ -230,7 +232,7 @@ var InspSched;
                 inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle PassRow";
             else if (inspection.ResultADC == 'C')
                 inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle CancelRow";
-            else if (inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'N')
+            else if (inspection.ResultADC == 'D' || inspection.ResultADC == 'N')
                 inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle FailRow";
             thisPermit.className = "large-2 medium-6 small-6 column InspPermit ";
             inspDateTime.className = "large-2 medium-6 small-6 column InspDate";
@@ -240,7 +242,7 @@ var InspSched;
             ResultADC.className = "large-3 medium-6 small-6 InspResult column end";
             var permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === inspection.PermitNo; })[0];
             // add the text nodes
-            if (!permit.IsExternalUser) {
+            if (permit.access !== InspSched.access_type.public_access) {
                 var link = document.createElement("a");
                 link.style.textDecoration = "underline";
                 link.href = permit.Permit_URL;
@@ -269,7 +271,7 @@ var InspSched;
             }
             else if (!inspection.ResultADC) {
                 remarkrow.style.display = "none";
-                if (IsGoodCancelDate(inspection, InspSched.ThisPermit.IsExternalUser))
+                if (IsGoodCancelDate(inspection, InspSched.ThisPermit.access == InspSched.access_type.public_access))
                     InspButtonDiv.appendChild(BuildButton("", "Cancel", "InspSched.CancelInspection('" + inspection.InspReqID + "', '" + inspection.PermitNo + "');"));
             }
             dataColumn.appendChild(thisPermit);

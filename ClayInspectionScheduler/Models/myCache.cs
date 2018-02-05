@@ -13,7 +13,9 @@ namespace ClayInspectionScheduler.Models
 
     public static object GetItem(string key)
     {
-      return GetOrAddExisting(key, () => InitItem(key));
+      var CIP = new CacheItemPolicy();
+      CIP.AbsoluteExpiration = DateTime.Now.AddHours(4);
+      return GetOrAddExisting(key, () => InitItem(key), CIP);
     }
 
     public static object GetItem(string key, CacheItemPolicy CIP)
@@ -30,49 +32,52 @@ namespace ClayInspectionScheduler.Models
       {
         return (oldValue ?? newValue).Value;
       }
-      catch
+      catch(Exception ex)
       {
         // Handle cached lazy exception by evicting from cache. Thanks to Denis Borovnev for pointing this out!
         _cache.Remove(key);
+        new ErrorLog(ex, "");
         throw;
       }
     }
 
-    private static T GetOrAddExisting<T>(string key, Func<T> valueFactory)
-    {
+    //private static T GetOrAddExisting<T>(string key, Func<T> valueFactory)
+    //{
 
-      Lazy<T> newValue = new Lazy<T>(valueFactory);
-      var oldValue = _cache.AddOrGetExisting(key, newValue, GetCIP()) as Lazy<T>;
-      try
-      {
-        return (oldValue ?? newValue).Value;
-      }
-      catch
-      {
-        // Handle cached lazy exception by evicting from cache. Thanks to Denis Borovnev for pointing this out!
-        _cache.Remove(key);
-        throw;
-      }
-    }
+    //  Lazy<T> newValue = new Lazy<T>(valueFactory);
+    //  var oldValue = _cache.AddOrGetExisting(key, newValue, GetCIP()) as Lazy<T>;
+    //  try
+    //  {
+    //    return (oldValue ?? newValue).Value;
+    //  }
+    //  catch
+    //  {
+    //    // Handle cached lazy exception by evicting from cache. Thanks to Denis Borovnev for pointing this out!
+    //    _cache.Remove(key);
+    //    throw;
+    //  }
+    //}
 
-    private static CacheItemPolicy GetCIP()
-    {
-      return new CacheItemPolicy()
-      {
-        AbsoluteExpiration = DateTime.Now.AddHours(4)
-      };
-    }
+    //private static CacheItemPolicy GetCIP()
+    //{
+    //  return new CacheItemPolicy()
+    //  {
+    //    AbsoluteExpiration = DateTime.Now.AddHours(4)
+    //  };
+    //}
 
     private static object InitItem(string key)
     {
       string[] s = key.Split(new[] { "," }, StringSplitOptions.None);
-      bool IsExternal = bool.Parse(s[1]);
 
       switch ( s[ 0 ].ToLower() )
       {
+        case "useraccess":
+          return UserAccess.GetAllUserAccess();
         case "inspectiontypes":
-          return InspType.Get(IsExternal);
+          return InspType.Get();
         case "datecache":
+          bool IsExternal = bool.Parse(s[1]);
           return new DateCache(IsExternal);
         default:
           return null;

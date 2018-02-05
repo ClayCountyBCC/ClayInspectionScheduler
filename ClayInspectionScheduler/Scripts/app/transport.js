@@ -8,7 +8,7 @@ var InspSched;
     (function (transport) {
         "use strict";
         function GetPermit(key) {
-            var x = XHR.Get("API/Permit/" + key);
+            var x = XHR.Get("API/Permit/Get/" + key);
             return new Promise(function (resolve, reject) {
                 x.then(function (response) {
                     var pl = JSON.parse(response.Text);
@@ -34,7 +34,7 @@ var InspSched;
         }
         transport.GetInspType = GetInspType;
         function GetInspections(key) {
-            var x = XHR.Get("API/Inspection/" + key);
+            var x = XHR.Get("API/Inspection/Permit/" + key);
             return new Promise(function (resolve, reject) {
                 x.then(function (response) {
                     var il = JSON.parse(response.Text);
@@ -61,8 +61,25 @@ var InspSched;
             });
         }
         transport.SaveInspection = SaveInspection;
-        function CancelInspection(InspID, key) {
-            var x = XHR.Delete("API/Inspection/" + key + "/" + InspID);
+        function AddComment(InspectionId, Comment) {
+            var data = {
+                'InspectionId': InspectionId,
+                'Comment': Comment
+            };
+            var x = XHR.Post("API/Inspection/Comment/", JSON.stringify(data));
+            return new Promise(function (resolve, reject) {
+                x.then(function (response) {
+                    var di = JSON.parse(response.Text);
+                    resolve(di);
+                }).catch(function () {
+                    console.log("error in Post Comment");
+                    reject(null);
+                });
+            });
+        }
+        transport.AddComment = AddComment;
+        function CancelInspection(InspectionId, PermitNumber) {
+            var x = XHR.Post("API/Inspection/PublicCancel/" + PermitNumber + "/" + InspectionId);
             return new Promise(function (resolve, reject) {
                 x.then(function (response) {
                     var di = JSON.parse(response.Text);
@@ -74,6 +91,26 @@ var InspSched;
             });
         }
         transport.CancelInspection = CancelInspection;
+        function UpdateInspection(PermitNumber, InspectionId, ResultCode, Remarks, Comments) {
+            var data = {
+                'permitNumber': PermitNumber,
+                'inspectionId': InspectionId,
+                'resultCode': ResultCode,
+                'remark': Remarks,
+                'comment': Comments
+            };
+            var x = XHR.Post("API/Inspection/Update/", JSON.stringify(data));
+            return new Promise(function (resolve, reject) {
+                x.then(function (response) {
+                    var di = JSON.parse(response.Text);
+                    resolve(di);
+                }).catch(function () {
+                    console.log("error in Inspection Update");
+                    reject(null);
+                });
+            });
+        }
+        transport.UpdateInspection = UpdateInspection;
     })(transport = InspSched.transport || (InspSched.transport = {}));
 })(InspSched || (InspSched = {}));
 //# sourceMappingURL=transport.js.map
