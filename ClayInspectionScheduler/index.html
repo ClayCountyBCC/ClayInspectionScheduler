@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang='en-US'>
 <head>
-  <title>InspectionScheduler</title>
+  <title>Clay Inspectionsr</title>
   <meta name="X-UA-Compatible" value="IE=11" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -18,6 +18,7 @@
   <link href="Content/fonts/foundation-icons.css" rel="stylesheet" />
   <link href="Content/css/MyStyle.css" rel="stylesheet" />
 
+
 </head>
 
 <body style="background-color:cadetblue">
@@ -26,10 +27,10 @@
   <div class="row expanded top-bar" style="background: #b0c4de url('64.png') no-repeat left;padding-left:64px;">
     <div class="columns">
       <div class="row expanded">
-          <h2><span class="hide-for-small-only">Clay </span> Inspection Scheduler</h2>
+        <h2><span class="hide-for-small-only">Clay </span> Inspections</h2>
       </div>
     </div>
-  </div> 
+  </div>
 
   <!--Inspection Scheduler Application container-->
   <div class="row expanded App-Container large-12 medium-12 small-12 columns align-center" style="padding-top:1rem;">
@@ -37,9 +38,9 @@
       <div class="large-4 medium-6 input-group">
         <input id="PermitSearch" type="search" class="input-group-field columns" placeholder="   Permit Number" />
         <span class="input-group-button" id="button">
-          <button id="PermitSearchButton" 
+          <button id="PermitSearchButton"
                   onclick="InspSched.updateHash(document.getElementById('PermitSearch').value);"
-                  type="submit" class="button fi-magnifying-glass end" value="Search" required ></button>
+                  type="submit" class="button fi-magnifying-glass end" value="Search" required></button>
         </span>
       </div>
     </div>
@@ -50,7 +51,7 @@
     </div>
 
     <!-- Permit Information -->
-    <div class="large-12 align-center row flex-container  flex-child-grow" style="padding-top:1rem; padding-bottom:2rem; max-width:1200px;" id="PermitScreen">
+    <div class="large-12 align-center row flex-container  flex-child-grow" style="max-width:95%;" id="PermitScreen">
       <div class="large-11 medium-12 small-12 align-center" style="border-radius:10px;overflow:hidden">
         <div class="large-12">
 
@@ -64,22 +65,28 @@
 
             <!-- Tab 1 : Inspection View -->
             <div class="tabs-panel is-active tabs-content" id="InspectionView">
+
+
               <div class="large-12 medium-12 small-12" id="InspectionTable">
 
                 <div class="large-12 medium-12 small-12" id="InspSched">
                   <div class="small-12 align-center" id="NoInspections">No Inspections Found</div>
 
-                  <div class="flex-container row align-center" id="NoInspContainer" style="padding: 1rem;background-color:#e5e5e5; border-bottom: 2px solid darkgray;">
-                    <p style="padding-bottom: .5rem;">Associated permits with no Inspections found</p>
-                    <div id="PermitsWithNoInspections"></div>
-                  </div>
+
+
 
                   <div class="large-12 row infoDiv " id="InspSchedBody">
-                    <div class="column infoDiv inspection-Table" id="InspListData" ></div>
+
+
+
+                    <div class="column infoDiv inspection-Table" id="InspListData">
+
+                    </div>
+
                   </div>
                 </div>
               </div>
-            </div>           
+            </div>
 
             <!-- Tab 2 : Scheduler -->
             <div class="tabs-panel" id="Scheduler">
@@ -117,7 +124,6 @@
                 <div id="Reasons" class="large-11 medium-11 small-11"></div>
 
               </div> <!-- End Issues Container-->
-
               <!-- Inspection Shceduler Container -->
               <div class="row align-justify" id="InspectionScheduler">
                 <div class="large-12 small-12 medium-12 ">
@@ -129,20 +135,17 @@
                         <div class=" date" id="date"></div>
                       </div>
                     </div>
-                      <!--Scheduling Inspection Type Selector / Save button-->
+                    <!--Scheduling Inspection Type Selector / Save button-->
                     <div class="large-6 medium-6 small-12 row flex-container align-center align-self-middle">
                       <div class="large-10 medium-10 small-10" style="text-align:center;">
+                        <textarea class="large-12 medium-12 small-12" placeholder="Please enter additional information for inspectors here. This will NOT be visible on inspection after it is saved." rows=3 maxlength=200 style="resize: none;" id="scheduler_comment"></textarea>
                         <select class="large-12 medium-12 small-12" id="InspTypeSelect"></select>
                         <button class="button " id="SaveSchedule" type="button" onclick="">Save Inspection</button>
                       </div>
                       <div class="large-10 medium-10 small-10 text-center align-center" id="SaveConfirmed">
-                        <p class="large-12" style="font-size:1.5em;" id="SaveSuccess">
-                           <span id="InspSaveDesc"></span> inspection scheduled for permit
-                          #<span id="InspSavePermitNo"></span>,
-                        on <span id="InspSaveDate"></span> 
-                        </p>
+
                       </div>
-                    </div>                                                 <!-- End Scheduling Inspection Type Selector / Save button-->
+                    </div>  <!-- End Scheduling Inspection Type Selector / Save button-->
 
                   </div>
                 </div>
@@ -156,13 +159,16 @@
     </div>     <!--End Permit Information-->
 
   </div>     <!--End Inspection Scheduler-->
+  <!--<script src="Scripts/app/bundle.min.js?201801191721"></script>-->
 
+  <script src="Scripts/app/Permit.js"></script>
 
-  <script src="Scripts/app/bundle.js?201802020735"></script>
+  <script src="Scripts/app/LocationHash.js"></script>
 
-  <!--<script src="Scripts/app/LocationHash.js"></script>
   <script src="Scripts/app/NewInspection.js"></script>
+
   <script src="Scripts/app/UI.js"></script>
+
   <script src="Scripts/app/XHR.js"></script>
   <script src="Scripts/app/transport.js"></script>
   <script src="Scripts/app/es6-promise.min.js"></script>
@@ -170,7 +176,7 @@
   <script src="Scripts/jquery-3.1.1.min.js"></script>
   <script src="Scripts/moment.min.js"></script>
   <script src="Scripts/bootstrap-datepicker.js"></script>
-  <script src="Scripts/foundation.min.js"></script>-->
+  <script src="Scripts/foundation.min.js"></script>
 
   <script>$(document).foundation();</script>
   <script>

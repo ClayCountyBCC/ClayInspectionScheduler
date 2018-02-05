@@ -15,7 +15,7 @@ namespace InspSched
     ResultADC: string;
     ResultDescription: string;
     Remarks: string;
-    Comments: string;
+    Comment: string;
     SchedDateTime: Date;
     DisplaySchedDateTime: string;
     Initials: string;
@@ -36,7 +36,7 @@ namespace InspSched
     public ResultADC: string;
     public ResultDescription: string;
     public Remarks: string;
-    public Comments: string;
+    public Comment: string;
     public SchedDateTime: Date;
     public DisplaySchedDateTime: string;
     public Initials: string;

@@ -81,7 +81,7 @@ namespace ClayInspectionScheduler.Models
     }
     public string Remarks { get; set; } = null;
 
-    public string Comments { get; set; } = "";
+    public string Comment { get; set; } = "";
 
     public DateTime SchedDateTime { get; set; }
 

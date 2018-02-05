@@ -2,9 +2,10 @@
   {
     "outputFileName": "Scripts/app/bundle.js",
     "inputFiles": [
+      "Scripts/app/Permit.js",
+
       "Scripts/app/LocationHash.js",
       "Scripts/app/newinspection.js",
-      "Scripts/app/Permit.js",
       "Scripts/app/ui.js",
       "Scripts/app/XHR.js",
       "Scripts/app/transport.js",
