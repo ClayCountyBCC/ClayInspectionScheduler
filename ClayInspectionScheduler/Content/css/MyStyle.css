@@ -45,15 +45,22 @@ body {
   color: white;
   cursor: pointer;
 }
-
-.button {
+.DetailsButton {
+  min-height: 20px;
+  background-color: #3e9571;
+  color: white;
+  cursor: pointer;
+  margin-top: 6px;
+  text-align: center;
+}
+button {
   font-weight: bold;
   background-color: #3e9571;
   margin: 0;
   cursor: pointer;
 }
 
-  .button:hover {
+ .button:hover {
     background-color: #27ce89;
   }
 
@@ -293,6 +300,7 @@ table tbody, table tfoot, table thead {
 
 .inspRemarks {
   color: #bd3f52;
+  min-height: 1px;
 }
 
 .PermitSelectDiv,
@@ -381,7 +389,12 @@ h5 {
     color: white;
     cursor: pointer;
   }
-
+  .DetailsButton {
+    min-height: 20px;
+    background-color: #3e9571;
+    color: white;
+    cursor: pointer;
+  }
   .inspRemarks {
     padding: 0;
     font-size: .75em;
@@ -392,8 +405,47 @@ h5 {
   }
 }
 
-.inspection-Table {
-  max-height: 58%;
-  max-height: calc(55vh);
-  overflow-y: scroll;
+.SaveCommentButton {
+  text-align: center;
+  margin: 0 auto;
+  min-height: 20px;
+  background-color: #3e9571;
+  color: white;
+  cursor: pointer;
+}
+
+ .inspection-Table {
+  max-height: 78vh;
+  max-height: calc(100%-90px);
+  overflow-y: auto;
+}
+
+.No-Edit{
+  cursor: text !important;
+  resize: none;
+  
+}
+
+[type=checkbox], [type=file], [type=radio] {
+  margin: 0 0 0;
+}
+.remark-text {
+  resize: none;
+  line-height: 1.25em;
+  min-height: 1.5em;
+  margin: 0px 553px 0px 0px;
+  padding: 0;
+}
+.comment-container {
+  display: none;
+}
+
+
+.Comment-Textarea {
+  resize: none;
+  margin: 0;
+  padding: 0;
+}
+.details-container {
+  display: flex;
 }

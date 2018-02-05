@@ -106,6 +106,8 @@ var InspSched;
         for (var _i = 0, permits_2 = permits; _i < permits_2.length; _i++) {
             var permit = permits_2[_i];
             if (permit.PermitNo == permitNumSelect.value) {
+                // THIS LINE FOR TESTING ONLY
+                permit.access = access_type.inspector_access;
                 InspSched.ThisPermit = permit;
                 if (permit.ErrorText.length > 0) {
                     InspSched.UI.InformUserOfError(permit.PermitNo, permit.ErrorText);
@@ -133,7 +135,7 @@ var InspSched;
         var thisInspCd = SaveInspectionButton.getAttribute("value");
         var thisInspDesc = document.getElementById("InspTypeSelect");
         var inspDesc = thisInspDesc.options[thisInspDesc.selectedIndex].textContent;
-        InspSched.newInsp = new InspSched.NewInspection(thisPermit, thisInspCd, $(dpCalendar).data('datepicker').getDate());
+        InspSched.newInsp = new InspSched.NewInspection(thisPermit, thisInspCd, $(dpCalendar).data('datepicker').getDate(), "");
         var e = InspSched.transport.SaveInspection(InspSched.newInsp).then(function (issues) {
             var thisHeading = document.getElementById('ErrorHeading');
             var IssueList = document.createElement('ul');

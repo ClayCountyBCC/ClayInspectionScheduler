@@ -2,7 +2,7 @@
 /// <reference path="ui.ts" />
 var InspSched;
 (function (InspSched) {
-    var Inspection = (function () {
+    var Inspection = /** @class */ (function () {
         function Inspection() {
         }
         return Inspection;

@@ -1,7 +1,7 @@
 /// <reference path="ui.ts" />
 var InspSched;
 (function (InspSched) {
-    var DateCache = (function () {
+    var DateCache = /** @class */ (function () {
         function DateCache() {
         }
         return DateCache;

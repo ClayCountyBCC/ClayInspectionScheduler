@@ -3,7 +3,7 @@
 /// <reference path="ui.ts" />
 var InspSched;
 (function (InspSched) {
-    var NewInspection = (function () {
+    var NewInspection = /** @class */ (function () {
         function NewInspection(PermitNo, InspectionCd, SchecDateTime) {
             this.PermitNo = PermitNo;
             this.InspectionCd = InspectionCd;
