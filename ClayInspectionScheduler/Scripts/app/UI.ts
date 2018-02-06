@@ -580,10 +580,7 @@ namespace InspSched.UI
       }
     }
 
-        InspButtonDiv.appendChild(detailButton);
-
-      }
-    }
+         
 
 
     DataRow.appendChild(InspButtonDiv);

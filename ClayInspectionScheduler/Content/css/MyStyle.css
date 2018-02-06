@@ -458,6 +458,9 @@ h5 {
   margin: 0;
   padding: 0;
 }
+.completed-comments-textarea{
+
+}
 
 .details-container {
   display: flex;

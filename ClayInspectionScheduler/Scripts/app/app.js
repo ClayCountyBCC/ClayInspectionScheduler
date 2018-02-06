@@ -107,7 +107,7 @@ var InspSched;
             var permit = permits_2[_i];
             if (permit.PermitNo == permitNumSelect.value) {
                 // THIS LINE FOR TESTING ONLY
-                permit.access = access_type.inspector_access;
+                permit.access = InspSched.access_type.inspector_access;
                 InspSched.ThisPermit = permit;
                 if (permit.ErrorText.length > 0) {
                     InspSched.UI.InformUserOfError(permit.PermitNo, permit.ErrorText);

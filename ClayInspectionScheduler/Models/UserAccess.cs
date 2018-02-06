@@ -69,7 +69,7 @@ namespace ClayInspectionScheduler.Models
           }
           var groups = (from g in up.GetAuthorizationGroups()
                         select g.Name).ToList();
-          if(groups.Contains(mis_access_group) | groups.Contains(inspector_access_group))
+          if(groups.Contains(mis_access_group) || groups.Contains(inspector_access_group))
           {
             current_access = access_type.inspector_access;
           }

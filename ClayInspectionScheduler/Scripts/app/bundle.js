@@ -10,7 +10,7 @@ var InspSched;
         access_type[access_type["inspector_access"] = 3] = "inspector_access";
     })(access_type = InspSched.access_type || (InspSched.access_type = {}));
     var Permit = /** @class */ (function () {
-        function Permit() {
+        function Permit(IsExternalUser) {
         }
         return Permit;
     }());
@@ -52,13 +52,11 @@ var InspSched;
 var InspSched;
 (function (InspSched) {
     var NewInspection = /** @class */ (function () {
-        function NewInspection(PermitNo, InspectionCd, SchecDateTime, Comment) {
-
+        function NewInspection(PermitNo, InspectionCd, SchecDateTime, Comments) {
             this.PermitNo = PermitNo;
             this.InspectionCd = InspectionCd;
             this.SchecDateTime = SchecDateTime;
-            this.Comment = Comment;
-
+            this.Comments = Comments;
         }
         return NewInspection;
     }());
@@ -358,8 +356,6 @@ var InspSched;
             addRemarkButton.setAttribute("onclick", "transport.SaveInspectionResult(inspection)");
             addRemarkButton.style.margin = "0";
             addRemarkButton.textContent = "Save Result";
-
-          
             //***************************************
             var radioButtonSection = document.createElement("div");
             radioButtonSection.setAttribute("elementName", "radioButtonSection");
@@ -416,8 +412,6 @@ var InspSched;
             // #endregion Comment Secion
             //*********************************************
             // Set permit number as link if internal user 
-
-          
             if (permit.access !== InspSched.access_type.public_access) {
                 var link = document.createElement("a");
                 link.style.textDecoration = "underline";
@@ -466,12 +460,11 @@ var InspSched;
             else if (inspection.ResultADC.length == 0) {
                 var detailButton = BuildButton(inspection.InspReqID + "_details_btn", "Details", "InspSched.UI.ToggleInspDetails(this.value)", inspection.InspReqID);
                 // element "remarkrow" will be visible/hidden when new Details button is clicked.
-                if (IsGoodCancelDate(inspection, InspSched.ThisPermit.access)) {
+                if (IsGoodCancelDate(inspection, permit.access)) {
                     if (permit.access === InspSched.access_type.public_access) {
                         var privprovstring = permit.ErrorText.substr(2, 16).toLowerCase();
                         if (privprovstring != "private provider") {
-                            InspButtonDiv.appendChild(BuildButton("", "Cancel", "InspSched.CancelInspection('" + inspection.InspReqID + "', '" + inspection.PermitNo + "');"));
-
+                            InspButtonDiv.appendChild(BuildButton("", "Cancel", "InspSched.CancelInspection(" + inspection.InspReqID + ", '" + inspection.PermitNo + "');"));
                             detailButton.className = "column large-12 medium-12 small-12 align-self-center NewInspButton DetailsButton";
                         }
                     }
@@ -480,8 +473,6 @@ var InspSched;
                     }
                     InspButtonDiv.appendChild(detailButton);
                 }
-
-                          
             }
             DataRow.appendChild(InspButtonDiv);
             if (inspection.DisplayInspDateTime.length > 0) {
@@ -496,6 +487,22 @@ var InspSched;
                     inspDesc.className = "large-10 medium-6 small-6 InspType InspResult column";
                 }
             }
+            // SET COMMENTS
+            if (inspection.Comment.length > 0) {
+                thiscomment.textContent = inspection.Comment;
+                thiscomment.readOnly = true;
+                thiscomment.contentEditable = "false";
+                thiscomment.style.margin = "0";
+                thiscomment.style.overflowY = "scroll";
+                thiscomment.style.display = "flex";
+                textboxdiv.appendChild(thiscomment);
+                textboxdiv.style.display = "flex";
+                CommentContainer.appendChild(textboxdiv);
+            }
+            AddCommentDiv.appendChild(commentlabel);
+            AddCommentDiv.appendChild(AddCommentTextarea);
+            SaveCommentButtonDiv.appendChild(SaveCommentButton);
+            AddCommentDiv.appendChild(SaveCommentButtonDiv);
             // SET COMMENTS
             if (inspection.Comment.length > 0) {
                 thiscomment.textContent = inspection.Comment;
@@ -549,7 +556,6 @@ var InspSched;
             disapprove.className = "columns";
             disapprove.htmlFor = "disapprove_selection";
             disapprove.appendChild(disapproveradio);
-
             disapprove.appendChild(document.createTextNode(privateProvidercheck > 0 ? "Not Performed" : "Disapprove"));
             var cancelradio = document.createElement("input");
             cancelradio.id = "cancelradio_selection";
@@ -564,8 +570,6 @@ var InspSched;
             incompleteradio.id = "incompleteradio_selection";
             incompleteradio.type = "radio";
             incompleteradio.value = "";
-
-          
             var incomplete = document.createElement("label");
             incomplete.className = "columns";
             incomplete.htmlFor = "incomplete_selection";
@@ -576,7 +580,6 @@ var InspSched;
             RadioButtonSubrow.appendChild(approve);
             RadioButtonSubrow.appendChild(disapprove);
             RadioButtonSubrow.appendChild(cancel);
-
             if (access == InspSched.access_type.inspector_access) {
                 RadioButtonSubrow.appendChild(incomplete);
             }
@@ -740,7 +743,6 @@ var InspSched;
             return true;
         }
         function ToggleInspDetails(value) {
-
             if (InspSched.UI.CurrentDetailsOpen != "" && value.valueOf() != InspSched.UI.CurrentDetailsOpen) {
                 var CurrentAddRemark = document.getElementById(InspSched.UI.CurrentDetailsOpen + '_add_remark');
                 var CurrentCompletedRemark = document.getElementById(InspSched.UI.CurrentDetailsOpen + '_completed_remark');
@@ -767,7 +769,6 @@ var InspSched;
             comments.style.display = elementState == 'none' ? 'flex' : 'none';
             console.log('comments visibility changed to: ' + comments.style.display.toString());
             document.getElementById(value.valueOf() + '_details_btn').textContent = (addRemark.style.display.toString().toLowerCase() == 'none' ? '' : 'Hide ') + 'Details';
-
             InspSched.UI.CurrentDetailsOpen = value.valueOf();
         }
         UI.ToggleInspDetails = ToggleInspDetails;
@@ -938,7 +939,6 @@ var InspSched;
             });
         }
         transport.SaveInspection = SaveInspection;
-
         function AddComment(InspectionId, Comment) {
             var data = {
                 'InspectionId': InspectionId,
