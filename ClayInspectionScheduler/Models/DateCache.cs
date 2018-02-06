@@ -59,11 +59,11 @@ namespace ClayInspectionScheduler.Models
       return new DateCache(IsExternalUser);
     }
 
-    public DateCache(bool isExternal)
+    public DateCache(bool IsExternalUser)
     {
       var dbArgs = new DynamicParameters();
-      dbArgs.Add("@Start", isExternal ? DateTime.Today.AddDays(1) : DateTime.Today);
-      dbArgs.Add("@End", isExternal ? DateTime.Today.AddDays(9) : DateTime.Today.AddDays(15));
+      dbArgs.Add("@Start", IsExternalUser ? DateTime.Today.AddDays(1) : DateTime.Today);
+      dbArgs.Add("@End", IsExternalUser ? DateTime.Today.AddDays(9) : DateTime.Today.AddDays(15));
 
       string sql = @"
         USE CALENDAR;

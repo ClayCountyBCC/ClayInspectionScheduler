@@ -10,7 +10,7 @@ var InspSched;
         access_type[access_type["inspector_access"] = 3] = "inspector_access";
     })(access_type = InspSched.access_type || (InspSched.access_type = {}));
     var Permit = /** @class */ (function () {
-        function Permit(IsExternalUser) {
+        function Permit() {
         }
         return Permit;
     }());
@@ -557,6 +557,7 @@ var InspSched;
             var incomplete = document.createElement("label");
             incomplete.className = "columns";
             incomplete.htmlFor = "incomplete_selection";
+            incomplete.appendChild(incompleteradio);
             incomplete.appendChild(document.createTextNode("Incomplete"));
             var RadioButtonSubrow = document.createElement("div");
             RadioButtonSubrow.className = "large-10 medium-10 small-12 flex-container flex-dir-row flex-child-grow align-justify";
@@ -565,7 +566,6 @@ var InspSched;
             RadioButtonSubrow.appendChild(cancel);
             if (access == InspSched.access_type.inspector_access) {
                 RadioButtonSubrow.appendChild(incomplete);
-                incomplete.appendChild(incompleteradio);
             }
             return RadioButtonSubrow;
         }

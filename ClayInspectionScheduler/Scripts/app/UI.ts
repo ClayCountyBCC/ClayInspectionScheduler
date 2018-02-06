@@ -555,7 +555,7 @@ namespace InspSched.UI
 
       if (IsGoodCancelDate(inspection, permit.access))
       {
-        if (permit.access === access_type.public_access) //(InspSched.ThisPermit.IsExternalUser)
+        if (permit.access === access_type.public_access) 
         {
           let privprovstring: string = permit.ErrorText.substr(2, 16).toLowerCase();
           if (privprovstring != "private provider")
