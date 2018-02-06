@@ -2,6 +2,7 @@
 /// <reference path="ui.ts" />
 var InspSched;
 (function (InspSched) {
+
     var access_type;
     (function (access_type) {
         access_type[access_type["no_access"] = 0] = "no_access";

@@ -1,4 +1,4 @@
-﻿/// <reference path="transport.ts" />
+/// <reference path="transport.ts" />
 /// <reference path="UI.ts" />
 /// <reference path="Permit.ts" />
 /// <reference path="dates.ts" />
@@ -148,8 +148,11 @@ namespace InspSched
     {
       if (permit.PermitNo == permitNumSelect.value)
       {
+        // THIS LINE FOR TESTING ONLY
+        permit.access = access_type.inspector_access;
 
         InspSched.ThisPermit = permit;
+
         if (permit.ErrorText.length > 0)
         {
           InspSched.UI.InformUserOfError(permit.PermitNo, permit.ErrorText);
@@ -187,6 +190,7 @@ namespace InspSched
     let thisInspCd: string = SaveInspectionButton.getAttribute("value");
     let thisInspDesc: HTMLSelectElement = (<HTMLSelectElement>document.getElementById("InspTypeSelect"));
     let inspDesc: string = thisInspDesc.options[thisInspDesc.selectedIndex].textContent;
+
     newInsp = new NewInspection(thisPermit, thisInspCd, $(dpCalendar).data('datepicker').getDate(), "");
 
     var e = transport.SaveInspection(newInsp).then(function (issues: Array<string>)

@@ -1,4 +1,4 @@
-﻿/// <reference path="app.ts" />
+/// <reference path="app.ts" />
 /// <reference path="Permit.ts" />
 /// <reference path="newinspection.ts" />
 /// <reference path="Inspection.ts" />
@@ -131,8 +131,8 @@ namespace InspSched.UI
 
     let permit: Permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === key })[0];
 
-      street.appendChild(document.createTextNode(permit.ProjAddrCombined.trim()));
-      city.appendChild(document.createTextNode(permit.ProjCity.trim()));
+    street.appendChild(document.createTextNode(permit.ProjAddrCombined.trim()));
+    city.appendChild(document.createTextNode(permit.ProjCity.trim()));
 
 
     Show('PermitSelectContainer');
@@ -261,6 +261,7 @@ namespace InspSched.UI
     console.log('inspections', inspections);
     for (let inspection of inspections)
     {
+
       if (permit.access === InspSched.access_type.public_access)
       {
         inspection.Comment = "";
@@ -278,6 +279,7 @@ namespace InspSched.UI
   // update BuildInspectionRow
   function BuildInspectionRow(inspection: Inspection)
   {
+
     let permit: Permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === inspection.PermitNo })[0];
     //permit.access = access_type.inspector_access;
 
@@ -538,6 +540,7 @@ namespace InspSched.UI
       {
         InspButtonDiv.appendChild(BuildButton(buttonId, "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
 
+
       }
       else
       {
@@ -550,6 +553,7 @@ namespace InspSched.UI
     else if (inspection.ResultADC.length == 0)
     {
       let detailButton = BuildButton(inspection.InspReqID + "_details_btn", "Details", "InspSched.UI.ToggleInspDetails(this.value)", inspection.InspReqID)
+
 
       // element "remarkrow" will be visible/hidden when new Details button is clicked.
 
@@ -570,6 +574,11 @@ namespace InspSched.UI
           detailButton.style.margin = "0";
 
         }
+
+        InspButtonDiv.appendChild(detailButton);
+
+      }
+    }
 
         InspButtonDiv.appendChild(detailButton);
 
@@ -597,6 +606,31 @@ namespace InspSched.UI
       }
 
     }
+
+   
+    // SET COMMENTS
+    if (inspection.Comment.length > 0)
+    {
+      thiscomment.textContent = inspection.Comment;
+      thiscomment.readOnly = true;
+      thiscomment.contentEditable = "false";
+      thiscomment.style.margin = "0";
+      thiscomment.style.overflowY = "scroll";
+      thiscomment.style.display = "flex";
+
+      textboxdiv.appendChild(thiscomment);
+      textboxdiv.style.display = "flex";
+
+      CommentContainer.appendChild(textboxdiv);
+
+
+    }
+
+    AddCommentDiv.appendChild(commentlabel);
+    AddCommentDiv.appendChild(AddCommentTextarea);
+
+    SaveCommentButtonDiv.appendChild(SaveCommentButton);
+    AddCommentDiv.appendChild(SaveCommentButtonDiv);
 
 
     // SET COMMENTS
@@ -638,6 +672,7 @@ namespace InspSched.UI
 
   }
 
+
   function BuildButton(buttonId: string, label: string, functionCall: string, value?: string): HTMLButtonElement
   {
     let InspButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
@@ -656,6 +691,7 @@ namespace InspSched.UI
   {
 
 
+
     let approveradio: HTMLInputElement = (<HTMLInputElement>document.createElement("input"));
     approveradio.id = (privateProvidercheck > 0 ? "perform" : "approve") + "_selection";
     approveradio.type = "radio";
@@ -666,6 +702,7 @@ namespace InspSched.UI
     approve.htmlFor = "approve_selection";
     approve.appendChild(approveradio);
     approve.appendChild(document.createTextNode(privateProvidercheck > 0 ? "Perform" : "Approve"));
+
     
     let disapproveradio: HTMLInputElement = (<HTMLInputElement>document.createElement("input"));
     disapproveradio.id = (privateProvidercheck > 0 ? "not_performed" : "disapprove") + "_selection";
@@ -676,6 +713,7 @@ namespace InspSched.UI
     disapprove.className = "columns";
     disapprove.htmlFor = "disapprove_selection";
     disapprove.appendChild(disapproveradio);
+
     disapprove.appendChild(document.createTextNode(privateProvidercheck > 0 ? "Not Performed" : "Disapprove"));
 
 
@@ -710,6 +748,7 @@ namespace InspSched.UI
     RadioButtonSubrow.appendChild(approve);
     RadioButtonSubrow.appendChild(disapprove);
     RadioButtonSubrow.appendChild(cancel);
+
 
     if (access == access_type.inspector_access)
     {
@@ -932,6 +971,7 @@ namespace InspSched.UI
 
   export function ToggleInspDetails(value: string): void
   {
+
     if (InspSched.UI.CurrentDetailsOpen != "" && value.valueOf() != InspSched.UI.CurrentDetailsOpen)
     {
 
@@ -953,6 +993,7 @@ namespace InspSched.UI
 
 
     let addRemark: HTMLDivElement = (<HTMLDivElement>document.getElementById(value.valueOf() + '_add_remark'));
+
     let completedRemark: HTMLDivElement = (<HTMLDivElement>document.getElementById(value.valueOf() + '_completed_remark'));
     let comments: HTMLDivElement = (<HTMLDivElement>document.getElementById(value.valueOf() + '_comments'));
     let button = document.getElementById(value.valueOf() + '_details_btn');
@@ -975,7 +1016,8 @@ namespace InspSched.UI
 
     document.getElementById(value.valueOf() + '_details_btn').textContent = (addRemark.style.display.toString().toLowerCase() == 'none' ? '' : 'Hide ') + 'Details';
 
-    InspSched.UI.CurrentDetailsOpen = value.toString();
+
+    InspSched.UI.CurrentDetailsOpen = value.valueOf();
 
 
 

@@ -4,6 +4,7 @@
     "inputFiles": [
       "Scripts/app/Permit.js",
 
+      
       "Scripts/app/LocationHash.js",
       "Scripts/app/newinspection.js",
       "Scripts/app/ui.js",
