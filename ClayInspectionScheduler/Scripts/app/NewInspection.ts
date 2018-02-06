@@ -9,6 +9,7 @@ namespace InspSched
    PermitNo: string;
    InspectionCd: string;
    SchecDateTime: Date;
+   Comments: string;
 
 
   }
@@ -18,12 +19,14 @@ namespace InspSched
     public PermitNo: string;
     public InspectionCd: string;
     public SchecDateTime: Date;
+    public Comments: string;
 
-    constructor( PermitNo, InspectionCd, SchecDateTime)
+    constructor( PermitNo, InspectionCd, SchecDateTime, Comments)
     {
       this.PermitNo = PermitNo;
       this.InspectionCd = InspectionCd;
       this.SchecDateTime = SchecDateTime;
+      this.Comments = Comments;
     }
 
   }

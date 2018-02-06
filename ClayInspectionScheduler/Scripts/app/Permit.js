@@ -11,7 +11,7 @@ var InspSched;
         access_type[access_type["inspector_access"] = 3] = "inspector_access";
     })(access_type = InspSched.access_type || (InspSched.access_type = {}));
     var Permit = /** @class */ (function () {
-        function Permit(IsExternalUser) {
+        function Permit() {
         }
         return Permit;
     }());

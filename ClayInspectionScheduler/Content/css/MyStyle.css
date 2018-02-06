@@ -1,4 +1,4 @@
-﻿html,
+html,
 body {
   max-height: 100%;
   margin: 0;
@@ -7,6 +7,7 @@ body {
 .column, .columns {
   min-height: 1px;
 }
+
 #PermitScreen,
 #SearchSelect,
 #CurrentPermitData,
@@ -45,6 +46,7 @@ body {
   color: white;
   cursor: pointer;
 }
+
 .DetailsButton {
   min-height: 20px;
   background-color: #3e9571;
@@ -53,6 +55,7 @@ body {
   margin-top: 6px;
   text-align: center;
 }
+
 button {
   font-weight: bold;
   background-color: #3e9571;
@@ -63,6 +66,7 @@ button {
  .button:hover {
     background-color: #27ce89;
   }
+
 
 select > .selectPlaceholder {
   display: none;
@@ -184,25 +188,26 @@ table {
   direction: ltr;
   display: table;
 }
-.datepicker table tr td.old,
-.datepicker table tr td, 
-.datepicker table tr td.new,
-.day {
+
+  .datepicker table tr td.old,
+  .datepicker table tr td,
+  .datepicker table tr td.new,
+  .day {
     color: white;
   }
- .datepicker table tr td, .datepicker table tr td.new {
-    background-color: #3e9571;
-  }
 
-    .datepicker table tr td.day:hover {
-      background-color: #27ce89;
-
-    }
-
-    .datepicker table tr td.active.day {
+    .datepicker table tr td, .datepicker table tr td.new {
       background-color: #3e9571;
-      max-width: 20rem;
     }
+
+      .datepicker table tr td.day:hover {
+        background-color: #27ce89;
+      }
+
+      .datepicker table tr td.active.day {
+        background-color: #3e9571;
+        max-width: 20rem;
+      }
 
 
 .datepicker-switch, .prev, .next {
@@ -346,7 +351,7 @@ h5 {
   padding-left: 1rem;
 }
 
-  .CancelRow, .InspRow {
+.CancelRow, .InspRow {
   padding: 1rem;
   border-left: 10px solid mediumpurple;
   border-bottom: 1px solid black;
@@ -364,13 +369,15 @@ h5 {
 .PassRow {
   border-left: 10px solid darkseagreen;
 }
+
 .inspRemarks {
   border-right: 1px solid lightgrey;
   margin: 0;
   padding: 0;
   padding-left: 1em;
 }
-  .tabs-title > a {
+
+.tabs-title > a {
   font-size: 1.25em;
   line-height: 1.25em;
   padding: .5em 1em;
@@ -389,12 +396,14 @@ h5 {
     color: white;
     cursor: pointer;
   }
+
   .DetailsButton {
     min-height: 20px;
     background-color: #3e9571;
     color: white;
     cursor: pointer;
   }
+
   .inspRemarks {
     padding: 0;
     font-size: .75em;
@@ -415,20 +424,22 @@ h5 {
 }
 
  .inspection-Table {
+
   max-height: 78vh;
   max-height: calc(100%-90px);
   overflow-y: auto;
 }
 
-.No-Edit{
+
+.No-Edit {
   cursor: text !important;
   resize: none;
-  
 }
 
 [type=checkbox], [type=file], [type=radio] {
   margin: 0 0 0;
 }
+
 .remark-text {
   resize: none;
   line-height: 1.25em;
@@ -436,6 +447,7 @@ h5 {
   margin: 0px 553px 0px 0px;
   padding: 0;
 }
+
 .comment-container {
   display: none;
 }
@@ -446,6 +458,7 @@ h5 {
   margin: 0;
   padding: 0;
 }
+
 .details-container {
   display: flex;
 }

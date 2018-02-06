@@ -58,31 +58,13 @@ var InspSched;
             this.InspectionCd = InspectionCd;
             this.SchecDateTime = SchecDateTime;
             this.Comment = Comment;
+
         }
         return NewInspection;
     }());
     InspSched.NewInspection = NewInspection;
 })(InspSched || (InspSched = {}));
 //# sourceMappingURL=newinspection.js.map
-/// <reference path="transport.ts" />
-/// <reference path="ui.ts" />
-var InspSched;
-(function (InspSched) {
-    var access_type;
-    (function (access_type) {
-        access_type[access_type["no_access"] = 0] = "no_access";
-        access_type[access_type["public_access"] = 1] = "public_access";
-        access_type[access_type["basic_access"] = 2] = "basic_access";
-        access_type[access_type["inspector_access"] = 3] = "inspector_access";
-    })(access_type = InspSched.access_type || (InspSched.access_type = {}));
-    var Permit = /** @class */ (function () {
-        function Permit(IsExternalUser) {
-        }
-        return Permit;
-    }());
-    InspSched.Permit = Permit;
-})(InspSched || (InspSched = {}));
-//# sourceMappingURL=Permit.js.map
 /// <reference path="app.ts" />
 /// <reference path="Permit.ts" />
 /// <reference path="newinspection.ts" />
@@ -178,24 +160,8 @@ var InspSched;
             clearElement(street);
             clearElement(city);
             var permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === key; })[0];
-            //if (permit.Supervisor_URL.length > 0)
-            //{
-            //  let streetlink = <HTMLAnchorElement>document.createElement("a");
-            //  streetlink.style.textDecoration = "underline";
-            //  streetlink.href = permit.Supervisor_URL;
-            //  streetlink.appendChild(document.createTextNode(permit.ProjAddrCombined.trim()));
-            //  let citylink = <HTMLAnchorElement>document.createElement("a");
-            //  citylink.style.textDecoration = "underline";
-            //  citylink.href = permit.Supervisor_URL;
-            //  citylink.appendChild(document.createTextNode(permit.ProjCity.trim()));
-            //  street.appendChild(streetlink);
-            //  city.appendChild(citylink);
-            //}
-            //else
-            //{
             street.appendChild(document.createTextNode(permit.ProjAddrCombined.trim()));
             city.appendChild(document.createTextNode(permit.ProjCity.trim()));
-            //}
             Show('PermitSelectContainer');
         }
         UI.UpdatePermitData = UpdatePermitData;
@@ -311,7 +277,7 @@ var InspSched;
                 inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle PassRow";
             else if (inspection.ResultADC == 'C')
                 inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle CancelRow";
-            else if (inspection.ResultADC == 'D' || inspection.ResultADC == 'N')
+            else if (inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'N')
                 inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle FailRow";
             // #region DataRow
             //*******************************************************************************************
@@ -392,7 +358,8 @@ var InspSched;
             addRemarkButton.setAttribute("onclick", "transport.SaveInspectionResult(inspection)");
             addRemarkButton.style.margin = "0";
             addRemarkButton.textContent = "Save Result";
-            // 
+
+          
             //***************************************
             var radioButtonSection = document.createElement("div");
             radioButtonSection.setAttribute("elementName", "radioButtonSection");
@@ -450,6 +417,7 @@ var InspSched;
             //*********************************************
             // Set permit number as link if internal user 
 
+          
             if (permit.access !== InspSched.access_type.public_access) {
                 var link = document.createElement("a");
                 link.style.textDecoration = "underline";
@@ -503,6 +471,7 @@ var InspSched;
                         var privprovstring = permit.ErrorText.substr(2, 16).toLowerCase();
                         if (privprovstring != "private provider") {
                             InspButtonDiv.appendChild(BuildButton("", "Cancel", "InspSched.CancelInspection('" + inspection.InspReqID + "', '" + inspection.PermitNo + "');"));
+
                             detailButton.className = "column large-12 medium-12 small-12 align-self-center NewInspButton DetailsButton";
                         }
                     }
@@ -512,6 +481,7 @@ var InspSched;
                     InspButtonDiv.appendChild(detailButton);
                 }
 
+                          
             }
             DataRow.appendChild(InspButtonDiv);
             if (inspection.DisplayInspDateTime.length > 0) {
@@ -579,7 +549,8 @@ var InspSched;
             disapprove.className = "columns";
             disapprove.htmlFor = "disapprove_selection";
             disapprove.appendChild(disapproveradio);
-            disapprove.appendChild(document.createTextNode(privateProvidercheck > 0 ? "not_performed" : "disapprove"));
+
+            disapprove.appendChild(document.createTextNode(privateProvidercheck > 0 ? "Not Performed" : "Disapprove"));
             var cancelradio = document.createElement("input");
             cancelradio.id = "cancelradio_selection";
             cancelradio.type = "radio";
@@ -593,7 +564,8 @@ var InspSched;
             incompleteradio.id = "incompleteradio_selection";
             incompleteradio.type = "radio";
             incompleteradio.value = "";
-            incompleteradio.textContent = "Incomplete";
+
+          
             var incomplete = document.createElement("label");
             incomplete.className = "columns";
             incomplete.htmlFor = "incomplete_selection";
@@ -604,9 +576,9 @@ var InspSched;
             RadioButtonSubrow.appendChild(approve);
             RadioButtonSubrow.appendChild(disapprove);
             RadioButtonSubrow.appendChild(cancel);
-            RadioButtonSubrow.appendChild(incomplete);
+
             if (access == InspSched.access_type.inspector_access) {
-                incomplete.appendChild(incompleteradio);
+                RadioButtonSubrow.appendChild(incomplete);
             }
             return RadioButtonSubrow;
         }
@@ -768,7 +740,8 @@ var InspSched;
             return true;
         }
         function ToggleInspDetails(value) {
-            if (InspSched.UI.CurrentDetailsOpen != "" && value != InspSched.UI.CurrentDetailsOpen) {
+
+            if (InspSched.UI.CurrentDetailsOpen != "" && value.valueOf() != InspSched.UI.CurrentDetailsOpen) {
                 var CurrentAddRemark = document.getElementById(InspSched.UI.CurrentDetailsOpen + '_add_remark');
                 var CurrentCompletedRemark = document.getElementById(InspSched.UI.CurrentDetailsOpen + '_completed_remark');
                 var CurrentComments = document.getElementById(InspSched.UI.CurrentDetailsOpen + '_comments');
@@ -794,7 +767,8 @@ var InspSched;
             comments.style.display = elementState == 'none' ? 'flex' : 'none';
             console.log('comments visibility changed to: ' + comments.style.display.toString());
             document.getElementById(value.valueOf() + '_details_btn').textContent = (addRemark.style.display.toString().toLowerCase() == 'none' ? '' : 'Hide ') + 'Details';
-            InspSched.UI.CurrentDetailsOpen = value;
+
+            InspSched.UI.CurrentDetailsOpen = value.valueOf();
         }
         UI.ToggleInspDetails = ToggleInspDetails;
     })(UI = InspSched.UI || (InspSched.UI = {}));

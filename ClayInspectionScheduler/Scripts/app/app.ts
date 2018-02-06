@@ -1,4 +1,4 @@
-﻿/// <reference path="transport.ts" />
+/// <reference path="transport.ts" />
 /// <reference path="UI.ts" />
 /// <reference path="Permit.ts" />
 /// <reference path="dates.ts" />
@@ -24,14 +24,14 @@ namespace InspSched
 
 
   let permitscreen = <HTMLDivElement>document.getElementById('PermitScreen');
-  let InspectionTypeSelect = <HTMLSelectElement>document.getElementById( "InspTypeSelect" );
-  let PermitSearchButton = <HTMLButtonElement>document.getElementById( "PermitSearchButton" );
-  let CloseIssueDivButton = <HTMLButtonElement>document.getElementById( "CloseIssueList" );
-  let PermitSearchField = <HTMLInputElement>document.getElementById( "PermitSearch" );
-  let permitNumSelect = <HTMLSelectElement>document.getElementById( "PermitSelect" );
-  let inspScheduler = document.getElementById( "InspectionScheduler" );
-  let IssueContainer: HTMLDivElement = ( <HTMLDivElement>document.getElementById( "NotScheduled" ) );
-  let IssuesDiv: HTMLDivElement = ( <HTMLDivElement>document.getElementById( 'Reasons' ) );
+  let InspectionTypeSelect = <HTMLSelectElement>document.getElementById("InspTypeSelect");
+  let PermitSearchButton = <HTMLButtonElement>document.getElementById("PermitSearchButton");
+  let CloseIssueDivButton = <HTMLButtonElement>document.getElementById("CloseIssueList");
+  let PermitSearchField = <HTMLInputElement>document.getElementById("PermitSearch");
+  let permitNumSelect = <HTMLSelectElement>document.getElementById("PermitSelect");
+  let inspScheduler = document.getElementById("InspectionScheduler");
+  let IssueContainer: HTMLDivElement = (<HTMLDivElement>document.getElementById("NotScheduled"));
+  let IssuesDiv: HTMLDivElement = (<HTMLDivElement>document.getElementById('Reasons'));
   let SaveInspectionButton = document.getElementById("SaveSchedule");
   let confirmed = document.getElementById('SaveConfirmed');
 
@@ -68,8 +68,10 @@ namespace InspSched
     }
   }
 
-  PermitSearchField.onkeydown = function (event) {
-    if (event.keyCode == 13) {
+  PermitSearchField.onkeydown = function (event)
+  {
+    if (event.keyCode == 13)
+    {
       //SearchPermit();
       updateHash(PermitSearchField.value);
     }
@@ -142,7 +144,7 @@ namespace InspSched
     // TODO: Add code to check if there is a selected date;
     SaveInspectionButton.setAttribute("disabled", "disabled");
 
-    for ( let permit of permits )
+    for (let permit of permits)
     {
       if (permit.PermitNo == permitNumSelect.value)
       {
@@ -170,10 +172,10 @@ namespace InspSched
   InspectionTypeSelect.onchange = function ()
   {
 
-    SaveInspectionButton.setAttribute( "value", InspectionTypeSelect.value );
-    if ( $( dpCalendar ).data( 'datepicker' ).getDate() != null )
+    SaveInspectionButton.setAttribute("value", InspectionTypeSelect.value);
+    if ($(dpCalendar).data('datepicker').getDate() != null)
     {
-      SaveInspectionButton.removeAttribute( "disabled" );
+      SaveInspectionButton.removeAttribute("disabled");
     }
   }
 
@@ -183,22 +185,23 @@ namespace InspSched
     confirmed.style.display = "none";
     IssueContainer.style.display = "none";
     InspSched.UI.clearElement(IssuesDiv);
-    
+
     let thisPermit: string = permitNumSelect.value;
     let thisInspCd: string = SaveInspectionButton.getAttribute("value");
-    let thisInspDesc: HTMLSelectElement = (<HTMLSelectElement>document.getElementById("InspTypeSelect")); 
+    let thisInspDesc: HTMLSelectElement = (<HTMLSelectElement>document.getElementById("InspTypeSelect"));
     let inspDesc: string = thisInspDesc.options[thisInspDesc.selectedIndex].textContent;
-    newInsp = new NewInspection( thisPermit, thisInspCd, $( dpCalendar ).data( 'datepicker' ).getDate(), "");
+
+    newInsp = new NewInspection(thisPermit, thisInspCd, $(dpCalendar).data('datepicker').getDate(), "");
 
     var e = transport.SaveInspection(newInsp).then(function (issues: Array<string>)
     {
-      
+
       let thisHeading: HTMLHeadingElement = (<HTMLHeadingElement>document.getElementById('ErrorHeading'));
-      let IssueList: HTMLUListElement = ( <HTMLUListElement>document.createElement( 'ul' ) );
+      let IssueList: HTMLUListElement = (<HTMLUListElement>document.createElement('ul'));
       if (issues.length === 0) issues.push("A system error has occurred. Please check your request and try again.");
       if (issues[0].toLowerCase().indexOf("inspection has been scheduled") === -1) 
       {
-        
+
         InspSched.UI.clearElement(thisHeading);
         thisHeading.appendChild(document.createTextNode("The following issue(s) prevented scheduling the requested inspection:"));
 
@@ -227,13 +230,13 @@ namespace InspSched
 
     }, function ()
       {
-        console.log( 'error in Saving Inspection' );
+        console.log('error in Saving Inspection');
         return false;
       });
 
     if (IssuesExist.length > 0)
       IssueContainer.style.display = 'flex';
-    
+
     InspSched.UI.GetInspList(thisPermit);
   }
 
@@ -244,7 +247,7 @@ namespace InspSched
 
   function LoadData()
   {
-    SaveInspectionButton.setAttribute( "disabled", "disabled" );
+    SaveInspectionButton.setAttribute("disabled", "disabled");
     IssueContainer.style.display = "none";
     LoadInspectionTypes();
 
@@ -253,7 +256,7 @@ namespace InspSched
   function LoadInspectionTypes()
   {
 
-    transport.GetInspType().then( function ( insptypes: Array<InspType> )
+    transport.GetInspType().then(function (insptypes: Array<InspType>)
     {
       console.log('inspection types', insptypes);
       InspSched.InspectionTypes = insptypes;
@@ -262,13 +265,13 @@ namespace InspSched
     },
       function ()
       {
-        console.log( 'error in LoadInspectionTypes' );
+        console.log('error in LoadInspectionTypes');
         // do something with the error here
         // need to figure out how to detect if something wasn't found
         // versus an error.
         //Hide('Searching');
         InspSched.InspectionTypes = [];
-      } );
+      });
   }
 
   export function BuildCalendar(dates: Array<string>, errorText: string = "")
@@ -311,18 +314,18 @@ namespace InspSched
   function EnableSaveButton()
   {
     {
-      if ( InspectionTypeSelect.value != "" && $( dpCalendar ).data( 'datepicker' ).getDate() != null )
+      if (InspectionTypeSelect.value != "" && $(dpCalendar).data('datepicker').getDate() != null)
       {
-        SaveInspectionButton.removeAttribute( "disabled" );
+        SaveInspectionButton.removeAttribute("disabled");
       }
       else
       {
-        SaveInspectionButton.setAttribute( "disabled", "disabled" );
+        SaveInspectionButton.setAttribute("disabled", "disabled");
       }
     }
   }
 
-  export function UpdatePermitSelectList(PermitNo: string):void
+  export function UpdatePermitSelectList(PermitNo: string): void
   {
     document.getElementById("NotScheduled").style.display = "none";
 
@@ -332,8 +335,10 @@ namespace InspSched
 
     selectedoption.selected = true;
 
-    for (let permit of InspSched.CurrentPermits) {
-      if (permit.PermitNo == permitNumSelect.value) {
+    for (let permit of InspSched.CurrentPermits)
+    {
+      if (permit.PermitNo == permitNumSelect.value)
+      {
         InspSched.ThisPermit = permit;
         InspSched.UI.LoadInspTypeSelect(permit.PermitNo);
         InspSched.UI.BuildScheduler(InspSched.CurrentInspections, permit.PermitNo);
@@ -348,7 +353,7 @@ namespace InspSched
 
     $('#InspectionSchedulerTabs').foundation('selectTab', 'Scheduler', true);
 
-      // clears Calendar of any chosen dates
+    // clears Calendar of any chosen dates
   }
 
   export function CancelInspection(InspID?: number, PermitNo?: string)
