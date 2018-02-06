@@ -12,6 +12,7 @@ namespace ClayInspectionScheduler.Models
   public class Inspection
   {
     public string PermitNo { get; set; }
+
     private string PermitTypeString
     {
       get
@@ -19,6 +20,7 @@ namespace ClayInspectionScheduler.Models
         return GetPermitType(PermitNo);
       }
     }
+
     private static string GetPermitType(string PermitNumber)
     {
       switch (PermitNumber[0].ToString())
@@ -79,6 +81,7 @@ namespace ClayInspectionScheduler.Models
 
       }
     }
+
     public string Remarks { get; set; } = null;
 
     public string Comment { get; set; } = "";
@@ -112,10 +115,63 @@ namespace ClayInspectionScheduler.Models
 
     public List<string> Errors { get; set; } = new List<string>();
 
+    public string GeoZone { get; set; }
+    public string FloodZone { get; set; }
+    public string InspectorColor { get; set; }
+
     public Inspection()
     {
 
+    }
 
+    private static List<Inspection> GetRawInspectionList()
+    {
+      string sql = @"
+        USE WATSC;
+        DECLARE @Today DATE = CAST(GETDATE() AS DATE);
+        DECLARE @Tomorrow DATE = 
+          CASE DATEPART(DW, @Today) 
+          WHEN 1 -- if today is Friday, Saturday, or Sunday
+            THEN CAST(DATEADD(DAY, 1, @Today) AS DATE) -- set it to Monday
+          WHEN 6
+            THEN CAST(DATEADD(DAY, 3, @Today) AS DATE) -- set it to Monday
+          WHEN 7
+            THEN  CAST(DATEADD(DAY, 2, @Today) AS DATE) -- set it to Monday
+          ELSE CAST(DATEADD(DAY, 1, @Today) AS DATE) -- Set it to tomorrow
+          END;
+
+        SELECT
+          I.InspReqID,
+          I.PermitNo, 
+          ISNULL(I.InspectionCode, '') InspectionCode, 
+          ISNULL(R.InsDesc, 'No Inspections') InsDesc, 
+          I.InspDateTime, 
+          LTRIM(RTRIM(ISNULL(i.ResultADC, ''))) ResultADC,
+          I.SchecDateTime SchedDateTime,
+	        I.Poster,
+          ISNULL(IP.Color, '#FFFFFF') InspectorColor,
+          I.Remarks,
+          I.Comment,
+          IP.name as InspectorName,
+          PrivProvIRId PrivateProviderInspectionRequestId,
+          ISNULL(B.GeoZone, 'Unknown') GeoZone
+        FROM bpINS_REQUEST I 
+        LEFT OUTER JOIN bpBASE_PERMIT B ON I.BaseId = B.BaseID
+        LEFT OUTER JOIN bpINS_REF IR ON IR.InspCd = I.InspectionCode
+        LEFT OUTER JOIN bp_INSPECTORS IP ON I.Inspector = IP.Intl 
+        WHERE 
+        -- Here we want to see the inspections that were scheduled for today and tomorrow
+          CAST(SchecDateTime AS DATE) IN (@Today, @Tomorrow)
+        -- and we want to include any from the past that aren't completed.
+          OR (CAST(SchecDateTime AS DATE) < @Today 
+            AND ResultADC IS NULL)
+        ORDER BY InspReqID DESC";
+      return Constants.Get_Data<Inspection>(sql);
+    }
+
+    public static List<Inspection> GetInspectorList()
+    {
+      return GetRawInspectionList();
     }
 
     private static List<Inspection> GetRaw(int InspectionId)
@@ -135,6 +191,7 @@ namespace ClayInspectionScheduler.Models
           LTRIM(RTRIM(ISNULL(i.ResultADC, ''))) ResultADC,
           i.SchecDateTime SchedDateTime,
 	        i.Poster,
+          ISNULL(IP.Color, '#FFFFFF') InspectorColor,
           i.Remarks,
           i.Comment,
           ip.name as InspectorName,
@@ -176,19 +233,20 @@ namespace ClayInspectionScheduler.Models
 		        OR A.mPermitNo = @PermitNo)
         )
 
-        select 
-            ISNULL(i.InspReqID, 99999999) InspReqID,
-            P.PermitNo, 
-            ISNULL(i.InspectionCode, '') InspectionCode, 
-            ISNULL(ir.InsDesc, 'No Inspections') InsDesc, 
-            i.InspDateTime, 
-            LTRIM(RTRIM(ISNULL(i.ResultADC, ''))) ResultADC,
-            i.SchecDateTime SchedDateTime,
-	          i.Poster,
-            i.Remarks,
-            i.Comment,
-            ip.name as InspectorName,
-            PrivProvIRId PrivateProviderInspectionRequestId
+        SELECT 
+          ISNULL(i.InspReqID, 99999999) InspReqID,
+          P.PermitNo, 
+          ISNULL(i.InspectionCode, '') InspectionCode, 
+          ISNULL(ir.InsDesc, 'No Inspections') InsDesc, 
+          i.InspDateTime, 
+          LTRIM(RTRIM(ISNULL(i.ResultADC, ''))) ResultADC,
+          i.SchecDateTime SchedDateTime,
+	        i.Poster,
+          ISNULL(IP.Color, '#FFFFFF') InspectorColor,
+          i.Remarks,
+          i.Comment,
+          ip.name as InspectorName,
+          PrivProvIRId PrivateProviderInspectionRequestId
         FROM Permits P
         LEFT OUTER JOIN bpINS_REQUEST i ON P.PermitNo = i.PermitNo
         LEFT OUTER JOIN bpINS_REF ir ON ir.InspCd = i.InspectionCode
