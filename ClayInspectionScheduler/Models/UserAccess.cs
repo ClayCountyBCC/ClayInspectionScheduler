@@ -129,8 +129,14 @@ namespace ClayInspectionScheduler.Models
 
     public static UserAccess GetUserAccess(string Username)
     {
+        #if DEBUG
+        {
+          return new UserAccess(Username.Replace(@"CLAYBCC\", "").ToLower());
+        }
+        #endif
       try
       {
+
         var d = GetCachedAllUserAccess();
         string un = Username.Replace(@"CLAYBCC\", "").ToLower();
         if (d.ContainsKey(un))

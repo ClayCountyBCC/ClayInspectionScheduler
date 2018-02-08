@@ -14,8 +14,9 @@ namespace ClayInspectionScheduler
     {
 
       GlobalConfiguration.Configure( WebApiConfig.Register );
+#if !DEBUG
       Models.InspType.GetCachedInspectionTypes();
-
+#endif
     }
   }
 }

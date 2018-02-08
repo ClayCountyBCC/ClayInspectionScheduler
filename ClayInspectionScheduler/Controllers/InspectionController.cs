@@ -27,7 +27,6 @@ namespace ClayInspectionScheduler.Controllers
       }
     }
 
-
     // Calls a function to set the result of an inspection
     [HttpPost]
     [Route("Comment")]
@@ -87,6 +86,22 @@ namespace ClayInspectionScheduler.Controllers
       return Ok(sr);
     }
 
+    [HttpGet]
+    [Route("List")]
+    public IHttpActionResult List()
+    {
+      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+      if(ua.current_access == UserAccess.access_type.inspector_access)
+      {
+        return Ok(Inspection.GetInspectorList());
+      }
+      else
+      {
+        var l = new List<Inspection>();
+        return Ok(l);
+
+      }
+    }
 
   }
 }
