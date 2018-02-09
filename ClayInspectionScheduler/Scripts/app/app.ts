@@ -190,8 +190,12 @@ namespace InspSched
     let thisInspCd: string = SaveInspectionButton.getAttribute("value");
     let thisInspDesc: HTMLSelectElement = (<HTMLSelectElement>document.getElementById("InspTypeSelect"));
     let inspDesc: string = thisInspDesc.options[thisInspDesc.selectedIndex].textContent;
+    let comment: HTMLTextAreaElement = (<HTMLTextAreaElement>document.getElementById("scheduler_comment"));
 
-    newInsp = new NewInspection(thisPermit, thisInspCd, $(dpCalendar).data('datepicker').getDate(), "");
+
+
+    newInsp = new NewInspection(thisPermit, thisInspCd, $(dpCalendar).data('datepicker').getDate(), comment.value);
+    comment.value = "";
 
     var e = transport.SaveInspection(newInsp).then(function (issues: Array<string>)
     {
@@ -220,8 +224,12 @@ namespace InspSched
       }
       else
       {
-        let savesuccess: HTMLParagraphElement = (<HTMLParagraphElement>document.getElementById("SaveSuccess"));
-        InspSched.UI.clearElement(savesuccess);
+        let savesuccess: HTMLParagraphElement = (<HTMLParagraphElement>document.getElementById("SaveConfirmed"));
+        if (savesuccess)
+        {
+          InspSched.UI.clearElement(savesuccess);
+
+        }
         savesuccess.appendChild(document.createTextNode(issues[0]));
         document.getElementById("SaveConfirmed").style.display = "flex";
       }

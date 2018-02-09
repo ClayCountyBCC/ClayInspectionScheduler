@@ -69,7 +69,7 @@ namespace ClayInspectionScheduler.Models
         case "C":
           return "Canceled";
         case "D":
-          return "Denied";
+          return "Disapproved";
         case "P":
           return "Performed";
         case "N":

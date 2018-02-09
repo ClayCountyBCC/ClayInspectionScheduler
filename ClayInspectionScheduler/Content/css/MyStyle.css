@@ -457,9 +457,13 @@ h5 {
   resize: none;
   margin: 0;
   padding: 0;
+  
+}
+.textbox-div{
+    margin-top:1em;
 }
 .completed-comments-textarea{
-
+  margin-top:1em;
 }
 
 .details-container {

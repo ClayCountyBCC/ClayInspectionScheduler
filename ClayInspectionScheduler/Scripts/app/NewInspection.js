@@ -4,11 +4,11 @@
 var InspSched;
 (function (InspSched) {
     var NewInspection = /** @class */ (function () {
-        function NewInspection(PermitNo, InspectionCd, SchecDateTime, Comments) {
+        function NewInspection(PermitNo, InspectionCd, SchecDateTime, Comment) {
             this.PermitNo = PermitNo;
             this.InspectionCd = InspectionCd;
             this.SchecDateTime = SchecDateTime;
-            this.Comments = Comments;
+            this.Comment = Comment;
         }
         return NewInspection;
     }());

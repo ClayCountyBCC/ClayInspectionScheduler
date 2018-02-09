@@ -135,7 +135,9 @@ var InspSched;
         var thisInspCd = SaveInspectionButton.getAttribute("value");
         var thisInspDesc = document.getElementById("InspTypeSelect");
         var inspDesc = thisInspDesc.options[thisInspDesc.selectedIndex].textContent;
-        InspSched.newInsp = new InspSched.NewInspection(thisPermit, thisInspCd, $(dpCalendar).data('datepicker').getDate(), "");
+        var comment = document.getElementById("scheduler_comment");
+        InspSched.newInsp = new InspSched.NewInspection(thisPermit, thisInspCd, $(dpCalendar).data('datepicker').getDate(), comment.value);
+        comment.value = "";
         var e = InspSched.transport.SaveInspection(InspSched.newInsp).then(function (issues) {
             var thisHeading = document.getElementById('ErrorHeading');
             var IssueList = document.createElement('ul');
@@ -154,8 +156,10 @@ var InspSched;
                 IssueContainer.style.display = "flex";
             }
             else {
-                var savesuccess = document.getElementById("SaveSuccess");
-                InspSched.UI.clearElement(savesuccess);
+                var savesuccess = document.getElementById("SaveConfirmed");
+                if (savesuccess) {
+                    InspSched.UI.clearElement(savesuccess);
+                }
                 savesuccess.appendChild(document.createTextNode(issues[0]));
                 document.getElementById("SaveConfirmed").style.display = "flex";
             }
