@@ -8,9 +8,11 @@ namespace InspSched.UI
 {
   "use strict";
   export let CurrentPermits: Array<Permit> = new Array<Permit>();
+  export let CurrentInspections: Array<Inspection> = [];
   export let PermitsWithOutInsp: Array<string> = [];
   export let CurrentDetailsOpen: string = "";
-  
+
+
   export function Search(key: string)
   {
     clearElement(document.getElementById('SearchFailed'));
@@ -414,7 +416,7 @@ namespace InspSched.UI
     addRemarkButton.className = "align-self-center columns DetailsButton large-12 medium-12-small-12";
     addRemarkButton.style.margin = "0";
     addRemarkButton.textContent = "Save Result";
-    
+
 
     //***************************************
     let radioButtonSection: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
@@ -477,7 +479,7 @@ namespace InspSched.UI
     SaveCommentButton.setAttribute("onclick", "InspSched.SaveComment('" + inspection.InspReqID + "','" + AddCommentTextarea.value + "')");
     SaveCommentButton.textContent = "Save Comment";
     SaveCommentButton.id = inspection.InspReqID + "_save_comment_button";
-    
+
 
 
     //if (inspection.comments.length > 0)
@@ -544,7 +546,7 @@ namespace InspSched.UI
 
       addRemarkContainer.appendChild(addRemark);
 
-      radioButtonSection.appendChild(BuildRadioButtonRow(inspection.InspReqID,inspection.ResultADC, permit.access, 0));
+      radioButtonSection.appendChild(BuildRadioButtonRow(inspection.InspReqID.toString(), inspection.ResultADC, permit.access, 0));
 
       addRemarkContainer.appendChild(radioButtonSection);
 
@@ -554,13 +556,13 @@ namespace InspSched.UI
 
     // #endregion Initial Append Rows to Inspection Row
 
-    let detailButton = BuildButton(inspection.InspReqID + "_details_btn", "Details", "InspSched.UI.ToggleInspDetails(this.value)", inspection.InspReqID)
+    let detailButton = BuildButton(inspection.InspReqID + "_details_btn", "Details", "InspSched.UI.ToggleInspDetails(this.value)", inspection.InspReqID.toString())
     detailButton.className = "column large-12 medium-12 small-12 align-self-center  DetailsButton";
 
     //Create function to make New/Cancel/Details Button
     if ((inspection.ResultADC.length > 0 || inspection.DisplaySchedDateTime.length === 0))
     {
-   
+
       let buttonId: string = "CreateNew_" + inspection.PermitNo;
       if (!document.getElementById(buttonId) && permit.ErrorText.length === 0)
       {
@@ -605,7 +607,7 @@ namespace InspSched.UI
 
     if (inspection.DisplayInspDateTime.length > 0)
     {
-      if (inspection.InspReqID !== "99999999")
+      if (inspection.InspReqID.toString() !== "99999999")
       {
 
         CompletedRemarks.appendChild(Remark);
@@ -654,7 +656,7 @@ namespace InspSched.UI
       DetailsContainer.appendChild(addRemarkContainer);
       DetailsContainer.appendChild(CommentContainer);
     }
-    
+
 
 
     inspRow.appendChild(DetailsContainer);
@@ -680,7 +682,7 @@ namespace InspSched.UI
   {
 
     let RadioButtonSubrow: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-    
+
     if (access === access_type.inspector_access)
     {
       RadioButtonSubrow.className = "large-10 medium-10 small-12 flex-container flex-dir-row flex-child-grow align-justify row";
@@ -888,6 +890,7 @@ namespace InspSched.UI
     }
   }
 
+
   export function Hide(id: string): void
   {
 
@@ -986,12 +989,12 @@ namespace InspSched.UI
 
   export function ToggleInspDetails(value: string): void
   {
-    
+
     let today = new Date().setHours(0, 0, 0, 0);
     let SchedDate: number;
     for (let i of InspSched.CurrentInspections)
     {
-      if (i.InspReqID == value)
+      if (i.InspReqID.toString() == value)
       {
         SchedDate = Date.parse(i.DisplaySchedDateTime);
       }
@@ -1066,8 +1069,8 @@ namespace InspSched.UI
 
     InspSched.UI.CurrentDetailsOpen = value.valueOf();
 
-    
-    
+
+
   }
 
 

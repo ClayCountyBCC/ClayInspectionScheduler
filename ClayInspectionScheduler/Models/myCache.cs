@@ -36,41 +36,16 @@ namespace ClayInspectionScheduler.Models
       {
         // Handle cached lazy exception by evicting from cache. Thanks to Denis Borovnev for pointing this out!
         _cache.Remove(key);
-        new ErrorLog(ex, "");
+        Constants.Log(ex, "");
         throw;
       }
     }
-
-    //private static T GetOrAddExisting<T>(string key, Func<T> valueFactory)
-    //{
-
-    //  Lazy<T> newValue = new Lazy<T>(valueFactory);
-    //  var oldValue = _cache.AddOrGetExisting(key, newValue, GetCIP()) as Lazy<T>;
-    //  try
-    //  {
-    //    return (oldValue ?? newValue).Value;
-    //  }
-    //  catch
-    //  {
-    //    // Handle cached lazy exception by evicting from cache. Thanks to Denis Borovnev for pointing this out!
-    //    _cache.Remove(key);
-    //    throw;
-    //  }
-    //}
-
-    //private static CacheItemPolicy GetCIP()
-    //{
-    //  return new CacheItemPolicy()
-    //  {
-    //    AbsoluteExpiration = DateTime.Now.AddHours(4)
-    //  };
-    //}
 
     private static object InitItem(string key)
     {
       string[] s = key.Split(new[] { "," }, StringSplitOptions.None);
 
-      switch ( s[ 0 ].ToLower() )
+      switch (s[0].ToLower())
       {
         case "useraccess":
           return UserAccess.GetAllUserAccess();

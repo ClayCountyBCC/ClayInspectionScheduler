@@ -43,7 +43,7 @@ namespace ClayInspectionScheduler.Models
           }
           catch (Exception ex)
           {
-            new ErrorLog(ex);
+            Constants.Log(ex);
           }
         }
       }
@@ -84,7 +84,7 @@ namespace ClayInspectionScheduler.Models
       }
       catch (Exception ex)
       {
-        new ErrorLog(ex);
+        Constants.Log(ex);
       }
     }
 
@@ -122,18 +122,18 @@ namespace ClayInspectionScheduler.Models
       }
       catch (Exception ex)
       {
-        new ErrorLog(ex);
+        Constants.Log(ex);
         return null;
       }
     }
 
     public static UserAccess GetUserAccess(string Username)
     {
-        #if DEBUG
-        {
-          return new UserAccess(Username.Replace(@"CLAYBCC\", "").ToLower());
-        }
-        #endif
+#if DEBUG
+      {
+        return new UserAccess(Username.Replace(@"CLAYBCC\", "").ToLower());
+      }
+#endif
       try
       {
 
@@ -150,7 +150,7 @@ namespace ClayInspectionScheduler.Models
       }
       catch(Exception ex)
       {
-        new ErrorLog(ex, "");
+        Constants.Log(ex, "");
         return null;
       }
     }

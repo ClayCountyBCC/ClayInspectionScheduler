@@ -8,6 +8,7 @@ var InspSched;
     (function (UI) {
         "use strict";
         UI.CurrentPermits = new Array();
+        UI.CurrentInspections = [];
         UI.PermitsWithOutInsp = [];
         UI.CurrentDetailsOpen = "";
         function Search(key) {
@@ -391,11 +392,11 @@ var InspSched;
                 addRemark.appendChild(addRemarkTextDiv);
                 addRemark.appendChild(addRemarkButtonDiv);
                 addRemarkContainer.appendChild(addRemark);
-                radioButtonSection.appendChild(BuildRadioButtonRow(inspection.InspReqID, inspection.ResultADC, permit.access, 0));
+                radioButtonSection.appendChild(BuildRadioButtonRow(inspection.InspReqID.toString(), inspection.ResultADC, permit.access, 0));
                 addRemarkContainer.appendChild(radioButtonSection);
             }
             // #endregion Initial Append Rows to Inspection Row
-            var detailButton = BuildButton(inspection.InspReqID + "_details_btn", "Details", "InspSched.UI.ToggleInspDetails(this.value)", inspection.InspReqID);
+            var detailButton = BuildButton(inspection.InspReqID + "_details_btn", "Details", "InspSched.UI.ToggleInspDetails(this.value)", inspection.InspReqID.toString());
             detailButton.className = "column large-12 medium-12 small-12 align-self-center  DetailsButton";
             //Create function to make New/Cancel/Details Button
             if ((inspection.ResultADC.length > 0 || inspection.DisplaySchedDateTime.length === 0)) {
@@ -426,7 +427,7 @@ var InspSched;
             }
             DataRow.appendChild(InspButtonDiv);
             if (inspection.DisplayInspDateTime.length > 0) {
-                if (inspection.InspReqID !== "99999999") {
+                if (inspection.InspReqID.toString() !== "99999999") {
                     CompletedRemarks.appendChild(Remark);
                     CompletedRemarks.appendChild(ResultDescription);
                     // remarks needs to be in the inspection data
@@ -705,7 +706,7 @@ var InspSched;
             var SchedDate;
             for (var _i = 0, _a = InspSched.CurrentInspections; _i < _a.length; _i++) {
                 var i = _a[_i];
-                if (i.InspReqID == value) {
+                if (i.InspReqID.toString() == value) {
                     SchedDate = Date.parse(i.DisplaySchedDateTime);
                 }
             }

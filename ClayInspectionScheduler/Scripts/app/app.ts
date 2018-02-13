@@ -7,6 +7,8 @@
 /// <reference path="../typings/jquery/jquery.d.ts" />
 /// <reference path="../typings/foundation/foundation.d.ts" />
 /// <reference path="../typings/bootstrap.datepicker/bootstrap.datepicker.d.ts" />
+/// <reference path="inspectorui.ts" />
+/// <reference path="inspectorview.ts" />
 
 namespace InspSched
 {
@@ -19,9 +21,8 @@ namespace InspSched
   export let CurrentInspections: Array<Inspection> = [];
   export let IssuesExist: Array<string> = [];
   export let ThisPermit: Permit;
-
-
-
+  export let IVInspections: Array<Inspection> = [];
+  export let IV: Array<InspectorView> = [];  // this is going to be the processed array of Inspection data.
 
   let InspectionTable = <HTMLDivElement>document.getElementById('InspectionTable');
   let InspectionTypeSelect = <HTMLSelectElement>document.getElementById("InspTypeSelect");
@@ -46,9 +47,8 @@ namespace InspSched
   export function updateHash(permit: string)
   {
     let hash = new LocationHash(location.hash.substring(1));
-    location.hash = hash.update(permit);
+    location.hash = hash.UpdatePermit(permit);
     let newhash = new LocationHash(location.hash.substring(1));
-    console.log('newhash', newhash, 'oldhash', hash);
     if (newhash.Permit === hash.Permit)
     {
       SearchPermit();
@@ -66,6 +66,14 @@ namespace InspSched
       PermitSearchField.value = currentHash.Permit.trim();
       SearchPermit();
     }
+    else
+    {
+      if (currentHash.Day.length > 0 || currentHash.Inspector.length > 0)
+      {
+        // Do something with them here
+      }
+
+    }
   }
 
   PermitSearchField.onkeydown = function (event)
@@ -81,7 +89,6 @@ namespace InspSched
   {
 
     InspectionTable.style.display = "none";
-
     UI.Hide('SaveConfirmed');
 
     UI.Hide('NotScheduled');
@@ -259,6 +266,7 @@ namespace InspSched
     SaveInspectionButton.setAttribute("disabled", "disabled");
     IssueContainer.style.display = "none";
     LoadInspectionTypes();
+    InspectorUI.LoadDailyInspections();
 
   }
 
@@ -340,12 +348,12 @@ namespace InspSched
     let remarkButton: HTMLButtonElement = (<HTMLButtonElement>document.getElementById(InspectionRequestId + "_save_remark_button"));
 
     let currentResult = remarkButton.value;
-    
+
     let remarkTextarea: HTMLTextAreaElement = (<HTMLTextAreaElement>document.getElementById(InspectionRequestId + "_remark_textarea"));
 
     let value: string = (<HTMLInputElement>document.querySelector('input[name="' + InspectionRequestId + '_results"]:checked')).value;
 
-    if (value ==  currentResult && remarkTextarea.value != "")
+    if (value == currentResult && remarkTextarea.value != "")
     {
       commentButton.removeAttribute("disabled");
     }
@@ -388,12 +396,12 @@ namespace InspSched
           }
           else
           {
-            commentButton.setAttribute("disabled","disabled");
+            commentButton.setAttribute("disabled", "disabled");
           }
         }
         return;
       default:
-        if (remarkTextarea.value == "" && remarkButton.value == value )
+        if (remarkTextarea.value == "" && remarkButton.value == value)
         {
           commentButton.removeAttribute("disabled");
           remarkButton.setAttribute("disabled", "disabled");
@@ -465,7 +473,7 @@ namespace InspSched
     let commentTextarea: HTMLTextAreaElement = (<HTMLTextAreaElement>document.getElementById(InspectionRequestId + "_comment_textarea"));
     let value: string = (<HTMLInputElement>document.querySelector('input[name="' + InspectionRequestId + '_results"]:checked')).value;
 
-    
+
 
     console.log("value: ", value);
 
@@ -482,14 +490,14 @@ namespace InspSched
     {
       SearchPermit();
 
-    }, function()
-    {
-      console.log('error in UpdateInspection');
-      // do something with the error here
-      // need to figure out how to detect if something wasn't found
-      // versus an error.
-      SearchPermit();
-    });
+    }, function ()
+      {
+        console.log('error in UpdateInspection');
+        // do something with the error here
+        // need to figure out how to detect if something wasn't found
+        // versus an error.
+        SearchPermit();
+      });
 
     InspSched.UI.ToggleInspDetails(InspectionRequestId);
 
@@ -497,7 +505,7 @@ namespace InspSched
     commentTextarea.value = "";
 
     // This will be updated to take inspection data returned from server and update the inspection to show new data.
-    
+
 
   }
 

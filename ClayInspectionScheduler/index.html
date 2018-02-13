@@ -1,13 +1,13 @@
 ﻿<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang='en-US'>
 <head>
-  <title>Clay Inspectionsr</title>
+  <title>Clay Inspections</title>
   <meta name="X-UA-Compatible" value="IE=11" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <link type="text/css" rel="stylesheet" xmlns="http://www.w3.org/1999/xhtml" />
-  <meta name="description" content="Inspection Scheduler" />
+  <meta name="description" content="Clay Inspections" />
 
   <link href="Content/css/jquery-ui.css" rel="stylesheet" />
   <link href="Content/css/bootstrap-datepicker3.standalone.css" rel="stylesheet" />
@@ -17,12 +17,12 @@
   <!--<link href="//cdnjs.cloudflare.com/ajax/libs/foundation/6.3.1/css/foundation.min.css" rel="stylesheet" />-->
   <link href="Content/fonts/foundation-icons.css" rel="stylesheet" />
   <link href="Content/css/MyStyle.css" rel="stylesheet" />
-  
+
 
 
 </head>
 
-<body style="background-color:cadetblue">
+<body style="background-color:cadetblue;">
 
   <!--Top Bar-->
   <div class="row expanded top-bar" style="background: #b0c4de url('64.png') no-repeat left;padding-left:64px;">
@@ -51,32 +51,55 @@
       <div id="SearchFailed" class="large-12 medium-12 small-12 row"></div>
     </div>
 
-    <!-- Permit Information -->
-    <div class="large-12 align-center row flex-container  flex-child-grow" style="max-width:95%;" id="PermitScreen">
-      <div class="large-11 medium-12 small-12 align-center" style="border-radius:10px;overflow:hidden">
-        <div class="large-12">
+    <!-- Permit Information removed flex-child-grow -->
+    <div class="large-12 align-center row flex-container"
+         style="max-width:95%;"
+         id="PermitScreen">
+      <div class="large-11 medium-12 small-12 align-center"
+           style="border-radius:10px; height: 100%; max-height: 100%;">
+        <div style="height: 100%; max-height: 100%;"
+             class="large-12">
 
           <!-- Tab List-->
           <ul class="tabs" data-tabs id="InspectionSchedulerTabs" style="border-top-left-radius:10px;border-top-right-radius:10px">
-            <li class="tabs-title is-active"><a href="#InspectionView" aria-selected="true">Inspections</a></li>
-            <li class="tabs-title"><a href="#Scheduler">Scheduler View</a></li>
-            <li class="tabs-title"><a href="#inspectors">Inspectors</a></li>
+            <li class="tabs-title is-active">
+              <a href="#InspectionView" aria-selected="true">Inspections View</a>
+            </li>
+            <li class="tabs-title">
+              <a href="#Scheduler">Scheduler View</a>
+            </li>
+            <li class="tabs-title">
+              <a href="#Inspector">Inspector View</a>
+            </li>
           </ul>
 
-          <div class="tabs-content" data-tabs-content="InspectionSchedulerTabs">
+          <div style="height: 100%; max-height: 100%; overflow-x: auto; overflow-y: scroll;"
+               class="tabs-content" data-tabs-content="InspectionSchedulerTabs">
 
             <!-- Tab 1 : Inspection View -->
+            <!-- style="height: 100%; max-height: 100%;" -->
             <div class="tabs-panel is-active tabs-content" id="InspectionView">
 
+              <!--style="max-height: 350px;"-->
               <div class="large-12 medium-12 small-12" id="InspectionTable">
 
                 <div class="large-12 medium-12 small-12" id="InspSched">
                   <div class="small-12 align-center" id="NoInspections">No Inspections Found</div>
-                  
-                  <div class="large-12 row infoDiv " id="InspSchedBody">
-                    <div class="column infoDiv inspection-Table" id="InspListData">
+
+
+
+
+                  <div style="height: 100%; max-height: 100%; display: flex;"
+                       class="large-12 row infoDiv " id="InspSchedBody">
+
+
+
+
+                    <div style="height: 100%; max-height: 100%;"
+                         class="column infoDiv inspection-Table" id="InspListData">
 
                     </div>
+
                   </div>
                 </div>
               </div>
@@ -132,7 +155,7 @@
                     <!--Scheduling Inspection Type Selector / Save button-->
                     <div class="large-6 medium-6 small-12 row flex-container align-center align-self-middle">
                       <div class="large-10 medium-10 small-10" style="text-align:center;">
-                        <textarea class="large-12 medium-12 small-12" placeholder="Please enter additional information for inspectors here. This will NOT be visible on inspection after it is saved." rows=3 maxlength=200 style="resize: none;" id="scheduler_comment"></textarea>
+                        <textarea class="large-12 medium-12 small-12" placeholder="Please enter additional information for inspectors here. This will NOT be visible to the public" rows=3 maxlength=200 style="resize: none;" id="scheduler_comment"></textarea>
                         <select class="large-12 medium-12 small-12" id="InspTypeSelect"></select>
                         <button class="button " id="SaveSchedule" type="button" onclick="">Save Inspection</button>
                       </div>
@@ -147,19 +170,74 @@
 
             </div><!-- End Tab 2 : Scheduler -->
 
+            <!-- Tab 3 : Inspector View-->
+            <div class="tabs-panel tabs-content" id="Inspector">
+              <div class="row">
+                <div class="columns small-3">
+                  <label style="text-align: center;">By Day</label>
+                  <div class="row align-center align-middle">
+                    <input type="radio" name="day" value="Today" id="dayToday" checked />
+                    <label for="dayToday">Today</label>
+                    <input type="radio" name="day" value="Tomorrow" id="dayTomorrow" />
+                    <label for="dayTomorrow">Tomorrow</label>
+                    <input type="radio" name="day" value="Both" id="dayBoth" />
+                    <label for="dayBoth">Both</label>
+                  </div>
+                </div>
+                <div class="columns small-3">
+                  <label style="text-align: center;">By Status</label>
+                  <div class="row align-center align-middle">
+                    <input type="radio" name="status" value="Open" id="statusOpen" checked />
+                    <label for="statusOpen">Open</label>
+                    <input type="radio" name="day" value="Closed" id="statusClosed" />
+                    <label for="statusClosed">Closed</label>
+                    <input type="radio" name="day" value="Both" id="statusBoth" />
+                    <label for="statusyBoth">Both</label>
+                  </div>
+                </div>
+                <div class="columns small-3">
+                  <label style="text-align: center;">
+                    By Inspector
+                    <select>
+                      <option value="" selected>All</option>
+                      <option value="1">Inspector 1</option>
+                      <option value="12">Inspector 2</option>
+                      <option value="13">Inspector 3</option>
+                      <option value="14">Inspector 4</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="columns small-3">
+                  <div class="flex-container row align-center align-middle">
+                    <a onclick="InspSched.InspectorUI.LoadDailyInspections();" class="button success">Refresh Data</a>
+                  </div>
+                </div>
+              </div>
 
+              <!-- The menu for the inspector view will go here
+              they will use this to pick today/tomorrow
+              and choose an inspector
+              and refresh the data
+              open/closed
+              -->
+
+
+              <div id="InspectorViewInspections">
+
+              </div>
+            </div> <!-- END Tab 3 : Inspector View-->
 
           </div>
         </div>
       </div>
 
     </div>     <!--End Permit Information-->
-
   </div>     <!--End Inspection Scheduler-->
   <!--<script src="Scripts/app/bundle.min.js?201801191721"></script>-->
-
+  <script src="Scripts/app/ShortInspection.js"></script>
   <script src="Scripts/app/Permit.js"></script>
-
+  <script src="Scripts/app/inspectorUI.js"></script>
+  <script src="Scripts/app/InspectorView.js"></script>
   <script src="Scripts/app/LocationHash.js"></script>
 
   <script src="Scripts/app/NewInspection.js"></script>

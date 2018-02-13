@@ -1,3 +1,15 @@
+var InspSched;
+(function (InspSched) {
+    var ShortInspection = /** @class */ (function () {
+        function ShortInspection(InspectionId, InspectionDesc) {
+            this.InspectionId = InspectionId;
+            this.InspectionDesc = InspectionDesc;
+        }
+        return ShortInspection;
+    }());
+    InspSched.ShortInspection = ShortInspection;
+})(InspSched || (InspSched = {}));
+//# sourceMappingURL=shortinspection.js.map
 /// <reference path="transport.ts" />
 /// <reference path="ui.ts" />
 var InspSched;
@@ -17,12 +29,251 @@ var InspSched;
     InspSched.Permit = Permit;
 })(InspSched || (InspSched = {}));
 //# sourceMappingURL=Permit.js.map
+/// <reference path="app.ts" />
+/// <reference path="inspection.ts" />
+/// <reference path="inspectorview.ts" />
+/// <reference path="shortinspection.ts" />
+var InspSched;
+(function (InspSched) {
+    var InspectorUI;
+    (function (InspectorUI) {
+        function LoadDailyInspections() {
+            InspSched.transport.DailyInspections().then(function (inspections) {
+                InspSched.IVInspections = inspections;
+                if (InspSched.IVInspections.length > 0) {
+                    var iv = new InspSched.InspectorView();
+                    InspSched.IV = iv.ProcessIVData(inspections);
+                    BuildInspectorUI();
+                }
+            }, function () {
+                console.log('error in LoadInspectionTypes');
+                InspSched.IVInspections = [];
+            });
+        }
+        InspectorUI.LoadDailyInspections = LoadDailyInspections;
+        function BuildInspectorUI() {
+            // this function will take the 
+            // IV data and create the html
+            // and add it to the InspectorViewInspections div
+            var currentHash = new InspSched.LocationHash(location.hash.substring(1));
+            var target = document.getElementById("InspectorViewInspections");
+            var df = document.createDocumentFragment();
+            InspSched.UI.clearElement(target);
+            if (InspSched.IV.length > 0) {
+                df.appendChild(BuildHeaderRow());
+                for (var _i = 0, _a = InspSched.IV; _i < _a.length; _i++) {
+                    var i = _a[_i];
+                    df.appendChild(BuildRow(i, currentHash));
+                }
+            }
+            target.appendChild(df);
+        }
+        function BuildHeaderRow() {
+            var df = document.createDocumentFragment();
+            var row = document.createElement("div");
+            row.classList.add("row");
+            row.classList.add("flex-container");
+            row.classList.add("medium-12");
+            row.classList.add("large-12");
+            row.style.borderBottom = "solid 1px Black";
+            var permit = CreateAndSet("Permit");
+            var permitColumn = document.createElement("div");
+            permitColumn.classList.add("flex-container");
+            permitColumn.classList.add("columns");
+            permitColumn.classList.add("align-middle");
+            permitColumn.classList.add("align-center");
+            permitColumn.appendChild(permit);
+            row.appendChild(permitColumn);
+            var secondcolumn = document.createElement("div");
+            secondcolumn.classList.add("columns");
+            secondcolumn.classList.add("medium-10");
+            secondcolumn.classList.add("large-10");
+            secondcolumn.classList.add("end");
+            var firstRow = document.createElement("div");
+            firstRow.classList.add("row");
+            firstRow.classList.add("medium-12");
+            firstRow.classList.add("large-12");
+            firstRow.appendChild(CreateAndSet("Address", "columns", "small-4"));
+            firstRow.appendChild(CreateAndSet("Inspector", "columns", "small-4"));
+            firstRow.appendChild(CreateAndSet("GeoZone", "columns", "small-2"));
+            firstRow.appendChild(CreateAndSet("FloodZone", "columns", "small-2"));
+            secondcolumn.appendChild(firstRow);
+            row.appendChild(secondcolumn);
+            df.appendChild(row);
+            return df;
+        }
+        function BuildRow(i, ch) {
+            var df = document.createDocumentFragment();
+            var row = document.createElement("div");
+            row.classList.add("row");
+            row.classList.add("flex-container");
+            row.classList.add("medium-12");
+            row.classList.add("large-12");
+            row.style.borderBottom = "solid 1px Black";
+            row.style.marginTop = ".5em";
+            ch.Permit = i.PermitNumber;
+            var permit = CreateLink(i.PermitNumber, ch.ToHash());
+            var permitContainer = document.createElement("div");
+            var permitContainerContainer = document.createElement("div");
+            permitContainerContainer.classList.add("row");
+            permitContainerContainer.classList.add("small-12");
+            permitContainer.classList.add("flex-container");
+            permitContainer.classList.add("small-12");
+            permitContainer.classList.add("align-middle");
+            permitContainer.classList.add("align-center");
+            permitContainer.appendChild(permit);
+            permitContainerContainer.appendChild(permitContainer);
+            var permitColumn = document.createElement("div");
+            permitColumn.classList.add("column");
+            permitColumn.classList.add("medium-2");
+            permitColumn.classList.add("align-middle");
+            permitColumn.classList.add("align-center");
+            permitColumn.classList.add("flex-container");
+            if (i.IsPrivateProvider) {
+                var pp = CreateAndSet("Private Provider");
+                pp.classList.add("align-middle");
+                pp.classList.add("small-12");
+                pp.classList.add("align-center");
+                pp.classList.add("flex-container");
+                pp.style.fontSize = "smaller";
+                permitContainerContainer.appendChild(pp);
+            }
+            permitColumn.appendChild(permitContainerContainer);
+            row.appendChild(permitColumn);
+            var secondcolumn = document.createElement("div");
+            secondcolumn.classList.add("columns");
+            secondcolumn.classList.add("medium-10");
+            secondcolumn.classList.add("large-10");
+            secondcolumn.classList.add("end");
+            var firstRow = document.createElement("div");
+            firstRow.classList.add("row");
+            firstRow.classList.add("medium-12");
+            firstRow.classList.add("large-12");
+            firstRow.appendChild(CreateAndSet(i.Address, "columns", "small-4"));
+            firstRow.appendChild(CreateAndSet(i.Inspector, "columns", "small-4"));
+            firstRow.appendChild(CreateAndSet(i.GeoZone, "columns", "small-2"));
+            firstRow.appendChild(CreateAndSet(i.FloodZone, "columns", "small-2"));
+            secondcolumn.appendChild(firstRow);
+            var secondRow = document.createElement("div");
+            secondRow.classList.add("row");
+            secondRow.classList.add("medium-12");
+            secondRow.classList.add("large-12");
+            for (var _i = 0, _a = i.Inspections; _i < _a.length; _i++) {
+                var insp = _a[_i];
+                ch.InspectionId = insp.InspectionId;
+                secondRow.appendChild(CreateLink(insp.InspectionDesc, ch.ToHash(), "medium-4", "columns"));
+            }
+            secondcolumn.appendChild(secondRow);
+            row.appendChild(secondcolumn);
+            df.appendChild(row);
+            return df;
+        }
+        function CreateAndSet(v) {
+            var c = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                c[_i - 1] = arguments[_i];
+            }
+            var e = document.createElement("div");
+            e.appendChild(document.createTextNode(v));
+            if (c.length > 0) {
+                for (var _a = 0, c_1 = c; _a < c_1.length; _a++) {
+                    var i = c_1[_a];
+                    e.classList.add(i); // optional class
+                }
+            }
+            return e;
+        }
+        function CreateLink(v, l) {
+            var c = [];
+            for (var _i = 2; _i < arguments.length; _i++) {
+                c[_i - 2] = arguments[_i];
+            }
+            var a = document.createElement("a");
+            a.href = l;
+            a.appendChild(document.createTextNode(v));
+            if (c.length > 0) {
+                for (var _a = 0, c_2 = c; _a < c_2.length; _a++) {
+                    var i = c_2[_a];
+                    a.classList.add(i);
+                }
+            }
+            return a;
+        }
+    })(InspectorUI = InspSched.InspectorUI || (InspSched.InspectorUI = {}));
+})(InspSched || (InspSched = {}));
+//# sourceMappingURL=inspectorui.js.map
+/// <reference path="shortinspection.ts" />
+var InspSched;
+(function (InspSched) {
+    var InspectorView = /** @class */ (function () {
+        function InspectorView(inspection) {
+            if (inspection === void 0) { inspection = null; }
+            this.PermitNumber = "";
+            this.Address = "";
+            this.GeoZone = "";
+            this.FloodZone = "";
+            this.Inspector = "";
+            this.IsPrivateProvider = false;
+            this.Inspections = [];
+            if (inspection !== null) {
+                this.PermitNumber = inspection.PermitNo;
+                this.Address = inspection.StreetAddress;
+                this.FloodZone = inspection.FloodZone;
+                this.GeoZone = inspection.GeoZone;
+                this.Inspector = inspection.InspectorName;
+                this.IsPrivateProvider = inspection.PrivateProviderInspectionRequestId > 0;
+            }
+        }
+        InspectorView.prototype.ProcessIVData = function (inspections, day, inspector) {
+            if (day === void 0) { day = ""; }
+            if (inspector === void 0) { inspector = ""; }
+            // We're going to filter our results if a day or inspector was passed.
+            var ivList = [];
+            // if we have a day or inspector set to filter on
+            // let's go ahead and filter the list of inspections
+            // based on them.
+            var fInspections = inspections.filter(function (i) {
+                var inspectorCheck = inspector.length > 0 ? i.InspectorName === inspector : true;
+                var dayCheck = day.length > 0 ? i.Day === day : true;
+                return inspectorCheck && dayCheck;
+            });
+            // get a unique list of permit numbers.
+            var permitNumbers = fInspections.map(function (p) {
+                return p.PermitNo;
+            });
+            permitNumbers = permitNumbers.filter(function (value, index, self) { return index === self.indexOf(value); });
+            var _loop_1 = function (p) {
+                var i = fInspections.filter(function (j) {
+                    return j.PermitNo === p;
+                });
+                var iv = new InspectorView(i[0]); // we'll base the inspectorView off of the first inspection returned.
+                iv.Inspections = i.map(function (insp) {
+                    return new InspSched.ShortInspection(insp.InspReqID, insp.InspectionCode + '-' + insp.InsDesc);
+                });
+                ivList.push(iv);
+            };
+            // let's coerce the inspection data into the IV format.
+            for (var _i = 0, permitNumbers_1 = permitNumbers; _i < permitNumbers_1.length; _i++) {
+                var p = permitNumbers_1[_i];
+                _loop_1(p);
+            }
+            console.log("ivList", ivList);
+            return ivList;
+        };
+        return InspectorView;
+    }());
+    InspSched.InspectorView = InspectorView;
+})(InspSched || (InspSched = {}));
+//# sourceMappingURL=inspectorview.js.map
 var InspSched;
 (function (InspSched) {
     var LocationHash // implements ILocationHash
      = /** @class */ (function () {
         function LocationHash(locationHash) {
             this.Permit = "";
+            this.Day = ""; // can be Today or Tomorrow
+            this.Inspector = ""; // can be an inspector's name or identifier.
+            this.InspectionId = 0;
             var ha = locationHash.split("&");
             for (var i = 0; i < ha.length; i++) {
                 var k = ha[i].split("=");
@@ -30,16 +281,39 @@ var InspSched;
                     case "permit":
                         this.Permit = k[1];
                         break;
+                    case "inspector":
+                        this.Inspector = k[1];
+                        break;
+                    case "day":
+                        this.Day = k[1];
+                        break;
+                    case "inspectionid":
+                        this.InspectionId = parseInt(k[1]);
+                        break;
                 }
             }
         }
-        LocationHash.prototype.update = function (permit) {
+        LocationHash.prototype.UpdatePermit = function (permit) {
             // and using its current properties, going to emit an updated hash
             // with a new EmailId.
             var h = "";
             if (permit.length > 0)
                 h += "&permit=" + permit;
             return h.substring(1);
+        };
+        LocationHash.prototype.ToHash = function () {
+            var h = "";
+            if (this.Permit.length > 0)
+                h += "&permit=" + this.Permit;
+            if (this.Day.length > 0)
+                h += "&day=" + this.Day;
+            if (this.Inspector.length > 0)
+                h += "&inspector=" + this.Inspector;
+            if (this.InspectionId > 0)
+                h += "&inspectionid=" + this.InspectionId.toString();
+            if (h.length > 0)
+                h = "#" + h.substring(1);
+            return h;
         };
         return LocationHash;
     }());
@@ -73,6 +347,7 @@ var InspSched;
     (function (UI) {
         "use strict";
         UI.CurrentPermits = new Array();
+        UI.CurrentInspections = [];
         UI.PermitsWithOutInsp = [];
         UI.CurrentDetailsOpen = "";
         function Search(key) {
@@ -456,11 +731,11 @@ var InspSched;
                 addRemark.appendChild(addRemarkTextDiv);
                 addRemark.appendChild(addRemarkButtonDiv);
                 addRemarkContainer.appendChild(addRemark);
-                radioButtonSection.appendChild(BuildRadioButtonRow(inspection.InspReqID, inspection.ResultADC, permit.access, 0));
+                radioButtonSection.appendChild(BuildRadioButtonRow(inspection.InspReqID.toString(), inspection.ResultADC, permit.access, 0));
                 addRemarkContainer.appendChild(radioButtonSection);
             }
             // #endregion Initial Append Rows to Inspection Row
-            var detailButton = BuildButton(inspection.InspReqID + "_details_btn", "Details", "InspSched.UI.ToggleInspDetails(this.value)", inspection.InspReqID);
+            var detailButton = BuildButton(inspection.InspReqID + "_details_btn", "Details", "InspSched.UI.ToggleInspDetails(this.value)", inspection.InspReqID.toString());
             detailButton.className = "column large-12 medium-12 small-12 align-self-center  DetailsButton";
             //Create function to make New/Cancel/Details Button
             if ((inspection.ResultADC.length > 0 || inspection.DisplaySchedDateTime.length === 0)) {
@@ -491,7 +766,7 @@ var InspSched;
             }
             DataRow.appendChild(InspButtonDiv);
             if (inspection.DisplayInspDateTime.length > 0) {
-                if (inspection.InspReqID !== "99999999") {
+                if (inspection.InspReqID.toString() !== "99999999") {
                     CompletedRemarks.appendChild(Remark);
                     CompletedRemarks.appendChild(ResultDescription);
                     // remarks needs to be in the inspection data
@@ -770,7 +1045,7 @@ var InspSched;
             var SchedDate;
             for (var _i = 0, _a = InspSched.CurrentInspections; _i < _a.length; _i++) {
                 var i = _a[_i];
-                if (i.InspReqID == value) {
+                if (i.InspReqID.toString() == value) {
                     SchedDate = Date.parse(i.DisplaySchedDateTime);
                 }
             }
@@ -1031,6 +1306,19 @@ var InspSched;
             });
         }
         transport.UpdateInspection = UpdateInspection;
+        function DailyInspections() {
+            var x = XHR.Get("API/Inspection/List");
+            return new Promise(function (resolve, reject) {
+                x.then(function (response) {
+                    var di = JSON.parse(response.Text);
+                    resolve(di);
+                }).catch(function () {
+                    console.log("error in Daily Inspections");
+                    reject(null);
+                });
+            });
+        }
+        transport.DailyInspections = DailyInspections;
     })(transport = InspSched.transport || (InspSched.transport = {}));
 })(InspSched || (InspSched = {}));
 //# sourceMappingURL=transport.js.map
@@ -1052,6 +1340,8 @@ var InspSched;
 /// <reference path="../typings/jquery/jquery.d.ts" />
 /// <reference path="../typings/foundation/foundation.d.ts" />
 /// <reference path="../typings/bootstrap.datepicker/bootstrap.datepicker.d.ts" />
+/// <reference path="inspectorui.ts" />
+/// <reference path="inspectorview.ts" />
 var InspSched;
 (function (InspSched) {
     "use strict";
@@ -1060,6 +1350,8 @@ var InspSched;
     InspSched.CurrentPermits = [];
     InspSched.CurrentInspections = [];
     InspSched.IssuesExist = [];
+    InspSched.IVInspections = [];
+    InspSched.IV = []; // this is going to be the processed array of Inspection data.
     var InspectionTable = document.getElementById('InspectionTable');
     var InspectionTypeSelect = document.getElementById("InspTypeSelect");
     var PermitSearchButton = document.getElementById("PermitSearchButton");
@@ -1080,9 +1372,8 @@ var InspSched;
     InspSched.start = start;
     function updateHash(permit) {
         var hash = new InspSched.LocationHash(location.hash.substring(1));
-        location.hash = hash.update(permit);
+        location.hash = hash.UpdatePermit(permit);
         var newhash = new InspSched.LocationHash(location.hash.substring(1));
-        console.log('newhash', newhash, 'oldhash', hash);
         if (newhash.Permit === hash.Permit) {
             SearchPermit();
         }
@@ -1096,6 +1387,11 @@ var InspSched;
             // do permitsearch here
             PermitSearchField.value = currentHash.Permit.trim();
             SearchPermit();
+        }
+        else {
+            if (currentHash.Day.length > 0 || currentHash.Inspector.length > 0) {
+                // Do something with them here
+            }
         }
     }
     InspSched.HandleHash = HandleHash;
@@ -1224,6 +1520,7 @@ var InspSched;
         SaveInspectionButton.setAttribute("disabled", "disabled");
         IssueContainer.style.display = "none";
         LoadInspectionTypes();
+        InspSched.InspectorUI.LoadDailyInspections();
     }
     function LoadInspectionTypes() {
         InspSched.transport.GetInspType().then(function (insptypes) {

@@ -38,7 +38,7 @@ namespace ClayInspectionScheduler.Models
       }
     }
 
-    public string InspReqID { get; set; }
+    public int InspReqID { get; set; } = 0;
 
     public string InspectionCode { get; set; }
 
@@ -131,7 +131,7 @@ namespace ClayInspectionScheduler.Models
         else if (SchedDateTime.Date == DateTime.Today.AddDays(1).Date)
         {
           return "Tomorrow";
-          
+
         }
         else if(SchedDateTime.Date > DateTime.Today.AddDays(1).Date)
         {
@@ -211,7 +211,7 @@ namespace ClayInspectionScheduler.Models
           I.Comment,
           LTRIM(RTRIM(IP.name)) as InspectorName,
           PrivProvIRId PrivateProviderInspectionRequestId,
-          ISNULL(LTRIM(RTRIM(B.GeoZone)), 'Unknown') GeoZone,
+          ISNULL(LTRIM(RTRIM(B.GeoZone)), '') GeoZone,
           ISNULL(F.FloodZone, '') FloodZone
         FROM bpINS_REQUEST I 
         LEFT OUTER JOIN bpBASE_PERMIT B ON I.BaseId = B.BaseID
@@ -287,7 +287,7 @@ namespace ClayInspectionScheduler.Models
         )
 
         SELECT 
-          ISNULL(i.InspReqID, 99999999) InspReqID,
+          ISNULL(i.InspReqID, 0) InspReqID,
           P.PermitNo, 
           ISNULL(i.InspectionCode, '') InspectionCode, 
           ISNULL(ir.InsDesc, 'No Inspections') InsDesc, 

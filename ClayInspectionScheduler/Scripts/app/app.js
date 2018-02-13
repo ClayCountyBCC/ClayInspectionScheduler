@@ -7,6 +7,8 @@
 /// <reference path="../typings/jquery/jquery.d.ts" />
 /// <reference path="../typings/foundation/foundation.d.ts" />
 /// <reference path="../typings/bootstrap.datepicker/bootstrap.datepicker.d.ts" />
+/// <reference path="inspectorui.ts" />
+/// <reference path="inspectorview.ts" />
 var InspSched;
 (function (InspSched) {
     "use strict";
@@ -15,6 +17,8 @@ var InspSched;
     InspSched.CurrentPermits = [];
     InspSched.CurrentInspections = [];
     InspSched.IssuesExist = [];
+    InspSched.IVInspections = [];
+    InspSched.IV = []; // this is going to be the processed array of Inspection data.
     var InspectionTable = document.getElementById('InspectionTable');
     var InspectionTypeSelect = document.getElementById("InspTypeSelect");
     var PermitSearchButton = document.getElementById("PermitSearchButton");
@@ -35,9 +39,8 @@ var InspSched;
     InspSched.start = start;
     function updateHash(permit) {
         var hash = new InspSched.LocationHash(location.hash.substring(1));
-        location.hash = hash.update(permit);
+        location.hash = hash.UpdatePermit(permit);
         var newhash = new InspSched.LocationHash(location.hash.substring(1));
-        console.log('newhash', newhash, 'oldhash', hash);
         if (newhash.Permit === hash.Permit) {
             SearchPermit();
         }
@@ -51,6 +54,11 @@ var InspSched;
             // do permitsearch here
             PermitSearchField.value = currentHash.Permit.trim();
             SearchPermit();
+        }
+        else {
+            if (currentHash.Day.length > 0 || currentHash.Inspector.length > 0) {
+                // Do something with them here
+            }
         }
     }
     InspSched.HandleHash = HandleHash;
@@ -179,6 +187,7 @@ var InspSched;
         SaveInspectionButton.setAttribute("disabled", "disabled");
         IssueContainer.style.display = "none";
         LoadInspectionTypes();
+        InspSched.InspectorUI.LoadDailyInspections();
     }
     function LoadInspectionTypes() {
         InspSched.transport.GetInspType().then(function (insptypes) {

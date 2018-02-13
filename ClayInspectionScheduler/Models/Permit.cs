@@ -157,7 +157,7 @@ namespace ClayInspectionScheduler.Models
     }
 
     public static List<Permit> Get(
-      string AssocKey, 
+      string AssocKey,
       UserAccess.access_type CurrentAccess)
     {
       /**
@@ -178,7 +178,7 @@ namespace ClayInspectionScheduler.Models
         var permits = GetRaw(AssocKey);
         if (!permits.Any(p => p.PermitNo == AssocKey))
         {
-          return new List<Permit>();          
+          return new List<Permit>();
         }
         else
         {
@@ -199,7 +199,7 @@ namespace ClayInspectionScheduler.Models
               l.Permit_URL = $@"http://{host}/WATSWeb/Permit/APermit{l.PermitTypeString}.aspx?PermitNo={l.PermitNo}";
             }
             l.access = CurrentAccess;
-            if(l.access  == UserAccess.access_type.public_access)
+            if(l.access == UserAccess.access_type.public_access)
             {
               l.Permit_URL = "";
               if (l.Confidential == 1)
@@ -214,7 +214,7 @@ namespace ClayInspectionScheduler.Models
         }
 
 
-       return permits;
+        return permits;
       }
       catch (Exception ex)
       {
@@ -228,8 +228,8 @@ namespace ClayInspectionScheduler.Models
       var holds = Hold.Get((from prmt in permits
                             select prmt.PermitNo).ToList<string>());
 
-      var MasterPermit = (from prmt in permits 
-                          where prmt.CoClosed != -1 
+      var MasterPermit = (from prmt in permits
+                          where prmt.CoClosed != -1
                           select prmt.PermitNo).DefaultIfEmpty("").First();
 
       var NoInspections = (from h in holds
@@ -242,8 +242,8 @@ namespace ClayInspectionScheduler.Models
 
       var p = IsMasterClosed(permits);
       if (p.Count() > 0) return p;
-      p = HoldsExist(permits,holds,NoInspections, MasterPermit);
-      p = ChargesExist(p, ChargePermits,MasterPermit);
+      p = HoldsExist(permits, holds, NoInspections, MasterPermit);
+      p = ChargesExist(p, ChargePermits, MasterPermit);
       if (p.Count() > 0) return p;
       return permits;
     }
@@ -269,7 +269,7 @@ namespace ClayInspectionScheduler.Models
       return new List<Permit>();
     }
 
-    private static List<Permit> HoldsExist(List<Permit> permits, List<Hold>holds,List<string> NoInspections, string MasterPermit)
+    private static List<Permit> HoldsExist(List<Permit> permits, List<Hold> holds, List<string> NoInspections, string MasterPermit)
     {
       if (holds.Count() == 0 && NoInspections.Count == 0)
         return permits;
@@ -324,14 +324,14 @@ namespace ClayInspectionScheduler.Models
           }
         }
       }
-      
 
 
 
-        return permits;
+
+      return permits;
     }
 
-    private static List<Permit> ChargesExist(List<Permit> permits, List<string>ChargePermits, string MasterPermit)
+    private static List<Permit> ChargesExist(List<Permit> permits, List<string> ChargePermits, string MasterPermit)
     {
       // Now let's check to see if we have any master permits that have
       // any holds or charges
@@ -341,7 +341,7 @@ namespace ClayInspectionScheduler.Models
         // check for charges on the master permit
         if (ChargePermits.Count > 0)
         {
-          if (ChargePermits.Contains( MasterPermit))
+          if(ChargePermits.Contains(MasterPermit))
           {
             var Error = $"There are unpaid charges associated with Permit #{ MasterPermit }, no inspections can be scheduled.";
             return BulkUpdateError(permits, Error);
@@ -375,11 +375,11 @@ namespace ClayInspectionScheduler.Models
           }
         }
       }
-      
+
       return permits;
 
     }
-    
+
     private static List<Permit> BulkUpdateError(List<Permit> permits, string ErrorText)
     {
       foreach (Permit p in permits)
@@ -413,15 +413,21 @@ namespace ClayInspectionScheduler.Models
 
            WILL NEED TO UPDATE TO INCLUDE A CHECK IF THE MASTER PERMIT HAS BEEN ISSUED
            IF NOT, BULK UPDATE ASSOC PERMITS TO DISPLAY ERROR
+        As of 2/12, an inspection cannot be scheduled if the address is blank, because it hasn't been properly addressed yet.
       */
+      if (this.ProjAddrCombined.Trim().Length == 0)
+      {
+        ErrorText = $"Permit #{this.PermitNo} does not have a valid address. Please contact the building department for assistance.";
+        return;
+      }
       if (this.IssueDate == DateTime.MinValue)
       {
-        this.ErrorText = $"Permit #{this.PermitNo} has not yet been issued. Please contact the building department for assistance";
+        this.ErrorText = $"Permit #{this.PermitNo} has not yet been issued. Please contact the building department for assistance.";
         return;
       }
 
       if (this.access == UserAccess.access_type.public_access)
-      { 
+      {
         if (PassedFinal()) return;
         if (PrivateProvider.Length > 0)
         {
@@ -450,14 +456,15 @@ namespace ClayInspectionScheduler.Models
       {
         this.ErrorText = "The Grace Date for this contractor has passed. Please contact the Building Department for assistance.";
         return true;
-      }      return false;
-        
+      }
+      return false;
+
     }
 
     private bool ContractorIssues()
     {
       // Contractor Owners do not have any valid data for these fields
-      if (this.ContractorId.ToUpper() == "OWNER") 
+      if (this.ContractorId.ToUpper() == "OWNER")
       {
         return false;
       }
@@ -465,8 +472,8 @@ namespace ClayInspectionScheduler.Models
       {
         ErrorText = "There is no contractor selected on this permit. Please contact the Building Department if you would like to schedule an inspection.";
       }
-      
-      if (this.ContractorStatus != "A" )
+
+      if (this.ContractorStatus != "A")
       {
         ErrorText = "There is an issue with the contractor's status";
         return true;
