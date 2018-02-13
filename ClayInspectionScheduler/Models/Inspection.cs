@@ -131,7 +131,6 @@ namespace ClayInspectionScheduler.Models
         else if (SchedDateTime.Date == DateTime.Today.AddDays(1).Date)
         {
           return "Tomorrow";
-
         }
         else if(SchedDateTime.Date > DateTime.Today.AddDays(1).Date)
         {

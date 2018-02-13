@@ -13,10 +13,10 @@ namespace ClayInspectionScheduler
     protected void Application_Start()
     {
 
-      GlobalConfiguration.Configure( WebApiConfig.Register );
-#if !DEBUG
+      GlobalConfiguration.Configure(WebApiConfig.Register);
       Models.InspType.GetCachedInspectionTypes();
-#endif
+      Models.Inspector.GetCached();
+      Models.UserAccess.GetCachedAllUserAccess();
     }
   }
 }

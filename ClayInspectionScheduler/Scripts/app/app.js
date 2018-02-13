@@ -9,6 +9,7 @@
 /// <reference path="../typings/bootstrap.datepicker/bootstrap.datepicker.d.ts" />
 /// <reference path="inspectorui.ts" />
 /// <reference path="inspectorview.ts" />
+/// <reference path="inspector.ts" />
 var InspSched;
 (function (InspSched) {
     "use strict";
@@ -18,6 +19,7 @@ var InspSched;
     InspSched.CurrentInspections = [];
     InspSched.IssuesExist = [];
     InspSched.IVInspections = [];
+    InspSched.Inspectors = [];
     InspSched.IV = []; // this is going to be the processed array of Inspection data.
     var InspectionTable = document.getElementById('InspectionTable');
     var InspectionTypeSelect = document.getElementById("InspTypeSelect");
@@ -55,11 +57,6 @@ var InspSched;
             PermitSearchField.value = currentHash.Permit.trim();
             SearchPermit();
         }
-        else {
-            if (currentHash.Day.length > 0 || currentHash.Inspector.length > 0) {
-                // Do something with them here
-            }
-        }
     }
     InspSched.HandleHash = HandleHash;
     PermitSearchField.onkeydown = function (event) {
@@ -69,6 +66,7 @@ var InspSched;
         }
     };
     function SearchPermit() {
+        InspSched.UI.CurrentDetailsOpen = "";
         InspectionTable.style.display = "none";
         InspSched.UI.Hide('SaveConfirmed');
         InspSched.UI.Hide('NotScheduled');
@@ -248,7 +246,9 @@ var InspSched;
         else {
             commentButton.setAttribute("disabled", "disabled");
         }
-        enableSaveResultButton(InspectionRequestId);
+        if (remarkButton !== null) {
+            enableSaveResultButton(InspectionRequestId);
+        }
     }
     InspSched.disableSaveCommentButton = disableSaveCommentButton;
     function enableSaveResultButton(InspectionRequestId) {

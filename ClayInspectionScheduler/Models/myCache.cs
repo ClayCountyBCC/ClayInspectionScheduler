@@ -47,6 +47,8 @@ namespace ClayInspectionScheduler.Models
 
       switch (s[0].ToLower())
       {
+        case "inspector":
+          return Inspector.Get();
         case "useraccess":
           return UserAccess.GetAllUserAccess();
         case "inspectiontypes":

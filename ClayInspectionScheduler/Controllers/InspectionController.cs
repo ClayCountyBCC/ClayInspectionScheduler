@@ -101,5 +101,20 @@ namespace ClayInspectionScheduler.Controllers
       }
     }
 
+    [HttpGet]
+    [Route("Inspectors")]
+    public IHttpActionResult Inspectors()
+    {
+      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+      if (ua.current_access == UserAccess.access_type.inspector_access)
+      {
+        return Ok(Inspector.GetCached());
+      }
+      else
+      {
+        return Ok(new List<Inspector>());
+      }
+    }
+
   }
 }

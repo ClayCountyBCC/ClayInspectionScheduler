@@ -3,8 +3,6 @@
   interface ILocationHash
   {
     Permit: string;
-    Day: string;
-    Inspector: string;
     InspectionId: number;
     constructor(locationHash: string);
   }
@@ -12,8 +10,6 @@
   export class LocationHash// implements ILocationHash
   {
     public Permit: string = "";
-    public Day: string = ""; // can be Today or Tomorrow
-    public Inspector: string = "";  // can be an inspector's name or identifier.
     public InspectionId: number = 0;
 
     constructor(locationHash: string)
@@ -26,12 +22,6 @@
         {
           case "permit":
             this.Permit = k[1];
-            break;
-          case "inspector":
-            this.Inspector = k[1];
-            break;
-          case "day":
-            this.Day = k[1];
             break;
           case "inspectionid":
             this.InspectionId = parseInt(k[1]);
@@ -54,8 +44,6 @@
     {
       let h: string = "";
       if (this.Permit.length > 0) h += "&permit=" + this.Permit;
-      if (this.Day.length > 0) h += "&day=" + this.Day;
-      if (this.Inspector.length > 0) h += "&inspector=" + this.Inspector;
       if (this.InspectionId > 0) h += "&inspectionid=" + this.InspectionId.toString();
       if (h.length > 0) h = "#" + h.substring(1);
       return h;

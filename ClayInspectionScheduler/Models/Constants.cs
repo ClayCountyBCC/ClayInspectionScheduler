@@ -23,23 +23,18 @@ namespace ClayInspectionScheduler.Models
     {
       switch (Environment.MachineName.ToUpper())
       {
-
         case "CLAYBCCDV10":
-        case "MISML01":
-          // Test Environment Machines
-          Console.WriteLine("MachineName = " + Environment.MachineName.ToUpper());
+        // Test Environment Machines
           return false;
 
-
         //case "MISHL05":
+        //case "MISML01":
         case "CLAYBCCIIS01":
         case "CLAYBCCDMZIIS01":
-          Console.WriteLine("MachineName = " + Environment.MachineName.ToUpper());
           // TODO: will need to add the DMZ machine name(s) here.
           return true;
 
         default:
-          Console.WriteLine("MachineName = " + Environment.MachineName.ToUpper());
           // we'll return false for any machinenames we don't know.
           return false;
       }

@@ -22,7 +22,7 @@
   {
     "outputFileName": "Scripts/app/bundle.min.js",
     "inputFiles": [
-      "Scripts/app/bundle.min.js"
+      "Scripts/app/bundle.js"
     ]
   }
 ]

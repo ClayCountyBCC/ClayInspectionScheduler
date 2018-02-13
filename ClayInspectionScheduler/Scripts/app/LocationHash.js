@@ -4,8 +4,6 @@ var InspSched;
      = /** @class */ (function () {
         function LocationHash(locationHash) {
             this.Permit = "";
-            this.Day = ""; // can be Today or Tomorrow
-            this.Inspector = ""; // can be an inspector's name or identifier.
             this.InspectionId = 0;
             var ha = locationHash.split("&");
             for (var i = 0; i < ha.length; i++) {
@@ -13,12 +11,6 @@ var InspSched;
                 switch (k[0].toLowerCase()) {
                     case "permit":
                         this.Permit = k[1];
-                        break;
-                    case "inspector":
-                        this.Inspector = k[1];
-                        break;
-                    case "day":
-                        this.Day = k[1];
                         break;
                     case "inspectionid":
                         this.InspectionId = parseInt(k[1]);
@@ -38,10 +30,6 @@ var InspSched;
             var h = "";
             if (this.Permit.length > 0)
                 h += "&permit=" + this.Permit;
-            if (this.Day.length > 0)
-                h += "&day=" + this.Day;
-            if (this.Inspector.length > 0)
-                h += "&inspector=" + this.Inspector;
             if (this.InspectionId > 0)
                 h += "&inspectionid=" + this.InspectionId.toString();
             if (h.length > 0)

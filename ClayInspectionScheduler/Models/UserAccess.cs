@@ -129,11 +129,6 @@ namespace ClayInspectionScheduler.Models
 
     public static UserAccess GetUserAccess(string Username)
     {
-#if DEBUG
-      {
-        return new UserAccess(Username.Replace(@"CLAYBCC\", "").ToLower());
-      }
-#endif
       try
       {
 

@@ -169,6 +169,11 @@ var InspSched;
                     document.getElementById('InspectionTable').style.display = "flex";
                 }
                 BuildScheduler(InspSched.CurrentInspections, key);
+                // This is how we auto select an inspection when one is passed from the inspection view.
+                var hash = new InspSched.LocationHash(location.hash.substring(1));
+                if (hash.InspectionId > 0) {
+                    InspSched.UI.ToggleInspDetails(hash.InspectionId.toString());
+                }
                 return true;
             }, function () {
                 console.log('error getting inspections');
@@ -202,8 +207,8 @@ var InspSched;
         function BuildInspectionRow(inspection) {
             var permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === inspection.PermitNo; })[0];
             //permit.access = access_type.inspector_access;
-            var today = new Date().setHours(0, 0, 0, 0);
-            var SchedDate = Date.parse(inspection.DisplaySchedDateTime);
+            //let today = new Date().setHours(0, 0, 0, 0);
+            //let SchedDate = Date.parse(inspection.DisplaySchedDateTime);
             var inspdetail = inspection.InspReqID.toString() + "_comments";
             var inspRow = document.createElement("div");
             inspRow.setAttribute("elementName", "inspRow");
@@ -385,7 +390,10 @@ var InspSched;
             inspRow.appendChild(DataRow);
             // Sections added below are dependent on access_type and date
             // cannot be public and cannot be earlier than today (will be changed to earlier date)
-            if (permit.access != InspSched.access_type.public_access && inspection.Day != "") {
+            console.log('access', permit.access, (permit.access != InspSched.access_type.public_access &&
+                (inspection.Day != "" || inspection.ResultADC == "")), 'inspection', inspection);
+            if (permit.access != InspSched.access_type.public_access &&
+                (inspection.Day != "" || inspection.ResultADC == "")) {
                 addRemarkTextDiv.appendChild(remarkTextarea);
                 addRemarkButtonDiv.appendChild(addRemarkButton);
                 addRemark.appendChild(addRemarkLabel);
@@ -701,16 +709,14 @@ var InspSched;
                 return false;
             return true;
         }
-        function ToggleInspDetails(value) {
-            var today = new Date().setHours(0, 0, 0, 0);
-            var SchedDate;
-            for (var _i = 0, _a = InspSched.CurrentInspections; _i < _a.length; _i++) {
-                var i = _a[_i];
-                if (i.InspReqID.toString() == value) {
-                    SchedDate = Date.parse(i.DisplaySchedDateTime);
-                }
+        function ToggleInspDetails(InspectionId) {
+            var current = InspSched.CurrentInspections.filter(function (j) { return j.InspReqID === parseInt(InspectionId); });
+            if (current.length === 0) {
+                console.log('an error occurred, the inspection you are looking for was not found in the current inspections.');
+                return;
             }
-            if (InspSched.UI.CurrentDetailsOpen != "" && value.valueOf() != InspSched.UI.CurrentDetailsOpen) {
+            if (InspSched.UI.CurrentDetailsOpen != "" &&
+                InspectionId != InspSched.UI.CurrentDetailsOpen) {
                 var CurrentAddRemark = document.getElementById(InspSched.UI.CurrentDetailsOpen + '_add_remark');
                 var CurrentCompletedRemark = document.getElementById(InspSched.UI.CurrentDetailsOpen + '_completed_remark');
                 var CurrentComments = document.getElementById(InspSched.UI.CurrentDetailsOpen + '_comments');
@@ -721,33 +727,25 @@ var InspSched;
                 }
                 document.getElementById(InspSched.UI.CurrentDetailsOpen + '_details_btn').textContent = "Details";
             }
-            var addRemark = document.getElementById(value.valueOf() + '_add_remark');
-            var completedRemark = document.getElementById(value.valueOf() + '_completed_remark');
-            var comments = document.getElementById(value.valueOf() + '_comments');
-            var button = document.getElementById(value.valueOf() + '_details_btn');
-            var elementState = comments.style.display.toString();
-            console.log('comments visible?: ' + elementState);
-            if (completedRemark != null && SchedDate >= today) {
+            var addRemark = document.getElementById(InspectionId + '_add_remark');
+            var completedRemark = document.getElementById(InspectionId + '_completed_remark');
+            var comments = document.getElementById(InspectionId + '_comments');
+            var button = document.getElementById(InspectionId + '_details_btn');
+            var d = new Date();
+            d.setHours(0, 0, 0, 0);
+            var elementState = comments.style.display.toString().toLowerCase();
+            if (((new Date(current[0].SchedDateTime) >= d) &&
+                addRemark != null) || current[0].ResultADC === "") {
                 completedRemark.style.display = elementState == 'flex' ? 'flex' : 'none';
-                console.log('details visibility changed to: ' + completedRemark.style.display.toString());
-                if (addRemark != null) {
-                    addRemark.style.display = elementState == 'none' ? 'flex' : 'none';
-                    console.log('add remark visibility changed to: ' + addRemark.style.display.toString());
-                }
+                addRemark.style.display = elementState == 'none' ? 'flex' : 'none';
             }
             if (comments != null) {
                 comments.style.display = elementState == 'none' ? 'flex' : 'none';
-                console.log('comments visibility changed to: ' + comments.style.display.toString());
             }
-            var buttonString = (comments.style.display.toString().toLowerCase() == 'none' ? '' : 'Hide ') + 'Details';
-            console.log('Button Text changed to: ' + buttonString);
-            document.getElementById(value.valueOf() + '_details_btn').textContent = buttonString;
-            var commentfield = document.getElementById(value.valueOf() + "_comment_textarea");
-            commentfield.value = "";
-            var remarkfield = document.getElementById(value.valueOf() + "_remark_textarea");
-            remarkfield.value = "";
-            InspSched.enableSaveResultButton(value);
-            InspSched.UI.CurrentDetailsOpen = value.valueOf();
+            var buttonString = (elementState == 'none' ? 'Hide ' : '') + 'Details';
+            document.getElementById(InspectionId + '_details_btn').textContent = buttonString;
+            //InspSched.enableSaveResultButton(InspectionId);
+            InspSched.UI.CurrentDetailsOpen = InspectionId;
         }
         UI.ToggleInspDetails = ToggleInspDetails;
     })(UI = InspSched.UI || (InspSched.UI = {}));

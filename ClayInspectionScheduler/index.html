@@ -68,7 +68,8 @@
             <li class="tabs-title">
               <a href="#Scheduler">Scheduler View</a>
             </li>
-            <li class="tabs-title">
+            <li id="InspectorViewTab"
+                class="tabs-title">
               <a href="#Inspector">Inspector View</a>
             </li>
           </ul>
@@ -155,7 +156,7 @@
                     <!--Scheduling Inspection Type Selector / Save button-->
                     <div class="large-6 medium-6 small-12 row flex-container align-center align-self-middle">
                       <div class="large-10 medium-10 small-10" style="text-align:center;">
-                        <textarea class="large-12 medium-12 small-12" placeholder="Please enter additional information for inspectors here. This will NOT be visible to the public" rows=3 maxlength=200 style="resize: none;" id="scheduler_comment"></textarea>
+                        <textarea class="large-12 medium-12 small-12" placeholder="Please enter additional information for inspectors here. This will NOT be visible to the public." rows=3 maxlength=200 style="resize: none;" id="scheduler_comment"></textarea>
                         <select class="large-12 medium-12 small-12" id="InspTypeSelect"></select>
                         <button class="button " id="SaveSchedule" type="button" onclick="">Save Inspection</button>
                       </div>
@@ -169,60 +170,97 @@
               </div><!-- End Inspection Shceduler Container -->
 
             </div><!-- End Tab 2 : Scheduler -->
-
             <!-- Tab 3 : Inspector View-->
             <div class="tabs-panel tabs-content" id="Inspector">
-              <div class="row">
-                <div class="columns small-3">
+              <div style="border-bottom: dotted 1px gray; padding-bottom: .5em;"
+                   class="row">
+                <div class="columns small-6 medium-6 large-3">
                   <label style="text-align: center;">By Day</label>
                   <div class="row align-center align-middle">
-                    <input type="radio" name="day" value="Today" id="dayToday" checked />
+                    <input onchange="InspSched.InspectorUI.LoadDailyInspections();"
+                           type="radio"
+                           name="day"
+                           value="Today"
+                           id="dayToday"
+                           checked />
                     <label for="dayToday">Today</label>
-                    <input type="radio" name="day" value="Tomorrow" id="dayTomorrow" />
+                    <input onchange="InspSched.InspectorUI.LoadDailyInspections();"
+                           type="radio"
+                           name="day"
+                           value="Tomorrow"
+                           id="dayTomorrow" />
                     <label for="dayTomorrow">Tomorrow</label>
-                    <input type="radio" name="day" value="Both" id="dayBoth" />
+                    <input onchange="InspSched.InspectorUI.LoadDailyInspections();"
+                           type="radio"
+                           name="day"
+                           value=""
+                           id="dayBoth" />
                     <label for="dayBoth">Both</label>
                   </div>
                 </div>
-                <div class="columns small-3">
+                <div class="columns small-6 medium-6 large-3">
                   <label style="text-align: center;">By Status</label>
                   <div class="row align-center align-middle">
-                    <input type="radio" name="status" value="Open" id="statusOpen" checked />
+                    <input onchange="InspSched.InspectorUI.LoadDailyInspections();"
+                           type="radio"
+                           name="status"
+                           value="Open"
+                           id="statusOpen"
+                           checked />
                     <label for="statusOpen">Open</label>
-                    <input type="radio" name="day" value="Closed" id="statusClosed" />
+                    <input onchange="InspSched.InspectorUI.LoadDailyInspections();"
+                           type="radio"
+                           name="status"
+                           value="Closed"
+                           id="statusClosed" />
                     <label for="statusClosed">Closed</label>
-                    <input type="radio" name="day" value="Both" id="statusBoth" />
-                    <label for="statusyBoth">Both</label>
+                    <input onchange="InspSched.InspectorUI.LoadDailyInspections();"
+                           type="radio"
+                           name="status"
+                           value=""
+                           id="statusBoth" />
+                    <label for="statusBoth">Both</label>
                   </div>
                 </div>
-                <div class="columns small-3">
-                  <label style="text-align: center;">
-                    By Inspector
-                    <select>
-                      <option value="" selected>All</option>
-                      <option value="1">Inspector 1</option>
-                      <option value="12">Inspector 2</option>
-                      <option value="13">Inspector 3</option>
-                      <option value="14">Inspector 4</option>
+                <div class="columns small-6 medium-6 large-3 flex-container align-middle align-center">
+                  <div class="flex-container row align-center align-middle flex-child-grow">
+                    <select style="margin: 0;"
+                            onchange="InspSched.InspectorUI.LoadDailyInspections();"
+                            id="InspectorList">
+                      <option value="" selected>Select Inspector</option>
+                      <option value="Unassigned">Unassigned</option>
                     </select>
-                  </label>
-                </div>
-                <div class="columns small-3">
-                  <div class="flex-container row align-center align-middle">
-                    <a onclick="InspSched.InspectorUI.LoadDailyInspections();" class="button success">Refresh Data</a>
                   </div>
+                </div>
+                <div class="flex-container columns small-6 medium-6 large-3">
+                  <div class="flex-container row align-center align-middle flex-child-grow">
+                    <button style="margin-top: 0; margin-bottom: 0;"
+                            onclick="InspSched.InspectorUI.LoadDailyInspections();"
+                            class="button DetailsButton column">
+                      Refresh Data
+                    </button>
+                    <button style="margin-left: 1em; margin-top: 0; margin-bottom: 0;"
+                            onclick="window.print();"
+                            class="button DetailsButton column">
+                      Print
+                    </button>
+                  </div>
+                  <!--<div class="flex-container row align-center align-middle">
+
+                </div>-->
                 </div>
               </div>
 
               <!-- The menu for the inspector view will go here
-              they will use this to pick today/tomorrow
-              and choose an inspector
-              and refresh the data
-              open/closed
-              -->
+            they will use this to pick today/tomorrow
+            and choose an inspector
+            and refresh the data
+            open/closed
+            -->
 
 
-              <div id="InspectorViewInspections">
+              <div style="margin-top: .5em;"
+                   id="InspectorViewInspections">
 
               </div>
             </div> <!-- END Tab 3 : Inspector View-->

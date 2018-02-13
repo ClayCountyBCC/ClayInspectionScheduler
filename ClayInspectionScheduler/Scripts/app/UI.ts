@@ -12,7 +12,6 @@ namespace InspSched.UI
   export let PermitsWithOutInsp: Array<string> = [];
   export let CurrentDetailsOpen: string = "";
 
-
   export function Search(key: string)
   {
     clearElement(document.getElementById('SearchFailed'));
@@ -239,6 +238,12 @@ namespace InspSched.UI
       }
       BuildScheduler(InspSched.CurrentInspections, key);
 
+      // This is how we auto select an inspection when one is passed from the inspection view.
+      let hash = new LocationHash(location.hash.substring(1));
+      if (hash.InspectionId > 0)
+      {
+        InspSched.UI.ToggleInspDetails(hash.InspectionId.toString());
+      }
       return true;
     }, function ()
       {
@@ -288,8 +293,8 @@ namespace InspSched.UI
     let permit: Permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === inspection.PermitNo })[0];
     //permit.access = access_type.inspector_access;
 
-    let today = new Date().setHours(0, 0, 0, 0);
-    let SchedDate = Date.parse(inspection.DisplaySchedDateTime);
+    //let today = new Date().setHours(0, 0, 0, 0);
+    //let SchedDate = Date.parse(inspection.DisplaySchedDateTime);
 
     let inspdetail: string = inspection.InspReqID.toString() + "_comments";
 
@@ -535,8 +540,12 @@ namespace InspSched.UI
 
     // Sections added below are dependent on access_type and date
     // cannot be public and cannot be earlier than today (will be changed to earlier date)
+    console.log('access', permit.access, (permit.access != InspSched.access_type.public_access &&
+      (inspection.Day != "" || inspection.ResultADC == "")),
+      'inspection', inspection);
 
-    if (permit.access != InspSched.access_type.public_access && inspection.Day != "")
+    if (permit.access != InspSched.access_type.public_access &&
+      (inspection.Day != "" || inspection.ResultADC == ""))
     {
       addRemarkTextDiv.appendChild(remarkTextarea);
       addRemarkButtonDiv.appendChild(addRemarkButton);
@@ -683,7 +692,7 @@ namespace InspSched.UI
 
     let RadioButtonSubrow: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
 
-    if (access === access_type.inspector_access)
+    if (access === InspSched.access_type.inspector_access)
     {
       RadioButtonSubrow.className = "large-10 medium-10 small-12 flex-container flex-dir-row flex-child-grow align-justify row";
       RadioButtonSubrow.id = InspectionId + "_radio_list";
@@ -987,35 +996,25 @@ namespace InspSched.UI
     return true;
   }
 
-  export function ToggleInspDetails(value: string): void
+  export function ToggleInspDetails(InspectionId: string): void
   {
 
-    let today = new Date().setHours(0, 0, 0, 0);
-    let SchedDate: number;
-    for (let i of InspSched.CurrentInspections)
+    let current = InspSched.CurrentInspections.filter(function (j) { return j.InspReqID === parseInt(InspectionId) });
+    if (current.length === 0)
     {
-      if (i.InspReqID.toString() == value)
-      {
-        SchedDate = Date.parse(i.DisplaySchedDateTime);
-      }
+      console.log('an error occurred, the inspection you are looking for was not found in the current inspections.');
+      return;
+    }
 
-    } 
-
-    if (InspSched.UI.CurrentDetailsOpen != "" && value.valueOf() != InspSched.UI.CurrentDetailsOpen)
+    if (InspSched.UI.CurrentDetailsOpen != "" &&
+      InspectionId != InspSched.UI.CurrentDetailsOpen)
     {
-
-
       let CurrentAddRemark: HTMLDivElement = (<HTMLDivElement>document.getElementById(InspSched.UI.CurrentDetailsOpen + '_add_remark'));
       let CurrentCompletedRemark: HTMLDivElement = (<HTMLDivElement>document.getElementById(InspSched.UI.CurrentDetailsOpen + '_completed_remark'));
       let CurrentComments: HTMLDivElement = (<HTMLDivElement>document.getElementById(InspSched.UI.CurrentDetailsOpen + '_comments'));
 
-
-
-
       CurrentAddRemark.style.display = "none";
       CurrentComments.style.display = "none";
-
-
 
       if (CurrentCompletedRemark != null)
       {
@@ -1025,49 +1024,34 @@ namespace InspSched.UI
       document.getElementById(InspSched.UI.CurrentDetailsOpen + '_details_btn').textContent = "Details";
     }
 
+    let addRemark: HTMLDivElement = (<HTMLDivElement>document.getElementById(InspectionId + '_add_remark'));
+    let completedRemark: HTMLDivElement = (<HTMLDivElement>document.getElementById(InspectionId+ '_completed_remark'));
+    let comments: HTMLDivElement = (<HTMLDivElement>document.getElementById(InspectionId + '_comments'));
+    let button = document.getElementById(InspectionId + '_details_btn');
 
-    let addRemark: HTMLDivElement = (<HTMLDivElement>document.getElementById(value.valueOf() + '_add_remark'));
-    let completedRemark: HTMLDivElement = (<HTMLDivElement>document.getElementById(value.valueOf() + '_completed_remark'));
-    let comments: HTMLDivElement = (<HTMLDivElement>document.getElementById(value.valueOf() + '_comments'));
-    let button = document.getElementById(value.valueOf() + '_details_btn');
+    let d = new Date();
+    d.setHours(0, 0, 0, 0);    
+    let elementState = comments.style.display.toString().toLowerCase();
 
-
-    let elementState = comments.style.display.toString();
-    console.log('comments visible?: ' + elementState);
-
-    if (completedRemark != null && SchedDate >= today)
+    if (((new Date(current[0].SchedDateTime) >= d) &&
+      addRemark != null) || current[0].ResultADC === "")
     {
       completedRemark.style.display = elementState == 'flex' ? 'flex' : 'none';
-      console.log('details visibility changed to: ' + completedRemark.style.display.toString());
-
-      if (addRemark != null)
-      {
         addRemark.style.display = elementState == 'none' ? 'flex' : 'none';
-        console.log('add remark visibility changed to: ' + addRemark.style.display.toString());
-      }
-
     }
 
     if (comments != null)
     {
       comments.style.display = elementState == 'none' ? 'flex' : 'none';
-      console.log('comments visibility changed to: ' + comments.style.display.toString());
     }
 
-    let buttonString = (comments.style.display.toString().toLowerCase() == 'none' ? '' : 'Hide ') + 'Details';
+    let buttonString = (elementState == 'none' ? 'Hide ': '') + 'Details';
 
-    console.log('Button Text changed to: ' + buttonString);
+    document.getElementById(InspectionId + '_details_btn').textContent = buttonString;
 
-    document.getElementById(value.valueOf() + '_details_btn').textContent = buttonString;
+    //InspSched.enableSaveResultButton(InspectionId);
 
-    let commentfield: HTMLTextAreaElement = (<HTMLTextAreaElement>document.getElementById(value.valueOf() + "_comment_textarea"));
-    commentfield.value = "";
-    let remarkfield: HTMLTextAreaElement = (<HTMLTextAreaElement>document.getElementById(value.valueOf() + "_remark_textarea"));
-    remarkfield.value = "";
-
-    InspSched.enableSaveResultButton(value);
-
-    InspSched.UI.CurrentDetailsOpen = value.valueOf();
+    InspSched.UI.CurrentDetailsOpen = InspectionId;
 
 
 

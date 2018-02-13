@@ -9,14 +9,16 @@ namespace InspSched.InspectorUI
 
   export function LoadDailyInspections()
   {
-
     transport.DailyInspections().then(function (inspections: Array<Inspection>)
     {
       InspSched.IVInspections = inspections;
       if (InspSched.IVInspections.length > 0)
       {
-        let iv = new InspectorView();
-        InspSched.IV = iv.ProcessIVData(inspections);
+        if (InspSched.Inspectors.length === 0)
+        {
+          LoadInspectors();
+        }
+        InspSched.IV = ProcessIVData(inspections);
         BuildInspectorUI();
       }
     },
@@ -26,9 +28,41 @@ namespace InspSched.InspectorUI
         InspSched.IVInspections = [];
       });
   }
+  function ShowInspectionTab()
+  {
+    let e = document.getElementById("InspectorViewTab");
+    e.style.display = "flex";
+  }
+
+  function LoadInspectors():void
+  {
+    transport.Inspectors().then(function (inspectors: Array<Inspector>)
+    {
+      InspSched.Inspectors = inspectors;
+      PopulateInspectorDropdown();
+    },
+      function ()
+      {
+        console.log('error in LoadInspectionTypes');
+        InspSched.IVInspections = [];
+      });
+  }
+
+  function PopulateInspectorDropdown(): void
+  {
+    let ddl = <HTMLSelectElement>document.getElementById('InspectorList');
+    for (let i of InspSched.Inspectors)
+    {
+      let o = <HTMLOptionElement>document.createElement("option");
+      o.value = i.Name;
+      o.label = i.Name;
+      ddl.options.add(o);
+    }
+  }
 
   function BuildInspectorUI()
   {
+    ShowInspectionTab(); // this shows the Inspector View Tab thinger
     // this function will take the 
     // IV data and create the html
     // and add it to the InspectorViewInspections div
@@ -94,6 +128,7 @@ namespace InspSched.InspectorUI
     row.style.borderBottom = "solid 1px Black";
     row.style.marginTop = ".5em";
     ch.Permit = i.PermitNumber;
+    ch.InspectionId = 0;
     let permit = CreateLink(i.PermitNumber, ch.ToHash());
     let permitContainer = document.createElement("div");
     let permitContainerContainer = document.createElement("div");
@@ -181,8 +216,69 @@ namespace InspSched.InspectorUI
     return a;
   }
 
+  export function ProcessIVData(
+    inspections: Array<Inspection>): Array<InspectorView>
+  {
+    // Let's get our filters.
+    let inspector: string = (<HTMLSelectElement>document.getElementById("InspectorList")).value;
+    let day: string = (<HTMLInputElement>document.querySelector('input[name="day"]:checked')).value;
+    let open: string = (<HTMLInputElement>document.querySelector('input[name="status"]:checked')).value;
+    // We're going to filter our results if a day or inspector was passed.
+    let isOpen: boolean = open === "Open";
+    let ivList: Array<InspectorView> = [];
+    // if we have a day or inspector set to filter on
+    // let's go ahead and filter the list of inspections
+    // based on them.
+    let d = new Date();
+    let fInspections: Array<Inspection> = inspections.filter(
+      function (i)
+      {
+        let inspectorCheck: boolean = inspector.length > 0 ? i.InspectorName === inspector : true;
+        let dayCheck: boolean = day.length > 0 ? i.Day === day || ( day === "Today" && i.ResultADC === "" && new Date(i.SchedDateTime) < d) : true;
 
+        let openCheck: boolean = true;
+        if (open.length === 0)
+        {
+          openCheck = true;
+        }
+        else
+        {
+          if (isOpen)
+          {
+            openCheck = i.ResultADC.length === 0;
+          }
+          else
+          {
+            openCheck = i.ResultADC.length > 0;
+          }
+        }
 
+        return inspectorCheck && dayCheck && openCheck;
+      });
+    // get a unique list of permit numbers.
+    let permitNumbers: Array<string> = fInspections.map(
+      function (p)
+      {
+        return p.PermitNo;
+      });
+    permitNumbers = permitNumbers.filter(function (value, index, self) { return index === self.indexOf(value) });
 
+    // let's coerce the inspection data into the IV format.
+    for (let p of permitNumbers)
+    {
+      let i = fInspections.filter(
+        function (j)
+        {
+          return j.PermitNo === p;
+        });
+      let iv = new InspectorView(i[0]); // we'll base the inspectorView off of the first inspection returned.
+      iv.Inspections = i.map(function (insp)
+      {
+        return new ShortInspection(insp.InspReqID, insp.InspectionCode + '-' + insp.InsDesc);
+      });
+      ivList.push(iv);
+    }
+    return ivList;
+  }
 
 }

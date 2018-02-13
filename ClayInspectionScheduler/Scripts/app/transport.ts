@@ -7,7 +7,6 @@ namespace InspSched.transport
 {
   "use strict"
 
-
   export function GetPermit(key: string): Promise<Array<Permit>>
   {
     var x = XHR.Get("API/Permit/Get/" + key);
@@ -173,5 +172,25 @@ namespace InspSched.transport
       });
     });
   }
+
+  export function Inspectors()
+  {
+    var x = XHR.Get("API/Inspection/Inspectors");
+    return new Promise(function (resolve, reject)
+    {
+      x.then(function (response)
+      {
+        var di = JSON.parse(response.Text);
+        resolve(di);
+
+      }).catch(function ()
+      {
+        console.log("error in Get Inspectors");
+        reject(null);
+      });
+    });
+  }
+
+
 
 }

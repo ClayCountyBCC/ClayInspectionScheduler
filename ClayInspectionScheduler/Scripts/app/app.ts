@@ -9,6 +9,7 @@
 /// <reference path="../typings/bootstrap.datepicker/bootstrap.datepicker.d.ts" />
 /// <reference path="inspectorui.ts" />
 /// <reference path="inspectorview.ts" />
+/// <reference path="inspector.ts" />
 
 namespace InspSched
 {
@@ -22,6 +23,7 @@ namespace InspSched
   export let IssuesExist: Array<string> = [];
   export let ThisPermit: Permit;
   export let IVInspections: Array<Inspection> = [];
+  export let Inspectors: Array<Inspector> = [];
   export let IV: Array<InspectorView> = [];  // this is going to be the processed array of Inspection data.
 
   let InspectionTable = <HTMLDivElement>document.getElementById('InspectionTable');
@@ -66,14 +68,6 @@ namespace InspSched
       PermitSearchField.value = currentHash.Permit.trim();
       SearchPermit();
     }
-    else
-    {
-      if (currentHash.Day.length > 0 || currentHash.Inspector.length > 0)
-      {
-        // Do something with them here
-      }
-
-    }
   }
 
   PermitSearchField.onkeydown = function (event)
@@ -87,7 +81,7 @@ namespace InspSched
 
   export function SearchPermit()
   {
-
+    InspSched.UI.CurrentDetailsOpen = "";
     InspectionTable.style.display = "none";
     UI.Hide('SaveConfirmed');
 
@@ -361,8 +355,11 @@ namespace InspSched
     {
       commentButton.setAttribute("disabled", "disabled");
     }
-
-    enableSaveResultButton(InspectionRequestId);
+    if (remarkButton !== null)
+    {
+      enableSaveResultButton(InspectionRequestId);
+    }
+    
   }
 
   export function enableSaveResultButton(InspectionRequestId: string)

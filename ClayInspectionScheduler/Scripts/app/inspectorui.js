@@ -10,8 +10,10 @@ var InspSched;
             InspSched.transport.DailyInspections().then(function (inspections) {
                 InspSched.IVInspections = inspections;
                 if (InspSched.IVInspections.length > 0) {
-                    var iv = new InspSched.InspectorView();
-                    InspSched.IV = iv.ProcessIVData(inspections);
+                    if (InspSched.Inspectors.length === 0) {
+                        LoadInspectors();
+                    }
+                    InspSched.IV = ProcessIVData(inspections);
                     BuildInspectorUI();
                 }
             }, function () {
@@ -20,7 +22,31 @@ var InspSched;
             });
         }
         InspectorUI.LoadDailyInspections = LoadDailyInspections;
+        function ShowInspectionTab() {
+            var e = document.getElementById("InspectorViewTab");
+            e.style.display = "flex";
+        }
+        function LoadInspectors() {
+            InspSched.transport.Inspectors().then(function (inspectors) {
+                InspSched.Inspectors = inspectors;
+                PopulateInspectorDropdown();
+            }, function () {
+                console.log('error in LoadInspectionTypes');
+                InspSched.IVInspections = [];
+            });
+        }
+        function PopulateInspectorDropdown() {
+            var ddl = document.getElementById('InspectorList');
+            for (var _i = 0, _a = InspSched.Inspectors; _i < _a.length; _i++) {
+                var i = _a[_i];
+                var o = document.createElement("option");
+                o.value = i.Name;
+                o.label = i.Name;
+                ddl.options.add(o);
+            }
+        }
         function BuildInspectorUI() {
+            ShowInspectionTab(); // this shows the Inspector View Tab thinger
             // this function will take the 
             // IV data and create the html
             // and add it to the InspectorViewInspections div
@@ -81,6 +107,7 @@ var InspSched;
             row.style.borderBottom = "solid 1px Black";
             row.style.marginTop = ".5em";
             ch.Permit = i.PermitNumber;
+            ch.InspectionId = 0;
             var permit = CreateLink(i.PermitNumber, ch.ToHash());
             var permitContainer = document.createElement("div");
             var permitContainerContainer = document.createElement("div");
@@ -168,6 +195,58 @@ var InspSched;
             }
             return a;
         }
+        function ProcessIVData(inspections) {
+            // Let's get our filters.
+            var inspector = document.getElementById("InspectorList").value;
+            var day = document.querySelector('input[name="day"]:checked').value;
+            var open = document.querySelector('input[name="status"]:checked').value;
+            // We're going to filter our results if a day or inspector was passed.
+            var isOpen = open === "Open";
+            var ivList = [];
+            // if we have a day or inspector set to filter on
+            // let's go ahead and filter the list of inspections
+            // based on them.
+            var d = new Date();
+            var fInspections = inspections.filter(function (i) {
+                var inspectorCheck = inspector.length > 0 ? i.InspectorName === inspector : true;
+                var dayCheck = day.length > 0 ? i.Day === day || (day === "Today" && i.ResultADC === "" && new Date(i.SchedDateTime) < d) : true;
+                var openCheck = true;
+                if (open.length === 0) {
+                    openCheck = true;
+                }
+                else {
+                    if (isOpen) {
+                        openCheck = i.ResultADC.length === 0;
+                    }
+                    else {
+                        openCheck = i.ResultADC.length > 0;
+                    }
+                }
+                return inspectorCheck && dayCheck && openCheck;
+            });
+            // get a unique list of permit numbers.
+            var permitNumbers = fInspections.map(function (p) {
+                return p.PermitNo;
+            });
+            permitNumbers = permitNumbers.filter(function (value, index, self) { return index === self.indexOf(value); });
+            var _loop_1 = function (p) {
+                var i = fInspections.filter(function (j) {
+                    return j.PermitNo === p;
+                });
+                var iv = new InspSched.InspectorView(i[0]); // we'll base the inspectorView off of the first inspection returned.
+                iv.Inspections = i.map(function (insp) {
+                    return new InspSched.ShortInspection(insp.InspReqID, insp.InspectionCode + '-' + insp.InsDesc);
+                });
+                ivList.push(iv);
+            };
+            // let's coerce the inspection data into the IV format.
+            for (var _i = 0, permitNumbers_1 = permitNumbers; _i < permitNumbers_1.length; _i++) {
+                var p = permitNumbers_1[_i];
+                _loop_1(p);
+            }
+            return ivList;
+        }
+        InspectorUI.ProcessIVData = ProcessIVData;
     })(InspectorUI = InspSched.InspectorUI || (InspSched.InspectorUI = {}));
 })(InspSched || (InspSched = {}));
 //# sourceMappingURL=inspectorui.js.map

@@ -41,8 +41,10 @@ var InspSched;
             InspSched.transport.DailyInspections().then(function (inspections) {
                 InspSched.IVInspections = inspections;
                 if (InspSched.IVInspections.length > 0) {
-                    var iv = new InspSched.InspectorView();
-                    InspSched.IV = iv.ProcessIVData(inspections);
+                    if (InspSched.Inspectors.length === 0) {
+                        LoadInspectors();
+                    }
+                    InspSched.IV = ProcessIVData(inspections);
                     BuildInspectorUI();
                 }
             }, function () {
@@ -51,7 +53,31 @@ var InspSched;
             });
         }
         InspectorUI.LoadDailyInspections = LoadDailyInspections;
+        function ShowInspectionTab() {
+            var e = document.getElementById("InspectorViewTab");
+            e.style.display = "flex";
+        }
+        function LoadInspectors() {
+            InspSched.transport.Inspectors().then(function (inspectors) {
+                InspSched.Inspectors = inspectors;
+                PopulateInspectorDropdown();
+            }, function () {
+                console.log('error in LoadInspectionTypes');
+                InspSched.IVInspections = [];
+            });
+        }
+        function PopulateInspectorDropdown() {
+            var ddl = document.getElementById('InspectorList');
+            for (var _i = 0, _a = InspSched.Inspectors; _i < _a.length; _i++) {
+                var i = _a[_i];
+                var o = document.createElement("option");
+                o.value = i.Name;
+                o.label = i.Name;
+                ddl.options.add(o);
+            }
+        }
         function BuildInspectorUI() {
+            ShowInspectionTab(); // this shows the Inspector View Tab thinger
             // this function will take the 
             // IV data and create the html
             // and add it to the InspectorViewInspections div
@@ -112,6 +138,7 @@ var InspSched;
             row.style.borderBottom = "solid 1px Black";
             row.style.marginTop = ".5em";
             ch.Permit = i.PermitNumber;
+            ch.InspectionId = 0;
             var permit = CreateLink(i.PermitNumber, ch.ToHash());
             var permitContainer = document.createElement("div");
             var permitContainerContainer = document.createElement("div");
@@ -199,6 +226,58 @@ var InspSched;
             }
             return a;
         }
+        function ProcessIVData(inspections) {
+            // Let's get our filters.
+            var inspector = document.getElementById("InspectorList").value;
+            var day = document.querySelector('input[name="day"]:checked').value;
+            var open = document.querySelector('input[name="status"]:checked').value;
+            // We're going to filter our results if a day or inspector was passed.
+            var isOpen = open === "Open";
+            var ivList = [];
+            // if we have a day or inspector set to filter on
+            // let's go ahead and filter the list of inspections
+            // based on them.
+            var d = new Date();
+            var fInspections = inspections.filter(function (i) {
+                var inspectorCheck = inspector.length > 0 ? i.InspectorName === inspector : true;
+                var dayCheck = day.length > 0 ? i.Day === day || (day === "Today" && i.ResultADC === "" && new Date(i.SchedDateTime) < d) : true;
+                var openCheck = true;
+                if (open.length === 0) {
+                    openCheck = true;
+                }
+                else {
+                    if (isOpen) {
+                        openCheck = i.ResultADC.length === 0;
+                    }
+                    else {
+                        openCheck = i.ResultADC.length > 0;
+                    }
+                }
+                return inspectorCheck && dayCheck && openCheck;
+            });
+            // get a unique list of permit numbers.
+            var permitNumbers = fInspections.map(function (p) {
+                return p.PermitNo;
+            });
+            permitNumbers = permitNumbers.filter(function (value, index, self) { return index === self.indexOf(value); });
+            var _loop_1 = function (p) {
+                var i = fInspections.filter(function (j) {
+                    return j.PermitNo === p;
+                });
+                var iv = new InspSched.InspectorView(i[0]); // we'll base the inspectorView off of the first inspection returned.
+                iv.Inspections = i.map(function (insp) {
+                    return new InspSched.ShortInspection(insp.InspReqID, insp.InspectionCode + '-' + insp.InsDesc);
+                });
+                ivList.push(iv);
+            };
+            // let's coerce the inspection data into the IV format.
+            for (var _i = 0, permitNumbers_1 = permitNumbers; _i < permitNumbers_1.length; _i++) {
+                var p = permitNumbers_1[_i];
+                _loop_1(p);
+            }
+            return ivList;
+        }
+        InspectorUI.ProcessIVData = ProcessIVData;
     })(InspectorUI = InspSched.InspectorUI || (InspSched.InspectorUI = {}));
 })(InspSched || (InspSched = {}));
 //# sourceMappingURL=inspectorui.js.map
@@ -224,42 +303,6 @@ var InspSched;
                 this.IsPrivateProvider = inspection.PrivateProviderInspectionRequestId > 0;
             }
         }
-        InspectorView.prototype.ProcessIVData = function (inspections, day, inspector) {
-            if (day === void 0) { day = ""; }
-            if (inspector === void 0) { inspector = ""; }
-            // We're going to filter our results if a day or inspector was passed.
-            var ivList = [];
-            // if we have a day or inspector set to filter on
-            // let's go ahead and filter the list of inspections
-            // based on them.
-            var fInspections = inspections.filter(function (i) {
-                var inspectorCheck = inspector.length > 0 ? i.InspectorName === inspector : true;
-                var dayCheck = day.length > 0 ? i.Day === day : true;
-                return inspectorCheck && dayCheck;
-            });
-            // get a unique list of permit numbers.
-            var permitNumbers = fInspections.map(function (p) {
-                return p.PermitNo;
-            });
-            permitNumbers = permitNumbers.filter(function (value, index, self) { return index === self.indexOf(value); });
-            var _loop_1 = function (p) {
-                var i = fInspections.filter(function (j) {
-                    return j.PermitNo === p;
-                });
-                var iv = new InspectorView(i[0]); // we'll base the inspectorView off of the first inspection returned.
-                iv.Inspections = i.map(function (insp) {
-                    return new InspSched.ShortInspection(insp.InspReqID, insp.InspectionCode + '-' + insp.InsDesc);
-                });
-                ivList.push(iv);
-            };
-            // let's coerce the inspection data into the IV format.
-            for (var _i = 0, permitNumbers_1 = permitNumbers; _i < permitNumbers_1.length; _i++) {
-                var p = permitNumbers_1[_i];
-                _loop_1(p);
-            }
-            console.log("ivList", ivList);
-            return ivList;
-        };
         return InspectorView;
     }());
     InspSched.InspectorView = InspectorView;
@@ -271,8 +314,6 @@ var InspSched;
      = /** @class */ (function () {
         function LocationHash(locationHash) {
             this.Permit = "";
-            this.Day = ""; // can be Today or Tomorrow
-            this.Inspector = ""; // can be an inspector's name or identifier.
             this.InspectionId = 0;
             var ha = locationHash.split("&");
             for (var i = 0; i < ha.length; i++) {
@@ -280,12 +321,6 @@ var InspSched;
                 switch (k[0].toLowerCase()) {
                     case "permit":
                         this.Permit = k[1];
-                        break;
-                    case "inspector":
-                        this.Inspector = k[1];
-                        break;
-                    case "day":
-                        this.Day = k[1];
                         break;
                     case "inspectionid":
                         this.InspectionId = parseInt(k[1]);
@@ -305,10 +340,6 @@ var InspSched;
             var h = "";
             if (this.Permit.length > 0)
                 h += "&permit=" + this.Permit;
-            if (this.Day.length > 0)
-                h += "&day=" + this.Day;
-            if (this.Inspector.length > 0)
-                h += "&inspector=" + this.Inspector;
             if (this.InspectionId > 0)
                 h += "&inspectionid=" + this.InspectionId.toString();
             if (h.length > 0)
@@ -508,6 +539,11 @@ var InspSched;
                     document.getElementById('InspectionTable').style.display = "flex";
                 }
                 BuildScheduler(InspSched.CurrentInspections, key);
+                // This is how we auto select an inspection when one is passed from the inspection view.
+                var hash = new InspSched.LocationHash(location.hash.substring(1));
+                if (hash.InspectionId > 0) {
+                    InspSched.UI.ToggleInspDetails(hash.InspectionId.toString());
+                }
                 return true;
             }, function () {
                 console.log('error getting inspections');
@@ -541,8 +577,8 @@ var InspSched;
         function BuildInspectionRow(inspection) {
             var permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === inspection.PermitNo; })[0];
             //permit.access = access_type.inspector_access;
-            var today = new Date().setHours(0, 0, 0, 0);
-            var SchedDate = Date.parse(inspection.DisplaySchedDateTime);
+            //let today = new Date().setHours(0, 0, 0, 0);
+            //let SchedDate = Date.parse(inspection.DisplaySchedDateTime);
             var inspdetail = inspection.InspReqID.toString() + "_comments";
             var inspRow = document.createElement("div");
             inspRow.setAttribute("elementName", "inspRow");
@@ -724,7 +760,10 @@ var InspSched;
             inspRow.appendChild(DataRow);
             // Sections added below are dependent on access_type and date
             // cannot be public and cannot be earlier than today (will be changed to earlier date)
-            if (permit.access != InspSched.access_type.public_access && inspection.Day != "") {
+            console.log('access', permit.access, (permit.access != InspSched.access_type.public_access &&
+                (inspection.Day != "" || inspection.ResultADC == "")), 'inspection', inspection);
+            if (permit.access != InspSched.access_type.public_access &&
+                (inspection.Day != "" || inspection.ResultADC == "")) {
                 addRemarkTextDiv.appendChild(remarkTextarea);
                 addRemarkButtonDiv.appendChild(addRemarkButton);
                 addRemark.appendChild(addRemarkLabel);
@@ -1040,16 +1079,14 @@ var InspSched;
                 return false;
             return true;
         }
-        function ToggleInspDetails(value) {
-            var today = new Date().setHours(0, 0, 0, 0);
-            var SchedDate;
-            for (var _i = 0, _a = InspSched.CurrentInspections; _i < _a.length; _i++) {
-                var i = _a[_i];
-                if (i.InspReqID.toString() == value) {
-                    SchedDate = Date.parse(i.DisplaySchedDateTime);
-                }
+        function ToggleInspDetails(InspectionId) {
+            var current = InspSched.CurrentInspections.filter(function (j) { return j.InspReqID === parseInt(InspectionId); });
+            if (current.length === 0) {
+                console.log('an error occurred, the inspection you are looking for was not found in the current inspections.');
+                return;
             }
-            if (InspSched.UI.CurrentDetailsOpen != "" && value.valueOf() != InspSched.UI.CurrentDetailsOpen) {
+            if (InspSched.UI.CurrentDetailsOpen != "" &&
+                InspectionId != InspSched.UI.CurrentDetailsOpen) {
                 var CurrentAddRemark = document.getElementById(InspSched.UI.CurrentDetailsOpen + '_add_remark');
                 var CurrentCompletedRemark = document.getElementById(InspSched.UI.CurrentDetailsOpen + '_completed_remark');
                 var CurrentComments = document.getElementById(InspSched.UI.CurrentDetailsOpen + '_comments');
@@ -1060,33 +1097,25 @@ var InspSched;
                 }
                 document.getElementById(InspSched.UI.CurrentDetailsOpen + '_details_btn').textContent = "Details";
             }
-            var addRemark = document.getElementById(value.valueOf() + '_add_remark');
-            var completedRemark = document.getElementById(value.valueOf() + '_completed_remark');
-            var comments = document.getElementById(value.valueOf() + '_comments');
-            var button = document.getElementById(value.valueOf() + '_details_btn');
-            var elementState = comments.style.display.toString();
-            console.log('comments visible?: ' + elementState);
-            if (completedRemark != null && SchedDate >= today) {
+            var addRemark = document.getElementById(InspectionId + '_add_remark');
+            var completedRemark = document.getElementById(InspectionId + '_completed_remark');
+            var comments = document.getElementById(InspectionId + '_comments');
+            var button = document.getElementById(InspectionId + '_details_btn');
+            var d = new Date();
+            d.setHours(0, 0, 0, 0);
+            var elementState = comments.style.display.toString().toLowerCase();
+            if (((new Date(current[0].SchedDateTime) >= d) &&
+                addRemark != null) || current[0].ResultADC === "") {
                 completedRemark.style.display = elementState == 'flex' ? 'flex' : 'none';
-                console.log('details visibility changed to: ' + completedRemark.style.display.toString());
-                if (addRemark != null) {
-                    addRemark.style.display = elementState == 'none' ? 'flex' : 'none';
-                    console.log('add remark visibility changed to: ' + addRemark.style.display.toString());
-                }
+                addRemark.style.display = elementState == 'none' ? 'flex' : 'none';
             }
             if (comments != null) {
                 comments.style.display = elementState == 'none' ? 'flex' : 'none';
-                console.log('comments visibility changed to: ' + comments.style.display.toString());
             }
-            var buttonString = (comments.style.display.toString().toLowerCase() == 'none' ? '' : 'Hide ') + 'Details';
-            console.log('Button Text changed to: ' + buttonString);
-            document.getElementById(value.valueOf() + '_details_btn').textContent = buttonString;
-            var commentfield = document.getElementById(value.valueOf() + "_comment_textarea");
-            commentfield.value = "";
-            var remarkfield = document.getElementById(value.valueOf() + "_remark_textarea");
-            remarkfield.value = "";
-            InspSched.enableSaveResultButton(value);
-            InspSched.UI.CurrentDetailsOpen = value.valueOf();
+            var buttonString = (elementState == 'none' ? 'Hide ' : '') + 'Details';
+            document.getElementById(InspectionId + '_details_btn').textContent = buttonString;
+            //InspSched.enableSaveResultButton(InspectionId);
+            InspSched.UI.CurrentDetailsOpen = InspectionId;
         }
         UI.ToggleInspDetails = ToggleInspDetails;
     })(UI = InspSched.UI || (InspSched.UI = {}));
@@ -1319,6 +1348,19 @@ var InspSched;
             });
         }
         transport.DailyInspections = DailyInspections;
+        function Inspectors() {
+            var x = XHR.Get("API/Inspection/Inspectors");
+            return new Promise(function (resolve, reject) {
+                x.then(function (response) {
+                    var di = JSON.parse(response.Text);
+                    resolve(di);
+                }).catch(function () {
+                    console.log("error in Get Inspectors");
+                    reject(null);
+                });
+            });
+        }
+        transport.Inspectors = Inspectors;
     })(transport = InspSched.transport || (InspSched.transport = {}));
 })(InspSched || (InspSched = {}));
 //# sourceMappingURL=transport.js.map
@@ -1342,6 +1384,7 @@ var InspSched;
 /// <reference path="../typings/bootstrap.datepicker/bootstrap.datepicker.d.ts" />
 /// <reference path="inspectorui.ts" />
 /// <reference path="inspectorview.ts" />
+/// <reference path="inspector.ts" />
 var InspSched;
 (function (InspSched) {
     "use strict";
@@ -1351,6 +1394,7 @@ var InspSched;
     InspSched.CurrentInspections = [];
     InspSched.IssuesExist = [];
     InspSched.IVInspections = [];
+    InspSched.Inspectors = [];
     InspSched.IV = []; // this is going to be the processed array of Inspection data.
     var InspectionTable = document.getElementById('InspectionTable');
     var InspectionTypeSelect = document.getElementById("InspTypeSelect");
@@ -1388,11 +1432,6 @@ var InspSched;
             PermitSearchField.value = currentHash.Permit.trim();
             SearchPermit();
         }
-        else {
-            if (currentHash.Day.length > 0 || currentHash.Inspector.length > 0) {
-                // Do something with them here
-            }
-        }
     }
     InspSched.HandleHash = HandleHash;
     PermitSearchField.onkeydown = function (event) {
@@ -1402,6 +1441,7 @@ var InspSched;
         }
     };
     function SearchPermit() {
+        InspSched.UI.CurrentDetailsOpen = "";
         InspectionTable.style.display = "none";
         InspSched.UI.Hide('SaveConfirmed');
         InspSched.UI.Hide('NotScheduled');
@@ -1581,7 +1621,9 @@ var InspSched;
         else {
             commentButton.setAttribute("disabled", "disabled");
         }
-        enableSaveResultButton(InspectionRequestId);
+        if (remarkButton !== null) {
+            enableSaveResultButton(InspectionRequestId);
+        }
     }
     InspSched.disableSaveCommentButton = disableSaveCommentButton;
     function enableSaveResultButton(InspectionRequestId) {
