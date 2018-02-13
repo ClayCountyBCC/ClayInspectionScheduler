@@ -261,3 +261,7 @@ __pycache__/
 *.pyc
 ClayInspectionScheduler/ConnectionStrings.config
 ConnectionStrings.config
+ClayInspectionScheduler/Scripts/app/bundle.js
+ClayInspectionScheduler/Scripts/app/bundle.min.js
+bundle.js
+bundle.min.js

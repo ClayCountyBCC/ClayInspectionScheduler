@@ -390,8 +390,6 @@ var InspSched;
             inspRow.appendChild(DataRow);
             // Sections added below are dependent on access_type and date
             // cannot be public and cannot be earlier than today (will be changed to earlier date)
-            console.log('access', permit.access, (permit.access != InspSched.access_type.public_access &&
-                (inspection.Day != "" || inspection.ResultADC == "")), 'inspection', inspection);
             if (permit.access != InspSched.access_type.public_access &&
                 (inspection.Day != "" || inspection.ResultADC == "")) {
                 addRemarkTextDiv.appendChild(remarkTextarea);

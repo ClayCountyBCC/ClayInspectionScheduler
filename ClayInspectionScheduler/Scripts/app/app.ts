@@ -92,8 +92,6 @@ namespace InspSched
     let permitno: string = PermitSearchField.value.trim()
     transport.GetPermit(InspSched.UI.Search(permitno)).then(function (permits: Array<Permit>)
     {
-      console.log(permits);
-
       InspSched.CurrentPermits = permits;
 
       InspSched.UI.ProcessResults(permits, permitno);
@@ -102,11 +100,9 @@ namespace InspSched
       {
         if (permit.PermitNo == permitno)
         {
-          console.log('our permits match');
           InspSched.ThisPermit = permit;
           if (permit.ErrorText.length === 0)
           {
-            console.log('build this calendar, yall');
             BuildCalendar(permit.ScheduleDates);
           }
 
@@ -269,10 +265,7 @@ namespace InspSched
 
     transport.GetInspType().then(function (insptypes: Array<InspType>)
     {
-      console.log('inspection types', insptypes);
       InspSched.InspectionTypes = insptypes;
-
-
     },
       function ()
       {
@@ -459,8 +452,6 @@ namespace InspSched
     }, function ()
       {
         console.log("error in SaveComment");
-
-
       });
   }
 
@@ -470,17 +461,10 @@ namespace InspSched
     let commentTextarea: HTMLTextAreaElement = (<HTMLTextAreaElement>document.getElementById(InspectionRequestId + "_comment_textarea"));
     let value: string = (<HTMLInputElement>document.querySelector('input[name="' + InspectionRequestId + '_results"]:checked')).value;
 
-
-
-    console.log("value: ", value);
-
     let remarkText = remarkTextarea.value;
-
-    console.log("remarkText: ", remarkText);
 
     let commentText = commentTextarea.value;
 
-    console.log("commentText: ", commentText);
     let inspReqIdAsNum = parseInt(InspectionRequestId);
 
     transport.UpdateInspection(permitNumber, inspReqIdAsNum, value, remarkText, commentText).then(function ()

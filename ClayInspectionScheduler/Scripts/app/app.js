@@ -73,16 +73,13 @@ var InspSched;
         $('#InspectionSchedulerTabs').foundation('selectTab', 'InspectionView', true);
         var permitno = PermitSearchField.value.trim();
         InspSched.transport.GetPermit(InspSched.UI.Search(permitno)).then(function (permits) {
-            console.log(permits);
             InspSched.CurrentPermits = permits;
             InspSched.UI.ProcessResults(permits, permitno);
             for (var _i = 0, permits_1 = permits; _i < permits_1.length; _i++) {
                 var permit = permits_1[_i];
                 if (permit.PermitNo == permitno) {
-                    console.log('our permits match');
                     InspSched.ThisPermit = permit;
                     if (permit.ErrorText.length === 0) {
-                        console.log('build this calendar, yall');
                         BuildCalendar(permit.ScheduleDates);
                     }
                     else {
@@ -189,7 +186,6 @@ var InspSched;
     }
     function LoadInspectionTypes() {
         InspSched.transport.GetInspType().then(function (insptypes) {
-            console.log('inspection types', insptypes);
             InspSched.InspectionTypes = insptypes;
         }, function () {
             console.log('error in LoadInspectionTypes');
@@ -325,11 +321,8 @@ var InspSched;
         var remarkTextarea = document.getElementById(InspectionRequestId + "_remark_textarea");
         var commentTextarea = document.getElementById(InspectionRequestId + "_comment_textarea");
         var value = document.querySelector('input[name="' + InspectionRequestId + '_results"]:checked').value;
-        console.log("value: ", value);
         var remarkText = remarkTextarea.value;
-        console.log("remarkText: ", remarkText);
         var commentText = commentTextarea.value;
-        console.log("commentText: ", commentText);
         var inspReqIdAsNum = parseInt(InspectionRequestId);
         InspSched.transport.UpdateInspection(permitNumber, inspReqIdAsNum, value, remarkText, commentText).then(function () {
             SearchPermit();

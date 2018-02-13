@@ -7,4 +7,4 @@ var InspSched;
     }());
     InspSched.Inspector = Inspector;
 })(InspSched || (InspSched = {}));
-//# sourceMappingURL=Inspector.js.map
+//# sourceMappingURL=inspector.js.map
