@@ -97,9 +97,7 @@ namespace ClayInspectionScheduler.Controllers
       }
       else
       {
-        var l = new List<Inspection>();
-        return Ok(l);
-
+        return Ok(new List<Inspection>());
       }
     }
 

@@ -2,7 +2,10 @@
   {
     "outputFileName": "Scripts/app/bundle.js",
     "inputFiles": [
-      "Scripts/app/Permit.js",      
+      "Scripts/app/ShortInspection.js",
+      "Scripts/app/Permit.js",
+      "Scripts/app/inspectorUI.js",
+      "Scripts/app/InspectorView.js",
       "Scripts/app/LocationHash.js",
       "Scripts/app/newinspection.js",
       "Scripts/app/ui.js",

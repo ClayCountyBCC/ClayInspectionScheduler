@@ -111,6 +111,19 @@ var InspSched;
             });
         }
         transport.UpdateInspection = UpdateInspection;
+        function DailyInspections() {
+            var x = XHR.Get("API/Inspection/List");
+            return new Promise(function (resolve, reject) {
+                x.then(function (response) {
+                    var di = JSON.parse(response.Text);
+                    resolve(di);
+                }).catch(function () {
+                    console.log("error in Daily Inspections");
+                    reject(null);
+                });
+            });
+        }
+        transport.DailyInspections = DailyInspections;
     })(transport = InspSched.transport || (InspSched.transport = {}));
 })(InspSched || (InspSched = {}));
 //# sourceMappingURL=transport.js.map

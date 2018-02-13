@@ -7,7 +7,7 @@ namespace InspSched
   interface IInspection
   {
     PermitNo: string;
-    InspReqID: string;
+    InspReqID: number;
     InspectionCode: string;
     InsDesc: string;
     InspDateTime: Date;
@@ -22,13 +22,18 @@ namespace InspSched
     Phone: string;
     InspectorName: string;
     PrivateProviderInspectionRequestId: number;
+    GeoZone: string;
+    FloodZone: string;
+    Day: string;
+    StreetAddress: string;
+    InspectorColor: string;
     Errors: string[];
   }
 
   export class Inspection implements IInspection
   {
     public PermitNo: string;
-    public InspReqID: string;
+    public InspReqID: number;
     public InspectionCode: string;
     public InsDesc: string;
     public InspDateTime: Date;
@@ -43,6 +48,11 @@ namespace InspSched
     public Phone: string;
     public InspectorName: string;
     public PrivateProviderInspectionRequestId: number;
+    public GeoZone: string;
+    public FloodZone: string;
+    public Day: string;
+    public StreetAddress: string;
+    public InspectorColor: string;
     public Errors: string[];
 
     constructor()

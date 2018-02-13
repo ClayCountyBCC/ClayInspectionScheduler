@@ -86,7 +86,7 @@ namespace InspSched.transport
 
   export function AddComment(InspectionId: number, Comment: string)
   {
-    var data = {      
+    var data = {
       'InspectionId': InspectionId,
       'Comment': Comment
     };
@@ -127,7 +127,7 @@ namespace InspSched.transport
 
   export function UpdateInspection(
     PermitNumber: string,
-    InspectionId: number,    
+    InspectionId: number,
     ResultCode: string,
     Remarks: string,
     Comments: string)
@@ -156,5 +156,22 @@ namespace InspSched.transport
     });
   }
 
-}
+  export function DailyInspections()
+  {
+    var x = XHR.Get("API/Inspection/List");
+    return new Promise(function (resolve, reject)
+    {
+      x.then(function (response)
+      {
+        var di = JSON.parse(response.Text);
+        resolve(di);
 
+      }).catch(function ()
+      {
+        console.log("error in Daily Inspections");
+        reject(null);
+      });
+    });
+  }
+
+}
