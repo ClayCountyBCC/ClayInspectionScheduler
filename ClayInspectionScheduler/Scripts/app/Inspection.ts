@@ -23,6 +23,11 @@ namespace InspSched
     InspectorName: string;
     PrivateProviderInspectionRequestId: number;
     Errors: string[];
+    Geozone: string;
+    FloodZone: string;
+    StreetAddress: string;
+    InspectorColor: string;
+    Day: string;
   }
 
   export class Inspection implements IInspection
@@ -44,6 +49,11 @@ namespace InspSched
     public InspectorName: string;
     public PrivateProviderInspectionRequestId: number;
     public Errors: string[];
+    public Geozone: string;
+    public FloodZone: string;
+    public StreetAddress: string;
+    public InspectorColor: string;
+    public Day: string;
 
     constructor()
     {

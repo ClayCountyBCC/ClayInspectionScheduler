@@ -105,7 +105,7 @@ var InspSched;
                 AddPermit(permits, key);
                 UpdatePermitData(key, permits);
                 Hide('Searching');
-                document.getElementById('CurrentPermitData').style.display = "block";
+                document.getElementById('CurrentPermitData').style.display = "flex";
                 ShowTable(key, permits);
             }
         }
@@ -230,7 +230,7 @@ var InspSched;
                     // TODO: add 'NO INSPECTIONS ERROR'
                     document.getElementById('NoInspections').style.display = "flex";
                     document.getElementById("InspSched").style.display = "flex";
-                    document.getElementById('PermitScreen').style.display = "flex";
+                    document.getElementById('InspectionTable').style.display = "flex";
                 }
                 BuildScheduler(InspSched.CurrentInspections, key);
                 return true;
@@ -259,7 +259,7 @@ var InspSched;
             }
             InspList.style.removeProperty("display");
             document.getElementById("InspSched").style.removeProperty("display");
-            document.getElementById('PermitScreen').style.display = "flex";
+            document.getElementById('InspectionTable').style.display = "flex";
         }
         UI.BuildInspectionList = BuildInspectionList;
         // update BuildInspectionRow
@@ -315,17 +315,17 @@ var InspSched;
             //*********************************************
             var CompletedRemarks = document.createElement("div");
             CompletedRemarks.setAttribute("elementName", "CompletedRemarks");
-            CompletedRemarks.className = "large-10 medium-12 small-12 ";
+            CompletedRemarks.className = "large-12 medium-12 small-12 row";
             CompletedRemarks.id = inspection.InspReqID.toString() + "_completed_remark";
             CompletedRemarks.style.display = "flex";
             var Remark = document.createElement("div");
-            Remark.className = "column large-9 medium-8 small-12 inspRemarks";
+            Remark.className = "column large-9 medium-8 small-6 inspRemarks";
             Remark.setAttribute("elementName", "Remark");
             Remark.appendChild(document.createTextNode((inspection.Remarks !== null && inspection.Remarks !== "" ? inspection.Remarks.trim() : "")));
-            var ResultADC = document.createElement("div");
-            ResultADC.setAttribute("elementName", "ResultADC");
-            ResultADC.className = "large-3 medium-4 small-12 InspResult column large-text-left text-center end ";
-            ResultADC.appendChild(document.createTextNode(inspection.ResultDescription.trim()));
+            var ResultDescription = document.createElement("div");
+            ResultDescription.setAttribute("elementName", "ResultDescription");
+            ResultDescription.className = "large-3 medium-4 small-6 InspResult column large-text-left text-center end ";
+            ResultDescription.appendChild(document.createTextNode(inspection.ResultDescription.trim()));
             // #endregion
             // #region add Remarks Container: add Remarks textarea, button, and radiobutton sections
             //*******************************************************************************
@@ -348,15 +348,20 @@ var InspSched;
             addRemarkTextDiv.style.paddingLeft = "1em";
             var remarkTextarea = document.createElement("textarea");
             remarkTextarea.setAttribute("elementName", "remarkTextarea");
+            remarkTextarea.setAttribute("onkeyup", "InspSched.disableSaveCommentButton(" + inspection.InspReqID + ")");
             remarkTextarea.className = "remark-text";
             remarkTextarea.rows = 1;
+            remarkTextarea.id = inspection.InspReqID + "_remark_textarea";
             var addRemarkButtonDiv = document.createElement("div");
             addRemarkButtonDiv.setAttribute("elementName", "addRemarkButtonDiv");
             addRemarkButtonDiv.className = "ButtonContainer column large-2 medium-4 small-12 flex-container align-center flex-child-grow";
             var addRemarkButton = document.createElement("button");
             addRemarkButton.setAttribute("elementName", "addRemarkButton");
+            addRemarkButton.setAttribute("disabled", "disabled");
+            addRemarkButton.setAttribute("value", inspection.ResultADC);
+            addRemarkButton.id = inspection.InspReqID + "_save_remark_button";
+            addRemarkButton.setAttribute("onclick", "(InspSched.UpdateInspection(" + permit.PermitNo + ", " + inspection.InspReqID + "))");
             addRemarkButton.className = "align-self-center columns DetailsButton large-12 medium-12-small-12";
-            addRemarkButton.setAttribute("onclick", "transport.SaveInspectionResult(inspection)");
             addRemarkButton.style.margin = "0";
             addRemarkButton.textContent = "Save Result";
             //***************************************
@@ -364,8 +369,6 @@ var InspSched;
             radioButtonSection.setAttribute("elementName", "radioButtonSection");
             radioButtonSection.className = "large-12 medium-12 small-12 column";
             radioButtonSection.style.paddingLeft = "1em";
-            if (InspSched.ThisPermit.access != InspSched.access_type.public_access && SchedDate >= today) {
-            }
             // #endregion Remarks Container: add Remarks textarea, button, and radiobutton sections
             // #region Comment Section
             //*********************************************************************************
@@ -380,6 +383,7 @@ var InspSched;
             textboxdiv.style.display = "flex";
             var thiscomment = document.createElement("textarea");
             thiscomment.setAttribute("elementName", "thiscomment");
+            thiscomment.id = inspection.InspReqID + "_audit";
             thiscomment.className = "row large-12 medium-12 small-12 No-Edit";
             thiscomment.rows = 4;
             var AddCommentDiv = document.createElement("div");
@@ -396,14 +400,17 @@ var InspSched;
             AddCommentTextarea.className = "large-10 medium-10 small-12 flex-dir-row Comment-Textarea";
             AddCommentTextarea.style.resize = "none";
             AddCommentTextarea.rows = 3;
+            AddCommentTextarea.id = inspection.InspReqID + "_comment_textarea";
             AddCommentTextarea.maxLength = 200;
             var SaveCommentButtonDiv = document.createElement("div");
             SaveCommentButtonDiv.setAttribute("elementName", "SaveCommentuttonDiv");
             SaveCommentButtonDiv.className = "ButtonContainer row large-2 medium-2 small-12 flex-container align-center";
             var SaveCommentButton = document.createElement("button");
-            SaveCommentButton.className = "align-self-center columns SaveCommentButton";
+            SaveCommentButton.className = "button align-self-center columns SaveCommentButton";
             SaveCommentButton.setAttribute("elementName", "SaveCommentButton");
+            SaveCommentButton.setAttribute("onclick", "InspSched.SaveComment('" + inspection.InspReqID + "','" + AddCommentTextarea.value + "')");
             SaveCommentButton.textContent = "Save Comment";
+            SaveCommentButton.id = inspection.InspReqID + "_save_comment_button";
             //if (inspection.comments.length > 0)
             //{
             //  CommentContainer.appendChild(1234567_textboxdiv);
@@ -442,21 +449,21 @@ var InspSched;
             inspRow.appendChild(DataRow);
             // Sections added below are dependent on access_type and date
             // cannot be public and cannot be earlier than today (will be changed to earlier date)
-            if (InspSched.ThisPermit.access != InspSched.access_type.public_access && SchedDate >= today) {
+            if (permit.access != InspSched.access_type.public_access && inspection.Day != "") {
                 addRemarkTextDiv.appendChild(remarkTextarea);
                 addRemarkButtonDiv.appendChild(addRemarkButton);
                 addRemark.appendChild(addRemarkLabel);
                 addRemark.appendChild(addRemarkTextDiv);
                 addRemark.appendChild(addRemarkButtonDiv);
                 addRemarkContainer.appendChild(addRemark);
-                radioButtonSection.appendChild(BuildRadioButtonRow(inspection.ResultADC, permit.access, 0));
+                radioButtonSection.appendChild(BuildRadioButtonRow(inspection.InspReqID, inspection.ResultADC, permit.access, 0));
                 addRemarkContainer.appendChild(radioButtonSection);
             }
             // #endregion Initial Append Rows to Inspection Row
+            var detailButton = BuildButton(inspection.InspReqID + "_details_btn", "Details", "InspSched.UI.ToggleInspDetails(this.value)", inspection.InspReqID);
+            detailButton.className = "column large-12 medium-12 small-12 align-self-center  DetailsButton";
             //Create function to make New/Cancel/Details Button
             if ((inspection.ResultADC.length > 0 || inspection.DisplaySchedDateTime.length === 0)) {
-                var detailButton = BuildButton(inspection.InspReqID + "_details_btn", "Details", "InspSched.UI.ToggleInspDetails(this.value)", inspection.InspReqID);
-                detailButton.className = "column large-12 medium-12 small-12 align-self-center NewInspButton DetailsButton";
                 var buttonId = "CreateNew_" + inspection.PermitNo;
                 if (!document.getElementById(buttonId) && permit.ErrorText.length === 0) {
                     InspButtonDiv.appendChild(BuildButton(buttonId, "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
@@ -469,17 +476,14 @@ var InspSched;
                 }
             }
             else if (inspection.ResultADC.length == 0) {
-                // element "remarkrow" will be visible/hidden when new Details button is clicked.
                 if (IsGoodCancelDate(inspection, permit.access)) {
                     if (permit.access === InspSched.access_type.public_access) {
                         var privprovstring = permit.ErrorText.substr(2, 16).toLowerCase();
-                        if (privprovstring != "private provider") {
+                        if (privprovstring != "private provider" || inspection.PrivateProviderInspectionRequestId != null) {
                             InspButtonDiv.appendChild(BuildButton("", "Cancel", "InspSched.CancelInspection(" + inspection.InspReqID + ", '" + inspection.PermitNo + "');"));
                         }
                     }
                     else {
-                        var detailButton = BuildButton(inspection.InspReqID + "_details_btn", "Details", "InspSched.UI.ToggleInspDetails(this.value)", inspection.InspReqID);
-                        detailButton.className = "column large-12 medium-12 small-12 align-self-center NewInspButton DetailsButton";
                         detailButton.style.margin = "0";
                         InspButtonDiv.appendChild(detailButton);
                     }
@@ -489,8 +493,9 @@ var InspSched;
             if (inspection.DisplayInspDateTime.length > 0) {
                 if (inspection.InspReqID !== "99999999") {
                     CompletedRemarks.appendChild(Remark);
-                    CompletedRemarks.appendChild(ResultADC);
-                    DetailsContainer.appendChild(CompletedRemarks);
+                    CompletedRemarks.appendChild(ResultDescription);
+                    // remarks needs to be in the inspection data
+                    inspectionData.appendChild(CompletedRemarks);
                 }
                 else {
                     inspector.style.display = 'none';
@@ -532,55 +537,75 @@ var InspSched;
             InspButton.value = (value == null ? "" : value);
             return InspButton;
         }
-        function BuildRadioButtonRow(checked, access, privateProvidercheck) {
-            var approveradio = document.createElement("input");
-            approveradio.id = (privateProvidercheck > 0 ? "perform" : "approve") + "_selection";
-            approveradio.type = "radio";
-            approveradio.name = "results";
-            approveradio.value = (privateProvidercheck > 0 ? "P" : "A");
-            var approve = document.createElement("label");
-            approve.className = "columns";
-            approve.htmlFor = "approve_selection";
-            approve.appendChild(approveradio);
-            approve.appendChild(document.createTextNode(privateProvidercheck > 0 ? "Perform" : "Approve"));
-            var disapproveradio = document.createElement("input");
-            disapproveradio.id = (privateProvidercheck > 0 ? "not_performed" : "disapprove") + "_selection";
-            disapproveradio.type = "radio";
-            disapproveradio.name = "results";
-            disapproveradio.value = (privateProvidercheck > 0 ? "N" : "D");
-            var disapprove = document.createElement("label");
-            disapprove.className = "columns";
-            disapprove.htmlFor = "disapprove_selection";
-            disapprove.appendChild(disapproveradio);
-            disapprove.appendChild(document.createTextNode(privateProvidercheck > 0 ? "Not Performed" : "Disapprove"));
+        function BuildRadioButtonRow(InspectionId, checked, access, privateProvidercheck) {
+            var RadioButtonSubrow = document.createElement("div");
+            if (access === InspSched.access_type.inspector_access) {
+                RadioButtonSubrow.className = "large-10 medium-10 small-12 flex-container flex-dir-row flex-child-grow align-justify row";
+                RadioButtonSubrow.id = InspectionId + "_radio_list";
+                var approveradio = document.createElement("input");
+                approveradio.id = (privateProvidercheck > 0 ? "perform" : "approve") + "_selection";
+                approveradio.type = "radio";
+                approveradio.setAttribute("onclick", "InspSched.disableSaveCommentButton(" + InspectionId + ")");
+                if (checked == "A" || checked == "P") {
+                    approveradio.checked = true;
+                }
+                approveradio.name = InspectionId + "_results";
+                approveradio.value = (privateProvidercheck > 0 ? "P" : "A");
+                var approve = document.createElement("label");
+                approve.className = "column large-2 small-6";
+                approve.htmlFor = "approve_selection";
+                approve.appendChild(approveradio);
+                approve.appendChild(document.createTextNode(privateProvidercheck > 0 ? "Perform" : "Approve"));
+                var disapproveradio = document.createElement("input");
+                disapproveradio.id = (privateProvidercheck > 0 ? "not_performed" : "disapprove") + "_selection";
+                disapproveradio.type = "radio";
+                disapproveradio.setAttribute("onclick", "InspSched.disableSaveCommentButton(" + InspectionId + ")");
+                if (checked == "D" || checked == "N") {
+                    disapproveradio.checked = true;
+                }
+                disapproveradio.name = InspectionId + "_results";
+                disapproveradio.value = (privateProvidercheck > 0 ? "N" : "D");
+                var disapprove = document.createElement("label");
+                disapprove.className = "column large-2 small-6";
+                disapprove.htmlFor = "disapprove_selection";
+                disapprove.appendChild(disapproveradio);
+                disapprove.appendChild(document.createTextNode(privateProvidercheck > 0 ? "Not Performed" : "Disapprove"));
+                RadioButtonSubrow.appendChild(approve);
+                RadioButtonSubrow.appendChild(disapprove);
+            }
+            else {
+                RadioButtonSubrow.className = "large-10 medium-10 small-12 flex-container flex-dir-row flex-child-grow align-right";
+            }
             var cancelradio = document.createElement("input");
             cancelradio.id = "cancelradio_selection";
             cancelradio.type = "radio";
-            cancelradio.name = "results";
+            cancelradio.setAttribute("onclick", "InspSched.disableSaveCommentButton(" + InspectionId + ")");
+            if (checked == "C") {
+                cancelradio.checked = true;
+            }
+            cancelradio.name = InspectionId + "_results";
             cancelradio.value = "C";
             var cancel = document.createElement("label");
-            cancel.className = "columns";
+            cancel.className = "column large-2 small-6";
             cancel.htmlFor = "cancelradio_selection";
             cancel.appendChild(cancelradio);
             cancel.appendChild(document.createTextNode("Cancel"));
             var incompleteradio = document.createElement("input");
             incompleteradio.id = "incompleteradio_selection";
             incompleteradio.type = "radio";
-            incompleteradio.name = "results";
+            incompleteradio.setAttribute("onclick", "InspSched.disableSaveCommentButton(" + InspectionId + ")");
+            if (checked == "") {
+                incompleteradio.checked = true;
+            }
+            incompleteradio.name = InspectionId + "_results";
             incompleteradio.value = "";
             var incomplete = document.createElement("label");
-            incomplete.className = "columns";
+            incomplete.className = "column large-2 small-6";
             incomplete.htmlFor = "incompleteradio_selection";
             incomplete.appendChild(incompleteradio);
             incomplete.appendChild(document.createTextNode("Incomplete"));
-            var RadioButtonSubrow = document.createElement("div");
-            RadioButtonSubrow.className = "large-10 medium-10 small-12 flex-container flex-dir-row flex-child-grow align-justify";
-            RadioButtonSubrow.appendChild(approve);
-            RadioButtonSubrow.appendChild(disapprove);
             RadioButtonSubrow.appendChild(cancel);
-            if (access == InspSched.access_type.inspector_access) {
-                RadioButtonSubrow.appendChild(incomplete);
-            }
+            RadioButtonSubrow.appendChild(incomplete);
             return RadioButtonSubrow;
         }
         /**********************************************
@@ -660,7 +685,7 @@ var InspSched;
                 var e = document.getElementById(id);
                 if (e.style.display != null) {
                     if (displayType == null)
-                        e.style.display = "block";
+                        e.style.display = "flex";
                     else
                         e.style.display = displayType;
                 }
@@ -668,7 +693,7 @@ var InspSched;
             else {
                 var e = document.getElementById(id);
                 if (displayType == null)
-                    element.style.display = "block";
+                    element.style.display = "flex";
                 else
                     element.style.display = displayType;
             }
@@ -781,6 +806,11 @@ var InspSched;
             var buttonString = (comments.style.display.toString().toLowerCase() == 'none' ? '' : 'Hide ') + 'Details';
             console.log('Button Text changed to: ' + buttonString);
             document.getElementById(value.valueOf() + '_details_btn').textContent = buttonString;
+            var commentfield = document.getElementById(value.valueOf() + "_comment_textarea");
+            commentfield.value = "";
+            var remarkfield = document.getElementById(value.valueOf() + "_remark_textarea");
+            remarkfield.value = "";
+            InspSched.enableSaveResultButton(value);
             InspSched.UI.CurrentDetailsOpen = value.valueOf();
         }
         UI.ToggleInspDetails = ToggleInspDetails;
@@ -1030,7 +1060,7 @@ var InspSched;
     InspSched.CurrentPermits = [];
     InspSched.CurrentInspections = [];
     InspSched.IssuesExist = [];
-    var permitscreen = document.getElementById('PermitScreen');
+    var InspectionTable = document.getElementById('InspectionTable');
     var InspectionTypeSelect = document.getElementById("InspTypeSelect");
     var PermitSearchButton = document.getElementById("PermitSearchButton");
     var CloseIssueDivButton = document.getElementById("CloseIssueList");
@@ -1076,7 +1106,7 @@ var InspSched;
         }
     };
     function SearchPermit() {
-        permitscreen.style.display = "none";
+        InspectionTable.style.display = "none";
         InspSched.UI.Hide('SaveConfirmed');
         InspSched.UI.Hide('NotScheduled');
         $('#InspectionSchedulerTabs').foundation('selectTab', 'InspectionView', true);
@@ -1242,6 +1272,60 @@ var InspSched;
             }
         }
     }
+    function disableSaveCommentButton(InspectionRequestId) {
+        var commentButton = document.getElementById(InspectionRequestId + "_save_comment_button");
+        var remarkButton = document.getElementById(InspectionRequestId + "_save_remark_button");
+        var currentResult = remarkButton.value;
+        var remarkTextarea = document.getElementById(InspectionRequestId + "_remark_textarea");
+        var value = document.querySelector('input[name="' + InspectionRequestId + '_results"]:checked').value;
+        if (value == currentResult && remarkTextarea.value != "") {
+            commentButton.removeAttribute("disabled");
+        }
+        else {
+            commentButton.setAttribute("disabled", "disabled");
+        }
+        enableSaveResultButton(InspectionRequestId);
+    }
+    InspSched.disableSaveCommentButton = disableSaveCommentButton;
+    function enableSaveResultButton(InspectionRequestId) {
+        var remarkButton = document.getElementById(InspectionRequestId + "_save_remark_button");
+        var commentButton = document.getElementById(InspectionRequestId + "_save_comment_button");
+        var remarkTextarea = document.getElementById(InspectionRequestId + "_remark_textarea");
+        var value = document.querySelector('input[name="' + InspectionRequestId + '_results"]:checked').value;
+        switch (value) {
+            case "A":
+                remarkButton.removeAttribute("disabled");
+                return;
+            case "P":
+            case "D":
+            case "N":
+            case "C":
+                if (remarkTextarea.value != "") {
+                    remarkButton.removeAttribute("disabled");
+                }
+                else {
+                    remarkButton.setAttribute("disabled", "disabled");
+                    if (value == remarkButton.value && remarkTextarea.value == "") {
+                        commentButton.removeAttribute("disabled");
+                    }
+                    else {
+                        commentButton.setAttribute("disabled", "disabled");
+                    }
+                }
+                return;
+            default:
+                if (remarkTextarea.value == "" && remarkButton.value == value) {
+                    commentButton.removeAttribute("disabled");
+                    remarkButton.setAttribute("disabled", "disabled");
+                }
+                else {
+                    commentButton.setAttribute("disabled", "disabled");
+                    remarkButton.removeAttribute("disabled");
+                }
+                return;
+        }
+    }
+    InspSched.enableSaveResultButton = enableSaveResultButton;
     function UpdatePermitSelectList(PermitNo) {
         document.getElementById("NotScheduled").style.display = "none";
         document.getElementById("SaveConfirmed").style.display = "none";
@@ -1261,6 +1345,43 @@ var InspSched;
         // clears Calendar of any chosen dates
     }
     InspSched.UpdatePermitSelectList = UpdatePermitSelectList;
+    function SaveComment(InspectionRequestId) {
+        var commentTextarea = document.getElementById(InspectionRequestId + "_comment_textarea");
+        var completedComments = document.getElementById(InspectionRequestId + "_audit");
+        var NewComment = commentTextarea.value;
+        InspSched.transport.AddComment(parseInt(InspectionRequestId), NewComment).then(function (inspection) {
+            completedComments.value = inspection.Comment;
+            commentTextarea.value = "";
+        }, function () {
+            console.log("error in SaveComment");
+        });
+    }
+    InspSched.SaveComment = SaveComment;
+    function UpdateInspection(permitNumber, InspectionRequestId) {
+        var remarkTextarea = document.getElementById(InspectionRequestId + "_remark_textarea");
+        var commentTextarea = document.getElementById(InspectionRequestId + "_comment_textarea");
+        var value = document.querySelector('input[name="' + InspectionRequestId + '_results"]:checked').value;
+        console.log("value: ", value);
+        var remarkText = remarkTextarea.value;
+        console.log("remarkText: ", remarkText);
+        var commentText = commentTextarea.value;
+        console.log("commentText: ", commentText);
+        var inspReqIdAsNum = parseInt(InspectionRequestId);
+        InspSched.transport.UpdateInspection(permitNumber, inspReqIdAsNum, value, remarkText, commentText).then(function () {
+            SearchPermit();
+        }, function () {
+            console.log('error in UpdateInspection');
+            // do something with the error here
+            // need to figure out how to detect if something wasn't found
+            // versus an error.
+            SearchPermit();
+        });
+        InspSched.UI.ToggleInspDetails(InspectionRequestId);
+        remarkTextarea.value = "";
+        commentTextarea.value = "";
+        // This will be updated to take inspection data returned from server and update the inspection to show new data.
+    }
+    InspSched.UpdateInspection = UpdateInspection;
     function CancelInspection(InspID, PermitNo) {
         document.getElementById('NotScheduled').style.display = "none";
         if (InspID != null && PermitNo != null) {

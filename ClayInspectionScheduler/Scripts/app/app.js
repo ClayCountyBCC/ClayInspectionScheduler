@@ -15,7 +15,7 @@ var InspSched;
     InspSched.CurrentPermits = [];
     InspSched.CurrentInspections = [];
     InspSched.IssuesExist = [];
-    var permitscreen = document.getElementById('PermitScreen');
+    var InspectionTable = document.getElementById('InspectionTable');
     var InspectionTypeSelect = document.getElementById("InspTypeSelect");
     var PermitSearchButton = document.getElementById("PermitSearchButton");
     var CloseIssueDivButton = document.getElementById("CloseIssueList");
@@ -61,7 +61,7 @@ var InspSched;
         }
     };
     function SearchPermit() {
-        permitscreen.style.display = "none";
+        InspectionTable.style.display = "none";
         InspSched.UI.Hide('SaveConfirmed');
         InspSched.UI.Hide('NotScheduled');
         $('#InspectionSchedulerTabs').foundation('selectTab', 'InspectionView', true);
@@ -227,6 +227,60 @@ var InspSched;
             }
         }
     }
+    function disableSaveCommentButton(InspectionRequestId) {
+        var commentButton = document.getElementById(InspectionRequestId + "_save_comment_button");
+        var remarkButton = document.getElementById(InspectionRequestId + "_save_remark_button");
+        var currentResult = remarkButton.value;
+        var remarkTextarea = document.getElementById(InspectionRequestId + "_remark_textarea");
+        var value = document.querySelector('input[name="' + InspectionRequestId + '_results"]:checked').value;
+        if (value == currentResult && remarkTextarea.value != "") {
+            commentButton.removeAttribute("disabled");
+        }
+        else {
+            commentButton.setAttribute("disabled", "disabled");
+        }
+        enableSaveResultButton(InspectionRequestId);
+    }
+    InspSched.disableSaveCommentButton = disableSaveCommentButton;
+    function enableSaveResultButton(InspectionRequestId) {
+        var remarkButton = document.getElementById(InspectionRequestId + "_save_remark_button");
+        var commentButton = document.getElementById(InspectionRequestId + "_save_comment_button");
+        var remarkTextarea = document.getElementById(InspectionRequestId + "_remark_textarea");
+        var value = document.querySelector('input[name="' + InspectionRequestId + '_results"]:checked').value;
+        switch (value) {
+            case "A":
+                remarkButton.removeAttribute("disabled");
+                return;
+            case "P":
+            case "D":
+            case "N":
+            case "C":
+                if (remarkTextarea.value != "") {
+                    remarkButton.removeAttribute("disabled");
+                }
+                else {
+                    remarkButton.setAttribute("disabled", "disabled");
+                    if (value == remarkButton.value && remarkTextarea.value == "") {
+                        commentButton.removeAttribute("disabled");
+                    }
+                    else {
+                        commentButton.setAttribute("disabled", "disabled");
+                    }
+                }
+                return;
+            default:
+                if (remarkTextarea.value == "" && remarkButton.value == value) {
+                    commentButton.removeAttribute("disabled");
+                    remarkButton.setAttribute("disabled", "disabled");
+                }
+                else {
+                    commentButton.setAttribute("disabled", "disabled");
+                    remarkButton.removeAttribute("disabled");
+                }
+                return;
+        }
+    }
+    InspSched.enableSaveResultButton = enableSaveResultButton;
     function UpdatePermitSelectList(PermitNo) {
         document.getElementById("NotScheduled").style.display = "none";
         document.getElementById("SaveConfirmed").style.display = "none";
@@ -246,6 +300,43 @@ var InspSched;
         // clears Calendar of any chosen dates
     }
     InspSched.UpdatePermitSelectList = UpdatePermitSelectList;
+    function SaveComment(InspectionRequestId) {
+        var commentTextarea = document.getElementById(InspectionRequestId + "_comment_textarea");
+        var completedComments = document.getElementById(InspectionRequestId + "_audit");
+        var NewComment = commentTextarea.value;
+        InspSched.transport.AddComment(parseInt(InspectionRequestId), NewComment).then(function (inspection) {
+            completedComments.value = inspection.Comment;
+            commentTextarea.value = "";
+        }, function () {
+            console.log("error in SaveComment");
+        });
+    }
+    InspSched.SaveComment = SaveComment;
+    function UpdateInspection(permitNumber, InspectionRequestId) {
+        var remarkTextarea = document.getElementById(InspectionRequestId + "_remark_textarea");
+        var commentTextarea = document.getElementById(InspectionRequestId + "_comment_textarea");
+        var value = document.querySelector('input[name="' + InspectionRequestId + '_results"]:checked').value;
+        console.log("value: ", value);
+        var remarkText = remarkTextarea.value;
+        console.log("remarkText: ", remarkText);
+        var commentText = commentTextarea.value;
+        console.log("commentText: ", commentText);
+        var inspReqIdAsNum = parseInt(InspectionRequestId);
+        InspSched.transport.UpdateInspection(permitNumber, inspReqIdAsNum, value, remarkText, commentText).then(function () {
+            SearchPermit();
+        }, function () {
+            console.log('error in UpdateInspection');
+            // do something with the error here
+            // need to figure out how to detect if something wasn't found
+            // versus an error.
+            SearchPermit();
+        });
+        InspSched.UI.ToggleInspDetails(InspectionRequestId);
+        remarkTextarea.value = "";
+        commentTextarea.value = "";
+        // This will be updated to take inspection data returned from server and update the inspection to show new data.
+    }
+    InspSched.UpdateInspection = UpdateInspection;
     function CancelInspection(InspID, PermitNo) {
         document.getElementById('NotScheduled').style.display = "none";
         if (InspID != null && PermitNo != null) {

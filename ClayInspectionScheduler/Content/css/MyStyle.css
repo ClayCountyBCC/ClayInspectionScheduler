@@ -7,8 +7,13 @@ body {
 .column, .columns {
   min-height: 1px;
 }
-
+/*
 #PermitScreen,
+
+*/
+#InspectionTable{
+  display: none;
+}
 #SearchSelect,
 #CurrentPermitData,
 #PermitSelectContainer,
@@ -54,6 +59,11 @@ body {
   cursor: pointer;
   margin-top: 6px;
   text-align: center;
+}
+.DetailsButton.disabled, .DetailsButton[disabled]{
+  opacity: .25;
+
+  cursor:not-allowed;
 }
 
 button {

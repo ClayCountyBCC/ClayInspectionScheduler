@@ -59,7 +59,7 @@ namespace ClayInspectionScheduler.Models
         return GetResultDescription(ResultADC);
       }
     }
-       
+
     private static string GetResultDescription(string ResultCode)
     {
       switch (ResultCode)
@@ -91,7 +91,7 @@ namespace ClayInspectionScheduler.Models
     public string Phone { get; set; } = "";
 
     public string InspectorName { get; set; } = "Unassigned";
-   
+
     public string DisplayInspDateTime
     {
       get
@@ -115,13 +115,41 @@ namespace ClayInspectionScheduler.Models
 
     public List<string> Errors { get; set; } = new List<string>();
 
-    public string GeoZone { get; set; }
-    public string FloodZone { get; set; }
-    public string InspectorColor { get; set; }
+    public string GeoZone { get; set; } = "";
+    public string FloodZone { get; set; } = "";
+    public string StreetAddress { get; set; } = "";
+    public string InspectorColor { get; set; } = "";
+    public string Day
+    {
+      get
+      {
+        if (SchedDateTime == DateTime.MinValue) return "";
+        if (SchedDateTime.Date == DateTime.Today.Date)
+        {
+          return "Today";
+        }
+        else if (SchedDateTime.Date == DateTime.Today.AddDays(1).Date)
+        {
+          return "Tomorrow";
+          
+        }
+        else if(SchedDateTime.Date > DateTime.Today.AddDays(1).Date)
+        {
+          return "Later";
+        }
+
+        return "";
+      }
+    }
 
     public Inspection()
     {
 
+    }
+
+    public static List<Inspection> GetInspectorList()
+    {
+      return GetRawInspectionList();
     }
 
     private static List<Inspection> GetRawInspectionList()
@@ -140,11 +168,40 @@ namespace ClayInspectionScheduler.Models
           ELSE CAST(DATEADD(DAY, 1, @Today) AS DATE) -- Set it to tomorrow
           END;
 
+        WITH BaseFloodZone AS (
+          SELECT DISTINCT
+            LTRIM(RTRIM(FloodZone)) FloodZone,
+            F.BaseID
+          FROM bpFLOOD_ZONE F
+          INNER JOIN bpINS_REQUEST I ON F.BaseID = I.BaseId
+          WHERE 
+            LEN(LTRIM(RTRIM(F.FloodZone))) > 0 
+            AND (CAST(I.SchecDateTime AS DATE) IN (@Today, @Tomorrow)
+            OR (CAST(SchecDateTime AS DATE) < @Today 
+              AND ResultADC IS NULL))
+        ), FloodZoneData AS (
+          SELECT 
+            F.BaseID,
+            STUFF((
+              SELECT ', ' + FloodZone
+              FROM BaseFloodZone B
+              WHERE F.BaseID = B.BaseId
+              FOR XML PATH (''), TYPE)
+              .value('(./text())[1]','nvarchar(max)')
+              , 
+              1, 
+              2, 
+              N'') AS FloodZone
+          FROM BaseFloodZone F
+          GROUP BY F.BaseId
+        )
+
         SELECT
+          B.ProjAddrCombined StreetAddress,
           I.InspReqID,
           I.PermitNo, 
           ISNULL(I.InspectionCode, '') InspectionCode, 
-          ISNULL(R.InsDesc, 'No Inspections') InsDesc, 
+          ISNULL(IR.InsDesc, 'No Inspections') InsDesc, 
           I.InspDateTime, 
           LTRIM(RTRIM(ISNULL(i.ResultADC, ''))) ResultADC,
           I.SchecDateTime SchedDateTime,
@@ -152,26 +209,23 @@ namespace ClayInspectionScheduler.Models
           ISNULL(IP.Color, '#FFFFFF') InspectorColor,
           I.Remarks,
           I.Comment,
-          IP.name as InspectorName,
+          LTRIM(RTRIM(IP.name)) as InspectorName,
           PrivProvIRId PrivateProviderInspectionRequestId,
-          ISNULL(B.GeoZone, 'Unknown') GeoZone
+          ISNULL(LTRIM(RTRIM(B.GeoZone)), 'Unknown') GeoZone,
+          ISNULL(F.FloodZone, '') FloodZone
         FROM bpINS_REQUEST I 
         LEFT OUTER JOIN bpBASE_PERMIT B ON I.BaseId = B.BaseID
         LEFT OUTER JOIN bpINS_REF IR ON IR.InspCd = I.InspectionCode
         LEFT OUTER JOIN bp_INSPECTORS IP ON I.Inspector = IP.Intl 
+        LEFT OUTER JOIN FloodZoneData F ON I.BaseId = F.BaseID
         WHERE 
         -- Here we want to see the inspections that were scheduled for today and tomorrow
-          CAST(SchecDateTime AS DATE) IN (@Today, @Tomorrow)
+          (CAST(SchecDateTime AS DATE) IN (@Today, @Tomorrow)
         -- and we want to include any from the past that aren't completed.
           OR (CAST(SchecDateTime AS DATE) < @Today 
-            AND ResultADC IS NULL)
+            AND ResultADC IS NULL))
         ORDER BY InspReqID DESC";
       return Constants.Get_Data<Inspection>(sql);
-    }
-
-    public static List<Inspection> GetInspectorList()
-    {
-      return GetRawInspectionList();
     }
 
     private static List<Inspection> GetRaw(int InspectionId)
@@ -181,7 +235,6 @@ namespace ClayInspectionScheduler.Models
 
       string sql = @"
         USE WATSC;
-
         SELECT
           i.InspReqID,
           i.PermitNo, 
@@ -283,12 +336,12 @@ namespace ClayInspectionScheduler.Models
 
 
     public static Inspection AddComment(
-      int InspectionId, 
-      string Comment, 
+      int InspectionId,
+      string Comment,
       UserAccess ua)
     {
       Comment = Comment.Trim();
-      if(ua.current_access == UserAccess.access_type.public_access | 
+      if(ua.current_access == UserAccess.access_type.public_access |
         ua.current_access == UserAccess.access_type.no_access)
       {
         return null;
@@ -311,11 +364,11 @@ namespace ClayInspectionScheduler.Models
         }
         catch (Exception ex)
         {
-          new ErrorLog(ex, "");
+          Constants.Log(ex, "");
           i = 0;
         }
         //int i = Constants.Exec_Query_SP(sp, dp);
-        if (i == -1 )
+        if (i == -1)
         {
           return Inspection.Get(InspectionId);
         }
@@ -328,10 +381,10 @@ namespace ClayInspectionScheduler.Models
 
 
     public static Inspection UpdateInspectionResult(
-      string PermitNumber, 
-      int InspectionId, 
-      string ResultCode, 
-      string Remarks, 
+      string PermitNumber,
+      int InspectionId,
+      string ResultCode,
+      string Remarks,
       string Comments,
       UserAccess User)
     {
@@ -356,6 +409,7 @@ namespace ClayInspectionScheduler.Models
             case "P":
             case "N":
             case "C":
+            case "":
               if (!UpdateStatus(InspectionId, ResultCode, current.ResultADC, Remarks, Comments, current.PrivateProviderInspectionRequestId, User))
               {
                 current.Errors.Add("Error saving your changes, please try again. If this message recurs, please contact the helpdesk.");
@@ -375,7 +429,7 @@ namespace ClayInspectionScheduler.Models
       }
       catch (Exception ex)
       {
-        new ErrorLog(ex, "");
+        Constants.Log(ex, "");
         return null;
       }
     }
@@ -407,7 +461,7 @@ namespace ClayInspectionScheduler.Models
         dp.Add("@SecondComment", "");
       }
 
-      
+
 
       string sql = @"
         USE WATSC;
@@ -517,7 +571,7 @@ namespace ClayInspectionScheduler.Models
           }
         default:
           Errors.Add("Unauthorized Access.");
-          return false;          
+          return false;
       }
     }
 

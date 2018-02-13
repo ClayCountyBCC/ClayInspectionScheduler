@@ -23,7 +23,7 @@ namespace InspSched
 
 
 
-  let permitscreen = <HTMLDivElement>document.getElementById('PermitScreen');
+  let InspectionTable = <HTMLDivElement>document.getElementById('InspectionTable');
   let InspectionTypeSelect = <HTMLSelectElement>document.getElementById("InspTypeSelect");
   let PermitSearchButton = <HTMLButtonElement>document.getElementById("PermitSearchButton");
   let CloseIssueDivButton = <HTMLButtonElement>document.getElementById("CloseIssueList");
@@ -80,7 +80,8 @@ namespace InspSched
   export function SearchPermit()
   {
 
-    permitscreen.style.display = "none";
+    InspectionTable.style.display = "none";
+
     UI.Hide('SaveConfirmed');
 
     UI.Hide('NotScheduled');
@@ -333,6 +334,81 @@ namespace InspSched
     }
   }
 
+  export function disableSaveCommentButton(InspectionRequestId: string)
+  {
+    let commentButton: HTMLButtonElement = (<HTMLButtonElement>document.getElementById(InspectionRequestId + "_save_comment_button"));
+    let remarkButton: HTMLButtonElement = (<HTMLButtonElement>document.getElementById(InspectionRequestId + "_save_remark_button"));
+
+    let currentResult = remarkButton.value;
+    
+    let remarkTextarea: HTMLTextAreaElement = (<HTMLTextAreaElement>document.getElementById(InspectionRequestId + "_remark_textarea"));
+
+    let value: string = (<HTMLInputElement>document.querySelector('input[name="' + InspectionRequestId + '_results"]:checked')).value;
+
+    if (value ==  currentResult && remarkTextarea.value != "")
+    {
+      commentButton.removeAttribute("disabled");
+    }
+    else
+    {
+      commentButton.setAttribute("disabled", "disabled");
+    }
+
+    enableSaveResultButton(InspectionRequestId);
+  }
+
+  export function enableSaveResultButton(InspectionRequestId: string)
+  {
+    let remarkButton: HTMLButtonElement = (<HTMLButtonElement>document.getElementById(InspectionRequestId + "_save_remark_button"));
+    let commentButton: HTMLButtonElement = (<HTMLButtonElement>document.getElementById(InspectionRequestId + "_save_comment_button"));
+
+    let remarkTextarea: HTMLTextAreaElement = (<HTMLTextAreaElement>document.getElementById(InspectionRequestId + "_remark_textarea"));
+
+    let value: string = (<HTMLInputElement>document.querySelector('input[name="' + InspectionRequestId + '_results"]:checked')).value;
+
+    switch (value)
+    {
+      case "A":
+        remarkButton.removeAttribute("disabled");
+        return;
+      case "P":
+      case "D":
+      case "N":
+      case "C":
+        if (remarkTextarea.value != "")
+        {
+          remarkButton.removeAttribute("disabled");
+        }
+        else
+        {
+          remarkButton.setAttribute("disabled", "disabled");
+          if (value == remarkButton.value && remarkTextarea.value == "")
+          {
+            commentButton.removeAttribute("disabled");
+          }
+          else
+          {
+            commentButton.setAttribute("disabled","disabled");
+          }
+        }
+        return;
+      default:
+        if (remarkTextarea.value == "" && remarkButton.value == value )
+        {
+          commentButton.removeAttribute("disabled");
+          remarkButton.setAttribute("disabled", "disabled");
+        }
+        else
+        {
+          commentButton.setAttribute("disabled", "disabled");
+          remarkButton.removeAttribute("disabled");
+
+        }
+        return;
+    }
+
+  }
+
   export function UpdatePermitSelectList(PermitNo: string): void
   {
     document.getElementById("NotScheduled").style.display = "none";
@@ -362,6 +438,67 @@ namespace InspSched
     $('#InspectionSchedulerTabs').foundation('selectTab', 'Scheduler', true);
 
     // clears Calendar of any chosen dates
+  }
+
+  export function SaveComment(InspectionRequestId: string)
+  {
+    let commentTextarea: HTMLTextAreaElement = (<HTMLTextAreaElement>document.getElementById(InspectionRequestId + "_comment_textarea"));
+    let completedComments: HTMLTextAreaElement = (<HTMLTextAreaElement>document.getElementById(InspectionRequestId + "_audit"));
+    let NewComment = commentTextarea.value;
+
+    transport.AddComment(parseInt(InspectionRequestId), NewComment).then(function (inspection: Inspection)
+    {
+      completedComments.value = inspection.Comment;
+      commentTextarea.value = "";
+
+    }, function ()
+      {
+        console.log("error in SaveComment");
+
+
+      });
+  }
+
+  export function UpdateInspection(permitNumber: string, InspectionRequestId: string)
+  {
+    let remarkTextarea: HTMLTextAreaElement = (<HTMLTextAreaElement>document.getElementById(InspectionRequestId + "_remark_textarea"));
+    let commentTextarea: HTMLTextAreaElement = (<HTMLTextAreaElement>document.getElementById(InspectionRequestId + "_comment_textarea"));
+    let value: string = (<HTMLInputElement>document.querySelector('input[name="' + InspectionRequestId + '_results"]:checked')).value;
+
+    
+
+    console.log("value: ", value);
+
+    let remarkText = remarkTextarea.value;
+
+    console.log("remarkText: ", remarkText);
+
+    let commentText = commentTextarea.value;
+
+    console.log("commentText: ", commentText);
+    let inspReqIdAsNum = parseInt(InspectionRequestId);
+
+    transport.UpdateInspection(permitNumber, inspReqIdAsNum, value, remarkText, commentText).then(function ()
+    {
+      SearchPermit();
+
+    }, function()
+    {
+      console.log('error in UpdateInspection');
+      // do something with the error here
+      // need to figure out how to detect if something wasn't found
+      // versus an error.
+      SearchPermit();
+    });
+
+    InspSched.UI.ToggleInspDetails(InspectionRequestId);
+
+    remarkTextarea.value = "";
+    commentTextarea.value = "";
+
+    // This will be updated to take inspection data returned from server and update the inspection to show new data.
+    
+
   }
 
   export function CancelInspection(InspID?: number, PermitNo?: string)
