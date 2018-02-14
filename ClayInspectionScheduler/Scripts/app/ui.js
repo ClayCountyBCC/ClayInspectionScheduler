@@ -302,7 +302,7 @@ var InspSched;
             remarkInput.id = inspection.InspReqID + "_remark_textarea";
             remarkInput.style.margin = "0";
             if (inspection.Remarks) {
-                remarkInput.textContent = inspection.Remarks;
+                remarkInput.value = inspection.Remarks;
             }
             remarkInput.classList.add("input-group-field");
             remarkInput.classList.add("columns");
@@ -332,7 +332,7 @@ var InspSched;
                 var link = document.createElement("a");
                 link.onclick = function (e) {
                     console.log('whoo', e);
-                    InspSched.UI.SetRemarkText(inspection.InspReqID, qr.Remark);
+                    return InspSched.UI.SetRemarkText(inspection.InspReqID, qr.Remark);
                 };
                 link.appendChild(document.createTextNode(qr.Remark));
                 quickRemarkLi.appendChild(link);
@@ -801,10 +801,10 @@ var InspSched;
         }
         UI.ToggleInspDetails = ToggleInspDetails;
         function SetRemarkText(InspectionId, Remark) {
-            console.log('set remark text', InspectionId, Remark);
-            var remarkElement = document.getElementById(InspectionId.toString() + "_remark_textarea");
-            console.log('remark element', remarkElement);
-            remarkElement.textContent = Remark;
+            var ul = document.getElementById("drop" + InspectionId.toString());
+            var input = document.getElementById(InspectionId.toString() + "_remark_textarea");
+            input.value = Remark;
+            ul.style.display = "none";
             return true;
         }
         UI.SetRemarkText = SetRemarkText;

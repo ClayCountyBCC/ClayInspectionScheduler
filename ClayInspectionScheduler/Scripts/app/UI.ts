@@ -416,7 +416,7 @@ namespace InspSched.UI
     remarkInput.style.margin = "0";
     if (inspection.Remarks)
     {
-      remarkInput.textContent = inspection.Remarks;
+      remarkInput.value = inspection.Remarks;
     }
     remarkInput.classList.add("input-group-field");
     remarkInput.classList.add("columns");
@@ -449,7 +449,7 @@ namespace InspSched.UI
       link.onclick = function (e: Event)
       {
         console.log('whoo', e);
-        InspSched.UI.SetRemarkText(inspection.InspReqID, qr.Remark);
+        return InspSched.UI.SetRemarkText(inspection.InspReqID, qr.Remark);
       };
       link.appendChild(document.createTextNode(qr.Remark));
       quickRemarkLi.appendChild(link);
@@ -1097,10 +1097,10 @@ namespace InspSched.UI
 
   export function SetRemarkText(InspectionId: number, Remark: string): boolean
   {
-    console.log('set remark text', InspectionId, Remark);
-    let remarkElement = (<HTMLInputElement>document.getElementById(InspectionId.toString() + "_remark_textarea"));
-    console.log('remark element', remarkElement);
-    remarkElement.textContent = Remark;
+    let ul: HTMLUListElement = (<HTMLUListElement>document.getElementById("drop" + InspectionId.toString()));
+    let input = (<HTMLInputElement>document.getElementById(InspectionId.toString() + "_remark_textarea"));
+    input.value = Remark;
+    ul.style.display = "none";
     return true;
   }
 
