@@ -260,12 +260,13 @@ var InspSched;
             CompletedRemarks.id = inspection.InspReqID.toString() + "_completed_remark";
             CompletedRemarks.style.display = "flex";
             var Remark = document.createElement("div");
-            Remark.className = "column large-9 medium-8 small-6 inspRemarks";
+            Remark.className = "column large-9 medium-6 small-6 inspRemarks";
             Remark.setAttribute("elementName", "Remark");
+            Remark.id = inspection.InspReqID.toString() + "_completed_remark_text";
             Remark.appendChild(document.createTextNode((inspection.Remarks !== null && inspection.Remarks !== "" ? inspection.Remarks.trim() : "")));
             var ResultDescription = document.createElement("div");
             ResultDescription.setAttribute("elementName", "ResultDescription");
-            ResultDescription.className = "large-3 medium-4 small-6 InspResult column large-text-left text-center end ";
+            ResultDescription.className = "large-3 medium-6 small-6 InspResult column end ";
             ResultDescription.appendChild(document.createTextNode(inspection.ResultDescription.trim()));
             // #endregion
             // #region add Remarks Container: add Remarks textarea, button, and radiobutton sections
@@ -293,6 +294,9 @@ var InspSched;
             remarkTextarea.className = "remark-text";
             remarkTextarea.rows = 1;
             remarkTextarea.id = inspection.InspReqID + "_remark_textarea";
+            if (inspection.Remarks) {
+                remarkTextarea.textContent = inspection.Remarks;
+            }
             var addRemarkButtonDiv = document.createElement("div");
             addRemarkButtonDiv.setAttribute("elementName", "addRemarkButtonDiv");
             addRemarkButtonDiv.className = "ButtonContainer column large-2 medium-4 small-12 flex-container align-center flex-child-grow";
@@ -321,12 +325,18 @@ var InspSched;
             var textboxdiv = document.createElement("div");
             textboxdiv.setAttribute("elementName", "textboxdiv");
             textboxdiv.className = "large-12 medium-12 small-12 row completed-comments-textarea ";
-            textboxdiv.style.display = "flex";
+            textboxdiv.style.display = "none";
+            textboxdiv.id = inspection.InspReqID.toString() + "_textbox_div";
             var thiscomment = document.createElement("textarea");
             thiscomment.setAttribute("elementName", "thiscomment");
             thiscomment.id = inspection.InspReqID + "_audit";
             thiscomment.className = "row large-12 medium-12 small-12 No-Edit";
             thiscomment.rows = 4;
+            thiscomment.readOnly = true;
+            thiscomment.contentEditable = "false";
+            thiscomment.style.margin = "0";
+            thiscomment.style.overflowY = "scroll";
+            thiscomment.style.display = "flex";
             var AddCommentDiv = document.createElement("div");
             AddCommentDiv.setAttribute("elementName", "AddCommentDiv");
             AddCommentDiv.className = "row large-12 medium-12 small-12 flex-container flex-child-grow";
@@ -398,7 +408,7 @@ var InspSched;
                 addRemark.appendChild(addRemarkTextDiv);
                 addRemark.appendChild(addRemarkButtonDiv);
                 addRemarkContainer.appendChild(addRemark);
-                radioButtonSection.appendChild(BuildRadioButtonRow(inspection.InspReqID.toString(), inspection.ResultADC, permit.access, 0));
+                radioButtonSection.appendChild(BuildRadioButtonRow(inspection.InspReqID.toString(), inspection.ResultADC, permit.access, inspection.PrivateProviderInspectionRequestId));
                 addRemarkContainer.appendChild(radioButtonSection);
             }
             // #endregion Initial Append Rows to Inspection Row
@@ -433,7 +443,7 @@ var InspSched;
             }
             DataRow.appendChild(InspButtonDiv);
             if (inspection.DisplayInspDateTime.length > 0) {
-                if (inspection.InspReqID.toString() !== "99999999") {
+                if (inspection.InspReqID > 0) {
                     CompletedRemarks.appendChild(Remark);
                     CompletedRemarks.appendChild(ResultDescription);
                     // remarks needs to be in the inspection data
@@ -445,18 +455,15 @@ var InspSched;
                     inspDesc.className = "large-10 medium-6 small-6 InspType InspResult column";
                 }
             }
+            CommentContainer.appendChild(textboxdiv);
             // SET COMMENTS
             if (inspection.Comment.length > 0) {
                 thiscomment.textContent = inspection.Comment;
-                thiscomment.readOnly = true;
-                thiscomment.contentEditable = "false";
-                thiscomment.style.margin = "0";
-                thiscomment.style.overflowY = "scroll";
-                thiscomment.style.display = "flex";
-                textboxdiv.appendChild(thiscomment);
                 textboxdiv.style.display = "flex";
-                CommentContainer.appendChild(textboxdiv);
+                thiscomment.style.display = "flex";
             }
+            textboxdiv.appendChild(thiscomment);
+            CommentContainer.appendChild(textboxdiv);
             AddCommentDiv.appendChild(commentlabel);
             AddCommentDiv.appendChild(AddCommentTextarea);
             SaveCommentButtonDiv.appendChild(SaveCommentButton);
@@ -495,9 +502,9 @@ var InspSched;
                 approveradio.value = (privateProvidercheck > 0 ? "P" : "A");
                 var approve = document.createElement("label");
                 approve.className = "column large-2 small-6";
-                approve.htmlFor = "approve_selection";
+                approve.htmlFor = privateProvidercheck > 0 ? "perform" : "approve" + "_selection";
                 approve.appendChild(approveradio);
-                approve.appendChild(document.createTextNode(privateProvidercheck > 0 ? "Perform" : "Approve"));
+                approve.appendChild(document.createTextNode(privateProvidercheck > 0 ? "Performed" : "Approved"));
                 var disapproveradio = document.createElement("input");
                 disapproveradio.id = (privateProvidercheck > 0 ? "not_performed" : "disapprove") + "_selection";
                 disapproveradio.type = "radio";
@@ -509,9 +516,9 @@ var InspSched;
                 disapproveradio.value = (privateProvidercheck > 0 ? "N" : "D");
                 var disapprove = document.createElement("label");
                 disapprove.className = "column large-2 small-6";
-                disapprove.htmlFor = "disapprove_selection";
+                disapprove.htmlFor = (privateProvidercheck > 0 ? "not_performed" : "disapprove") + "_selection";
                 disapprove.appendChild(disapproveradio);
-                disapprove.appendChild(document.createTextNode(privateProvidercheck > 0 ? "Not Performed" : "Disapprove"));
+                disapprove.appendChild(document.createTextNode(privateProvidercheck > 0 ? "Not Performed" : "Disapproved"));
                 RadioButtonSubrow.appendChild(approve);
                 RadioButtonSubrow.appendChild(disapprove);
             }

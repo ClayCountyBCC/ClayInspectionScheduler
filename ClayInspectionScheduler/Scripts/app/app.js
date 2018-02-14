@@ -212,7 +212,7 @@ var InspSched;
                     var date = $(dpCalendar).data('datepicker').getDate();
                     //return false;
                     $('change-date').submit();
-                    EnableSaveButton();
+                    EnableSaveNewInspectionButton();
                 });
             }
             ;
@@ -220,7 +220,7 @@ var InspSched;
         }
     }
     InspSched.BuildCalendar = BuildCalendar;
-    function EnableSaveButton() {
+    function EnableSaveNewInspectionButton() {
         {
             if (InspectionTypeSelect.value != "" && $(dpCalendar).data('datepicker').getDate() != null) {
                 SaveInspectionButton.removeAttribute("disabled");
@@ -252,9 +252,13 @@ var InspSched;
         var commentButton = document.getElementById(InspectionRequestId + "_save_comment_button");
         var remarkTextarea = document.getElementById(InspectionRequestId + "_remark_textarea");
         var value = document.querySelector('input[name="' + InspectionRequestId + '_results"]:checked').value;
+        var currentResult = remarkButton.value;
         switch (value) {
             case "A":
-                remarkButton.removeAttribute("disabled");
+                if (currentResult != value) {
+                    remarkButton.removeAttribute("disabled");
+                    commentButton.setAttribute("disabled", "disabled");
+                }
                 return;
             case "P":
             case "D":
@@ -262,11 +266,13 @@ var InspSched;
             case "C":
                 if (remarkTextarea.value != "") {
                     remarkButton.removeAttribute("disabled");
+                    commentButton.setAttribute("disabled", "disabled");
                 }
                 else {
                     remarkButton.setAttribute("disabled", "disabled");
                     if (value == remarkButton.value && remarkTextarea.value == "") {
                         commentButton.removeAttribute("disabled");
+                        commentButton.setAttribute("disabled", "disabled");
                     }
                     else {
                         commentButton.setAttribute("disabled", "disabled");
@@ -310,7 +316,8 @@ var InspSched;
         var completedComments = document.getElementById(InspectionRequestId + "_audit");
         var NewComment = commentTextarea.value;
         InspSched.transport.AddComment(parseInt(InspectionRequestId), NewComment).then(function (inspection) {
-            completedComments.value = inspection.Comment;
+            completedComments.textContent = inspection.Comment;
+            document.getElementById(InspectionRequestId.toString() + "_textbox_div").style.display = "flex";
             commentTextarea.value = "";
         }, function () {
             console.log("error in SaveComment");
@@ -318,24 +325,29 @@ var InspSched;
     }
     InspSched.SaveComment = SaveComment;
     function UpdateInspection(permitNumber, InspectionRequestId) {
+        var completedRemark = document.getElementById(InspectionRequestId + "_completed_remark_text");
+        var completedComments = document.getElementById(InspectionRequestId + "_audit");
         var remarkTextarea = document.getElementById(InspectionRequestId + "_remark_textarea");
         var commentTextarea = document.getElementById(InspectionRequestId + "_comment_textarea");
         var value = document.querySelector('input[name="' + InspectionRequestId + '_results"]:checked').value;
         var remarkText = remarkTextarea.value;
         var commentText = commentTextarea.value;
         var inspReqIdAsNum = parseInt(InspectionRequestId);
-        InspSched.transport.UpdateInspection(permitNumber, inspReqIdAsNum, value, remarkText, commentText).then(function () {
-            SearchPermit();
+        InspSched.transport.UpdateInspection(permitNumber, inspReqIdAsNum, value, remarkText, commentText).then(function (updatedInspection) {
+            //Instead of SearchPermit(), The current open Inspection data should change while expanded, much like the save comment.
+            //SearchPermit();
+            remarkTextarea.value = updatedInspection.Remarks;
+            completedComments.textContent = "";
+            completedComments.textContent = updatedInspection.Comment;
+            commentTextarea.value = "";
+            completedRemark.innerText = updatedInspection.Remarks;
         }, function () {
             console.log('error in UpdateInspection');
             // do something with the error here
             // need to figure out how to detect if something wasn't found
             // versus an error.
-            SearchPermit();
+            //SearchPermit();
         });
-        InspSched.UI.ToggleInspDetails(InspectionRequestId);
-        remarkTextarea.value = "";
-        commentTextarea.value = "";
         // This will be updated to take inspection data returned from server and update the inspection to show new data.
     }
     InspSched.UpdateInspection = UpdateInspection;
