@@ -10,11 +10,13 @@
 /// <reference path="inspectorui.ts" />
 /// <reference path="inspectorview.ts" />
 /// <reference path="inspector.ts" />
+/// <reference path="quickremark.ts" />
 var InspSched;
 (function (InspSched) {
     "use strict";
     var dpCalendar = null;
     InspSched.InspectionTypes = [];
+    InspSched.InspectionQuickRemarks = [];
     InspSched.CurrentPermits = [];
     InspSched.CurrentInspections = [];
     InspSched.IssuesExist = [];
@@ -183,6 +185,7 @@ var InspSched;
         IssueContainer.style.display = "none";
         LoadInspectionTypes();
         InspSched.InspectorUI.LoadDailyInspections();
+        LoadInspectionQuickRemarks();
     }
     function LoadInspectionTypes() {
         InspSched.transport.GetInspType().then(function (insptypes) {
@@ -194,6 +197,18 @@ var InspSched;
             // versus an error.
             //Hide('Searching');
             InspSched.InspectionTypes = [];
+        });
+    }
+    function LoadInspectionQuickRemarks() {
+        InspSched.transport.GetInspectionQuickRemarks().then(function (quickremarks) {
+            InspSched.InspectionQuickRemarks = quickremarks;
+            console.log('quick remarks', quickremarks);
+        }, function () {
+            console.log('error in Load Inspection Quick Remarks');
+            // do something with the error here
+            // need to figure out how to detect if something wasn't found
+            // versus an error.
+            InspSched.InspectionQuickRemarks = [];
         });
     }
     function BuildCalendar(dates, errorText) {
@@ -324,7 +339,23 @@ var InspSched;
         });
     }
     InspSched.SaveComment = SaveComment;
+    function UpdateResultButton(InspectionId, status) {
+        var remarkButton = document.getElementById(InspectionId + "_save_remark_button");
+        switch (status) {
+            case "saving":
+                remarkButton.textContent = "Saving...";
+                remarkButton.classList.remove;
+                remarkButton.disabled = true;
+                break;
+            case "saved":
+                remarkButton.textContent = "Saved";
+                remarkButton.disabled = false;
+                window.setTimeout(function (j) { remarkButton.textContent = "Save Result"; }, 5000);
+                break;
+        }
+    }
     function UpdateInspection(permitNumber, InspectionRequestId) {
+        UpdateResultButton(InspectionRequestId, "saving");
         var completedRemark = document.getElementById(InspectionRequestId + "_completed_remark_text");
         var completedComments = document.getElementById(InspectionRequestId + "_audit");
         var remarkTextarea = document.getElementById(InspectionRequestId + "_remark_textarea");
@@ -341,6 +372,7 @@ var InspSched;
             completedComments.textContent = updatedInspection.Comment;
             commentTextarea.value = "";
             completedRemark.innerText = updatedInspection.Remarks;
+            UpdateResultButton(InspectionRequestId, "saved");
         }, function () {
             console.log('error in UpdateInspection');
             // do something with the error here
@@ -369,5 +401,35 @@ var InspSched;
         }
     }
     InspSched.CancelInspection = CancelInspection;
+    function FilterQuickRemarks(InspectionType, IsPrivateProvider) {
+        return InspSched.InspectionQuickRemarks.filter(function (j) {
+            var permitTypeCheck = false;
+            switch (InspectionType) {
+                case "0":
+                case "1":
+                case "9":
+                    if (j.Building) {
+                        return true;
+                    }
+                case "2":
+                    if (j.Electrical) {
+                        return true;
+                    }
+                case "3":
+                    if (j.Plumbing) {
+                        return true;
+                    }
+                case "4":
+                    if (j.Mechanical) {
+                        return true;
+                    }
+                case "6":
+                    // fire
+                    break;
+            }
+            return (IsPrivateProvider && j.PrivateProvider);
+        });
+    }
+    InspSched.FilterQuickRemarks = FilterQuickRemarks;
 })(InspSched || (InspSched = {}));
 //# sourceMappingURL=app.js.map

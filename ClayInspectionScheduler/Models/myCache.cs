@@ -47,6 +47,8 @@ namespace ClayInspectionScheduler.Models
 
       switch (s[0].ToLower())
       {
+        case "quickremarks":
+          return QuickRemark.GetInspectionQuickRemarks();
         case "inspector":
           return Inspector.Get();
         case "useraccess":

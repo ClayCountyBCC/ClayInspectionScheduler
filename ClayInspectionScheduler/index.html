@@ -6,15 +6,15 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <link type="text/css" rel="stylesheet" xmlns="http://www.w3.org/1999/xhtml" />
+  <!--<link type="text/css" rel="stylesheet" xmlns="http://www.w3.org/1999/xhtml" />-->
   <meta name="description" content="Clay Inspections" />
 
   <link href="Content/css/jquery-ui.css" rel="stylesheet" />
   <link href="Content/css/bootstrap-datepicker3.standalone.css" rel="stylesheet" />
-  <!--<link href="Content/css/foundation-flex.min.css" rel="stylesheet" />-->
-  <link href="//cdnjs.cloudflare.com/ajax/libs/foundation/6.3.1/css/foundation-flex.min.css" rel="stylesheet" />
+  <link href="Content/css/foundation-flex.min.css" rel="stylesheet" />
+  <!--<link href="//cdnjs.cloudflare.com/ajax/libs/foundation/6.4.3/css/foundation.css" rel="stylesheet" />-->
   <link href="Content/css/foundation.min.css" rel="stylesheet" />
-  <!--<link href="//cdnjs.cloudflare.com/ajax/libs/foundation/6.3.1/css/foundation.min.css" rel="stylesheet" />-->
+  <!--<link href="//cdnjs.cloudflare.com/ajax/libs/foundation/6.3.1/css/foundation-flex.min.css" rel="stylesheet" />-->
   <link href="Content/fonts/foundation-icons.css" rel="stylesheet" />
   <link href="Content/css/MyStyle.css" rel="stylesheet" />
 
@@ -68,7 +68,8 @@
             <li class="tabs-title">
               <a href="#Scheduler">Scheduler View</a>
             </li>
-            <li id="InspectorViewTab"
+            <li style="display: none;"
+                id="InspectorViewTab"
                 class="tabs-title">
               <a href="#Inspector">Inspector View</a>
             </li>
@@ -247,16 +248,16 @@
                   </div>
                   <!--<div class="flex-container row align-center align-middle">
 
-                </div>-->
+                  </div>-->
                 </div>
               </div>
 
               <!-- The menu for the inspector view will go here
-            they will use this to pick today/tomorrow
-            and choose an inspector
-            and refresh the data
-            open/closed
-            -->
+              they will use this to pick today/tomorrow
+              and choose an inspector
+              and refresh the data
+              open/closed
+              -->
 
 
               <div style="margin-top: .5em;"
@@ -288,6 +289,7 @@
   <script src="Scripts/moment.min.js"></script>
   <script src="Scripts/bootstrap-datepicker.js"></script>
   <script src="Scripts/foundation.min.js"></script>
+  <!--<script src="//cdnjs.cloudflare.com/ajax/libs/foundation/6.4.3/js/foundation.js"></script>-->
 
   <script>$(document).foundation();</script>
   <script>

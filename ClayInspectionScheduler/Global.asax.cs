@@ -17,6 +17,7 @@ namespace ClayInspectionScheduler
       Models.InspType.GetCachedInspectionTypes();
       Models.Inspector.GetCached();
       Models.UserAccess.GetCachedAllUserAccess();
+      Models.QuickRemark.GetCachedInspectionQuickRemarks();
     }
   }
 }

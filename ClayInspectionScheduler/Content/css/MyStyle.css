@@ -452,7 +452,7 @@ h5 {
   resize: none;
   line-height: 1.25em;
   min-height: 1.5em;
-  margin: 0px 553px 0px 0px;
+  margin: 0;
   padding: 0;
 }
 
@@ -492,4 +492,8 @@ h5 {
 #Inspector {
   height: 100%;
   max-height: 100%;
+}
+.quick-remark-list > li
+{
+  list-style: none;
 }

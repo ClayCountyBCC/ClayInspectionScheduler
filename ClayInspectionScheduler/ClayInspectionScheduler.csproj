@@ -120,6 +120,7 @@
     <Compile Include="Models\myCache.cs" />
     <Compile Include="Models\NewInspection.cs" />
     <Compile Include="Models\Permit.cs" />
+    <Compile Include="Models\QuickRemark.cs" />
     <Compile Include="Models\UserAccess.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -209,6 +210,7 @@
     <TypeScriptCompile Include="Scripts\app\Inspection.ts" />
     <TypeScriptCompile Include="Scripts\app\InspType.ts" />
     <TypeScriptCompile Include="Scripts\app\Permit.ts" />
+    <TypeScriptCompile Include="Scripts\app\QuickRemark.ts" />
     <TypeScriptCompile Include="Scripts\app\ShortInspection.ts" />
     <TypeScriptCompile Include="Scripts\app\transport.ts" />
     <TypeScriptCompile Include="Scripts\app\typings\es6-promise\es6-promise.d.ts" />

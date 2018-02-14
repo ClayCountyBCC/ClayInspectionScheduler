@@ -6,7 +6,6 @@ namespace InspSched
 {
   export enum access_type 
   {
-    no_access = 0, // denied access
     public_access = 1, // They get treated like public users.
     basic_access = 2,
     inspector_access = 3

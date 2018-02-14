@@ -239,10 +239,13 @@ namespace InspSched.UI
       BuildScheduler(InspSched.CurrentInspections, key);
 
       // This is how we auto select an inspection when one is passed from the inspection view.
-      let hash = new LocationHash(location.hash.substring(1));
-      if (hash.InspectionId > 0)
+      if (InspSched.CurrentPermits[0].access !== InspSched.access_type.public_access)
       {
-        InspSched.UI.ToggleInspDetails(hash.InspectionId.toString());
+        let hash = new LocationHash(location.hash.substring(1));
+        if (hash.InspectionId > 0)
+        {
+          InspSched.UI.ToggleInspDetails(hash.InspectionId.toString());
+        }
       }
       return true;
     }, function ()
@@ -300,7 +303,7 @@ namespace InspSched.UI
 
 
     let inspRow: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-    inspRow.setAttribute("elementName", "inspRow");
+    //inspRow.setAttribute("elementName", "inspRow");
 
     // Set Inspection Row element classes 
     if (inspection.ResultADC.length == 0)
@@ -317,33 +320,33 @@ namespace InspSched.UI
     //*******************************************************************************************
     let DataRow: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
     DataRow.className = "large-12 medium-12 small-12 row flex-container align-middle";
-    DataRow.setAttribute("elementName", "dataColumn");
+    //DataRow.setAttribute("elementName", "dataColumn");
 
     let inspectionData: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-    inspectionData.setAttribute("elementName", "inspectionData");
+    //inspectionData.setAttribute("elementName", "inspectionData");
     inspectionData.className = "large-10 medium-8 small-12";
 
     let permitNumber: HTMLDivElement = (<HTMLDivElement>document.createElement('div'));
     permitNumber.className = "large-2 medium-6 small-6 column InspPermit ";
-    permitNumber.setAttribute("elementName", "permitNumber");
+    //permitNumber.setAttribute("elementName", "permitNumber");
 
     let inspDesc: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
     inspDesc.className = "large-5 medium-6 small-6 InspType column";
-    inspDesc.setAttribute("elementName", "inspDesc");
+    //inspDesc.setAttribute("elementName", "inspDesc");
     inspDesc.appendChild(document.createTextNode(inspection.InsDesc.trim()));
 
     let inspDateTime: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
     inspDateTime.className = "large-2 medium-6 small-6 column InspDate";
-    inspDateTime.setAttribute("elementName", "inspDateTime");
+    //inspDateTime.setAttribute("elementName", "inspDateTime");
 
     let inspector: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
     inspector.className = "large-3 medium-6 small-12 InspResult column end";
-    inspector.setAttribute("elementName", "inspector");
+    //inspector.setAttribute("elementName", "inspector");
     inspector.appendChild(document.createTextNode(inspection.InspectorName.trim()));
 
     //********************************************
     let InspButtonDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-    InspButtonDiv.setAttribute("elementName", "InspButtonDiv");
+    //InspButtonDiv.setAttribute("elementName", "InspButtonDiv");
     InspButtonDiv.className = "ButtonContainer row large-2 medium-4 small-12 flex-container align-center";
 
     // #endregion
@@ -352,24 +355,24 @@ namespace InspSched.UI
     //*******************************************************************************************
     let DetailsContainer: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
     DetailsContainer.className = "large-12 medium-12 small-12 row flex-container align-middle details-container";
-    DetailsContainer.setAttribute("elementName", "DetailsSection");
+    //DetailsContainer.setAttribute("elementName", "DetailsSection");
 
 
     //*********************************************
     let CompletedRemarks: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-    CompletedRemarks.setAttribute("elementName", "CompletedRemarks");
+    //CompletedRemarks.setAttribute("elementName", "CompletedRemarks");
     CompletedRemarks.className = "large-12 medium-12 small-12 row";
     CompletedRemarks.id = inspection.InspReqID.toString() + "_completed_remark";
     CompletedRemarks.style.display = "flex";
 
     let Remark: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
     Remark.className = "column large-9 medium-6 small-6 inspRemarks";
-    Remark.setAttribute("elementName", "Remark");
+    //Remark.setAttribute("elementName", "Remark");
     Remark.id = inspection.InspReqID.toString() + "_completed_remark_text";
     Remark.appendChild(document.createTextNode((inspection.Remarks !== null && inspection.Remarks !== "" ? inspection.Remarks.trim() : "")));
 
     let ResultDescription: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-    ResultDescription.setAttribute("elementName", "ResultDescription");
+    //ResultDescription.setAttribute("elementName", "ResultDescription");
     ResultDescription.className = "large-3 medium-6 small-6 InspResult column end ";
     ResultDescription.appendChild(document.createTextNode(inspection.ResultDescription.trim()));
     // #endregion
@@ -377,48 +380,92 @@ namespace InspSched.UI
     // #region add Remarks Container: add Remarks textarea, button, and radiobutton sections
     //*******************************************************************************
     let addRemarkContainer: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-    addRemarkContainer.setAttribute("elementName", "addRemarkContainer");
+    //addRemarkContainer.setAttribute("elementName", "addRemarkContainer");
     addRemarkContainer.className = "large-12 medium-12 small-12 row flex-container align-middle add-remark-container";
     addRemarkContainer.id = inspection.InspReqID + "_add_remark";
     addRemarkContainer.style.display = "none";
 
     //***************************************
     let addRemark: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-    addRemark.setAttribute("elementName", "addRemark");
+    //addRemark.setAttribute("elementName", "addRemark");
     addRemark.className = "row large-12 medium-12 small-12 flex-container flex-child-grow";
 
 
 
     let addRemarkLabel: HTMLLabelElement = (<HTMLLabelElement>document.createElement("label"));
-    addRemarkLabel.setAttribute("elementName", "addRemarkLabel");
+    //addRemarkLabel.setAttribute("elementName", "addRemarkLabel");
     addRemarkLabel.className = "large-12 medium-12 small-12 row ";
     addRemarkLabel.textContent = "Public Remarks:";
     addRemarkLabel.style.textAlign = "left";
 
     let addRemarkTextDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-    addRemarkTextDiv.className = "large-10 medium-8 small-12 flex-dir-row";
-    addRemarkTextDiv.style.paddingLeft = "1em";
+    addRemarkTextDiv.className = "large-10 medium-8 small-12";
+    //addRemarkTextDiv.classList.add("row");
+    addRemarkTextDiv.classList.add("flex-container");
+    let addRemarkInputGroup: HTMLDivElement = document.createElement("div");
+    addRemarkInputGroup.classList.add("input-group");
+    addRemarkInputGroup.classList.add("small-12");
 
 
-    let remarkTextarea: HTMLTextAreaElement = (<HTMLTextAreaElement>document.createElement("textarea"));
-    remarkTextarea.setAttribute("elementName", "remarkTextarea");
-    remarkTextarea.setAttribute("onkeyup", "InspSched.disableSaveCommentButton(" + inspection.InspReqID + ")");
-    remarkTextarea.className = "remark-text";
-    remarkTextarea.rows = 1;
-    remarkTextarea.id = inspection.InspReqID + "_remark_textarea";
+    let remarkInput: HTMLInputElement = (<HTMLInputElement>document.createElement("input"));
+    remarkInput.type = "text";
+    //remarkInput.setAttribute("elementName", "remarkTextarea");
+    remarkInput.setAttribute("onkeyup", "InspSched.disableSaveCommentButton(" + inspection.InspReqID + ")");
+    //remarkInput.className = "remark-text";
+    remarkInput.id = inspection.InspReqID + "_remark_textarea";
+    remarkInput.style.margin = "0";
     if (inspection.Remarks)
     {
-      remarkTextarea.textContent = inspection.Remarks;
+      remarkInput.textContent = inspection.Remarks;
     }
-
-
+    remarkInput.classList.add("input-group-field");
+    remarkInput.classList.add("columns");
+    let containerSpan: HTMLSpanElement = document.createElement("span");
+    containerSpan.classList.add("input-group-button")
+    let quickRemarkButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
+    quickRemarkButton.classList.add("button");
+    quickRemarkButton.classList.add("dropdown");
+    quickRemarkButton.classList.add("arrow-only");
+    quickRemarkButton.style.borderLeftWidth = "0";
+    quickRemarkButton.classList.add("end");
+    quickRemarkButton.onclick = function (e: Event)
+    {
+      let toggle = quickRemarkUL.style.display === "block";
+      quickRemarkUL.style.display = toggle ? "none" : "block";
+      console.log('clicky');
+    }
+    let quickRemarkUL: HTMLUListElement = (<HTMLUListElement>document.createElement("UL"));
+    quickRemarkUL.id = "drop" + inspection.InspReqID.toString();
+    quickRemarkUL.classList.add("quick-remark-list");
+    quickRemarkUL.classList.add("small-12");
+    quickRemarkUL.classList.add("row");
+    quickRemarkUL.style.display = "none";
+    quickRemarkUL.style.textDecoration = "none";
+    let filteredRemarks = FilterQuickRemarks(inspection.PermitNo[0], inspection.PrivateProviderInspectionRequestId > 0);
+    for (let qr of filteredRemarks)
+    {
+      let quickRemarkLi: HTMLLIElement = (<HTMLLIElement>document.createElement("LI"));
+      let link: HTMLAnchorElement = document.createElement("a");
+      link.onclick = function (e: Event)
+      {
+        console.log('whoo', e);
+        InspSched.UI.SetRemarkText(inspection.InspReqID, qr.Remark);
+      };
+      link.appendChild(document.createTextNode(qr.Remark));
+      quickRemarkLi.appendChild(link);
+      quickRemarkUL.appendChild(quickRemarkLi);
+    }
+    containerSpan.appendChild(quickRemarkButton);
+    addRemarkInputGroup.appendChild(remarkInput);
+    addRemarkInputGroup.appendChild(containerSpan);
+    
 
     let addRemarkButtonDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-    addRemarkButtonDiv.setAttribute("elementName", "addRemarkButtonDiv");
+    //addRemarkButtonDiv.setAttribute("elementName", "addRemarkButtonDiv");
     addRemarkButtonDiv.className = "ButtonContainer column large-2 medium-4 small-12 flex-container align-center flex-child-grow";
 
     let addRemarkButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
-    addRemarkButton.setAttribute("elementName", "addRemarkButton");
+    //addRemarkButton.setAttribute("elementName", "addRemarkButton");
     addRemarkButton.setAttribute("disabled", "disabled");
     addRemarkButton.setAttribute("value", inspection.ResultADC);
     addRemarkButton.id = inspection.InspReqID + "_save_remark_button";
@@ -430,7 +477,7 @@ namespace InspSched.UI
 
     //***************************************
     let radioButtonSection: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-    radioButtonSection.setAttribute("elementName", "radioButtonSection");
+    //radioButtonSection.setAttribute("elementName", "radioButtonSection");
     radioButtonSection.className = "large-12 medium-12 small-12 column";
     radioButtonSection.style.paddingLeft = "1em";
 
@@ -442,20 +489,20 @@ namespace InspSched.UI
     //*********************************************************************************
     let CommentContainer: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
     CommentContainer.className = "large-12 medium-12 small-12 row flex-container comment-container completed-comments-textarea";
-    CommentContainer.setAttribute("elementName", "CommentContainer");
+    //CommentContainer.setAttribute("elementName", "CommentContainer");
     CommentContainer.style.display = "none";
     CommentContainer.id = inspection.InspReqID + "_comments";
 
 
     let textboxdiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-    textboxdiv.setAttribute("elementName", "textboxdiv");
+    //textboxdiv.setAttribute("elementName", "textboxdiv");
     textboxdiv.className = "large-12 medium-12 small-12 row completed-comments-textarea ";
     textboxdiv.style.display = "none";
     textboxdiv.id = inspection.InspReqID.toString() + "_textbox_div";
 
 
     let thiscomment: HTMLTextAreaElement = (<HTMLTextAreaElement>document.createElement("textarea"));
-    thiscomment.setAttribute("elementName", "thiscomment");
+    //thiscomment.setAttribute("elementName", "thiscomment");
     thiscomment.id = inspection.InspReqID + "_audit"
     thiscomment.className = "row large-12 medium-12 small-12 No-Edit";
     thiscomment.rows = 4;
@@ -466,18 +513,18 @@ namespace InspSched.UI
     thiscomment.style.display = "flex";
 
     let AddCommentDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-    AddCommentDiv.setAttribute("elementName", "AddCommentDiv");
+    //AddCommentDiv.setAttribute("elementName", "AddCommentDiv");
     AddCommentDiv.className = "row large-12 medium-12 small-12 flex-container flex-child-grow";
     AddCommentDiv.style.paddingLeft = "1em";
 
     let commentlabel: HTMLLabelElement = (<HTMLLabelElement>document.createElement("label"));
-    commentlabel.setAttribute("elementName", "commentlabel");
+    //commentlabel.setAttribute("elementName", "commentlabel");
     commentlabel.className = "large-12 medium-12 small-12 row ";
     commentlabel.style.textAlign = "left";
     commentlabel.innerText = "Add Comments:";
 
     let AddCommentTextarea: HTMLTextAreaElement = (<HTMLTextAreaElement>document.createElement("textarea"));
-    AddCommentTextarea.setAttribute("elementName", "AddCommentTextarea");
+    //AddCommentTextarea.setAttribute("elementName", "AddCommentTextarea");
     AddCommentTextarea.className = "large-10 medium-10 small-12 flex-dir-row Comment-Textarea";
     AddCommentTextarea.style.resize = "none";
     AddCommentTextarea.rows = 3;
@@ -486,12 +533,12 @@ namespace InspSched.UI
 
 
     let SaveCommentButtonDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-    SaveCommentButtonDiv.setAttribute("elementName", "SaveCommentuttonDiv");
+    //SaveCommentButtonDiv.setAttribute("elementName", "SaveCommentuttonDiv");
     SaveCommentButtonDiv.className = "ButtonContainer row large-2 medium-2 small-12 flex-container align-center";
 
     let SaveCommentButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
     SaveCommentButton.className = "button align-self-center columns SaveCommentButton";
-    SaveCommentButton.setAttribute("elementName", "SaveCommentButton");
+    //SaveCommentButton.setAttribute("elementName", "SaveCommentButton");
     SaveCommentButton.setAttribute("onclick", "InspSched.SaveComment('" + inspection.InspReqID + "','" + AddCommentTextarea.value + "')");
     SaveCommentButton.textContent = "Save Comment";
     SaveCommentButton.id = inspection.InspReqID + "_save_comment_button";
@@ -554,7 +601,8 @@ namespace InspSched.UI
     if (permit.access != InspSched.access_type.public_access &&
       (inspection.Day != "" || inspection.ResultADC == ""))
     {
-      addRemarkTextDiv.appendChild(remarkTextarea);
+      addRemarkTextDiv.appendChild(addRemarkInputGroup);
+      addRemarkTextDiv.appendChild(quickRemarkUL);
       addRemarkButtonDiv.appendChild(addRemarkButton);
       addRemark.appendChild(addRemarkLabel);
       addRemark.appendChild(addRemarkTextDiv);
@@ -576,26 +624,21 @@ namespace InspSched.UI
     detailButton.className = "column large-12 medium-12 small-12 align-self-center  DetailsButton";
 
     //Create function to make New/Cancel/Details Button
-    if ((inspection.ResultADC.length > 0 || inspection.DisplaySchedDateTime.length === 0))
+    if (permit.ErrorText.length === 0)
     {
-
-      let buttonId: string = "CreateNew_" + inspection.PermitNo;
-      if (!document.getElementById(buttonId) && permit.ErrorText.length === 0)
-      {
-        InspButtonDiv.appendChild(BuildButton(buttonId, "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
-      }
-      else
-      {
-        detailButton.style.margin = "0";
-      }
-
-      if (permit.access !== InspSched.access_type.public_access)
-      {
-        InspButtonDiv.appendChild(detailButton);
-      }
-
+      InspButtonDiv.appendChild(BuildButton("", "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
     }
-    else if (inspection.ResultADC.length == 0) 
+    else
+    {
+      detailButton.style.margin = "0";
+    }
+
+    if (permit.access !== InspSched.access_type.public_access)
+    {
+      InspButtonDiv.appendChild(detailButton);
+    }
+
+    if (inspection.ResultADC.length == 0) 
     {
       if (IsGoodCancelDate(inspection, permit.access))
       {
@@ -610,11 +653,8 @@ namespace InspSched.UI
         }
         else
         {
-
-
-          detailButton.style.margin = "0";
+          //detailButton.style.margin = "0";
           InspButtonDiv.appendChild(detailButton);
-
         }
       }
     }
@@ -679,7 +719,10 @@ namespace InspSched.UI
   function BuildButton(buttonId: string, label: string, functionCall: string, value?: string): HTMLButtonElement
   {
     let InspButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
-    InspButton.id = buttonId;
+    if (buttonId.length > 0)
+    {
+      InspButton.id = buttonId;
+    }    
     InspButton.value = "";
     InspButton.className = "align-self-center columns NewInspButton";
     InspButton.appendChild(document.createTextNode(label));
@@ -993,7 +1036,7 @@ namespace InspSched.UI
     let inspDate = new Date(inspection.DisplaySchedDateTime);
     var dayOfMonth = tomorrow.getDate() + 1;
 
-    if (inspDate < tomorrow && (access == InspSched.access_type.no_access || access == InspSched.access_type.public_access))
+    if (inspDate < tomorrow && (access == InspSched.access_type.public_access))
       return false;
 
     return true;
@@ -1047,18 +1090,18 @@ namespace InspSched.UI
     {
       comments.style.display = elementState == 'none' ? 'flex' : 'none';
     }
-
     let buttonString = (elementState == 'none' ? 'Hide ': '') + 'Details';
-
     document.getElementById(InspectionId + '_details_btn').textContent = buttonString;
-
-    //InspSched.enableSaveResultButton(InspectionId);
-
     InspSched.UI.CurrentDetailsOpen = InspectionId;
-
-
-
   }
 
+  export function SetRemarkText(InspectionId: number, Remark: string): boolean
+  {
+    console.log('set remark text', InspectionId, Remark);
+    let remarkElement = (<HTMLInputElement>document.getElementById(InspectionId.toString() + "_remark_textarea"));
+    console.log('remark element', remarkElement);
+    remarkElement.textContent = Remark;
+    return true;
+  }
 
 }

@@ -10,6 +10,7 @@
 /// <reference path="inspectorui.ts" />
 /// <reference path="inspectorview.ts" />
 /// <reference path="inspector.ts" />
+/// <reference path="quickremark.ts" />
 
 namespace InspSched
 {
@@ -17,6 +18,7 @@ namespace InspSched
 
   let dpCalendar = null;
   export let InspectionTypes: Array<InspType> = [];
+  export let InspectionQuickRemarks: Array<QuickRemark> = [];
   export let newInsp: NewInspection;
   export let CurrentPermits: Array<Permit> = [];
   export let CurrentInspections: Array<Inspection> = [];
@@ -257,12 +259,12 @@ namespace InspSched
     IssueContainer.style.display = "none";
     LoadInspectionTypes();
     InspectorUI.LoadDailyInspections();
+    LoadInspectionQuickRemarks();
 
   }
 
   function LoadInspectionTypes()
   {
-
     transport.GetInspType().then(function (insptypes: Array<InspType>)
     {
       InspSched.InspectionTypes = insptypes;
@@ -275,6 +277,23 @@ namespace InspSched
         // versus an error.
         //Hide('Searching');
         InspSched.InspectionTypes = [];
+      });
+  }
+
+  function LoadInspectionQuickRemarks(): void
+  {
+    transport.GetInspectionQuickRemarks().then(function (quickremarks: Array<QuickRemark>)
+    {
+      InspSched.InspectionQuickRemarks = quickremarks;
+      console.log('quick remarks', quickremarks);
+    },
+      function ()
+      {
+        console.log('error in Load Inspection Quick Remarks');
+        // do something with the error here
+        // need to figure out how to detect if something wasn't found
+        // versus an error.
+        InspSched.InspectionQuickRemarks = [];
       });
   }
 
@@ -467,8 +486,27 @@ namespace InspSched
       });
   }
 
+  function UpdateResultButton(InspectionId: string, status: string):void
+  {
+    let remarkButton = <HTMLButtonElement>document.getElementById(InspectionId + "_save_remark_button");
+    switch (status)
+    {
+      case "saving":
+        remarkButton.textContent = "Saving..."
+        remarkButton.classList.remove
+        remarkButton.disabled = true;
+        break;
+      case "saved":
+        remarkButton.textContent = "Saved"
+        remarkButton.disabled = false;
+        window.setTimeout(function (j) { remarkButton.textContent = "Save Result" }, 5000);        
+        break;
+    }
+  }
+
   export function UpdateInspection(permitNumber: string, InspectionRequestId: string)
   {
+    UpdateResultButton(InspectionRequestId, "saving");
     let completedRemark = (<HTMLDivElement>document.getElementById(InspectionRequestId+ "_completed_remark_text"));
     let completedComments = (<HTMLTextAreaElement>document.getElementById(InspectionRequestId+ "_audit"));
     let remarkTextarea: HTMLTextAreaElement = (<HTMLTextAreaElement>document.getElementById(InspectionRequestId + "_remark_textarea"));
@@ -491,8 +529,7 @@ namespace InspSched
       completedComments.textContent = updatedInspection.Comment;
       commentTextarea.value = "";
       completedRemark.innerText = updatedInspection.Remarks;
-
-
+      UpdateResultButton(InspectionRequestId, "saved");
     }, function ()
       {
         console.log('error in UpdateInspection');
@@ -536,6 +573,45 @@ namespace InspSched
 
       }
     }
+  }
+
+  export function FilterQuickRemarks(InspectionType: string, IsPrivateProvider: boolean): Array<QuickRemark>
+  {
+    return InspSched.InspectionQuickRemarks.filter(
+      function (j)
+      {
+        let permitTypeCheck: boolean = false;
+        switch (InspectionType)
+        {
+          case "0":
+          case "1":
+          case "9":
+            if (j.Building)
+            {
+              return true;
+            }
+
+          case "2":
+            if (j.Electrical)
+            {
+              return true;
+            }
+          case "3":
+            if (j.Plumbing)
+            {
+              return true;
+            }
+          case "4":
+            if (j.Mechanical)
+            {
+              return true;
+            }
+          case "6":
+            // fire
+            break;
+        }
+        return (IsPrivateProvider && j.PrivateProvider)
+      });
   }
 
 }

@@ -137,6 +137,19 @@ var InspSched;
             });
         }
         transport.Inspectors = Inspectors;
+        function GetInspectionQuickRemarks() {
+            var x = XHR.Get("API/Inspection/QuickRemarks");
+            return new Promise(function (resolve, reject) {
+                x.then(function (response) {
+                    var di = JSON.parse(response.Text);
+                    resolve(di);
+                }).catch(function () {
+                    console.log("error in Get Quick Remarks");
+                    reject(null);
+                });
+            });
+        }
+        transport.GetInspectionQuickRemarks = GetInspectionQuickRemarks;
     })(transport = InspSched.transport || (InspSched.transport = {}));
 })(InspSched || (InspSched = {}));
 //# sourceMappingURL=transport.js.map

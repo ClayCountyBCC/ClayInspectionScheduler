@@ -303,7 +303,7 @@ namespace ClayInspectionScheduler.Models
         LEFT OUTER JOIN bpINS_REQUEST i ON P.PermitNo = i.PermitNo
         LEFT OUTER JOIN bpINS_REF ir ON ir.InspCd = i.InspectionCode
         LEFT OUTER JOIN bp_INSPECTORS ip ON i.Inspector = ip.Intl 
-        ORDER BY InspReqID DESC";
+        ORDER BY ISNULL(InspDateTime, GETDATE()) DESC, InspReqID DESC";
       return Constants.Get_Data<Inspection>(sql, dbArgs);
     }
 
@@ -333,15 +333,13 @@ namespace ClayInspectionScheduler.Models
       }
     }
 
-
     public static Inspection AddComment(
       int InspectionId,
       string Comment,
       UserAccess ua)
     {
       Comment = Comment.Trim();
-      if(ua.current_access == UserAccess.access_type.public_access |
-        ua.current_access == UserAccess.access_type.no_access)
+      if(ua.current_access == UserAccess.access_type.public_access)
       {
         return null;
       }
@@ -377,7 +375,6 @@ namespace ClayInspectionScheduler.Models
         }
       }
     }
-
 
     public static Inspection UpdateInspectionResult(
       string PermitNumber,
@@ -424,7 +421,7 @@ namespace ClayInspectionScheduler.Models
               break;
           }
         }
-        return current;
+        return Inspection.Get(InspectionId);
       }
       catch (Exception ex)
       {
@@ -632,6 +629,8 @@ namespace ClayInspectionScheduler.Models
         VALUES (@Poster,'REI',@PermitType,@PermitNumber,@Amount,@Amount,1, @HoldInput, @HoldId)";
       return sql;
     }
+
+
 
   }
 }

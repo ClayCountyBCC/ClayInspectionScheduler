@@ -116,5 +116,20 @@ namespace ClayInspectionScheduler.Controllers
       }
     }
 
+    [HttpGet]
+    [Route("QuickRemarks")]
+    public IHttpActionResult QuickRemarks()
+    {
+      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+      if (ua.current_access != UserAccess.access_type.public_access)
+      {
+        return Ok(QuickRemark.GetCachedInspectionQuickRemarks());
+      }
+      else
+      {
+        return Ok(new List<string>());
+      }
+    }
+
   }
 }
