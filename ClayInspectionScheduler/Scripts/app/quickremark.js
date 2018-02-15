@@ -7,4 +7,4 @@ var InspSched;
     }());
     InspSched.QuickRemark = QuickRemark;
 })(InspSched || (InspSched = {}));
-//# sourceMappingURL=QuickRemark.js.map
+//# sourceMappingURL=quickremark.js.map

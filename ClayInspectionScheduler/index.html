@@ -6,15 +6,14 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!--<link type="text/css" rel="stylesheet" xmlns="http://www.w3.org/1999/xhtml" />-->
   <meta name="description" content="Clay Inspections" />
 
   <link href="Content/css/jquery-ui.css" rel="stylesheet" />
   <link href="Content/css/bootstrap-datepicker3.standalone.css" rel="stylesheet" />
-  <link href="Content/css/foundation-flex.min.css" rel="stylesheet" />
-  <!--<link href="//cdnjs.cloudflare.com/ajax/libs/foundation/6.4.3/css/foundation.css" rel="stylesheet" />-->
+  <!--<link href="Content/css/foundation-flex.min.css" rel="stylesheet" />-->
+  <link href="//cdnjs.cloudflare.com/ajax/libs/foundation/6.3.1/css/foundation-flex.min.css" rel="stylesheet" />
   <link href="Content/css/foundation.min.css" rel="stylesheet" />
-  <!--<link href="//cdnjs.cloudflare.com/ajax/libs/foundation/6.3.1/css/foundation-flex.min.css" rel="stylesheet" />-->
+  <!--<link href="//cdnjs.cloudflare.com/ajax/libs/foundation/6.3.1/css/foundation.min.css" rel="stylesheet" />-->
   <link href="Content/fonts/foundation-icons.css" rel="stylesheet" />
   <link href="Content/css/MyStyle.css" rel="stylesheet" />
 
@@ -25,7 +24,7 @@
 <body style="background-color:cadetblue;">
 
   <!--Top Bar-->
-  <div class="row expanded top-bar" style="background: #b0c4de url('64.png') no-repeat left;padding-left:64px;">
+  <div class="row expanded top-bar hide-for-print" style="background: #b0c4de url('64.png') no-repeat left;padding-left:64px;">
     <div class="columns">
       <div class="row expanded">
         <h2><span class="hide-for-small-only">Clay </span> Inspections</h2>
@@ -35,7 +34,7 @@
 
   <!--Inspection Scheduler Application container-->
   <div class="row expanded App-Container large-12 medium-12 small-12 columns align-center" style="padding-top:1rem;">
-    <div class="flex-container small-12 align-center">
+    <div class="flex-container small-12 align-center hide-for-print">
       <div class="large-4 medium-6 input-group">
         <input id="PermitSearch" type="search" class="input-group-field columns" placeholder="   Permit Number" />
         <span class="input-group-button" id="button">
@@ -45,7 +44,7 @@
         </span>
       </div>
     </div>
-    <div class="flex-container small-12 align-center">
+    <div class="flex-container small-12 align-center hide-for-print">
       <div id="Searching"><h3>Searching...<i class="fi-loop spin-cw"></i></h3></div>
       <div id="SearchFailed"></div>
       <div id="SearchFailed" class="large-12 medium-12 small-12 row"></div>
@@ -58,10 +57,10 @@
       <div class="large-11 medium-12 small-12 align-center"
            style="border-radius:10px; height: 100%; max-height: 100%;">
         <div style="height: 100%; max-height: 100%;"
-             class="large-12">
+             class="large-12 change-height-for-print">
 
           <!-- Tab List-->
-          <ul class="tabs" data-tabs id="InspectionSchedulerTabs" style="border-top-left-radius:10px;border-top-right-radius:10px">
+          <ul class="tabs hide-for-print" data-tabs id="InspectionSchedulerTabs" style="border-top-left-radius:10px;border-top-right-radius:10px">
             <li class="tabs-title is-active">
               <a href="#InspectionView" aria-selected="true">Inspections View</a>
             </li>
@@ -175,8 +174,8 @@
             <!-- Tab 3 : Inspector View-->
             <div class="tabs-panel tabs-content" id="Inspector">
               <div style="border-bottom: dotted 1px gray; padding-bottom: .5em;"
-                   class="row">
-                <div class="columns small-6 medium-6 large-3">
+                   class="row hide-for-print">
+                <div class="columns small-6 medium-6 large-3" id="inspection_day_filters">
                   <label style="text-align: center;">By Day</label>
                   <div class="row align-center align-middle">
                     <input onchange="InspSched.InspectorUI.LoadDailyInspections();"
@@ -200,7 +199,7 @@
                     <label for="dayBoth">Both</label>
                   </div>
                 </div>
-                <div class="columns small-6 medium-6 large-3">
+                <div class="columns small-6 medium-6 large-3" id="inspection_status_filters">
                   <label style="text-align: center;">By Status</label>
                   <div class="row align-center align-middle">
                     <input onchange="InspSched.InspectorUI.LoadDailyInspections();"
@@ -224,7 +223,7 @@
                     <label for="statusBoth">Both</label>
                   </div>
                 </div>
-                <div class="columns small-6 medium-6 large-3 flex-container align-middle align-center">
+                <div class="columns small-6 medium-6 large-3 flex-container align-middle align-center" id="inspector_filters">
                   <div class="flex-container row align-center align-middle flex-child-grow">
                     <select style="margin: 0;"
                             onchange="InspSched.InspectorUI.LoadDailyInspections();"
@@ -234,7 +233,7 @@
                     </select>
                   </div>
                 </div>
-                <div class="flex-container columns small-6 medium-6 large-3">
+                <div class="flex-container columns small-6 medium-6 large-3" id="inspector_view_buttons">
                   <div class="flex-container row align-center align-middle flex-child-grow">
                     <button style="margin-top: 0; margin-bottom: 0;"
                             onclick="InspSched.InspectorUI.LoadDailyInspections();"
@@ -273,9 +272,9 @@
 
     </div>     <!--End Permit Information-->
   </div>     <!--End Inspection Scheduler-->
-  <!--<script src="Scripts/app/bundle.min.js?201802140801"></script>-->
+  <script src="Scripts/app/bundle.min.js?201802150801"></script>
 
-  <script src="Scripts/app/ShortInspection.js"></script>
+  <!--<script src="Scripts/app/ShortInspection.js"></script>
   <script src="Scripts/app/Permit.js"></script>
   <script src="Scripts/app/inspectorUI.js"></script>
   <script src="Scripts/app/InspectorView.js"></script>
@@ -289,8 +288,7 @@
   <script src="Scripts/jquery-3.1.1.min.js"></script>
   <script src="Scripts/moment.min.js"></script>
   <script src="Scripts/bootstrap-datepicker.js"></script>
-  <script src="Scripts/foundation.min.js"></script>
-  <!--<script src="//cdnjs.cloudflare.com/ajax/libs/foundation/6.4.3/js/foundation.js"></script>-->
+  <script src="Scripts/foundation.min.js"></script>-->
 
   <script>$(document).foundation();</script>
   <script>
