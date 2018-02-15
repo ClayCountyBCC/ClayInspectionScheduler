@@ -529,7 +529,7 @@ h5 {
     overflow: auto;
   }
 
-  #InspectionSchedulerTabs,
+  #InspectionSchedulerTabs
   {
     overflow-y: auto;
   }
@@ -562,3 +562,4 @@ h5 {
   {
     border: none;
   }
+}
