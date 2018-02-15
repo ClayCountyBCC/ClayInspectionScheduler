@@ -513,7 +513,8 @@ namespace InspSched
     let remarkTextarea: HTMLTextAreaElement = (<HTMLTextAreaElement>document.getElementById(InspectionRequestId + "_remark_textarea"));
     let commentTextarea: HTMLTextAreaElement = (<HTMLTextAreaElement>document.getElementById(InspectionRequestId + "_comment_textarea"));
     let value: string = (<HTMLInputElement>document.querySelector('input[name="' + InspectionRequestId + '_results"]:checked')).value;
-
+    let completedCommentsDIV = (<HTMLDivElement>document.getElementById(InspectionRequestId + "_textbox_div"));
+    completedCommentsDIV.style.display = "flex";
     let remarkText = remarkTextarea.value;
 
     let commentText = commentTextarea.value;

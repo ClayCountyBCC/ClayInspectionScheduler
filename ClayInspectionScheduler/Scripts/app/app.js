@@ -362,6 +362,8 @@ var InspSched;
         var remarkTextarea = document.getElementById(InspectionRequestId + "_remark_textarea");
         var commentTextarea = document.getElementById(InspectionRequestId + "_comment_textarea");
         var value = document.querySelector('input[name="' + InspectionRequestId + '_results"]:checked').value;
+        var completedCommentsDIV = document.getElementById(InspectionRequestId + "_textbox_div");
+        completedCommentsDIV.style.display = "flex";
         var remarkText = remarkTextarea.value;
         var commentText = commentTextarea.value;
         var inspReqIdAsNum = parseInt(InspectionRequestId);
