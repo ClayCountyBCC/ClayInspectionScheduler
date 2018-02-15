@@ -790,7 +790,7 @@ namespace InspSched.UI
 
       let approve: HTMLLabelElement = (<HTMLLabelElement>document.createElement("label"));
       approve.className = "column large-2 small-6";
-      approve.htmlFor = privateProvidercheck > 0 ? "perform" : "approve" + "_selection";
+      approve.htmlFor = (privateProvidercheck > 0 ? "perform" : "approve") + "_selection";
       approve.appendChild(approveradio);
       approve.appendChild(document.createTextNode(privateProvidercheck > 0 ? "Performed" : "Approved"));
 
