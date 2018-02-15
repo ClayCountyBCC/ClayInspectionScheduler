@@ -6,7 +6,6 @@
 
 namespace InspSched.UI
 {
-  "use strict";
   export let CurrentPermits: Array<Permit> = new Array<Permit>();
   export let CurrentInspections: Array<Inspection> = [];
   export let PermitsWithOutInsp: Array<string> = [];
@@ -387,29 +386,25 @@ namespace InspSched.UI
 
     //***************************************
     let addRemark: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-    //addRemark.setAttribute("elementName", "addRemark");
     addRemark.className = "row large-12 medium-12 small-12 flex-container flex-child-grow";
 
 
 
     let addRemarkLabel: HTMLLabelElement = (<HTMLLabelElement>document.createElement("label"));
-    //addRemarkLabel.setAttribute("elementName", "addRemarkLabel");
     addRemarkLabel.className = "large-12 medium-12 small-12 row ";
     addRemarkLabel.textContent = "Public Remarks:";
     addRemarkLabel.style.textAlign = "left";
 
     let addRemarkTextDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
     addRemarkTextDiv.className = "large-10 medium-8 small-12";
-    //addRemarkTextDiv.classList.add("row");
     addRemarkTextDiv.classList.add("flex-container");
     let addRemarkInputGroup: HTMLDivElement = document.createElement("div");
     addRemarkInputGroup.classList.add("input-group");
     addRemarkInputGroup.classList.add("small-12");
-
-
+    addRemarkInputGroup.style.margin = "0";
+    
     let remarkInput: HTMLInputElement = (<HTMLInputElement>document.createElement("input"));
     remarkInput.type = "text";
-    //remarkInput.setAttribute("elementName", "remarkTextarea");
     remarkInput.setAttribute("onkeyup", "InspSched.disableSaveCommentButton(" + inspection.InspReqID + ")");
     //remarkInput.className = "remark-text";
     remarkInput.id = inspection.InspReqID + "_remark_textarea";
@@ -422,25 +417,65 @@ namespace InspSched.UI
     remarkInput.classList.add("columns");
     let containerSpan: HTMLSpanElement = document.createElement("span");
     containerSpan.classList.add("input-group-button")
+    
     let quickRemarkButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
     quickRemarkButton.classList.add("button");
     quickRemarkButton.classList.add("dropdown");
     quickRemarkButton.classList.add("arrow-only");
     quickRemarkButton.style.borderLeftWidth = "0";
     quickRemarkButton.classList.add("end");
+    let eventTarget = document.getElementById("ScrollTab");
+    let handler = function handleScrollForRealThisTime()
+    {
+      quickRemarkUL.style.display = "none";
+      eventTarget.removeEventListener("scroll", handler, false);
+      window.removeEventListener("resize", handler, true);
+    };
     quickRemarkButton.onclick = function (e: Event)
     {
       let toggle = quickRemarkUL.style.display === "block";
-      quickRemarkUL.style.display = toggle ? "none" : "block";
-      console.log('clicky');
+
+      if (!toggle)
+      {
+        eventTarget.addEventListener("scroll", handler, false);
+        window.addEventListener("resize", handler, true);
+        
+        let remarkInput = document.getElementById(inspection.InspReqID + "_remark_textarea");
+        quickRemarkUL.style.display = toggle ? "none" : "block";
+        quickRemarkUL.style.width = addRemarkInputGroup.clientWidth.toString() + "px";
+        quickRemarkUL.style.maxWidth = addRemarkInputGroup.clientWidth.toString() + "px";
+        
+        quickRemarkUL.style.left = addRemarkInputGroup.offsetLeft.toString();
+        
+        let windowHeight: number = window.innerHeight;
+        let bottomHeight: number = windowHeight - (addRemarkInputGroup.offsetTop + addRemarkInputGroup.clientHeight - eventTarget.scrollTop);
+        let topHeight: number = addRemarkInputGroup.offsetTop - eventTarget.scrollTop;
+        quickRemarkUL.style.height = "103px";
+        if (bottomHeight < topHeight)
+        {
+          console.log('use top');
+          quickRemarkUL.style.top = (topHeight - 103).toString() + "px";
+        }
+        else
+        {
+          console.log('use bottom');
+          quickRemarkUL.style.top = (addRemarkInputGroup.offsetTop + addRemarkInputGroup.clientHeight - eventTarget.scrollTop).toString() + "px";
+        }
+        
+      }
+      else
+      {
+        handler();
+      }
     }
     let quickRemarkUL: HTMLUListElement = (<HTMLUListElement>document.createElement("UL"));
     quickRemarkUL.id = "drop" + inspection.InspReqID.toString();
-    quickRemarkUL.classList.add("quick-remark-list");
-    quickRemarkUL.classList.add("small-12");
+    quickRemarkUL.classList.add("quick-remark-list");    
     quickRemarkUL.classList.add("row");
+    quickRemarkUL.style.backgroundColor = "white";
     quickRemarkUL.style.display = "none";
-    quickRemarkUL.style.textDecoration = "none";
+    quickRemarkUL.style.position = "fixed";
+    
     let filteredRemarks = FilterQuickRemarks(inspection.PermitNo[0], inspection.PrivateProviderInspectionRequestId > 0);
     for (let qr of filteredRemarks)
     {
@@ -448,7 +483,6 @@ namespace InspSched.UI
       let link: HTMLAnchorElement = document.createElement("a");
       link.onclick = function (e: Event)
       {
-        console.log('whoo', e);
         return InspSched.UI.SetRemarkText(inspection.InspReqID, qr.Remark);
       };
       link.appendChild(document.createTextNode(qr.Remark));
@@ -1103,5 +1137,4 @@ namespace InspSched.UI
     ul.style.display = "none";
     return true;
   }
-
 }

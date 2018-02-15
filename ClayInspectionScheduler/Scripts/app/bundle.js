@@ -131,6 +131,7 @@ var InspSched;
             var df = document.createDocumentFragment();
             var row = document.createElement("div");
             row.classList.add("row");
+            row.classList.add("no-page-break");
             row.classList.add("flex-container");
             row.classList.add("medium-12");
             row.classList.add("large-12");
@@ -375,7 +376,6 @@ var InspSched;
 (function (InspSched) {
     var UI;
     (function (UI) {
-        "use strict";
         UI.CurrentPermits = new Array();
         UI.CurrentInspections = [];
         UI.PermitsWithOutInsp = [];
@@ -649,23 +649,20 @@ var InspSched;
             addRemarkContainer.style.display = "none";
             //***************************************
             var addRemark = document.createElement("div");
-            //addRemark.setAttribute("elementName", "addRemark");
             addRemark.className = "row large-12 medium-12 small-12 flex-container flex-child-grow";
             var addRemarkLabel = document.createElement("label");
-            //addRemarkLabel.setAttribute("elementName", "addRemarkLabel");
             addRemarkLabel.className = "large-12 medium-12 small-12 row ";
             addRemarkLabel.textContent = "Public Remarks:";
             addRemarkLabel.style.textAlign = "left";
             var addRemarkTextDiv = document.createElement("div");
             addRemarkTextDiv.className = "large-10 medium-8 small-12";
-            //addRemarkTextDiv.classList.add("row");
             addRemarkTextDiv.classList.add("flex-container");
             var addRemarkInputGroup = document.createElement("div");
             addRemarkInputGroup.classList.add("input-group");
             addRemarkInputGroup.classList.add("small-12");
+            addRemarkInputGroup.style.margin = "0";
             var remarkInput = document.createElement("input");
             remarkInput.type = "text";
-            //remarkInput.setAttribute("elementName", "remarkTextarea");
             remarkInput.setAttribute("onkeyup", "InspSched.disableSaveCommentButton(" + inspection.InspReqID + ")");
             //remarkInput.className = "remark-text";
             remarkInput.id = inspection.InspReqID + "_remark_textarea";
@@ -683,24 +680,51 @@ var InspSched;
             quickRemarkButton.classList.add("arrow-only");
             quickRemarkButton.style.borderLeftWidth = "0";
             quickRemarkButton.classList.add("end");
+            var eventTarget = document.getElementById("ScrollTab");
+            var handler = function handleScrollForRealThisTime() {
+                quickRemarkUL.style.display = "none";
+                eventTarget.removeEventListener("scroll", handler, false);
+                window.removeEventListener("resize", handler, true);
+            };
             quickRemarkButton.onclick = function (e) {
                 var toggle = quickRemarkUL.style.display === "block";
-                quickRemarkUL.style.display = toggle ? "none" : "block";
-                console.log('clicky');
+                if (!toggle) {
+                    eventTarget.addEventListener("scroll", handler, false);
+                    window.addEventListener("resize", handler, true);
+                    var remarkInput_1 = document.getElementById(inspection.InspReqID + "_remark_textarea");
+                    quickRemarkUL.style.display = toggle ? "none" : "block";
+                    quickRemarkUL.style.width = addRemarkInputGroup.clientWidth.toString() + "px";
+                    quickRemarkUL.style.maxWidth = addRemarkInputGroup.clientWidth.toString() + "px";
+                    quickRemarkUL.style.left = addRemarkInputGroup.offsetLeft.toString();
+                    var windowHeight = window.innerHeight;
+                    var bottomHeight = windowHeight - (addRemarkInputGroup.offsetTop + addRemarkInputGroup.clientHeight - eventTarget.scrollTop);
+                    var topHeight = addRemarkInputGroup.offsetTop - eventTarget.scrollTop;
+                    quickRemarkUL.style.height = "103px";
+                    if (bottomHeight < topHeight) {
+                        console.log('use top');
+                        quickRemarkUL.style.top = (topHeight - 103).toString() + "px";
+                    }
+                    else {
+                        console.log('use bottom');
+                        quickRemarkUL.style.top = (addRemarkInputGroup.offsetTop + addRemarkInputGroup.clientHeight - eventTarget.scrollTop).toString() + "px";
+                    }
+                }
+                else {
+                    handler();
+                }
             };
             var quickRemarkUL = document.createElement("UL");
             quickRemarkUL.id = "drop" + inspection.InspReqID.toString();
             quickRemarkUL.classList.add("quick-remark-list");
-            quickRemarkUL.classList.add("small-12");
             quickRemarkUL.classList.add("row");
+            quickRemarkUL.style.backgroundColor = "white";
             quickRemarkUL.style.display = "none";
-            quickRemarkUL.style.textDecoration = "none";
+            quickRemarkUL.style.position = "fixed";
             var filteredRemarks = InspSched.FilterQuickRemarks(inspection.PermitNo[0], inspection.PrivateProviderInspectionRequestId > 0);
             var _loop_1 = function (qr) {
                 var quickRemarkLi = document.createElement("LI");
                 var link = document.createElement("a");
                 link.onclick = function (e) {
-                    console.log('whoo', e);
                     return InspSched.UI.SetRemarkText(inspection.InspReqID, qr.Remark);
                 };
                 link.appendChild(document.createTextNode(qr.Remark));
@@ -1461,6 +1485,7 @@ var InspSched;
 var InspSched;
 (function (InspSched) {
     "use strict";
+    InspSched.test = false;
     var dpCalendar = null;
     InspSched.InspectionTypes = [];
     InspSched.InspectionQuickRemarks = [];

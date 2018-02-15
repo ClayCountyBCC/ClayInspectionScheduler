@@ -16,6 +16,7 @@ namespace InspSched
 {
   "use strict";
 
+  export let test: boolean = false;
   let dpCalendar = null;
   export let InspectionTypes: Array<InspType> = [];
   export let InspectionQuickRemarks: Array<QuickRemark> = [];

@@ -14,6 +14,7 @@
 var InspSched;
 (function (InspSched) {
     "use strict";
+    InspSched.test = false;
     var dpCalendar = null;
     InspSched.InspectionTypes = [];
     InspSched.InspectionQuickRemarks = [];

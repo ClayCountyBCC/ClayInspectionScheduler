@@ -101,6 +101,7 @@ var InspSched;
             var df = document.createDocumentFragment();
             var row = document.createElement("div");
             row.classList.add("row");
+            row.classList.add("no-page-break");
             row.classList.add("flex-container");
             row.classList.add("medium-12");
             row.classList.add("large-12");
