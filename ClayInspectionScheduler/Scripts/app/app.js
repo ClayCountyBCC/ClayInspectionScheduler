@@ -14,7 +14,6 @@
 var InspSched;
 (function (InspSched) {
     "use strict";
-    InspSched.test = false;
     var dpCalendar = null;
     InspSched.InspectionTypes = [];
     InspSched.InspectionQuickRemarks = [];
@@ -38,8 +37,11 @@ var InspSched;
     function start() {
         LoadData();
         window.onhashchange = HandleHash;
-        if (location.hash.substring(1).length > 0)
-            HandleHash(); // if they pass something in the URL
+        if (location.hash.length > 0) {
+            if (location.hash && location.hash.substring(1).length > 0) {
+                HandleHash(); // if they pass something in the URL
+            }
+        }
     } //  END start()
     InspSched.start = start;
     function updateHash(permit) {

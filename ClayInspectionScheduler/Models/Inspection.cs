@@ -153,19 +153,34 @@ namespace ClayInspectionScheduler.Models
 
     private static List<Inspection> GetRawInspectionList()
     {
+      var dc = DateCache.getDateCache(false, DateTime.MinValue);
+
+      var dp = new DynamicParameters();
+      dp.Add("@Today", DateTime.Today.Date);
+      if (dc.goodDates.Count() > 1)
+      {
+        dp.Add("@Tomorrow", dc.goodDates.ToArray()[1].Date);
+      }
+      else
+      {
+        dp.Add("@Tomorrow", DateTime.Today.AddDays(1).Date);
+      }      
+
+      //DECLARE @Today DATE = CAST(GETDATE() AS DATE);
+      //DECLARE @Tomorrow DATE =
+      //  CASE DATEPART(DW, @Today)
+      //    WHEN 1-- if today is Friday, Saturday, or Sunday
+      //      THEN CAST(DATEADD(DAY, 1, @Today) AS DATE) --set it to Monday
+      //   WHEN 6
+      //      THEN CAST(DATEADD(DAY, 3, @Today) AS DATE) --set it to Monday
+      //   WHEN 7
+      //      THEN CAST(DATEADD(DAY, 2, @Today) AS DATE) --set it to Monday
+      //  ELSE CAST(DATEADD(DAY, 1, @Today) AS DATE)-- Set it to tomorrow
+      //    END;
+
+
       string sql = @"
         USE WATSC;
-        DECLARE @Today DATE = CAST(GETDATE() AS DATE);
-        DECLARE @Tomorrow DATE = 
-          CASE DATEPART(DW, @Today) 
-          WHEN 1 -- if today is Friday, Saturday, or Sunday
-            THEN CAST(DATEADD(DAY, 1, @Today) AS DATE) -- set it to Monday
-          WHEN 6
-            THEN CAST(DATEADD(DAY, 3, @Today) AS DATE) -- set it to Monday
-          WHEN 7
-            THEN  CAST(DATEADD(DAY, 2, @Today) AS DATE) -- set it to Monday
-          ELSE CAST(DATEADD(DAY, 1, @Today) AS DATE) -- Set it to tomorrow
-          END;
 
         WITH BaseFloodZone AS (
           SELECT DISTINCT
@@ -175,8 +190,8 @@ namespace ClayInspectionScheduler.Models
           INNER JOIN bpINS_REQUEST I ON F.BaseID = I.BaseId
           WHERE 
             LEN(LTRIM(RTRIM(F.FloodZone))) > 0 
-            AND (CAST(I.SchecDateTime AS DATE) IN (@Today, @Tomorrow)
-            OR (CAST(SchecDateTime AS DATE) < @Today 
+            AND (CAST(I.SchecDateTime AS DATE) IN (CAST(@Today AS DATE), CAST(@Tomorrow AS DATE))
+            OR (CAST(SchecDateTime AS DATE) < CAST(@Today AS DATE)
               AND ResultADC IS NULL))
         ), FloodZoneData AS (
           SELECT 
@@ -219,12 +234,12 @@ namespace ClayInspectionScheduler.Models
         LEFT OUTER JOIN FloodZoneData F ON I.BaseId = F.BaseID
         WHERE 
         -- Here we want to see the inspections that were scheduled for today and tomorrow
-          (CAST(SchecDateTime AS DATE) IN (@Today, @Tomorrow)
+          (CAST(SchecDateTime AS DATE) IN (CAST(@Today AS DATE), CAST(@Tomorrow AS DATE))
         -- and we want to include any from the past that aren't completed.
-          OR (CAST(SchecDateTime AS DATE) < @Today 
+          OR (CAST(SchecDateTime AS DATE) < CAST(@Today AS DATE)
             AND ResultADC IS NULL))
         ORDER BY InspReqID DESC";
-      return Constants.Get_Data<Inspection>(sql);
+      return Constants.Get_Data<Inspection>(sql, dp);
     }
 
     private static List<Inspection> GetRaw(int InspectionId)

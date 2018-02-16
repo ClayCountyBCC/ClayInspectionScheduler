@@ -16,7 +16,6 @@ namespace InspSched
 {
   "use strict";
 
-  export let test: boolean = false;
   let dpCalendar = null;
   export let InspectionTypes: Array<InspType> = [];
   export let InspectionQuickRemarks: Array<QuickRemark> = [];
@@ -41,12 +40,18 @@ namespace InspSched
   let SaveInspectionButton = document.getElementById("SaveSchedule");
   let confirmed = document.getElementById('SaveConfirmed');
 
-
   export function start(): void
   {
     LoadData();
     window.onhashchange = HandleHash;
-    if (location.hash.substring(1).length > 0) HandleHash(); // if they pass something in the URL
+    if (location.hash.length > 0)
+    {
+      if (location.hash && location.hash.substring(1).length > 0)
+      {
+        HandleHash(); // if they pass something in the URL
+      }
+    }
+      
   } //  END start()
 
   export function updateHash(permit: string)

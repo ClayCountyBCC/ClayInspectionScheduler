@@ -93,7 +93,16 @@ namespace ClayInspectionScheduler.Controllers
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
       if(ua.current_access == UserAccess.access_type.inspector_access)
       {
-        return Ok(Inspection.GetInspectorList());
+        var il = Inspection.GetInspectorList();
+        if(il == null)
+        {
+          return InternalServerError();
+        }
+        else
+        {
+          return Ok(il);
+        }
+        
       }
       else
       {

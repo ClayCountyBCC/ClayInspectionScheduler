@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.Caching;
-
+using Newtonsoft.Json;
 
 namespace ClayInspectionScheduler.Models
 {
@@ -29,7 +29,8 @@ namespace ClayInspectionScheduler.Models
         return maxDate.ToShortDateString();
       }
     }
-    private List<DateTime> goodDates { get; set; } = new List<DateTime>();
+    [JsonIgnore]
+    public List<DateTime> goodDates { get; set; } = new List<DateTime>();
     private List<DateTime> badDates { get; set; } = new List<DateTime>();
     public List<string> badDates_string
     {
