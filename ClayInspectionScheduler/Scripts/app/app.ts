@@ -508,12 +508,15 @@ namespace InspSched
   export function UpdateInspection(permitNumber: string, InspectionRequestId: string)
   {
     UpdateResultButton(InspectionRequestId, "saving");
+
     let completedRemark = (<HTMLDivElement>document.getElementById(InspectionRequestId+ "_completed_remark_text"));
     let completedComments = (<HTMLTextAreaElement>document.getElementById(InspectionRequestId+ "_audit"));
     let remarkTextarea: HTMLTextAreaElement = (<HTMLTextAreaElement>document.getElementById(InspectionRequestId + "_remark_textarea"));
     let commentTextarea: HTMLTextAreaElement = (<HTMLTextAreaElement>document.getElementById(InspectionRequestId + "_comment_textarea"));
     let value: string = (<HTMLInputElement>document.querySelector('input[name="' + InspectionRequestId + '_results"]:checked')).value;
     let completedCommentsDIV = (<HTMLDivElement>document.getElementById(InspectionRequestId + "_textbox_div"));
+    let inspDateTime: HTMLDivElement = (<HTMLDivElement>document.getElementById(InspectionRequestId + "_inspection-date-time"));
+    
     completedCommentsDIV.style.display = "flex";
     let remarkText = remarkTextarea.value;
 
@@ -530,6 +533,9 @@ namespace InspSched
       completedComments.textContent = "";
       completedComments.textContent = updatedInspection.Comment;
       commentTextarea.value = "";
+      UI.clearElement(inspDateTime);
+      inspDateTime.appendChild(document.createTextNode(updatedInspection.DisplayInspDateTime));
+
       completedRemark.innerText = updatedInspection.Remarks;
       UpdateResultButton(InspectionRequestId, "saved");
     }, function ()

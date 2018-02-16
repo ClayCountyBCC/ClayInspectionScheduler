@@ -334,6 +334,7 @@ namespace InspSched.UI
     inspDesc.appendChild(document.createTextNode(inspection.InsDesc.trim()));
 
     let inspDateTime: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
+    inspDateTime.id = inspection.InspReqID.toString() + "_inspection-date-time";
     inspDateTime.className = "large-2 medium-6 small-6 column InspDate";
     //inspDateTime.setAttribute("elementName", "inspDateTime");
 
@@ -457,21 +458,13 @@ namespace InspSched.UI
         {
           console.log('use top');
           quickRemarkUL.style.top = (topHeight - 103).toString() + "px";
-          if (BrowserName.toLowerCase() === 'ie' || BrowserName.toLowerCase() == 'edge')
-          {
-            quickRemarkUL.style.left = leftOffset.toString() +"px";
-          }
-          console.log('quickRemarkUL.style.position: ', quickRemarkUL.style.position);
-          if (CheckBrowser().toLowerCase() === 'ie' || CheckBrowser().toLowerCase() == 'edge')
-          {
-            quickRemarkUL.style.left = leftOffset.toString() + "px";
-          }
+          quickRemarkUL.style.left = leftOffset.toString() + "px";
         }
         else
         {
           console.log('use bottom');
           quickRemarkUL.style.top = (addRemarkInputGroup.offsetTop + addRemarkInputGroup.clientHeight - eventTarget.scrollTop).toString() + "px";
-          console.log('quickRemarkUL.offsetLeft', quickRemarkUL.offsetLeft.toString());
+          quickRemarkUL.style.left = leftOffset.toString() + "px";
         }
         
       }
@@ -622,9 +615,10 @@ namespace InspSched.UI
     }
 
     // if inspection is incomplete, set date to InspSched, else InspDate
-    if (inspection.DisplayInspDateTime.toLowerCase() == 'incomplete')
+    if (inspection.DisplayInspDateTime.toLowerCase() === 'incomplete')
     {
       inspDateTime.appendChild(document.createTextNode(inspection.DisplaySchedDateTime));
+      
     }
     else
     {
@@ -680,7 +674,10 @@ namespace InspSched.UI
     {
       detailButton.style.margin = "0";
     }
-
+    if (permit.access !== InspSched.access_type.public_access)
+    {
+      buttonDiv.appendChild(detailButton);
+    }
 
 
     if (inspection.ResultADC.length == 0) 
@@ -1041,6 +1038,7 @@ namespace InspSched.UI
   // this function emptys an element of all its child nodes.
   export function clearElement(node: HTMLElement): void
   {
+
     while (node.firstChild)
     {
       node.removeChild(node.firstChild);

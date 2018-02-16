@@ -71,7 +71,7 @@ var InspSched;
                 var i = _a[_i];
                 var o = document.createElement("option");
                 o.value = i.Name;
-                o.label = i.Name;
+                o.appendChild(document.createTextNode(i.Name));
                 ddl.options.add(o);
             }
         }
@@ -609,6 +609,7 @@ var InspSched;
             //inspDesc.setAttribute("elementName", "inspDesc");
             inspDesc.appendChild(document.createTextNode(inspection.InsDesc.trim()));
             var inspDateTime = document.createElement("div");
+            inspDateTime.id = inspection.InspReqID.toString() + "_inspection-date-time";
             inspDateTime.className = "large-2 medium-6 small-6 column InspDate";
             //inspDateTime.setAttribute("elementName", "inspDateTime");
             var inspector = document.createElement("div");
@@ -706,18 +707,12 @@ var InspSched;
                     if (bottomHeight < topHeight) {
                         console.log('use top');
                         quickRemarkUL.style.top = (topHeight - 103).toString() + "px";
-                        if (BrowserName.toLowerCase() === 'ie' || BrowserName.toLowerCase() == 'edge') {
-                            quickRemarkUL.style.left = leftOffset.toString() + "px";
-                        }
-                        console.log('quickRemarkUL.style.position: ', quickRemarkUL.style.position);
-                        if (CheckBrowser().toLowerCase() === 'ie' || CheckBrowser().toLowerCase() == 'edge') {
-                            quickRemarkUL.style.left = leftOffset.toString() + "px";
-                        }
+                        quickRemarkUL.style.left = leftOffset.toString() + "px";
                     }
                     else {
                         console.log('use bottom');
                         quickRemarkUL.style.top = (addRemarkInputGroup.offsetTop + addRemarkInputGroup.clientHeight - eventTarget.scrollTop).toString() + "px";
-                        console.log('quickRemarkUL.offsetLeft', quickRemarkUL.offsetLeft.toString());
+                        quickRemarkUL.style.left = leftOffset.toString() + "px";
                     }
                 }
                 else {
@@ -837,7 +832,7 @@ var InspSched;
                 permitNumber.appendChild(document.createTextNode(inspection.PermitNo));
             }
             // if inspection is incomplete, set date to InspSched, else InspDate
-            if (inspection.DisplayInspDateTime.toLowerCase() == 'incomplete') {
+            if (inspection.DisplayInspDateTime.toLowerCase() === 'incomplete') {
                 inspDateTime.appendChild(document.createTextNode(inspection.DisplaySchedDateTime));
             }
             else {
@@ -876,6 +871,9 @@ var InspSched;
             }
             else {
                 detailButton.style.margin = "0";
+            }
+            if (permit.access !== InspSched.access_type.public_access) {
+                buttonDiv.appendChild(detailButton);
             }
             if (inspection.ResultADC.length == 0) {
                 if (IsGoodCancelDate(inspection, permit.access)) {
@@ -1871,6 +1869,7 @@ var InspSched;
         var commentTextarea = document.getElementById(InspectionRequestId + "_comment_textarea");
         var value = document.querySelector('input[name="' + InspectionRequestId + '_results"]:checked').value;
         var completedCommentsDIV = document.getElementById(InspectionRequestId + "_textbox_div");
+        var inspDateTime = document.getElementById(InspectionRequestId + "_inspection-date-time");
         completedCommentsDIV.style.display = "flex";
         var remarkText = remarkTextarea.value;
         var commentText = commentTextarea.value;
@@ -1882,6 +1881,8 @@ var InspSched;
             completedComments.textContent = "";
             completedComments.textContent = updatedInspection.Comment;
             commentTextarea.value = "";
+            InspSched.UI.clearElement(inspDateTime);
+            inspDateTime.appendChild(document.createTextNode(updatedInspection.DisplayInspDateTime));
             completedRemark.innerText = updatedInspection.Remarks;
             UpdateResultButton(InspectionRequestId, "saved");
         }, function () {

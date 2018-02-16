@@ -41,7 +41,7 @@ var InspSched;
                 var i = _a[_i];
                 var o = document.createElement("option");
                 o.value = i.Name;
-                o.label = i.Name;
+                o.appendChild(document.createTextNode(i.Name));
                 ddl.options.add(o);
             }
         }

@@ -363,6 +363,7 @@ var InspSched;
         var commentTextarea = document.getElementById(InspectionRequestId + "_comment_textarea");
         var value = document.querySelector('input[name="' + InspectionRequestId + '_results"]:checked').value;
         var completedCommentsDIV = document.getElementById(InspectionRequestId + "_textbox_div");
+        var inspDateTime = document.getElementById(InspectionRequestId + "_inspection-date-time");
         completedCommentsDIV.style.display = "flex";
         var remarkText = remarkTextarea.value;
         var commentText = commentTextarea.value;
@@ -374,6 +375,8 @@ var InspSched;
             completedComments.textContent = "";
             completedComments.textContent = updatedInspection.Comment;
             commentTextarea.value = "";
+            InspSched.UI.clearElement(inspDateTime);
+            inspDateTime.appendChild(document.createTextNode(updatedInspection.DisplayInspDateTime));
             completedRemark.innerText = updatedInspection.Remarks;
             UpdateResultButton(InspectionRequestId, "saved");
         }, function () {
