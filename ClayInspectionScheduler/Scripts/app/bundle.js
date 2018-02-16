@@ -576,6 +576,7 @@ var InspSched;
         UI.BuildInspectionList = BuildInspectionList;
         // update BuildInspectionRow
         function BuildInspectionRow(inspection) {
+            var BrowserName = CheckBrowser();
             var permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === inspection.PermitNo; })[0];
             //permit.access = access_type.inspector_access;
             //let today = new Date().setHours(0, 0, 0, 0);
@@ -615,9 +616,9 @@ var InspSched;
             //inspector.setAttribute("elementName", "inspector");
             inspector.appendChild(document.createTextNode(inspection.InspectorName.trim()));
             //********************************************
-            var InspButtonDiv = document.createElement("div");
+            var InspButtonContainer = document.createElement("div");
             //InspButtonDiv.setAttribute("elementName", "InspButtonDiv");
-            InspButtonDiv.className = "ButtonContainer row large-2 medium-4 small-12 flex-container align-center";
+            InspButtonContainer.className = "ButtonContainer column large-2 medium-4 small-12 flex-container align-center";
             // #endregion
             // #region Completed Remarks Row
             //*******************************************************************************************
@@ -699,14 +700,24 @@ var InspSched;
                     var windowHeight = window.innerHeight;
                     var bottomHeight = windowHeight - (addRemarkInputGroup.offsetTop + addRemarkInputGroup.clientHeight - eventTarget.scrollTop);
                     var topHeight = addRemarkInputGroup.offsetTop - eventTarget.scrollTop;
+                    var leftOffset = addRemarkInputGroup.offsetLeft;
+                    console.log('windowHeight: ', windowHeight, 'bottomHeight: ', bottomHeight, 'topHeight: ', topHeight);
                     quickRemarkUL.style.height = "103px";
                     if (bottomHeight < topHeight) {
                         console.log('use top');
                         quickRemarkUL.style.top = (topHeight - 103).toString() + "px";
+                        if (BrowserName.toLowerCase() === 'ie' || BrowserName.toLowerCase() == 'edge') {
+                            quickRemarkUL.style.left = leftOffset.toString() + "px";
+                        }
+                        console.log('quickRemarkUL.style.position: ', quickRemarkUL.style.position);
+                        if (CheckBrowser().toLowerCase() === 'ie' || CheckBrowser().toLowerCase() == 'edge') {
+                            quickRemarkUL.style.left = leftOffset.toString() + "px";
+                        }
                     }
                     else {
                         console.log('use bottom');
                         quickRemarkUL.style.top = (addRemarkInputGroup.offsetTop + addRemarkInputGroup.clientHeight - eventTarget.scrollTop).toString() + "px";
+                        console.log('quickRemarkUL.offsetLeft', quickRemarkUL.offsetLeft.toString());
                     }
                 }
                 else {
@@ -789,16 +800,16 @@ var InspSched;
             commentlabel.innerText = "Add Comments:";
             var AddCommentTextarea = document.createElement("textarea");
             //AddCommentTextarea.setAttribute("elementName", "AddCommentTextarea");
-            AddCommentTextarea.className = "large-10 medium-10 small-12 flex-dir-row Comment-Textarea";
+            AddCommentTextarea.className = "large-10 medium-10 small-12 column Comment-Textarea";
             AddCommentTextarea.style.resize = "none";
             AddCommentTextarea.rows = 3;
             AddCommentTextarea.id = inspection.InspReqID + "_comment_textarea";
             AddCommentTextarea.maxLength = 200;
             var SaveCommentButtonDiv = document.createElement("div");
             //SaveCommentButtonDiv.setAttribute("elementName", "SaveCommentuttonDiv");
-            SaveCommentButtonDiv.className = "ButtonContainer row large-2 medium-2 small-12 flex-container align-center";
+            SaveCommentButtonDiv.className = "ButtonContainer column large-2 medium-2 small-12 flex-container align-center";
             var SaveCommentButton = document.createElement("button");
-            SaveCommentButton.className = "button align-self-center columns SaveCommentButton";
+            SaveCommentButton.className = "button align-self-center column small-12 SaveCommentButton";
             //SaveCommentButton.setAttribute("elementName", "SaveCommentButton");
             SaveCommentButton.setAttribute("onclick", "InspSched.SaveComment('" + inspection.InspReqID + "','" + AddCommentTextarea.value + "')");
             SaveCommentButton.textContent = "Save Comment";
@@ -856,31 +867,35 @@ var InspSched;
             // #endregion Initial Append Rows to Inspection Row
             var detailButton = BuildButton(inspection.InspReqID + "_details_btn", "Details", "InspSched.UI.ToggleInspDetails(this.value)", inspection.InspReqID.toString());
             detailButton.className = "column large-12 medium-12 small-12 align-self-center  DetailsButton";
+            var buttonDiv = document.createElement("div");
+            buttonDiv.className = "row small-12";
+            InspButtonContainer.appendChild(buttonDiv);
             //Create function to make New/Cancel/Details Button
             if (permit.ErrorText.length === 0) {
-                InspButtonDiv.appendChild(BuildButton("", "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
+                buttonDiv.appendChild(BuildButton("", "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
             }
             else {
                 detailButton.style.margin = "0";
-            }
-            if (permit.access !== InspSched.access_type.public_access) {
-                InspButtonDiv.appendChild(detailButton);
             }
             if (inspection.ResultADC.length == 0) {
                 if (IsGoodCancelDate(inspection, permit.access)) {
                     if (permit.access === InspSched.access_type.public_access) {
                         var privprovstring = permit.ErrorText.substr(2, 16).toLowerCase();
                         if (privprovstring != "private provider" || inspection.PrivateProviderInspectionRequestId != null) {
-                            InspButtonDiv.appendChild(BuildButton("", "Cancel", "InspSched.CancelInspection(" + inspection.InspReqID + ", '" + inspection.PermitNo + "');"));
+                            var cancelButton = BuildButton("", "Cancel", "InspSched.CancelInspection(" + inspection.InspReqID + ", '" + inspection.PermitNo + "');");
+                            buttonDiv.appendChild(cancelButton);
+                            if (permit.ErrorText.length === 0) {
+                                cancelButton.style.marginTop = "6px";
+                            }
                         }
                     }
                     else {
                         //detailButton.style.margin = "0";
-                        InspButtonDiv.appendChild(detailButton);
+                        buttonDiv.appendChild(detailButton);
                     }
                 }
             }
-            DataRow.appendChild(InspButtonDiv);
+            DataRow.appendChild(InspButtonContainer);
             if (inspection.DisplayInspDateTime.length > 0) {
                 if (inspection.InspReqID > 0) {
                     CompletedRemarks.appendChild(Remark);
@@ -915,13 +930,35 @@ var InspSched;
             inspRow.appendChild(DetailsContainer);
             return inspRow;
         }
+        function CheckBrowser() {
+            var browser = "";
+            if ((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1) {
+                browser = 'Opera';
+            }
+            else if (navigator.userAgent.indexOf("Chrome") != -1) {
+                browser = 'Chrome';
+            }
+            else if (navigator.userAgent.indexOf("Safari") != -1) {
+                browser = 'Safari';
+            }
+            else if (navigator.userAgent.indexOf("Firefox") != -1) {
+                browser = 'Firefox';
+            }
+            else if ((navigator.userAgent.indexOf("MSIE") != -1) || (!!document.DOCUMENT_NODE == true)) {
+                browser = 'IE';
+            }
+            else {
+                browser = 'unknown';
+            }
+            return browser;
+        }
         function BuildButton(buttonId, label, functionCall, value) {
             var InspButton = document.createElement("button");
             if (buttonId.length > 0) {
                 InspButton.id = buttonId;
             }
             InspButton.value = "";
-            InspButton.className = "align-self-center columns NewInspButton";
+            InspButton.className = "column large-12 medium-12 small-12 align-self-center  NewInspButton";
             InspButton.appendChild(document.createTextNode(label));
             InspButton.setAttribute("onclick", functionCall);
             InspButton.value = (value == null ? "" : value);

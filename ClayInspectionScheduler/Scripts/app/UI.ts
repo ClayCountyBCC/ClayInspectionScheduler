@@ -54,7 +54,6 @@ namespace InspSched.UI
       Hide('Searching');
       document.getElementById('CurrentPermitData').style.display = "flex";
       ShowTable(key, permits);
-
     }
 
   }
@@ -291,7 +290,7 @@ namespace InspSched.UI
   // update BuildInspectionRow
   function BuildInspectionRow(inspection: Inspection)
   {
-
+    let BrowserName = CheckBrowser();
     let permit: Permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === inspection.PermitNo })[0];
     //permit.access = access_type.inspector_access;
 
@@ -344,9 +343,9 @@ namespace InspSched.UI
     inspector.appendChild(document.createTextNode(inspection.InspectorName.trim()));
 
     //********************************************
-    let InspButtonDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
+    let InspButtonContainer: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
     //InspButtonDiv.setAttribute("elementName", "InspButtonDiv");
-    InspButtonDiv.className = "ButtonContainer row large-2 medium-4 small-12 flex-container align-center";
+    InspButtonContainer.className = "ButtonContainer column large-2 medium-4 small-12 flex-container align-center";
 
     // #endregion
 
@@ -450,16 +449,29 @@ namespace InspSched.UI
         let windowHeight: number = window.innerHeight;
         let bottomHeight: number = windowHeight - (addRemarkInputGroup.offsetTop + addRemarkInputGroup.clientHeight - eventTarget.scrollTop);
         let topHeight: number = addRemarkInputGroup.offsetTop - eventTarget.scrollTop;
+        let leftOffset: number = addRemarkInputGroup.offsetLeft;
+        console.log('windowHeight: ', windowHeight, 'bottomHeight: ', bottomHeight, 'topHeight: ', topHeight);
+
         quickRemarkUL.style.height = "103px";
         if (bottomHeight < topHeight)
         {
           console.log('use top');
           quickRemarkUL.style.top = (topHeight - 103).toString() + "px";
+          if (BrowserName.toLowerCase() === 'ie' || BrowserName.toLowerCase() == 'edge')
+          {
+            quickRemarkUL.style.left = leftOffset.toString() +"px";
+          }
+          console.log('quickRemarkUL.style.position: ', quickRemarkUL.style.position);
+          if (CheckBrowser().toLowerCase() === 'ie' || CheckBrowser().toLowerCase() == 'edge')
+          {
+            quickRemarkUL.style.left = leftOffset.toString() + "px";
+          }
         }
         else
         {
           console.log('use bottom');
           quickRemarkUL.style.top = (addRemarkInputGroup.offsetTop + addRemarkInputGroup.clientHeight - eventTarget.scrollTop).toString() + "px";
+          console.log('quickRemarkUL.offsetLeft', quickRemarkUL.offsetLeft.toString());
         }
         
       }
@@ -559,7 +571,7 @@ namespace InspSched.UI
 
     let AddCommentTextarea: HTMLTextAreaElement = (<HTMLTextAreaElement>document.createElement("textarea"));
     //AddCommentTextarea.setAttribute("elementName", "AddCommentTextarea");
-    AddCommentTextarea.className = "large-10 medium-10 small-12 flex-dir-row Comment-Textarea";
+    AddCommentTextarea.className = "large-10 medium-10 small-12 column Comment-Textarea";
     AddCommentTextarea.style.resize = "none";
     AddCommentTextarea.rows = 3;
     AddCommentTextarea.id = inspection.InspReqID + "_comment_textarea";
@@ -568,10 +580,10 @@ namespace InspSched.UI
 
     let SaveCommentButtonDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
     //SaveCommentButtonDiv.setAttribute("elementName", "SaveCommentuttonDiv");
-    SaveCommentButtonDiv.className = "ButtonContainer row large-2 medium-2 small-12 flex-container align-center";
-
+    SaveCommentButtonDiv.className = "ButtonContainer column large-2 medium-2 small-12 flex-container align-center";
+    
     let SaveCommentButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
-    SaveCommentButton.className = "button align-self-center columns SaveCommentButton";
+    SaveCommentButton.className = "button align-self-center column small-12 SaveCommentButton";
     //SaveCommentButton.setAttribute("elementName", "SaveCommentButton");
     SaveCommentButton.setAttribute("onclick", "InspSched.SaveComment('" + inspection.InspReqID + "','" + AddCommentTextarea.value + "')");
     SaveCommentButton.textContent = "Save Comment";
@@ -656,21 +668,20 @@ namespace InspSched.UI
 
     let detailButton = BuildButton(inspection.InspReqID + "_details_btn", "Details", "InspSched.UI.ToggleInspDetails(this.value)", inspection.InspReqID.toString())
     detailButton.className = "column large-12 medium-12 small-12 align-self-center  DetailsButton";
-
+    let buttonDiv = <HTMLDivElement>document.createElement("div");
+    buttonDiv.className = "row small-12";
+    InspButtonContainer.appendChild(buttonDiv);
     //Create function to make New/Cancel/Details Button
     if (permit.ErrorText.length === 0)
     {
-      InspButtonDiv.appendChild(BuildButton("", "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
+      buttonDiv.appendChild(BuildButton("", "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
     }
     else
     {
       detailButton.style.margin = "0";
     }
 
-    if (permit.access !== InspSched.access_type.public_access)
-    {
-      InspButtonDiv.appendChild(detailButton);
-    }
+
 
     if (inspection.ResultADC.length == 0) 
     {
@@ -682,18 +693,25 @@ namespace InspSched.UI
 
           if (privprovstring != "private provider" || inspection.PrivateProviderInspectionRequestId != null)
           {
-            InspButtonDiv.appendChild(BuildButton("", "Cancel", "InspSched.CancelInspection(" + inspection.InspReqID + ", '" + inspection.PermitNo + "');"));
+            let cancelButton = BuildButton("", "Cancel", "InspSched.CancelInspection(" + inspection.InspReqID + ", '" + inspection.PermitNo + "');")
+            buttonDiv.appendChild(cancelButton);
+            if (permit.ErrorText.length === 0)
+            {
+              cancelButton.style.marginTop = "6px";
+            }
           }
         }
         else
         {
+          
           //detailButton.style.margin = "0";
-          InspButtonDiv.appendChild(detailButton);
+          buttonDiv.appendChild(detailButton);
+
         }
       }
     }
 
-    DataRow.appendChild(InspButtonDiv);
+    DataRow.appendChild(InspButtonContainer);
 
     if (inspection.DisplayInspDateTime.length > 0)
     {
@@ -750,6 +768,38 @@ namespace InspSched.UI
 
   }
 
+  function CheckBrowser()
+  { 
+
+    
+    let browser: string = "";
+    if ((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1) 
+    {
+      browser = 'Opera';
+    }
+    else if (navigator.userAgent.indexOf("Chrome") != -1)
+    {
+      browser = 'Chrome';
+    }
+    else if (navigator.userAgent.indexOf("Safari") != -1)
+    {
+      browser = 'Safari';
+    }
+    else if (navigator.userAgent.indexOf("Firefox") != -1) 
+    {
+      browser ='Firefox';
+    }
+    else if ((navigator.userAgent.indexOf("MSIE") != -1) || (!!document.DOCUMENT_NODE == true)) //IF IE > 10
+    {
+      browser = 'IE';
+    }
+    else 
+    {
+      browser ='unknown';
+    }
+    return browser;
+  }
+
   function BuildButton(buttonId: string, label: string, functionCall: string, value?: string): HTMLButtonElement
   {
     let InspButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
@@ -758,7 +808,7 @@ namespace InspSched.UI
       InspButton.id = buttonId;
     }    
     InspButton.value = "";
-    InspButton.className = "align-self-center columns NewInspButton";
+    InspButton.className = "column large-12 medium-12 small-12 align-self-center  NewInspButton";
     InspButton.appendChild(document.createTextNode(label));
     InspButton.setAttribute("onclick", functionCall);
 

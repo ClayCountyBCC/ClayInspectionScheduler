@@ -510,9 +510,10 @@ h5 {
 
 @media print
 {
+
   @page
   {
-    size: landscape;
+    size: landscape !important;
   }
   /* All your print styles go here */
   #header,
@@ -522,6 +523,9 @@ h5 {
   #inspection_filter_container
   {
     display: none !important;
+  }
+  #inspectorViewInspections{
+    -ms-transform: scale(.75,.75) !important;
   }
 
   body
