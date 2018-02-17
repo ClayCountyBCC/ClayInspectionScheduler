@@ -119,27 +119,27 @@ namespace ClayInspectionScheduler.Models
     public string FloodZone { get; set; } = "";
     public string StreetAddress { get; set; } = "";
     public string InspectorColor { get; set; } = "";
-    public string Day
-    {
-      get
-      {
-        if (SchedDateTime == DateTime.MinValue) return "";
-        if (SchedDateTime.Date == DateTime.Today.Date)
-        {
-          return "Today";
-        }
-        else if (SchedDateTime.Date == DateTime.Today.AddDays(1).Date)
-        {
-          return "Tomorrow";
-        }
-        else if(SchedDateTime.Date > DateTime.Today.AddDays(1).Date)
-        {
-          return "Later";
-        }
+    public string Day { get; set; } = "";
+    //{
+    //  get
+    //  {
+    //    if (SchedDateTime == DateTime.MinValue) return "";
+    //    if (SchedDateTime.Date == DateTime.Today.Date)
+    //    {
+    //      return "Today";
+    //    }
+    //    else if (SchedDateTime.Date == DateTime.Today.AddDays(1).Date)
+    //    {
+    //      return "Tomorrow";
+    //    }
+    //    else if(SchedDateTime.Date > DateTime.Today.AddDays(1).Date)
+    //    {
+    //      return "Later";
+    //    }
 
-        return "";
-      }
-    }
+    //    return "";
+    //  }
+    //}
 
     public Inspection()
     {
@@ -148,7 +148,8 @@ namespace ClayInspectionScheduler.Models
 
     public static List<Inspection> GetInspectorList()
     {
-      return GetRawInspectionList();
+      var il = GetRawInspectionList();
+      return il;
     }
 
     private static List<Inspection> GetRawInspectionList()
@@ -156,15 +157,12 @@ namespace ClayInspectionScheduler.Models
       var dc = DateCache.getDateCache(false, DateTime.MinValue);
 
       var dp = new DynamicParameters();
+      var tomorrow = (from g in dc.goodDates where g > DateTime.Today.Date orderby g select g).First();
+
       dp.Add("@Today", DateTime.Today.Date);
-      if (dc.goodDates.Count() > 1)
-      {
-        dp.Add("@Tomorrow", dc.goodDates.ToArray()[1].Date);
-      }
-      else
-      {
-        dp.Add("@Tomorrow", DateTime.Today.AddDays(1).Date);
-      }      
+      dp.Add("@Tomorrow", tomorrow.Date);
+
+      Console.Write(dp);
 
       //DECLARE @Today DATE = CAST(GETDATE() AS DATE);
       //DECLARE @Tomorrow DATE =
@@ -180,7 +178,7 @@ namespace ClayInspectionScheduler.Models
 
 
       string sql = @"
-        USE WATSC;
+          USE WATSC;
 
         WITH BaseFloodZone AS (
           SELECT DISTINCT
@@ -223,6 +221,10 @@ namespace ClayInspectionScheduler.Models
           ISNULL(IP.Color, '#FFFFFF') InspectorColor,
           I.Remarks,
           I.Comment,
+          CASE WHEN CAST(I.SchecDateTime AS DATE) < @Today THEN ''
+               WHEN CAST(I.SchecDateTime AS DATE) = @Today THEN 'Today'
+               WHEN CAST(I.SchecDateTime AS DATE) = @Tomorrow THEN 'Tomorrow' 
+               WHEN CAST(I.SchecDateTime AS DATE) > @Tomorrow THEN 'Later'  END [Day],
           LTRIM(RTRIM(IP.name)) as InspectorName,
           PrivProvIRId PrivateProviderInspectionRequestId,
           ISNULL(LTRIM(RTRIM(B.GeoZone)), '') GeoZone,
@@ -239,8 +241,22 @@ namespace ClayInspectionScheduler.Models
           OR (CAST(SchecDateTime AS DATE) < CAST(@Today AS DATE)
             AND ResultADC IS NULL))
         ORDER BY InspReqID DESC";
-      return Constants.Get_Data<Inspection>(sql, dp);
-    }
+
+
+       Constants.Get_Data<Inspection>(sql, dp);
+      try
+      {
+        var il = Constants.Get_Data<Inspection>(sql, dp);
+        return il;
+      }
+      catch(Exception ex)
+      {
+        Constants.Log(ex, sql);
+        return new List<Inspection>();
+      }
+       
+       
+       }
 
     private static List<Inspection> GetRaw(int InspectionId)
     {
