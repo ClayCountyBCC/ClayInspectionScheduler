@@ -28,6 +28,7 @@ body {
   display: none;
 }
 
+
 #InspectionScheduler {
   display: none;
 }
@@ -507,7 +508,11 @@ h5 {
 {
   list-style: none;
 }
+.change-height-for-print {
+  height:100%;
+  max-height: 100%;
 
+}
 @media print
 {
 
@@ -530,40 +535,41 @@ h5 {
 
   body
   {
-    overflow: auto;
+    overflow: auto !important ;
   }
 
   #InspectionSchedulerTabs
   {
-    overflow-y: auto;
+    overflow-y: auto !important;
   }
 
   .App-Container
   {
-    display: flex;
-    width: auto;
-    height: auto;
+    display: flex !important;
+    width: auto !important ;
+    height: auto !important;
   }
 
   .change-height-for-print
   {
-    max-height: none;
-    width: 100%;
+    height:auto !important;
+    max-height: none !important;
+    width: 100% !important;
   }
 
   #PermitScreen
   {
     min-width: 100% !important;
-    height: auto;
+    height: auto !important;
   }
 
   .no-page-break
   {
-    page-break-inside: avoid;
+    page-break-inside: avoid !important;
   }
 
   .tabs-content
   {
-    border: none;
+    border: none !important;
   }
 }
