@@ -58,6 +58,10 @@ var InspSched;
         }
         function LoadInspectors() {
             InspSched.transport.Inspectors().then(function (inspectors) {
+                var developmentcheck = document.getElementById("isDevelopment");
+                if (inspectors[0].in_development) {
+                    developmentcheck.textContent = "Dev Environment";
+                }
                 InspSched.Inspectors = inspectors;
                 PopulateInspectorDropdown();
             }, function () {
@@ -827,6 +831,7 @@ var InspSched;
                 link.href = permit.Permit_URL;
                 link.appendChild(document.createTextNode(inspection.PermitNo));
                 permitNumber.appendChild(link);
+                //permit.Permit_URL.substring()
             }
             else {
                 permitNumber.appendChild(document.createTextNode(inspection.PermitNo));

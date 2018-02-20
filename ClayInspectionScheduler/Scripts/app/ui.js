@@ -457,6 +457,7 @@ var InspSched;
                 link.href = permit.Permit_URL;
                 link.appendChild(document.createTextNode(inspection.PermitNo));
                 permitNumber.appendChild(link);
+                //permit.Permit_URL.substring()
             }
             else {
                 permitNumber.appendChild(document.createTextNode(inspection.PermitNo));

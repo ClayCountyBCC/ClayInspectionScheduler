@@ -15,11 +15,12 @@ namespace ClayInspectionScheduler.Models
     public string user_name { get; set; }
     public int employee_id { get; set; } = 0;
     public string display_name { get; set; } = "";
-    public enum access_type : int
+
+  public enum access_type : int
     {
       public_access = 1, // They get treated like public users.
       basic_access = 2,
-      inspector_access = 3
+      inspector_access = 3,
     }
     public access_type current_access { get; set; } = access_type.public_access; // default to public access.
 
@@ -153,6 +154,7 @@ namespace ClayInspectionScheduler.Models
     {
       return (Dictionary<string, UserAccess>)MyCache.GetItem("useraccess");
     }
+
 
   }
 }

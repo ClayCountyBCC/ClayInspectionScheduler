@@ -16,7 +16,7 @@ namespace ClayInspectionScheduler.Models
     public bool PlumbingPermit { get; set; }
     public bool PrivateProvider { get; set; }
     public string Initials { get; set; }
-
+    public bool in_development {get;set;}
     public Inspector()
     {
 
@@ -41,7 +41,6 @@ namespace ClayInspectionScheduler.Models
         ORDER BY Name ASC;";
       return Constants.Get_Data<Inspector>(query);
     }
-
     public static List<Inspector> GetCached()
     {
       return (List<Inspector>)MyCache.GetItem("inspector");

@@ -608,6 +608,7 @@ namespace InspSched.UI
       link.href = permit.Permit_URL;
       link.appendChild(document.createTextNode(inspection.PermitNo));
       permitNumber.appendChild(link);
+      //permit.Permit_URL.substring()
     }
     else
     {
