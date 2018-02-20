@@ -29,7 +29,7 @@ var InspSched;
         function LoadInspectors() {
             InspSched.transport.Inspectors().then(function (inspectors) {
                 var developmentcheck = document.getElementById("isDevelopment");
-                if (inspectors[0].in_development) {
+                if (inspectors[0].InDevelopment) {
                     developmentcheck.textContent = "Dev Environment";
                 }
                 InspSched.Inspectors = inspectors;

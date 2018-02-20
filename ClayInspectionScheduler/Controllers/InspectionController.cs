@@ -117,12 +117,8 @@ namespace ClayInspectionScheduler.Controllers
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
       if (ua.current_access == UserAccess.access_type.inspector_access)
       {
-        var il = Inspector.GetCached();
-        foreach (var i in il)
-        {
-          i.in_development = Constants.UseProduction() == false;
-        }
-        return Ok(il);
+        return Ok(Inspector.GetCached());
+
       }
       else
       {

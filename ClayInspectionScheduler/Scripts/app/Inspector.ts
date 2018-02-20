@@ -11,7 +11,7 @@
     PlumbingPermit: boolean;
     PrivateProvider: boolean;
     Initials: string;
-    in_development: boolean;
+    InDevelopment: boolean;
   }
   export class Inspector implements IInspector
   {
@@ -24,7 +24,7 @@
     public PlumbingPermit: boolean;
     public PrivateProvider: boolean;
     public Initials: string;
-    public in_development: boolean; 
+    public InDevelopment: boolean; 
  
 
     constructor()

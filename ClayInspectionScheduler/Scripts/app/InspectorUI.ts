@@ -39,7 +39,7 @@ namespace InspSched.InspectorUI
     transport.Inspectors().then(function (inspectors: Array<Inspector>)
     {
       let developmentcheck = (<HTMLSpanElement>document.getElementById("isDevelopment"));
-      if (inspectors[0].in_development)
+      if (inspectors[0].InDevelopment)
       {
         developmentcheck.textContent = "Dev Environment";
       }

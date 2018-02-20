@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Runtime.Caching;
+using Dapper;
 
 namespace ClayInspectionScheduler.Models
 {
@@ -16,15 +18,16 @@ namespace ClayInspectionScheduler.Models
     public bool PlumbingPermit { get; set; }
     public bool PrivateProvider { get; set; }
     public string Initials { get; set; }
-    public bool in_development {get;set;}
+    public bool InDevelopment {get;set;}
     public Inspector()
     {
 
-    }
+    } 
 
     public static List<Inspector> Get()
     {
-      string query = @"
+
+      string query = $@"
         SELECT 
           LTRIM(RTRIM(Name)) Name,
           ISNULL(Color, '#FFFFFF') Color,
@@ -34,7 +37,8 @@ namespace ClayInspectionScheduler.Models
           ME MechanicalPermit,
           PL PlumbingPermit,  
           PrivateProvider,
-          Intl Initials
+          Intl Initials,
+          {(Models.Constants.UseProduction() == false ? 1 : 0)} InDevelopment
         FROM bp_INSPECTORS
         WHERE 
           Active=1
@@ -43,7 +47,8 @@ namespace ClayInspectionScheduler.Models
     }
     public static List<Inspector> GetCached()
     {
-      return (List<Inspector>)MyCache.GetItem("inspector");
+      var CIP = new CacheItemPolicy() { AbsoluteExpiration = DateTime.Today.AddDays(1) };
+      return (List<Inspector>)MyCache.GetItem("inspector", CIP);
     }
 
   }

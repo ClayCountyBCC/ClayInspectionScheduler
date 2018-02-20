@@ -28,6 +28,11 @@ body {
   display: none;
 }
 
+#isDevelopment {
+  user-select: none;
+  -ms-user-select: none;
+  -moz-user-select: none;
+}
 
 #InspectionScheduler {
   display: none;

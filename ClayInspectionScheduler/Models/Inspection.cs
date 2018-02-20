@@ -13,6 +13,8 @@ namespace ClayInspectionScheduler.Models
   {
     public string PermitNo { get; set; }
 
+    public bool IsCommercial { get; set; }
+
     private string PermitTypeString
     {
       get
@@ -212,6 +214,7 @@ namespace ClayInspectionScheduler.Models
           B.ProjAddrCombined StreetAddress,
           I.InspReqID,
           I.PermitNo, 
+          M.Comm,
           ISNULL(I.InspectionCode, '') InspectionCode, 
           ISNULL(IR.InsDesc, 'No Inspections') InsDesc, 
           I.InspDateTime, 
@@ -234,6 +237,7 @@ namespace ClayInspectionScheduler.Models
         LEFT OUTER JOIN bpINS_REF IR ON IR.InspCd = I.InspectionCode
         LEFT OUTER JOIN bp_INSPECTORS IP ON I.Inspector = IP.Intl 
         LEFT OUTER JOIN FloodZoneData F ON I.BaseId = F.BaseID
+        LEFT OUTER JOIN bpMASTER_PERMIT M ON M.BaseId = B.BaseId
         WHERE 
         -- Here we want to see the inspections that were scheduled for today and tomorrow
           (CAST(SchecDateTime AS DATE) IN (CAST(@Today AS DATE), CAST(@Tomorrow AS DATE))

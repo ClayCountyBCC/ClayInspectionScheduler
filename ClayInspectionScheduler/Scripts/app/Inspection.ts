@@ -7,6 +7,7 @@ namespace InspSched
   interface IInspection
   {
     PermitNo: string;
+    IsCommercial: boolean;
     InspReqID: number;
     InspectionCode: string;
     InsDesc: string;
@@ -33,6 +34,7 @@ namespace InspSched
   export class Inspection implements IInspection
   {
     public PermitNo: string;
+    public IsCommercial: boolean;
     public InspReqID: number;
     public InspectionCode: string;
     public InsDesc: string;
