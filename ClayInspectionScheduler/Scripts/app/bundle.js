@@ -1,3 +1,1504 @@
+var InspSched;
+(function (InspSched) {
+    var ShortInspection = /** @class */ (function () {
+        function ShortInspection(InspectionId, InspectionDesc) {
+            this.InspectionId = InspectionId;
+            this.InspectionDesc = InspectionDesc;
+        }
+        return ShortInspection;
+    }());
+    InspSched.ShortInspection = ShortInspection;
+})(InspSched || (InspSched = {}));
+//# sourceMappingURL=shortinspection.js.map
+/// <reference path="transport.ts" />
+/// <reference path="ui.ts" />
+var InspSched;
+(function (InspSched) {
+    var access_type;
+    (function (access_type) {
+        access_type[access_type["public_access"] = 1] = "public_access";
+        access_type[access_type["basic_access"] = 2] = "basic_access";
+        access_type[access_type["inspector_access"] = 3] = "inspector_access";
+    })(access_type = InspSched.access_type || (InspSched.access_type = {}));
+    var Permit = /** @class */ (function () {
+        function Permit(IsExternalUser) {
+        }
+        return Permit;
+    }());
+    InspSched.Permit = Permit;
+})(InspSched || (InspSched = {}));
+//# sourceMappingURL=Permit.js.map
+/// <reference path="app.ts" />
+/// <reference path="inspection.ts" />
+/// <reference path="shortinspection.ts" />
+var InspSched;
+(function (InspSched) {
+    var InspectorUI;
+    (function (InspectorUI) {
+        function LoadDailyInspections() {
+            InspSched.transport.DailyInspections().then(function (inspections) {
+                InspSched.IVInspections = inspections;
+                if (InspSched.IVInspections.length > 0) {
+                    if (InspSched.Inspectors.length === 0) {
+                        LoadInspectors();
+                    }
+                    InspSched.IV = ProcessIVInspections(inspections);
+                    BuildInspectorUI();
+                }
+            }, function () {
+                console.log('error in LoadInspectionTypes');
+                InspSched.IVInspections = [];
+            });
+        }
+        InspectorUI.LoadDailyInspections = LoadDailyInspections;
+        function ShowInspectionTab() {
+            var e = document.getElementById("InspectorViewTab");
+            e.style.display = "flex";
+        }
+        function LoadInspectors() {
+            InspSched.transport.Inspectors().then(function (inspectors) {
+                var developmentcheck = document.getElementById("isDevelopment");
+                if (inspectors[0].InDevelopment) {
+                    developmentcheck.textContent = "Dev Environment";
+                }
+                InspSched.Inspectors = inspectors;
+                PopulateInspectorDropdown();
+            }, function () {
+                console.log('error in LoadInspectionTypes');
+                InspSched.IVInspections = [];
+            });
+        }
+        function PopulateInspectorDropdown() {
+            var ddl = document.getElementById('InspectorList');
+            for (var _i = 0, _a = InspSched.Inspectors; _i < _a.length; _i++) {
+                var i = _a[_i];
+                var o = document.createElement("option");
+                o.value = i.Name;
+                o.appendChild(document.createTextNode(i.Name));
+                ddl.options.add(o);
+            }
+        }
+        function BuildInspectorUI() {
+            ShowInspectionTab(); // this shows the Inspector View Tab thinger
+            // this function will take the 
+            // IV data and create the html
+            // and add it to the InspectorViewInspections div
+            var currentHash = new InspSched.LocationHash(location.hash.substring(1));
+            var target = document.getElementById("InspectorViewInspections");
+            var df = document.createDocumentFragment();
+            InspSched.UI.clearElement(target);
+            if (InspSched.IV.length > 0) {
+                df.appendChild(BuildHeaderRow());
+                for (var _i = 0, _a = InspSched.IV; _i < _a.length; _i++) {
+                    var i = _a[_i];
+                    df.appendChild(BuildRow(i, currentHash));
+                }
+            }
+            target.appendChild(df);
+        }
+        function BuildHeaderRow() {
+            var df = document.createDocumentFragment();
+            var row = document.createElement("div");
+            row.classList.add("row");
+            row.classList.add("flex-container");
+            row.classList.add("medium-12");
+            row.classList.add("large-12");
+            row.style.borderBottom = "solid 1px Black";
+            var permit = CreateAndSet("Permit");
+            var permitColumn = document.createElement("div");
+            permitColumn.classList.add("flex-container");
+            permitColumn.classList.add("columns");
+            permitColumn.classList.add("align-middle");
+            permitColumn.classList.add("align-center");
+            permitColumn.appendChild(permit);
+            row.appendChild(permitColumn);
+            var secondcolumn = document.createElement("div");
+            secondcolumn.classList.add("columns");
+            secondcolumn.classList.add("medium-10");
+            secondcolumn.classList.add("large-10");
+            secondcolumn.classList.add("end");
+            var firstRow = document.createElement("div");
+            firstRow.classList.add("row");
+            firstRow.classList.add("medium-12");
+            firstRow.classList.add("large-12");
+            firstRow.appendChild(CreateAndSet("Address", "columns", "small-4"));
+            firstRow.appendChild(CreateAndSet("Inspector", "columns", "small-4"));
+            firstRow.appendChild(CreateAndSet("GeoZone", "columns", "small-2"));
+            firstRow.appendChild(CreateAndSet("FloodZone", "columns", "small-2"));
+            secondcolumn.appendChild(firstRow);
+            row.appendChild(secondcolumn);
+            df.appendChild(row);
+            return df;
+        }
+        function BuildRow(i, ch) {
+            var df = document.createDocumentFragment();
+            var row = document.createElement("div");
+            row.classList.add("row");
+            row.classList.add("no-page-break");
+            row.classList.add("flex-container");
+            row.classList.add("medium-12");
+            row.classList.add("large-12");
+            row.style.borderBottom = "solid 1px Black";
+            row.style.marginTop = ".5em";
+            ch.Permit = i.PermitNumber;
+            ch.InspectionId = 0;
+            var permit = CreateLink(i.PermitNumber, ch.ToHash());
+            var permitContainer = document.createElement("div");
+            var permitContainerContainer = document.createElement("div");
+            permitContainerContainer.classList.add("row");
+            permitContainerContainer.classList.add("small-12");
+            permitContainer.classList.add("flex-container");
+            permitContainer.classList.add("small-12");
+            permitContainer.classList.add("align-middle");
+            permitContainer.classList.add("align-center");
+            permitContainer.appendChild(permit);
+            permitContainerContainer.appendChild(permitContainer);
+            var permitColumn = document.createElement("div");
+            permitColumn.classList.add("column");
+            permitColumn.classList.add("medium-2");
+            permitColumn.classList.add("align-middle");
+            permitColumn.classList.add("align-center");
+            permitColumn.classList.add("flex-container");
+            if (i.IsPrivateProvider) {
+                var pp = CreateAndSet("Private Provider");
+                pp.classList.add("align-middle");
+                pp.classList.add("small-12");
+                pp.classList.add("align-center");
+                pp.classList.add("flex-container");
+                pp.style.fontSize = "smaller";
+                permitContainerContainer.appendChild(pp);
+            }
+            permitColumn.appendChild(permitContainerContainer);
+            row.appendChild(permitColumn);
+            var secondcolumn = document.createElement("div");
+            secondcolumn.classList.add("columns");
+            secondcolumn.classList.add("medium-10");
+            secondcolumn.classList.add("large-10");
+            secondcolumn.classList.add("end");
+            var firstRow = document.createElement("div");
+            firstRow.classList.add("row");
+            firstRow.classList.add("medium-12");
+            firstRow.classList.add("large-12");
+            firstRow.appendChild(CreateAndSet(i.Address, "columns", "small-4"));
+            firstRow.appendChild(CreateAndSet(i.Inspector, "columns", "small-4"));
+            firstRow.appendChild(CreateAndSet(i.GeoZone, "columns", "small-2"));
+            firstRow.appendChild(CreateAndSet(i.FloodZone, "columns", "small-2"));
+            secondcolumn.appendChild(firstRow);
+            var secondRow = document.createElement("div");
+            secondRow.classList.add("row");
+            secondRow.classList.add("medium-12");
+            secondRow.classList.add("large-12");
+            for (var _i = 0, _a = i.Inspections; _i < _a.length; _i++) {
+                var insp = _a[_i];
+                ch.InspectionId = insp.InspectionId;
+                secondRow.appendChild(CreateLink(insp.InspectionDesc, ch.ToHash(), "medium-4", "columns"));
+            }
+            secondcolumn.appendChild(secondRow);
+            row.appendChild(secondcolumn);
+            df.appendChild(row);
+            return df;
+        }
+        function CreateAndSet(v) {
+            var c = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                c[_i - 1] = arguments[_i];
+            }
+            var e = document.createElement("div");
+            e.appendChild(document.createTextNode(v));
+            if (c.length > 0) {
+                for (var _a = 0, c_1 = c; _a < c_1.length; _a++) {
+                    var i = c_1[_a];
+                    e.classList.add(i); // optional class
+                }
+            }
+            return e;
+        }
+        function CreateLink(v, l) {
+            var c = [];
+            for (var _i = 2; _i < arguments.length; _i++) {
+                c[_i - 2] = arguments[_i];
+            }
+            var a = document.createElement("a");
+            a.href = l;
+            a.appendChild(document.createTextNode(v));
+            if (c.length > 0) {
+                for (var _a = 0, c_2 = c; _a < c_2.length; _a++) {
+                    var i = c_2[_a];
+                    a.classList.add(i);
+                }
+            }
+            return a;
+        }
+        function ProcessIVInspections(inspections) {
+            // Let's get our filters.
+            var inspector = document.getElementById("InspectorList").value;
+            var day = document.querySelector('input[name="day"]:checked').value;
+            var open = document.querySelector('input[name="status"]:checked').value;
+            // We're going to filter our results if a day or inspector was passed.
+            var isOpen = open === "Open";
+            var ivList = [];
+            // if we have a day or inspector set to filter on
+            // let's go ahead and filter the list of inspections
+            // based on them.
+            var d = new Date();
+            var fInspections = inspections.filter(function (i) {
+                var inspectorCheck = inspector.length > 0 ? i.InspectorName === inspector : true;
+                var dayCheck = day.length > 0 ? i.Day === day || (day === "Today" && i.ResultADC === "" && new Date(i.SchedDateTime) < d) : true;
+                var openCheck = true;
+                if (open.length === 0) {
+                    openCheck = true;
+                }
+                else {
+                    if (isOpen) {
+                        openCheck = i.ResultADC.length === 0;
+                    }
+                    else {
+                        openCheck = i.ResultADC.length > 0;
+                    }
+                }
+                return inspectorCheck && dayCheck && openCheck;
+            });
+            // get a unique list of permit numbers.
+            var permitNumbers = fInspections.map(function (p) {
+                return p.PermitNo;
+            });
+            permitNumbers = permitNumbers.filter(function (value, index, self) { return index === self.indexOf(value); });
+            var _loop_1 = function (p) {
+                var i = fInspections.filter(function (j) {
+                    return j.PermitNo === p;
+                });
+                var iv = new InspSched.InspectionView(i[0]); // we'll base the inspectorView off of the first inspection returned.
+                iv.Inspections = i.map(function (insp) {
+                    return new InspSched.ShortInspection(insp.InspReqID, insp.InspectionCode + '-' + insp.InsDesc);
+                });
+                ivList.push(iv);
+            };
+            // let's coerce the inspection data into the IV format.
+            for (var _i = 0, permitNumbers_1 = permitNumbers; _i < permitNumbers_1.length; _i++) {
+                var p = permitNumbers_1[_i];
+                _loop_1(p);
+            }
+            return ivList;
+        }
+        InspectorUI.ProcessIVInspections = ProcessIVInspections;
+    })(InspectorUI = InspSched.InspectorUI || (InspSched.InspectorUI = {}));
+})(InspSched || (InspSched = {}));
+//# sourceMappingURL=inspectorui.js.map
+/// <reference path="shortinspection.ts" />
+var InspSched;
+(function (InspSched) {
+    var InspectionView = /** @class */ (function () {
+        function InspectionView(inspection) {
+            if (inspection === void 0) { inspection = null; }
+            this.PermitNumber = "";
+            this.Address = "";
+            this.GeoZone = "";
+            this.FloodZone = "";
+            this.Inspector = "";
+            this.IsPrivateProvider = false;
+            this.Inspections = [];
+            if (inspection !== null) {
+                this.PermitNumber = inspection.PermitNo;
+                this.Address = inspection.StreetAddress;
+                this.FloodZone = inspection.FloodZone;
+                this.GeoZone = inspection.GeoZone;
+                this.Inspector = inspection.InspectorName;
+                this.IsPrivateProvider = inspection.PrivateProviderInspectionRequestId > 0;
+            }
+        }
+        return InspectionView;
+    }());
+    InspSched.InspectionView = InspectionView;
+})(InspSched || (InspSched = {}));
+//# sourceMappingURL=InspectionView.js.map
+var InspSched;
+(function (InspSched) {
+    var LocationHash // implements ILocationHash
+     = /** @class */ (function () {
+        function LocationHash(locationHash) {
+            this.Permit = "";
+            this.InspectionId = 0;
+            var ha = locationHash.split("&");
+            for (var i = 0; i < ha.length; i++) {
+                var k = ha[i].split("=");
+                switch (k[0].toLowerCase()) {
+                    case "permit":
+                        this.Permit = k[1];
+                        break;
+                    case "inspectionid":
+                        this.InspectionId = parseInt(k[1]);
+                        break;
+                }
+            }
+        }
+        LocationHash.prototype.UpdatePermit = function (permit) {
+            // and using its current properties, going to emit an updated hash
+            // with a new EmailId.
+            var h = "";
+            if (permit.length > 0)
+                h += "&permit=" + permit;
+            return h.substring(1);
+        };
+        LocationHash.prototype.ToHash = function () {
+            var h = "";
+            if (this.Permit.length > 0)
+                h += "&permit=" + this.Permit;
+            if (this.InspectionId > 0)
+                h += "&inspectionid=" + this.InspectionId.toString();
+            if (h.length > 0)
+                h = "#" + h.substring(1);
+            return h;
+        };
+        return LocationHash;
+    }());
+    InspSched.LocationHash = LocationHash;
+})(InspSched || (InspSched = {}));
+//# sourceMappingURL=LocationHash.js.map
+/// <reference path="app.ts" />
+/// <reference path="transport.ts" />
+/// <reference path="ui.ts" />
+var InspSched;
+(function (InspSched) {
+    var NewInspection = /** @class */ (function () {
+        function NewInspection(PermitNo, InspectionCd, SchecDateTime, Comment) {
+            this.PermitNo = PermitNo;
+            this.InspectionCd = InspectionCd;
+            this.SchecDateTime = SchecDateTime;
+            this.Comment = Comment;
+        }
+        return NewInspection;
+    }());
+    InspSched.NewInspection = NewInspection;
+})(InspSched || (InspSched = {}));
+//# sourceMappingURL=newinspection.js.map
+/// <reference path="app.ts" />
+/// <reference path="Permit.ts" />
+/// <reference path="newinspection.ts" />
+/// <reference path="Inspection.ts" />
+var InspSched;
+(function (InspSched) {
+    var UI;
+    (function (UI) {
+        UI.CurrentPermits = new Array();
+        UI.CurrentInspections = [];
+        UI.PermitsWithOutInsp = [];
+        UI.CurrentDetailsOpen = "";
+        function Search(key) {
+            clearElement(document.getElementById('SearchFailed'));
+            Hide('PermitSelectContainer');
+            Hide('CurrentPermitData');
+            Hide('CurrentPermit');
+            Hide('InspectionTable');
+            Hide('SearchFailed');
+            Hide('SuspendedContractor');
+            Hide('NotScheduled');
+            Show('Searching');
+            var k = key.trim().toUpperCase();
+            document.getElementById('PermitSearch').setAttribute("value", k);
+            if (k.length == 8 && !isNaN(Number(k))) {
+                return k;
+            }
+            else {
+                Hide('Searching');
+                UpdateSearchFailed(key);
+                return null;
+            }
+        }
+        UI.Search = Search;
+        function ProcessResults(permits, key) {
+            if (permits.length == 0) {
+                UpdateSearchFailed(key);
+            }
+            else {
+                AddPermit(permits, key);
+                UpdatePermitData(key, permits);
+                Hide('Searching');
+                document.getElementById('CurrentPermitData').style.display = "flex";
+                ShowTable(key, permits);
+            }
+        }
+        UI.ProcessResults = ProcessResults;
+        /**********************************
+          
+          Build Option List
+        
+        **********************************/
+        function GetPermitList(key, permit) {
+            InspSched.transport.GetPermit(key).then(function (permits) {
+                UI.CurrentPermits = permits;
+                InspSched.CurrentPermits = permits;
+                ProcessResults(permits, key);
+                return true;
+            }, function () {
+                console.log('error in GetPermits');
+                // do something with the error here
+                // need to figure out how to detect if something wasn't found
+                // versus an error.
+                Hide('Searching');
+                return false;
+            });
+        }
+        function AddPermit(permits, key) {
+            var container = document.getElementById('PermitSelect');
+            clearElement(container);
+            var current = buildPermitSelectOptGroup("Search Results", "current");
+            var related = buildPermitSelectOptGroup("Related Permits", "related");
+            container.appendChild(current);
+            if (permits.length > 1) {
+                container.appendChild(related);
+            }
+            for (var _i = 0, permits_1 = permits; _i < permits_1.length; _i++) {
+                var permit = permits_1[_i];
+                if (permit.PermitNo == key) {
+                    current.appendChild(buildPermitSelectOption(permit, key));
+                    GetInspList(key, permit);
+                }
+                else {
+                    if (permits.length > 1)
+                        related.appendChild(buildPermitSelectOption(permit, key));
+                }
+            }
+        }
+        function UpdatePermitData(key, permits) {
+            var street = document.getElementById('ProjAddrCombined');
+            var city = document.getElementById('ProjCity');
+            clearElement(street);
+            clearElement(city);
+            var permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === key; })[0];
+            street.appendChild(document.createTextNode(permit.ProjAddrCombined.trim()));
+            city.appendChild(document.createTextNode(permit.ProjCity.trim()));
+            Show('PermitSelectContainer');
+        }
+        UI.UpdatePermitData = UpdatePermitData;
+        function buildPermitSelectOptGroup(lbl, val) {
+            //let og = document.createElement( "optgroup" );
+            var og = document.createElement("optgroup");
+            og.label = lbl;
+            og.value = val;
+            return og;
+        }
+        function createOptGroupElement(value, className) {
+            var og = document.createElement("optgroup");
+            if (className !== undefined) {
+                og.className = className;
+            }
+            og.label = value;
+            og.appendChild(document.createTextNode(value));
+            return og;
+        }
+        function buildPermitSelectOption(permit, key) {
+            var label = getInspTypeString(permit.PermitNo[0]);
+            var option = document.createElement("option");
+            option.setAttribute("value", permit.PermitNo.trim());
+            option.setAttribute("label", permit.PermitNo + "  (" + label + ")");
+            option.setAttribute("title", permit.PermitNo.trim());
+            option.appendChild(document.createTextNode(permit.PermitNo + "  (" + label + ")"));
+            option.id = "select_" + permit.PermitNo;
+            if (permit.PermitNo == key) {
+                option.value = permit.PermitNo.trim();
+                option.selected = true;
+            }
+            else {
+                option.value = permit.PermitNo.trim();
+            }
+            return option;
+        }
+        /**********************************
+      
+        Initial build:
+          list is filled during search
+          ProcessResults() calls GetInspList()
+      
+        Updating the Inspection List:
+          select element: 'PermitSelect' will \
+          trigger onchange event calling
+          UpdateInspList()
+        
+        ***********************************/
+        function GetInspList(key, permit) {
+            document.getElementById('InspectionScheduler').removeAttribute("value");
+            var saveButton = document.getElementById('SaveSchedule');
+            if (saveButton != undefined) {
+                saveButton.setAttribute("disabled", "disabled");
+                saveButton.removeAttribute("value");
+            }
+            var completed = 0;
+            var canSchedule = true;
+            Hide('InspSched');
+            Hide('InspListHeader');
+            Hide('InspListData');
+            Hide('SuspendedContractor');
+            clearElement(document.getElementById('InspListData'));
+            InspSched.transport.GetInspections(key).then(function (inspections) {
+                if (inspections.length > 0) {
+                    InspSched.CurrentInspections = inspections;
+                    BuildInspectionList(InspSched.CurrentInspections, permit);
+                }
+                else {
+                    // TODO: add 'NO INSPECTIONS ERROR'
+                    document.getElementById('NoInspections').style.display = "flex";
+                    document.getElementById("InspSched").style.display = "flex";
+                    document.getElementById('InspectionTable').style.display = "flex";
+                }
+                BuildScheduler(InspSched.CurrentInspections, key);
+                // This is how we auto select an inspection when one is passed from the inspection view.
+                if (InspSched.CurrentPermits[0].access !== InspSched.access_type.public_access) {
+                    var hash = new InspSched.LocationHash(location.hash.substring(1));
+                    if (hash.InspectionId > 0) {
+                        InspSched.UI.ToggleInspDetails(hash.InspectionId.toString());
+                    }
+                }
+                return true;
+            }, function () {
+                console.log('error getting inspections');
+                return false;
+            });
+        }
+        UI.GetInspList = GetInspList;
+        function BuildInspectionList(inspections, permit) {
+            //For testing ONLY
+            // Initialize element variable for list container 'InspListData'
+            var InspList = document.getElementById('InspListData');
+            var empty = document.createElement("tr");
+            // TODO: add Try/Catch
+            // create (call BuildInspectioN()) and add inspection row to container InspList
+            console.log('inspections', inspections);
+            for (var _i = 0, inspections_1 = inspections; _i < inspections_1.length; _i++) {
+                var inspection = inspections_1[_i];
+                if (permit) {
+                    if (permit.access === InspSched.access_type.public_access) {
+                        inspection.Comment = "";
+                    }
+                }
+                InspList.appendChild(BuildInspectionRow(inspection));
+            }
+            InspList.style.removeProperty("display");
+            document.getElementById("InspSched").style.removeProperty("display");
+            document.getElementById('InspectionTable').style.display = "flex";
+        }
+        UI.BuildInspectionList = BuildInspectionList;
+        // update BuildInspectionRow
+        function BuildInspectionRow(inspection) {
+            var BrowserName = CheckBrowser();
+            var permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === inspection.PermitNo; })[0];
+            //permit.access = access_type.inspector_access;
+            //let today = new Date().setHours(0, 0, 0, 0);
+            //let SchedDate = Date.parse(inspection.DisplaySchedDateTime);
+            var inspdetail = inspection.InspReqID.toString() + "_comments";
+            var inspRow = document.createElement("div");
+            //inspRow.setAttribute("elementName", "inspRow");
+            // Set Inspection Row element classes 
+            if (inspection.ResultADC.length == 0)
+                inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle";
+            else if (inspection.ResultADC == 'A' || inspection.ResultADC == 'P')
+                inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle PassRow";
+            else if (inspection.ResultADC == 'C')
+                inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle CancelRow";
+            else if (inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'N')
+                inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle FailRow";
+            // #region DataRow
+            //*******************************************************************************************
+            var DataRow = document.createElement("div");
+            DataRow.className = "large-12 medium-12 small-12 row flex-container align-middle";
+            //DataRow.setAttribute("elementName", "dataColumn");
+            var inspectionData = document.createElement("div");
+            //inspectionData.setAttribute("elementName", "inspectionData");
+            inspectionData.className = "large-10 medium-8 small-12";
+            var permitNumber = document.createElement('div');
+            permitNumber.className = "large-2 medium-6 small-6 column InspPermit ";
+            //permitNumber.setAttribute("elementName", "permitNumber");
+            var inspDesc = document.createElement("div");
+            inspDesc.className = "large-5 medium-6 small-6 InspType column";
+            //inspDesc.setAttribute("elementName", "inspDesc");
+            inspDesc.appendChild(document.createTextNode(inspection.InsDesc.trim()));
+            var inspDateTime = document.createElement("div");
+            inspDateTime.id = inspection.InspReqID.toString() + "_inspection-date-time";
+            inspDateTime.className = "large-2 medium-6 small-6 column InspDate";
+            //inspDateTime.setAttribute("elementName", "inspDateTime");
+            var inspector = document.createElement("div");
+            inspector.className = "large-3 medium-6 small-12 InspResult column end";
+            //inspector.setAttribute("elementName", "inspector");
+            inspector.appendChild(document.createTextNode(inspection.InspectorName.trim()));
+            //********************************************
+            var InspButtonContainer = document.createElement("div");
+            //InspButtonDiv.setAttribute("elementName", "InspButtonDiv");
+            InspButtonContainer.className = "ButtonContainer column large-2 medium-4 small-12 flex-container align-center";
+            // #endregion
+            // #region Completed Remarks Row
+            //*******************************************************************************************
+            var DetailsContainer = document.createElement("div");
+            DetailsContainer.className = "large-12 medium-12 small-12 row flex-container align-middle details-container";
+            //DetailsContainer.setAttribute("elementName", "DetailsSection");
+            //*********************************************
+            var CompletedRemarks = document.createElement("div");
+            //CompletedRemarks.setAttribute("elementName", "CompletedRemarks");
+            CompletedRemarks.className = "large-12 medium-12 small-12 row";
+            CompletedRemarks.id = inspection.InspReqID.toString() + "_completed_remark";
+            CompletedRemarks.style.display = "flex";
+            var Remark = document.createElement("div");
+            Remark.className = "column large-9 medium-6 small-6 inspRemarks";
+            //Remark.setAttribute("elementName", "Remark");
+            Remark.id = inspection.InspReqID.toString() + "_completed_remark_text";
+            Remark.appendChild(document.createTextNode((inspection.Remarks !== null && inspection.Remarks !== "" ? inspection.Remarks.trim() : "")));
+            var ResultDescription = document.createElement("div");
+            //ResultDescription.setAttribute("elementName", "ResultDescription");
+            ResultDescription.className = "large-3 medium-6 small-6 InspResult column end ";
+            ResultDescription.appendChild(document.createTextNode(inspection.ResultDescription.trim()));
+            // #endregion
+            // #region add Remarks Container: add Remarks textarea, button, and radiobutton sections
+            //*******************************************************************************
+            var addRemarkContainer = document.createElement("div");
+            //addRemarkContainer.setAttribute("elementName", "addRemarkContainer");
+            addRemarkContainer.className = "large-12 medium-12 small-12 row flex-container align-middle add-remark-container";
+            addRemarkContainer.id = inspection.InspReqID + "_add_remark";
+            addRemarkContainer.style.display = "none";
+            //***************************************
+            var addRemark = document.createElement("div");
+            addRemark.className = "row large-12 medium-12 small-12 flex-container flex-child-grow";
+            var addRemarkLabel = document.createElement("label");
+            addRemarkLabel.className = "large-12 medium-12 small-12 row ";
+            addRemarkLabel.textContent = "Public Remarks:";
+            addRemarkLabel.style.textAlign = "left";
+            var addRemarkTextDiv = document.createElement("div");
+            addRemarkTextDiv.className = "large-10 medium-8 small-12";
+            addRemarkTextDiv.classList.add("flex-container");
+            var addRemarkInputGroup = document.createElement("div");
+            addRemarkInputGroup.classList.add("input-group");
+            addRemarkInputGroup.classList.add("small-12");
+            addRemarkInputGroup.style.margin = "0";
+            var remarkInput = document.createElement("input");
+            remarkInput.type = "text";
+            remarkInput.setAttribute("onkeyup", "InspSched.disableSaveCommentButton(" + inspection.InspReqID + ")");
+            //remarkInput.className = "remark-text";
+            remarkInput.id = inspection.InspReqID + "_remark_textarea";
+            remarkInput.style.margin = "0";
+            if (inspection.Remarks) {
+                remarkInput.value = inspection.Remarks;
+            }
+            remarkInput.classList.add("input-group-field");
+            remarkInput.classList.add("columns");
+            var containerSpan = document.createElement("span");
+            containerSpan.classList.add("input-group-button");
+            var quickRemarkButton = document.createElement("button");
+            quickRemarkButton.classList.add("button");
+            quickRemarkButton.classList.add("dropdown");
+            quickRemarkButton.classList.add("arrow-only");
+            quickRemarkButton.style.borderLeftWidth = "0";
+            quickRemarkButton.classList.add("end");
+            var eventTarget = document.getElementById("ScrollTab");
+            var handler = function handleScrollForRealThisTime() {
+                quickRemarkUL.style.display = "none";
+                eventTarget.removeEventListener("scroll", handler, false);
+                window.removeEventListener("resize", handler, true);
+            };
+            quickRemarkButton.onclick = function (e) {
+                var toggle = quickRemarkUL.style.display === "block";
+                if (!toggle) {
+                    eventTarget.addEventListener("scroll", handler, false);
+                    window.addEventListener("resize", handler, true);
+                    var remarkInput_1 = document.getElementById(inspection.InspReqID + "_remark_textarea");
+                    quickRemarkUL.style.display = toggle ? "none" : "block";
+                    quickRemarkUL.style.width = addRemarkInputGroup.clientWidth.toString() + "px";
+                    quickRemarkUL.style.maxWidth = addRemarkInputGroup.clientWidth.toString() + "px";
+                    quickRemarkUL.style.left = addRemarkInputGroup.offsetLeft.toString();
+                    var windowHeight = window.innerHeight;
+                    var bottomHeight = windowHeight - (addRemarkInputGroup.offsetTop + addRemarkInputGroup.clientHeight - eventTarget.scrollTop);
+                    var topHeight = addRemarkInputGroup.offsetTop - eventTarget.scrollTop;
+                    var leftOffset = addRemarkInputGroup.offsetLeft;
+                    console.log('windowHeight: ', windowHeight, 'bottomHeight: ', bottomHeight, 'topHeight: ', topHeight);
+                    quickRemarkUL.style.height = "103px";
+                    if (bottomHeight < topHeight) {
+                        console.log('use top');
+                        quickRemarkUL.style.top = (topHeight - 103).toString() + "px";
+                        quickRemarkUL.style.left = leftOffset.toString() + "px";
+                    }
+                    else {
+                        console.log('use bottom');
+                        quickRemarkUL.style.top = (addRemarkInputGroup.offsetTop + addRemarkInputGroup.clientHeight - eventTarget.scrollTop).toString() + "px";
+                        quickRemarkUL.style.left = leftOffset.toString() + "px";
+                    }
+                }
+                else {
+                    handler();
+                }
+            };
+            var quickRemarkUL = document.createElement("UL");
+            quickRemarkUL.id = "drop" + inspection.InspReqID.toString();
+            quickRemarkUL.classList.add("quick-remark-list");
+            quickRemarkUL.classList.add("row");
+            quickRemarkUL.style.backgroundColor = "white";
+            quickRemarkUL.style.display = "none";
+            quickRemarkUL.style.position = "fixed";
+            var filteredRemarks = InspSched.FilterQuickRemarks(inspection.PermitNo[0], inspection.PrivateProviderInspectionRequestId > 0);
+            var _loop_1 = function (qr) {
+                var quickRemarkLi = document.createElement("LI");
+                var link = document.createElement("a");
+                link.onclick = function (e) {
+                    return InspSched.UI.SetRemarkText(inspection.InspReqID, qr.Remark);
+                };
+                link.appendChild(document.createTextNode(qr.Remark));
+                quickRemarkLi.appendChild(link);
+                quickRemarkUL.appendChild(quickRemarkLi);
+            };
+            for (var _i = 0, filteredRemarks_1 = filteredRemarks; _i < filteredRemarks_1.length; _i++) {
+                var qr = filteredRemarks_1[_i];
+                _loop_1(qr);
+            }
+            containerSpan.appendChild(quickRemarkButton);
+            addRemarkInputGroup.appendChild(remarkInput);
+            addRemarkInputGroup.appendChild(containerSpan);
+            var addRemarkButtonDiv = document.createElement("div");
+            //addRemarkButtonDiv.setAttribute("elementName", "addRemarkButtonDiv");
+            addRemarkButtonDiv.className = "ButtonContainer column large-2 medium-4 small-12 flex-container align-center flex-child-grow";
+            var addRemarkButton = document.createElement("button");
+            //addRemarkButton.setAttribute("elementName", "addRemarkButton");
+            addRemarkButton.setAttribute("disabled", "disabled");
+            addRemarkButton.setAttribute("value", inspection.ResultADC);
+            addRemarkButton.id = inspection.InspReqID + "_save_remark_button";
+            addRemarkButton.setAttribute("onclick", "(InspSched.UpdateInspection(" + permit.PermitNo + ", " + inspection.InspReqID + "))");
+            addRemarkButton.className = "align-self-center columns DetailsButton large-12 medium-12-small-12";
+            addRemarkButton.style.margin = "0";
+            addRemarkButton.textContent = "Save Result";
+            //***************************************
+            var radioButtonSection = document.createElement("div");
+            //radioButtonSection.setAttribute("elementName", "radioButtonSection");
+            radioButtonSection.className = "large-12 medium-12 small-12 column";
+            radioButtonSection.style.paddingLeft = "1em";
+            // #endregion Remarks Container: add Remarks textarea, button, and radiobutton sections
+            // #region Comment Section
+            //*********************************************************************************
+            var CommentContainer = document.createElement("div");
+            CommentContainer.className = "large-12 medium-12 small-12 row flex-container comment-container completed-comments-textarea";
+            //CommentContainer.setAttribute("elementName", "CommentContainer");
+            CommentContainer.style.display = "none";
+            CommentContainer.id = inspection.InspReqID + "_comments";
+            var textboxdiv = document.createElement("div");
+            //textboxdiv.setAttribute("elementName", "textboxdiv");
+            textboxdiv.className = "large-12 medium-12 small-12 row completed-comments-textarea ";
+            textboxdiv.style.display = "none";
+            textboxdiv.id = inspection.InspReqID.toString() + "_textbox_div";
+            var thiscomment = document.createElement("textarea");
+            //thiscomment.setAttribute("elementName", "thiscomment");
+            thiscomment.id = inspection.InspReqID + "_audit";
+            thiscomment.className = "row large-12 medium-12 small-12 No-Edit";
+            thiscomment.rows = 4;
+            thiscomment.readOnly = true;
+            thiscomment.contentEditable = "false";
+            thiscomment.style.margin = "0";
+            thiscomment.style.overflowY = "scroll";
+            thiscomment.style.display = "flex";
+            var AddCommentDiv = document.createElement("div");
+            //AddCommentDiv.setAttribute("elementName", "AddCommentDiv");
+            AddCommentDiv.className = "row large-12 medium-12 small-12 flex-container flex-child-grow";
+            AddCommentDiv.style.paddingLeft = "1em";
+            var commentlabel = document.createElement("label");
+            //commentlabel.setAttribute("elementName", "commentlabel");
+            commentlabel.className = "large-12 medium-12 small-12 row ";
+            commentlabel.style.textAlign = "left";
+            commentlabel.innerText = "Add Comments:";
+            var AddCommentTextarea = document.createElement("textarea");
+            //AddCommentTextarea.setAttribute("elementName", "AddCommentTextarea");
+            AddCommentTextarea.className = "large-10 medium-10 small-12 column Comment-Textarea";
+            AddCommentTextarea.style.resize = "none";
+            AddCommentTextarea.rows = 3;
+            AddCommentTextarea.id = inspection.InspReqID + "_comment_textarea";
+            AddCommentTextarea.maxLength = 200;
+            var SaveCommentButtonDiv = document.createElement("div");
+            //SaveCommentButtonDiv.setAttribute("elementName", "SaveCommentuttonDiv");
+            SaveCommentButtonDiv.className = "ButtonContainer column large-2 medium-2 small-12 flex-container align-center";
+            var SaveCommentButton = document.createElement("button");
+            SaveCommentButton.className = "button align-self-center column small-12 SaveCommentButton";
+            //SaveCommentButton.setAttribute("elementName", "SaveCommentButton");
+            SaveCommentButton.setAttribute("onclick", "InspSched.SaveComment('" + inspection.InspReqID + "','" + AddCommentTextarea.value + "')");
+            SaveCommentButton.textContent = "Save Comment";
+            SaveCommentButton.id = inspection.InspReqID + "_save_comment_button";
+            //if (inspection.comments.length > 0)
+            //{
+            //  CommentContainer.appendChild(1234567_textboxdiv);
+            //}
+            //1234567_commnents.appendChild(AddCommentDiv);
+            //AddCommentDiv.appendChild(commentlabel);
+            //AddCommentDiv.appendChild(AddCommentTextarea);
+            //SaveCommentButtonDiv.appendChild(SaveCommentButton)
+            //AddCommentDiv.appendChild(SaveCommentButtonDiv);
+            // #endregion Comment Secion
+            //*********************************************
+            // Set permit number as link if internal user 
+            if (permit.access !== InspSched.access_type.public_access) {
+                var link = document.createElement("a");
+                link.style.textDecoration = "underline";
+                link.href = permit.Permit_URL;
+                link.appendChild(document.createTextNode(inspection.PermitNo));
+                permitNumber.appendChild(link);
+                //permit.Permit_URL.substring()
+            }
+            else {
+                permitNumber.appendChild(document.createTextNode(inspection.PermitNo));
+            }
+            // if inspection is incomplete, set date to InspSched, else InspDate
+            if (inspection.DisplayInspDateTime.toLowerCase() === 'incomplete') {
+                inspDateTime.appendChild(document.createTextNode(inspection.DisplaySchedDateTime));
+            }
+            else {
+                inspDateTime.appendChild(document.createTextNode(inspection.DisplayInspDateTime));
+            }
+            // #region Initial Append Rows to Inspection Row
+            inspectionData.appendChild(permitNumber);
+            inspectionData.appendChild(inspDateTime);
+            inspectionData.appendChild(inspDesc);
+            inspectionData.appendChild(inspector);
+            DataRow.appendChild(inspectionData);
+            inspRow.appendChild(DataRow);
+            // Sections added below are dependent on access_type and date
+            // cannot be public and cannot be earlier than today (will be changed to earlier date)
+            if (permit.access != InspSched.access_type.public_access &&
+                (inspection.Day != "" || inspection.ResultADC == "")) {
+                addRemarkTextDiv.appendChild(addRemarkInputGroup);
+                addRemarkTextDiv.appendChild(quickRemarkUL);
+                addRemarkButtonDiv.appendChild(addRemarkButton);
+                addRemark.appendChild(addRemarkLabel);
+                addRemark.appendChild(addRemarkTextDiv);
+                addRemark.appendChild(addRemarkButtonDiv);
+                addRemarkContainer.appendChild(addRemark);
+                radioButtonSection.appendChild(BuildRadioButtonRow(inspection.InspReqID.toString(), inspection.ResultADC, permit.access, inspection.PrivateProviderInspectionRequestId));
+                addRemarkContainer.appendChild(radioButtonSection);
+            }
+            // #endregion Initial Append Rows to Inspection Row
+            var detailButton = BuildButton(inspection.InspReqID + "_details_btn", "Details", "InspSched.UI.ToggleInspDetails(this.value)", inspection.InspReqID.toString());
+            detailButton.className = "column large-12 medium-12 small-12 align-self-center  DetailsButton";
+            var buttonDiv = document.createElement("div");
+            buttonDiv.className = "row small-12";
+            InspButtonContainer.appendChild(buttonDiv);
+            //Create function to make New/Cancel/Details Button
+            if (permit.ErrorText.length === 0) {
+                buttonDiv.appendChild(BuildButton("", "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
+            }
+            else {
+                detailButton.style.margin = "0";
+            }
+            if (permit.access !== InspSched.access_type.public_access) {
+                buttonDiv.appendChild(detailButton);
+            }
+            if (inspection.ResultADC.length == 0) {
+                if (IsGoodCancelDate(inspection, permit.access)) {
+                    if (permit.access === InspSched.access_type.public_access) {
+                        var privprovstring = permit.ErrorText.substr(2, 16).toLowerCase();
+                        if (privprovstring != "private provider" || inspection.PrivateProviderInspectionRequestId != null) {
+                            var cancelButton = BuildButton("", "Cancel", "InspSched.CancelInspection(" + inspection.InspReqID + ", '" + inspection.PermitNo + "');");
+                            buttonDiv.appendChild(cancelButton);
+                            if (permit.ErrorText.length === 0) {
+                                cancelButton.style.marginTop = "6px";
+                            }
+                        }
+                    }
+                    else {
+                        //detailButton.style.margin = "0";
+                        buttonDiv.appendChild(detailButton);
+                    }
+                }
+            }
+            DataRow.appendChild(InspButtonContainer);
+            if (inspection.DisplayInspDateTime.length > 0) {
+                if (inspection.InspReqID > 0) {
+                    CompletedRemarks.appendChild(Remark);
+                    CompletedRemarks.appendChild(ResultDescription);
+                    // remarks needs to be in the inspection data
+                    inspectionData.appendChild(CompletedRemarks);
+                }
+                else {
+                    inspector.style.display = 'none';
+                    inspDateTime.style.display = 'none';
+                    inspDesc.className = "large-10 medium-6 small-6 InspType InspResult column";
+                }
+            }
+            CommentContainer.appendChild(textboxdiv);
+            // SET COMMENTS
+            if (inspection.Comment.length > 0) {
+                thiscomment.textContent = inspection.Comment;
+                textboxdiv.style.display = "flex";
+                thiscomment.style.display = "flex";
+            }
+            textboxdiv.appendChild(thiscomment);
+            CommentContainer.appendChild(textboxdiv);
+            AddCommentDiv.appendChild(commentlabel);
+            AddCommentDiv.appendChild(AddCommentTextarea);
+            SaveCommentButtonDiv.appendChild(SaveCommentButton);
+            AddCommentDiv.appendChild(SaveCommentButtonDiv);
+            CommentContainer.appendChild(AddCommentDiv);
+            if (permit.access !== InspSched.access_type.public_access) {
+                DetailsContainer.appendChild(addRemarkContainer);
+                DetailsContainer.appendChild(CommentContainer);
+            }
+            inspRow.appendChild(DetailsContainer);
+            return inspRow;
+        }
+        function CheckBrowser() {
+            var browser = "";
+            if ((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1) {
+                browser = 'Opera';
+            }
+            else if (navigator.userAgent.indexOf("Chrome") != -1) {
+                browser = 'Chrome';
+            }
+            else if (navigator.userAgent.indexOf("Safari") != -1) {
+                browser = 'Safari';
+            }
+            else if (navigator.userAgent.indexOf("Firefox") != -1) {
+                browser = 'Firefox';
+            }
+            else if ((navigator.userAgent.indexOf("MSIE") != -1) || (!!document.DOCUMENT_NODE == true)) {
+                browser = 'IE';
+            }
+            else {
+                browser = 'unknown';
+            }
+            return browser;
+        }
+        function BuildButton(buttonId, label, functionCall, value) {
+            var InspButton = document.createElement("button");
+            if (buttonId.length > 0) {
+                InspButton.id = buttonId;
+            }
+            InspButton.value = "";
+            InspButton.className = "column large-12 medium-12 small-12 align-self-center  NewInspButton";
+            InspButton.appendChild(document.createTextNode(label));
+            InspButton.setAttribute("onclick", functionCall);
+            InspButton.value = (value == null ? "" : value);
+            return InspButton;
+        }
+        function BuildRadioButtonRow(InspectionId, checked, access, privateProvidercheck) {
+            var RadioButtonSubrow = document.createElement("div");
+            if (access === InspSched.access_type.inspector_access) {
+                RadioButtonSubrow.className = "large-10 medium-10 small-12 flex-container flex-dir-row flex-child-grow align-justify row";
+                RadioButtonSubrow.id = InspectionId + "_radio_list";
+                var approveradio = document.createElement("input");
+                approveradio.id = (privateProvidercheck > 0 ? "perform" : "approve") + "_selection";
+                approveradio.type = "radio";
+                approveradio.setAttribute("onclick", "InspSched.disableSaveCommentButton(" + InspectionId + ")");
+                if (checked == "A" || checked == "P") {
+                    approveradio.checked = true;
+                }
+                approveradio.name = InspectionId + "_results";
+                approveradio.value = (privateProvidercheck > 0 ? "P" : "A");
+                var approve = document.createElement("label");
+                approve.className = "column large-2 small-6";
+                approve.htmlFor = (privateProvidercheck > 0 ? "perform" : "approve") + "_selection";
+                approve.appendChild(approveradio);
+                approve.appendChild(document.createTextNode(privateProvidercheck > 0 ? "Performed" : "Approved"));
+                var disapproveradio = document.createElement("input");
+                disapproveradio.id = (privateProvidercheck > 0 ? "not_performed" : "disapprove") + "_selection";
+                disapproveradio.type = "radio";
+                disapproveradio.setAttribute("onclick", "InspSched.disableSaveCommentButton(" + InspectionId + ")");
+                if (checked == "D" || checked == "N") {
+                    disapproveradio.checked = true;
+                }
+                disapproveradio.name = InspectionId + "_results";
+                disapproveradio.value = (privateProvidercheck > 0 ? "N" : "D");
+                var disapprove = document.createElement("label");
+                disapprove.className = "column large-2 small-6";
+                disapprove.htmlFor = (privateProvidercheck > 0 ? "not_performed" : "disapprove") + "_selection";
+                disapprove.appendChild(disapproveradio);
+                disapprove.appendChild(document.createTextNode(privateProvidercheck > 0 ? "Not Performed" : "Disapproved"));
+                RadioButtonSubrow.appendChild(approve);
+                RadioButtonSubrow.appendChild(disapprove);
+            }
+            else {
+                RadioButtonSubrow.className = "large-10 medium-10 small-12 flex-container flex-dir-row flex-child-grow align-right";
+            }
+            var cancelradio = document.createElement("input");
+            cancelradio.id = "cancelradio_selection";
+            cancelradio.type = "radio";
+            cancelradio.setAttribute("onclick", "InspSched.disableSaveCommentButton(" + InspectionId + ")");
+            if (checked == "C") {
+                cancelradio.checked = true;
+            }
+            cancelradio.name = InspectionId + "_results";
+            cancelradio.value = "C";
+            var cancel = document.createElement("label");
+            cancel.className = "column large-2 small-6";
+            cancel.htmlFor = "cancelradio_selection";
+            cancel.appendChild(cancelradio);
+            cancel.appendChild(document.createTextNode("Cancel"));
+            var incompleteradio = document.createElement("input");
+            incompleteradio.id = "incompleteradio_selection";
+            incompleteradio.type = "radio";
+            incompleteradio.setAttribute("onclick", "InspSched.disableSaveCommentButton(" + InspectionId + ")");
+            if (checked == "") {
+                incompleteradio.checked = true;
+            }
+            incompleteradio.name = InspectionId + "_results";
+            incompleteradio.value = "";
+            var incomplete = document.createElement("label");
+            incomplete.className = "column large-2 small-6";
+            incomplete.htmlFor = "incompleteradio_selection";
+            incomplete.appendChild(incompleteradio);
+            incomplete.appendChild(document.createTextNode("Incomplete"));
+            RadioButtonSubrow.appendChild(cancel);
+            RadioButtonSubrow.appendChild(incomplete);
+            return RadioButtonSubrow;
+        }
+        /**********************************************
+         *
+         * Build Scheduler
+         * Get and build select list of inspections@
+         *
+         *********************************************/
+        function BuildScheduler(inspections, key) {
+            // Populate Inspection Type Select list
+            LoadInspTypeSelect(key);
+            InspSched.BuildCalendar(InspSched.ThisPermit.ScheduleDates, InspSched.ThisPermit.ErrorText);
+            document.getElementById('InspectionScheduler').setAttribute("value", key);
+        }
+        UI.BuildScheduler = BuildScheduler;
+        function LoadInspTypeSelect(key) {
+            var thistype = key[0];
+            var label = getInspTypeString(thistype);
+            var InspTypeList = document.getElementById('InspTypeSelect');
+            var optionLabel = document.createElement("option");
+            clearElement(InspTypeList);
+            optionLabel.appendChild(document.createTextNode(label + " Inspections:"));
+            optionLabel.className = "selectPlaceholder";
+            optionLabel.selected;
+            optionLabel.value = "";
+            InspTypeList.appendChild(optionLabel);
+            var permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === key; })[0];
+            var filteredInspectionTypes = InspSched.InspectionTypes.filter(function (inspectionType) {
+                if (inspectionType.InspCd[0] === thistype) {
+                    if (permit.NoFinalInspections) {
+                        return !inspectionType.Final;
+                    }
+                    else {
+                        return true;
+                    }
+                }
+            });
+            //for (let type of InspSched.InspectionTypes)
+            for (var _i = 0, filteredInspectionTypes_1 = filteredInspectionTypes; _i < filteredInspectionTypes_1.length; _i++) {
+                var type = filteredInspectionTypes_1[_i];
+                if (type.InspCd[0] == thistype) {
+                    var option = document.createElement("option");
+                    option.label = type.InsDesc;
+                    option.value = type.InspCd;
+                    option.className = "TypeSelectOption";
+                    option.appendChild(document.createTextNode(type.InsDesc));
+                    InspTypeList.appendChild(option);
+                }
+            }
+        }
+        UI.LoadInspTypeSelect = LoadInspTypeSelect;
+        /**********************************
+        
+          Do Somethings
+        
+        ***********************************/
+        function getInspTypeString(InspType) {
+            switch (InspType) {
+                case "1":
+                case "0":
+                case "9":
+                    return "Building";
+                case "2":
+                    return "Electrical";
+                case "3":
+                    return "Plumbing";
+                case "4":
+                    return "Mechanical";
+                case "6":
+                    return "Fire";
+                default:
+                    return "Unknown";
+            }
+        }
+        function Show(id, element, displayType) {
+            if (!element) {
+                var e = document.getElementById(id);
+                if (e.style.display != null) {
+                    if (displayType == null)
+                        e.style.display = "flex";
+                    else
+                        e.style.display = displayType;
+                }
+            }
+            else {
+                var e = document.getElementById(id);
+                if (displayType == null)
+                    element.style.display = "flex";
+                else
+                    element.style.display = displayType;
+            }
+        }
+        UI.Show = Show;
+        function Hide(id) {
+            var e = document.getElementById(id);
+            if (e)
+                e.style.display = "none";
+        }
+        UI.Hide = Hide;
+        // this function emptys an element of all its child nodes.
+        function clearElement(node) {
+            while (node.firstChild) {
+                node.removeChild(node.firstChild);
+            }
+        }
+        UI.clearElement = clearElement;
+        function ShowTable(key, permits) {
+            var inspectionTable = document.getElementById('InspectionTable');
+            if (permits) {
+                Hide('Searching');
+                inspectionTable.style.removeProperty("display");
+            }
+        }
+        function UpdateSearchFailed(key) {
+            var e = document.getElementById('SearchFailed');
+            clearElement(e);
+            var message = document.createElement("h3");
+            if (!isNaN(Number(key)) && key.length == 8) {
+                message.appendChild(document.createTextNode("Permit #" + key + " not found"));
+            }
+            else if (!isNaN(Number(key)) && key.length > 0 && key.length != 8) {
+                message.innerHTML = "\"" + key + "\" is not a valid Permit Number";
+            }
+            else if (key.length == 0) {
+                message.innerHTML = "You did not enter any information.<br />Enter a valid permit number and click search.";
+            }
+            else {
+                message.innerHTML = "Invalid Entry<br />";
+            }
+            message.style.textAlign = "center";
+            e.appendChild(message);
+            Hide('Searching');
+            Show('SearchFailed');
+        }
+        function InformUserOfError(permitno, error) {
+            Hide("InspectionScheduler");
+            clearElement(document.getElementById('InspTypeSelect'));
+            var reasons = document.getElementById('Reasons');
+            clearElement(reasons);
+            var thisHeading = document.getElementById('ErrorHeading');
+            clearElement(thisHeading);
+            var IssueList = document.createElement('ul');
+            var thisIssue = document.createElement('li');
+            thisHeading.appendChild(document.createTextNode("The following issue is preventing the ability to schedule an inspection:"));
+            thisIssue.appendChild(document.createTextNode(error));
+            thisIssue.style.marginLeft = "2rem;";
+            IssueList.appendChild(thisIssue);
+            reasons.appendChild(IssueList);
+            document.getElementById("NotScheduled").style.display = "flex";
+        }
+        UI.InformUserOfError = InformUserOfError;
+        function IsGoodCancelDate(inspection, access) {
+            var tomorrow = new Date();
+            var inspDate = new Date(inspection.DisplaySchedDateTime);
+            var dayOfMonth = tomorrow.getDate() + 1;
+            if (inspDate < tomorrow && (access == InspSched.access_type.public_access))
+                return false;
+            return true;
+        }
+        function ToggleInspDetails(InspectionId) {
+            var current = InspSched.CurrentInspections.filter(function (j) { return j.InspReqID === parseInt(InspectionId); });
+            if (current.length === 0) {
+                console.log('an error occurred, the inspection you are looking for was not found in the current inspections.');
+                return;
+            }
+            if (InspSched.UI.CurrentDetailsOpen != "" &&
+                InspectionId != InspSched.UI.CurrentDetailsOpen) {
+                var CurrentAddRemark = document.getElementById(InspSched.UI.CurrentDetailsOpen + '_add_remark');
+                var CurrentCompletedRemark = document.getElementById(InspSched.UI.CurrentDetailsOpen + '_completed_remark');
+                var CurrentComments = document.getElementById(InspSched.UI.CurrentDetailsOpen + '_comments');
+                CurrentAddRemark.style.display = "none";
+                CurrentComments.style.display = "none";
+                if (CurrentCompletedRemark != null) {
+                    CurrentCompletedRemark.style.display = "flex";
+                }
+                document.getElementById(InspSched.UI.CurrentDetailsOpen + '_details_btn').textContent = "Details";
+            }
+            var addRemark = document.getElementById(InspectionId + '_add_remark');
+            var completedRemark = document.getElementById(InspectionId + '_completed_remark');
+            var comments = document.getElementById(InspectionId + '_comments');
+            var button = document.getElementById(InspectionId + '_details_btn');
+            var d = new Date();
+            d.setHours(0, 0, 0, 0);
+            var elementState = comments.style.display.toString().toLowerCase();
+            if (((new Date(current[0].SchedDateTime) >= d) &&
+                addRemark != null) || current[0].ResultADC === "") {
+                completedRemark.style.display = elementState == 'flex' ? 'flex' : 'none';
+                addRemark.style.display = elementState == 'none' ? 'flex' : 'none';
+            }
+            if (comments != null) {
+                comments.style.display = elementState == 'none' ? 'flex' : 'none';
+            }
+            var buttonString = (elementState == 'none' ? 'Hide ' : '') + 'Details';
+            document.getElementById(InspectionId + '_details_btn').textContent = buttonString;
+            InspSched.UI.CurrentDetailsOpen = InspectionId;
+        }
+        UI.ToggleInspDetails = ToggleInspDetails;
+        function SetRemarkText(InspectionId, Remark) {
+            var ul = document.getElementById("drop" + InspectionId.toString());
+            var input = document.getElementById(InspectionId.toString() + "_remark_textarea");
+            input.value = Remark;
+            ul.style.display = "none";
+            return true;
+        }
+        UI.SetRemarkText = SetRemarkText;
+    })(UI = InspSched.UI || (InspSched.UI = {}));
+})(InspSched || (InspSched = {}));
+//# sourceMappingURL=ui.js.map
+/// <reference path="typings/es6-promise/es6-promise.d.ts" />
+/*  This code was written by macromaniac
+ *  Originally pulled from: https://gist.github.com/macromaniac/e62ed27781842b6c8611 on 7/14/2016
+ *  and from https://gist.github.com/takanori-ugai/8262008944769419e614
+ *
+ */
+var XHR;
+(function (XHR) {
+    var Header = /** @class */ (function () {
+        function Header(header, data) {
+            this.header = header;
+            this.data = data;
+        }
+        return Header;
+    }());
+    XHR.Header = Header;
+    var Data = /** @class */ (function () {
+        function Data() {
+        }
+        return Data;
+    }());
+    XHR.Data = Data;
+    function DataFromJSXHR(jsXHR) {
+        var data = new Data();
+        data.Headers = jsXHR.getAllResponseHeaders();
+        data.Text = jsXHR.responseText;
+        data.Type = jsXHR.responseType;
+        data.Status = jsXHR.status;
+        data.StatusText = jsXHR.statusText;
+        return data;
+    }
+    function SendCommand(method, url, headers, data) {
+        if (data === void 0) { data = ""; }
+        return new Promise(function (resolve, reject) {
+            var jsXHR = new XMLHttpRequest();
+            jsXHR.open(method, url);
+            if (headers != null)
+                headers.forEach(function (header) {
+                    return jsXHR.setRequestHeader(header.header, header.data);
+                });
+            jsXHR.onload = function (ev) {
+                if (jsXHR.status < 200 || jsXHR.status >= 300) {
+                    reject(DataFromJSXHR(jsXHR));
+                }
+                resolve(DataFromJSXHR(jsXHR));
+            };
+            jsXHR.onerror = function (ev) {
+                reject('Error ' + method.toUpperCase() + 'ing data to url "' + url + '", check that it exists and is accessible');
+            };
+            if (data.length > 0)
+                jsXHR.send(data);
+            else
+                jsXHR.send();
+        });
+    }
+    function addJSONHeader(headers) {
+        if (headers === null || headers.length == 0) {
+            headers = [
+                new XHR.Header("Content-Type", "application/json; charset=utf-8"),
+                new XHR.Header("Accept", "application/json")
+            ];
+        }
+        else {
+            headers.push(new XHR.Header("Content-Type", "application/json; charset=utf-8"));
+            headers.push(new XHR.Header("Accept", "application/json"));
+        }
+        return headers;
+    }
+    function Get(url, headers, isJSON) {
+        if (headers === void 0) { headers = null; }
+        if (isJSON === void 0) { isJSON = true; }
+        headers = (isJSON ? addJSONHeader(headers) : headers);
+        return SendCommand('GET', url, headers);
+    }
+    XHR.Get = Get;
+    function Post(url, data, headers, isJSON) {
+        if (data === void 0) { data = ""; }
+        if (headers === void 0) { headers = null; }
+        if (isJSON === void 0) { isJSON = true; }
+        headers = (isJSON ? addJSONHeader(headers) : headers);
+        return SendCommand('POST', url, headers, data);
+    }
+    XHR.Post = Post;
+    function Put(url, data, headers, isJSON) {
+        if (data === void 0) { data = ""; }
+        if (headers === void 0) { headers = null; }
+        if (isJSON === void 0) { isJSON = true; }
+        headers = (isJSON ? addJSONHeader(headers) : headers);
+        return SendCommand('PUT', url, headers, data);
+    }
+    XHR.Put = Put;
+    function Delete(url, data, headers, isJSON) {
+        if (data === void 0) { data = ""; }
+        if (headers === void 0) { headers = null; }
+        if (isJSON === void 0) { isJSON = true; }
+        headers = (isJSON ? addJSONHeader(headers) : headers);
+        return SendCommand('DELETE', url, headers, data);
+    }
+    XHR.Delete = Delete;
+})(XHR || (XHR = {}));
+//# sourceMappingURL=XHR.js.map
+/// <reference path="XHR.ts" />
+/// <reference path="Permit.ts" />
+/// <reference path="newinspection.ts" />
+/// <reference path="Inspection.ts" />
+var InspSched;
+(function (InspSched) {
+    var transport;
+    (function (transport) {
+        "use strict";
+        function GetPermit(key) {
+            var x = XHR.Get("API/Permit/Get/" + key);
+            return new Promise(function (resolve, reject) {
+                x.then(function (response) {
+                    var pl = JSON.parse(response.Text);
+                    resolve(pl);
+                }).catch(function () {
+                    console.log("error in GetPermit");
+                    reject(null);
+                });
+            });
+        }
+        transport.GetPermit = GetPermit;
+        function GetInspType() {
+            var x = XHR.Get("API/InspType/");
+            return new Promise(function (resolve, reject) {
+                x.then(function (response) {
+                    var pl = JSON.parse(response.Text);
+                    resolve(pl);
+                }).catch(function () {
+                    console.log("error in GetInspTypeList");
+                    reject(null);
+                });
+            });
+        }
+        transport.GetInspType = GetInspType;
+        function GetInspections(key) {
+            var x = XHR.Get("API/Inspection/Permit/" + key);
+            return new Promise(function (resolve, reject) {
+                x.then(function (response) {
+                    var il = JSON.parse(response.Text);
+                    resolve(il);
+                }).catch(function () {
+                    console.log("error in GetInspections");
+                    reject(null);
+                });
+            });
+        }
+        transport.GetInspections = GetInspections;
+        function SaveInspection(thisInspection) {
+            var x = XHR.Post("API/NewInspection/", JSON.stringify(thisInspection));
+            return new Promise(function (resolve, reject) {
+                x.then(function (response) {
+                    var di = JSON.parse(response.Text);
+                    InspSched.UI.GetInspList(thisInspection.PermitNo);
+                    resolve(di);
+                }).catch(function () {
+                    console.log("error in SaveInspections");
+                    InspSched.UI.GetInspList(thisInspection.PermitNo);
+                    reject(null);
+                });
+            });
+        }
+        transport.SaveInspection = SaveInspection;
+        function AddComment(InspectionId, Comment) {
+            var data = {
+                'InspectionId': InspectionId,
+                'Comment': Comment
+            };
+            var x = XHR.Post("API/Inspection/Comment/", JSON.stringify(data));
+            return new Promise(function (resolve, reject) {
+                x.then(function (response) {
+                    var di = JSON.parse(response.Text);
+                    resolve(di);
+                }).catch(function () {
+                    console.log("error in Post Comment");
+                    reject(null);
+                });
+            });
+        }
+        transport.AddComment = AddComment;
+        function CancelInspection(InspectionId, PermitNumber) {
+            var x = XHR.Post("API/Inspection/PublicCancel/" + PermitNumber + "/" + InspectionId);
+            return new Promise(function (resolve, reject) {
+                x.then(function (response) {
+                    var di = JSON.parse(response.Text);
+                    resolve(di);
+                }).catch(function () {
+                    console.log("error in GetInspections");
+                    reject(null);
+                });
+            });
+        }
+        transport.CancelInspection = CancelInspection;
+        function UpdateInspection(PermitNumber, InspectionId, ResultCode, Remarks, Comments) {
+            var data = {
+                'permitNumber': PermitNumber,
+                'inspectionId': InspectionId,
+                'resultCode': ResultCode,
+                'remark': Remarks,
+                'comment': Comments
+            };
+            var x = XHR.Post("API/Inspection/Update/", JSON.stringify(data));
+            return new Promise(function (resolve, reject) {
+                x.then(function (response) {
+                    var di = JSON.parse(response.Text);
+                    resolve(di);
+                }).catch(function () {
+                    console.log("error in Inspection Update");
+                    reject(null);
+                });
+            });
+        }
+        transport.UpdateInspection = UpdateInspection;
+        function DailyInspections() {
+            var x = XHR.Get("API/Inspection/List");
+            return new Promise(function (resolve, reject) {
+                x.then(function (response) {
+                    var di = JSON.parse(response.Text);
+                    resolve(di);
+                }).catch(function () {
+                    console.log("error in Daily Inspections");
+                    reject(null);
+                });
+            });
+        }
+        transport.DailyInspections = DailyInspections;
+        function Inspectors() {
+            var x = XHR.Get("API/Inspection/Inspectors");
+            return new Promise(function (resolve, reject) {
+                x.then(function (response) {
+                    var di = JSON.parse(response.Text);
+                    resolve(di);
+                }).catch(function () {
+                    console.log("error in Get Inspectors");
+                    reject(null);
+                });
+            });
+        }
+        transport.Inspectors = Inspectors;
+        function GetInspectionQuickRemarks() {
+            var x = XHR.Get("API/Inspection/QuickRemarks");
+            return new Promise(function (resolve, reject) {
+                x.then(function (response) {
+                    var di = JSON.parse(response.Text);
+                    resolve(di);
+                }).catch(function () {
+                    console.log("error in Get Quick Remarks");
+                    reject(null);
+                });
+            });
+        }
+        transport.GetInspectionQuickRemarks = GetInspectionQuickRemarks;
+    })(transport = InspSched.transport || (InspSched.transport = {}));
+})(InspSched || (InspSched = {}));
+//# sourceMappingURL=transport.js.map
 /*!
  * @overview es6-promise - a tiny implementation of Promises/A+.
  * @copyright Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)
@@ -7,6 +1508,448 @@
  */
 
 (function () { "use strict"; function t(t) { return "function" == typeof t || "object" == typeof t && null !== t } function e(t) { return "function" == typeof t } function n(t) { G = t } function r(t) { Q = t } function o() { return function () { process.nextTick(a) } } function i() { return function () { B(a) } } function s() { var t = 0, e = new X(a), n = document.createTextNode(""); return e.observe(n, { characterData: !0 }), function () { n.data = t = ++t % 2 } } function u() { var t = new MessageChannel; return t.port1.onmessage = a, function () { t.port2.postMessage(0) } } function c() { return function () { setTimeout(a, 1) } } function a() { for (var t = 0; J > t; t += 2) { var e = tt[t], n = tt[t + 1]; e(n), tt[t] = void 0, tt[t + 1] = void 0 } J = 0 } function f() { try { var t = require, e = t("vertx"); return B = e.runOnLoop || e.runOnContext, i() } catch (n) { return c() } } function l(t, e) { var n = this, r = new this.constructor(p); void 0 === r[rt] && k(r); var o = n._state; if (o) { var i = arguments[o - 1]; Q(function () { x(o, r, i, n._result) }) } else E(n, r, t, e); return r } function h(t) { var e = this; if (t && "object" == typeof t && t.constructor === e) return t; var n = new e(p); return g(n, t), n } function p() { } function _() { return new TypeError("You cannot resolve a promise with itself") } function d() { return new TypeError("A promises callback cannot return that same promise.") } function v(t) { try { return t.then } catch (e) { return ut.error = e, ut } } function y(t, e, n, r) { try { t.call(e, n, r) } catch (o) { return o } } function m(t, e, n) { Q(function (t) { var r = !1, o = y(n, e, function (n) { r || (r = !0, e !== n ? g(t, n) : S(t, n)) }, function (e) { r || (r = !0, j(t, e)) }, "Settle: " + (t._label || " unknown promise")); !r && o && (r = !0, j(t, o)) }, t) } function b(t, e) { e._state === it ? S(t, e._result) : e._state === st ? j(t, e._result) : E(e, void 0, function (e) { g(t, e) }, function (e) { j(t, e) }) } function w(t, n, r) { n.constructor === t.constructor && r === et && constructor.resolve === nt ? b(t, n) : r === ut ? j(t, ut.error) : void 0 === r ? S(t, n) : e(r) ? m(t, n, r) : S(t, n) } function g(e, n) { e === n ? j(e, _()) : t(n) ? w(e, n, v(n)) : S(e, n) } function A(t) { t._onerror && t._onerror(t._result), T(t) } function S(t, e) { t._state === ot && (t._result = e, t._state = it, 0 !== t._subscribers.length && Q(T, t)) } function j(t, e) { t._state === ot && (t._state = st, t._result = e, Q(A, t)) } function E(t, e, n, r) { var o = t._subscribers, i = o.length; t._onerror = null, o[i] = e, o[i + it] = n, o[i + st] = r, 0 === i && t._state && Q(T, t) } function T(t) { var e = t._subscribers, n = t._state; if (0 !== e.length) { for (var r, o, i = t._result, s = 0; s < e.length; s += 3) r = e[s], o = e[s + n], r ? x(n, r, o, i) : o(i); t._subscribers.length = 0 } } function M() { this.error = null } function P(t, e) { try { return t(e) } catch (n) { return ct.error = n, ct } } function x(t, n, r, o) { var i, s, u, c, a = e(r); if (a) { if (i = P(r, o), i === ct ? (c = !0, s = i.error, i = null) : u = !0, n === i) return void j(n, d()) } else i = o, u = !0; n._state !== ot || (a && u ? g(n, i) : c ? j(n, s) : t === it ? S(n, i) : t === st && j(n, i)) } function C(t, e) { try { e(function (e) { g(t, e) }, function (e) { j(t, e) }) } catch (n) { j(t, n) } } function O() { return at++ } function k(t) { t[rt] = at++, t._state = void 0, t._result = void 0, t._subscribers = [] } function Y(t) { return new _t(this, t).promise } function q(t) { var e = this; return new e(I(t) ? function (n, r) { for (var o = t.length, i = 0; o > i; i++) e.resolve(t[i]).then(n, r) } : function (t, e) { e(new TypeError("You must pass an array to race.")) }) } function F(t) { var e = this, n = new e(p); return j(n, t), n } function D() { throw new TypeError("You must pass a resolver function as the first argument to the promise constructor") } function K() { throw new TypeError("Failed to construct 'Promise': Please use the 'new' operator, this object constructor cannot be called as a function.") } function L(t) { this[rt] = O(), this._result = this._state = void 0, this._subscribers = [], p !== t && ("function" != typeof t && D(), this instanceof L ? C(this, t) : K()) } function N(t, e) { this._instanceConstructor = t, this.promise = new t(p), this.promise[rt] || k(this.promise), I(e) ? (this._input = e, this.length = e.length, this._remaining = e.length, this._result = new Array(this.length), 0 === this.length ? S(this.promise, this._result) : (this.length = this.length || 0, this._enumerate(), 0 === this._remaining && S(this.promise, this._result))) : j(this.promise, U()) } function U() { return new Error("Array Methods must be provided an Array") } function W() { var t; if ("undefined" != typeof global) t = global; else if ("undefined" != typeof self) t = self; else try { t = Function("return this")() } catch (e) { throw new Error("polyfill failed because global object is unavailable in this environment") } var n = t.Promise; (!n || "[object Promise]" !== Object.prototype.toString.call(n.resolve()) || n.cast) && (t.Promise = pt) } var z; z = Array.isArray ? Array.isArray : function (t) { return "[object Array]" === Object.prototype.toString.call(t) }; var B, G, H, I = z, J = 0, Q = function (t, e) { tt[J] = t, tt[J + 1] = e, J += 2, 2 === J && (G ? G(a) : H()) }, R = "undefined" != typeof window ? window : void 0, V = R || {}, X = V.MutationObserver || V.WebKitMutationObserver, Z = "undefined" == typeof self && "undefined" != typeof process && "[object process]" === {}.toString.call(process), $ = "undefined" != typeof Uint8ClampedArray && "undefined" != typeof importScripts && "undefined" != typeof MessageChannel, tt = new Array(1e3); H = Z ? o() : X ? s() : $ ? u() : void 0 === R && "function" == typeof require ? f() : c(); var et = l, nt = h, rt = Math.random().toString(36).substring(16), ot = void 0, it = 1, st = 2, ut = new M, ct = new M, at = 0, ft = Y, lt = q, ht = F, pt = L; L.all = ft, L.race = lt, L.resolve = nt, L.reject = ht, L._setScheduler = n, L._setAsap = r, L._asap = Q, L.prototype = { constructor: L, then: et, "catch": function (t) { return this.then(null, t) } }; var _t = N; N.prototype._enumerate = function () { for (var t = this.length, e = this._input, n = 0; this._state === ot && t > n; n++) this._eachEntry(e[n], n) }, N.prototype._eachEntry = function (t, e) { var n = this._instanceConstructor, r = n.resolve; if (r === nt) { var o = v(t); if (o === et && t._state !== ot) this._settledAt(t._state, e, t._result); else if ("function" != typeof o) this._remaining--, this._result[e] = t; else if (n === pt) { var i = new n(p); w(i, t, o), this._willSettleAt(i, e) } else this._willSettleAt(new n(function (e) { e(t) }), e) } else this._willSettleAt(r(t), e) }, N.prototype._settledAt = function (t, e, n) { var r = this.promise; r._state === ot && (this._remaining--, t === st ? j(r, n) : this._result[e] = n), 0 === this._remaining && S(r, this._result) }, N.prototype._willSettleAt = function (t, e) { var n = this; E(t, void 0, function (t) { n._settledAt(it, e, t) }, function (t) { n._settledAt(st, e, t) }) }; var dt = W, vt = { Promise: pt, polyfill: dt }; "function" == typeof define && define.amd ? define(function () { return vt }) : "undefined" != typeof module && module.exports ? module.exports = vt : "undefined" != typeof this && (this.ES6Promise = vt), dt() }).call(this);
+/// <reference path="transport.ts" />
+/// <reference path="UI.ts" />
+/// <reference path="Permit.ts" />
+/// <reference path="dates.ts" />
+/// <reference path="newinspection.ts" />
+/// <reference path="Inspection.ts" />
+/// <reference path="../typings/jquery/jquery.d.ts" />
+/// <reference path="../typings/foundation/foundation.d.ts" />
+/// <reference path="../typings/bootstrap.datepicker/bootstrap.datepicker.d.ts" />
+/// <reference path="inspectorui.ts" />
+/// <reference path="inspector.ts" />
+/// <reference path="quickremark.ts" />
+var InspSched;
+(function (InspSched) {
+    "use strict";
+    var dpCalendar = null;
+    InspSched.InspectionTypes = [];
+    InspSched.InspectionQuickRemarks = [];
+    InspSched.CurrentPermits = [];
+    InspSched.CurrentInspections = [];
+    InspSched.IssuesExist = [];
+    InspSched.IVInspections = [];
+    InspSched.Inspectors = [];
+    InspSched.IV = []; // this is going to be the processed array of Inspection data.
+    var InspectionTable = document.getElementById('InspectionTable');
+    var InspectionTypeSelect = document.getElementById("InspTypeSelect");
+    var PermitSearchButton = document.getElementById("PermitSearchButton");
+    var CloseIssueDivButton = document.getElementById("CloseIssueList");
+    var PermitSearchField = document.getElementById("PermitSearch");
+    var permitNumSelect = document.getElementById("PermitSelect");
+    var inspScheduler = document.getElementById("InspectionScheduler");
+    var IssueContainer = document.getElementById("NotScheduled");
+    var IssuesDiv = document.getElementById('Reasons');
+    var SaveInspectionButton = document.getElementById("SaveSchedule");
+    var confirmed = document.getElementById('SaveConfirmed');
+    function start() {
+        LoadData();
+        window.onhashchange = HandleHash;
+        if (location.hash.length > 0) {
+            if (location.hash && location.hash.substring(1).length > 0) {
+                HandleHash(); // if they pass something in the URL
+            }
+        }
+    } //  END start()
+    InspSched.start = start;
+    function updateHash(permit) {
+        var hash = new InspSched.LocationHash(location.hash.substring(1));
+        location.hash = hash.UpdatePermit(permit);
+        var newhash = new InspSched.LocationHash(location.hash.substring(1));
+        if (newhash.Permit === hash.Permit) {
+            SearchPermit();
+        }
+    }
+    InspSched.updateHash = updateHash;
+    function HandleHash() {
+        var hash = location.hash;
+        var currentHash = new InspSched.LocationHash(location.hash.substring(1));
+        if (currentHash.Permit.length > 0) {
+            // if they entered a permit number, let's try and search for it
+            // do permitsearch here
+            PermitSearchField.value = currentHash.Permit.trim();
+            SearchPermit();
+        }
+    }
+    InspSched.HandleHash = HandleHash;
+    PermitSearchField.onkeydown = function (event) {
+        if (event.keyCode == 13) {
+            //SearchPermit();
+            updateHash(PermitSearchField.value);
+        }
+    };
+    function SearchPermit() {
+        InspSched.UI.CurrentDetailsOpen = "";
+        InspectionTable.style.display = "none";
+        InspSched.UI.Hide('SaveConfirmed');
+        InspSched.UI.Hide('NotScheduled');
+        $('#InspectionSchedulerTabs').foundation('selectTab', 'InspectionView', true);
+        var permitno = PermitSearchField.value.trim();
+        InspSched.transport.GetPermit(InspSched.UI.Search(permitno)).then(function (permits) {
+            InspSched.CurrentPermits = permits;
+            InspSched.UI.ProcessResults(permits, permitno);
+            for (var _i = 0, permits_1 = permits; _i < permits_1.length; _i++) {
+                var permit = permits_1[_i];
+                if (permit.PermitNo == permitno) {
+                    InspSched.ThisPermit = permit;
+                    if (permit.ErrorText.length === 0) {
+                        BuildCalendar(permit.ScheduleDates);
+                    }
+                    else {
+                        InspSched.UI.InformUserOfError(permit.PermitNo, permit.ErrorText);
+                    }
+                    break;
+                }
+            }
+            return true;
+        }, function () {
+            console.log('error getting permits');
+            // do something with the error here
+            // need to figure out how to detect if something wasn't found
+            // versus an error.
+            InspSched.UI.Hide('Searching');
+            return false;
+        });
+    }
+    InspSched.SearchPermit = SearchPermit;
+    permitNumSelect.onchange = function () {
+        $(dpCalendar).datepicker('destroy');
+        IssueContainer.style.display = 'none';
+        confirmed.style.display = "none";
+        var permits = InspSched.CurrentPermits;
+        // TODO: Add code to check if there is a selected date;
+        SaveInspectionButton.setAttribute("disabled", "disabled");
+        for (var _i = 0, permits_2 = permits; _i < permits_2.length; _i++) {
+            var permit = permits_2[_i];
+            if (permit.PermitNo == permitNumSelect.value) {
+                // THIS LINE FOR TESTING ONLY
+                permit.access = InspSched.access_type.inspector_access;
+                InspSched.ThisPermit = permit;
+                if (permit.ErrorText.length > 0) {
+                    InspSched.UI.InformUserOfError(permit.PermitNo, permit.ErrorText);
+                }
+                else {
+                    InspSched.UI.LoadInspTypeSelect(permit.PermitNo);
+                    BuildCalendar(permit.ScheduleDates);
+                }
+                break;
+            }
+        }
+    };
+    InspectionTypeSelect.onchange = function () {
+        SaveInspectionButton.setAttribute("value", InspectionTypeSelect.value);
+        if ($(dpCalendar).data('datepicker').getDate() != null) {
+            SaveInspectionButton.removeAttribute("disabled");
+        }
+    };
+    SaveInspectionButton.onclick = function () {
+        inspScheduler.style.display = "none";
+        confirmed.style.display = "none";
+        IssueContainer.style.display = "none";
+        InspSched.UI.clearElement(IssuesDiv);
+        var thisPermit = permitNumSelect.value;
+        var thisInspCd = SaveInspectionButton.getAttribute("value");
+        var thisInspDesc = document.getElementById("InspTypeSelect");
+        var inspDesc = thisInspDesc.options[thisInspDesc.selectedIndex].textContent;
+        var comment = document.getElementById("scheduler_comment");
+        InspSched.newInsp = new InspSched.NewInspection(thisPermit, thisInspCd, $(dpCalendar).data('datepicker').getDate(), comment.value);
+        comment.value = "";
+        var e = InspSched.transport.SaveInspection(InspSched.newInsp).then(function (issues) {
+            var thisHeading = document.getElementById('ErrorHeading');
+            var IssueList = document.createElement('ul');
+            if (issues.length === 0)
+                issues.push("A system error has occurred. Please check your request and try again.");
+            if (issues[0].toLowerCase().indexOf("inspection has been scheduled") === -1) {
+                InspSched.UI.clearElement(thisHeading);
+                thisHeading.appendChild(document.createTextNode("The following issue(s) prevented scheduling the requested inspection:"));
+                for (var i in issues) {
+                    var thisIssue = document.createElement('li');
+                    thisIssue.appendChild(document.createTextNode(issues[i]));
+                    thisIssue.style.marginLeft = "2rem;";
+                    IssueList.appendChild(thisIssue);
+                }
+                IssuesDiv.appendChild(IssueList);
+                IssueContainer.style.display = "flex";
+            }
+            else {
+                var savesuccess = document.getElementById("SaveConfirmed");
+                if (savesuccess) {
+                    InspSched.UI.clearElement(savesuccess);
+                }
+                savesuccess.appendChild(document.createTextNode(issues[0]));
+                document.getElementById("SaveConfirmed").style.display = "flex";
+            }
+            return true;
+        }, function () {
+            console.log('error in Saving Inspection');
+            return false;
+        });
+        if (InspSched.IssuesExist.length > 0)
+            IssueContainer.style.display = 'flex';
+        InspSched.UI.GetInspList(thisPermit);
+    };
+    CloseIssueDivButton.onclick = function () {
+        IssueContainer.style.display = "none";
+    };
+    function LoadData() {
+        SaveInspectionButton.setAttribute("disabled", "disabled");
+        IssueContainer.style.display = "none";
+        LoadInspectionTypes();
+        InspSched.InspectorUI.LoadDailyInspections();
+        LoadInspectionQuickRemarks();
+    }
+    function LoadInspectionTypes() {
+        InspSched.transport.GetInspType().then(function (insptypes) {
+            InspSched.InspectionTypes = insptypes;
+        }, function () {
+            console.log('error in LoadInspectionTypes');
+            // do something with the error here
+            // need to figure out how to detect if something wasn't found
+            // versus an error.
+            //Hide('Searching');
+            InspSched.InspectionTypes = [];
+        });
+    }
+    function LoadInspectionQuickRemarks() {
+        InspSched.transport.GetInspectionQuickRemarks().then(function (quickremarks) {
+            InspSched.InspectionQuickRemarks = quickremarks;
+            console.log('quick remarks', quickremarks);
+        }, function () {
+            console.log('error in Load Inspection Quick Remarks');
+            // do something with the error here
+            // need to figure out how to detect if something wasn't found
+            // versus an error.
+            InspSched.InspectionQuickRemarks = [];
+        });
+    }
+    function BuildCalendar(dates, errorText) {
+        if (errorText === void 0) { errorText = ""; }
+        $(dpCalendar).datepicker('destroy');
+        if (errorText.length === 0) {
+            dpCalendar = $('#sandbox-container div').datepicker({
+                startDate: InspSched.ThisPermit.Dates.minDate_string,
+                datesDisabled: InspSched.ThisPermit.Dates.badDates_string,
+                endDate: InspSched.ThisPermit.Dates.maxDate_string,
+                maxViewMode: 0,
+                toggleActive: true,
+            });
+            {
+                $(dpCalendar).on('changeDate', function () {
+                    var date = $(dpCalendar).data('datepicker').getDate();
+                    //return false;
+                    $('change-date').submit();
+                    EnableSaveNewInspectionButton();
+                });
+            }
+            ;
+            document.getElementById('InspectionScheduler').style.display = "flex";
+        }
+    }
+    InspSched.BuildCalendar = BuildCalendar;
+    function EnableSaveNewInspectionButton() {
+        {
+            if (InspectionTypeSelect.value != "" && $(dpCalendar).data('datepicker').getDate() != null) {
+                SaveInspectionButton.removeAttribute("disabled");
+            }
+            else {
+                SaveInspectionButton.setAttribute("disabled", "disabled");
+            }
+        }
+    }
+    function disableSaveCommentButton(InspectionRequestId) {
+        var commentButton = document.getElementById(InspectionRequestId + "_save_comment_button");
+        var remarkButton = document.getElementById(InspectionRequestId + "_save_remark_button");
+        var currentResult = remarkButton.value;
+        var remarkTextarea = document.getElementById(InspectionRequestId + "_remark_textarea");
+        var value = document.querySelector('input[name="' + InspectionRequestId + '_results"]:checked').value;
+        if (value == currentResult && remarkTextarea.value != "") {
+            commentButton.removeAttribute("disabled");
+        }
+        else {
+            commentButton.setAttribute("disabled", "disabled");
+        }
+        if (remarkButton !== null) {
+            enableSaveResultButton(InspectionRequestId);
+        }
+    }
+    InspSched.disableSaveCommentButton = disableSaveCommentButton;
+    function enableSaveResultButton(InspectionRequestId) {
+        var remarkButton = document.getElementById(InspectionRequestId + "_save_remark_button");
+        var commentButton = document.getElementById(InspectionRequestId + "_save_comment_button");
+        var remarkTextarea = document.getElementById(InspectionRequestId + "_remark_textarea");
+        var value = document.querySelector('input[name="' + InspectionRequestId + '_results"]:checked').value;
+        var currentResult = remarkButton.value;
+        switch (value) {
+            case "A":
+                if (currentResult != value) {
+                    remarkButton.removeAttribute("disabled");
+                    commentButton.setAttribute("disabled", "disabled");
+                }
+                return;
+            case "P":
+            case "D":
+            case "N":
+            case "C":
+                if (remarkTextarea.value != "") {
+                    remarkButton.removeAttribute("disabled");
+                    commentButton.setAttribute("disabled", "disabled");
+                }
+                else {
+                    remarkButton.setAttribute("disabled", "disabled");
+                    if (value == remarkButton.value && remarkTextarea.value == "") {
+                        commentButton.removeAttribute("disabled");
+                        commentButton.setAttribute("disabled", "disabled");
+                    }
+                    else {
+                        commentButton.setAttribute("disabled", "disabled");
+                    }
+                }
+                return;
+            default:
+                if (remarkTextarea.value == "" && remarkButton.value == value) {
+                    commentButton.removeAttribute("disabled");
+                    remarkButton.setAttribute("disabled", "disabled");
+                }
+                else {
+                    commentButton.setAttribute("disabled", "disabled");
+                    remarkButton.removeAttribute("disabled");
+                }
+                return;
+        }
+    }
+    InspSched.enableSaveResultButton = enableSaveResultButton;
+    function UpdatePermitSelectList(PermitNo) {
+        document.getElementById("NotScheduled").style.display = "none";
+        document.getElementById("SaveConfirmed").style.display = "none";
+        var selectedoption = document.getElementById("select_" + PermitNo);
+        selectedoption.selected = true;
+        for (var _i = 0, _a = InspSched.CurrentPermits; _i < _a.length; _i++) {
+            var permit = _a[_i];
+            if (permit.PermitNo == permitNumSelect.value) {
+                InspSched.ThisPermit = permit;
+                InspSched.UI.LoadInspTypeSelect(permit.PermitNo);
+                InspSched.UI.BuildScheduler(InspSched.CurrentInspections, permit.PermitNo);
+            }
+        }
+        if ($('#sandbox-container div').data('datepicker') != null && $('#sandbox-container div').data('datepicker') != undefined)
+            $('#sandbox-container div').data('datepicker').clearDates();
+        $('#InspectionSchedulerTabs').foundation('selectTab', 'Scheduler', true);
+        // clears Calendar of any chosen dates
+    }
+    InspSched.UpdatePermitSelectList = UpdatePermitSelectList;
+    function SaveComment(InspectionRequestId) {
+        var commentTextarea = document.getElementById(InspectionRequestId + "_comment_textarea");
+        var completedComments = document.getElementById(InspectionRequestId + "_audit");
+        var NewComment = commentTextarea.value;
+        InspSched.transport.AddComment(parseInt(InspectionRequestId), NewComment).then(function (inspection) {
+            completedComments.textContent = inspection.Comment;
+            document.getElementById(InspectionRequestId.toString() + "_textbox_div").style.display = "flex";
+            commentTextarea.value = "";
+        }, function () {
+            console.log("error in SaveComment");
+        });
+    }
+    InspSched.SaveComment = SaveComment;
+    function UpdateResultButton(InspectionId, status) {
+        var remarkButton = document.getElementById(InspectionId + "_save_remark_button");
+        switch (status) {
+            case "saving":
+                remarkButton.textContent = "Saving...";
+                remarkButton.classList.remove;
+                remarkButton.disabled = true;
+                break;
+            case "saved":
+                remarkButton.textContent = "Saved";
+                remarkButton.disabled = false;
+                window.setTimeout(function (j) { remarkButton.textContent = "Save Result"; }, 5000);
+                break;
+        }
+    }
+    function UpdateInspection(permitNumber, InspectionRequestId) {
+        UpdateResultButton(InspectionRequestId, "saving");
+        var completedRemark = document.getElementById(InspectionRequestId + "_completed_remark_text");
+        var completedComments = document.getElementById(InspectionRequestId + "_audit");
+        var remarkTextarea = document.getElementById(InspectionRequestId + "_remark_textarea");
+        var commentTextarea = document.getElementById(InspectionRequestId + "_comment_textarea");
+        var value = document.querySelector('input[name="' + InspectionRequestId + '_results"]:checked').value;
+        var completedCommentsDIV = document.getElementById(InspectionRequestId + "_textbox_div");
+        var inspDateTime = document.getElementById(InspectionRequestId + "_inspection-date-time");
+        completedCommentsDIV.style.display = "flex";
+        var remarkText = remarkTextarea.value;
+        var commentText = commentTextarea.value;
+        var inspReqIdAsNum = parseInt(InspectionRequestId);
+        InspSched.transport.UpdateInspection(permitNumber, inspReqIdAsNum, value, remarkText, commentText).then(function (updatedInspection) {
+            //Instead of SearchPermit(), The current open Inspection data should change while expanded, much like the save comment.
+            //SearchPermit();
+            remarkTextarea.value = updatedInspection.Remarks;
+            completedComments.textContent = "";
+            completedComments.textContent = updatedInspection.Comment;
+            commentTextarea.value = "";
+            InspSched.UI.clearElement(inspDateTime);
+            inspDateTime.appendChild(document.createTextNode(updatedInspection.DisplayInspDateTime));
+            completedRemark.innerText = updatedInspection.Remarks;
+            UpdateResultButton(InspectionRequestId, "saved");
+        }, function () {
+            console.log('error in UpdateInspection');
+            // do something with the error here
+            // need to figure out how to detect if something wasn't found
+            // versus an error.
+            //SearchPermit();
+        });
+        // This will be updated to take inspection data returned from server and update the inspection to show new data.
+    }
+    InspSched.UpdateInspection = UpdateInspection;
+    function CancelInspection(InspID, PermitNo) {
+        document.getElementById('NotScheduled').style.display = "none";
+        if (InspID != null && PermitNo != null) {
+            //Hide( 'FutureInspRow' );
+            // TODO: Add function to not allow cancel if scheduled date of insp is current date 
+            var isDeleted = InspSched.transport.CancelInspection(InspID, PermitNo);
+            // TODO: ADD code to inform user if the inspection has been deleted 
+            // Reload inspection list after delete
+            if (isDeleted) {
+                InspSched.UI.GetInspList(PermitNo);
+                BuildCalendar(InspSched.ThisPermit.ScheduleDates);
+            }
+            else {
+                //display notification of failed delete
+            }
+        }
+    }
+    InspSched.CancelInspection = CancelInspection;
+    function FilterQuickRemarks(InspectionType, IsPrivateProvider) {
+        return InspSched.InspectionQuickRemarks.filter(function (j) {
+            var permitTypeCheck = false;
+            switch (InspectionType) {
+                case "0":
+                case "1":
+                case "9":
+                    if (j.Building) {
+                        return true;
+                    }
+                case "2":
+                    if (j.Electrical) {
+                        return true;
+                    }
+                case "3":
+                    if (j.Plumbing) {
+                        return true;
+                    }
+                case "4":
+                    if (j.Mechanical) {
+                        return true;
+                    }
+                case "6":
+                    // fire
+                    break;
+            }
+            return (IsPrivateProvider && j.PrivateProvider);
+        });
+    }
+    InspSched.FilterQuickRemarks = FilterQuickRemarks;
+})(InspSched || (InspSched = {}));
+//# sourceMappingURL=app.js.map
 /*!
  * jQuery JavaScript Library v3.1.1
  * https://jquery.com/
