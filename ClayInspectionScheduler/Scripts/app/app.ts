@@ -41,6 +41,7 @@ namespace InspSched
 
   export function start(): void
   {
+
     LoadData();
     window.onhashchange = HandleHash;
     if (location.hash.length > 0)

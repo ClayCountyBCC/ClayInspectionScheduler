@@ -13,10 +13,11 @@
       "Scripts/app/transport.js",
       "scripts/app/es6-promise.min.js",
       "Scripts/app/app.js",
-      "Scripts/jquery-3.1.1.min.js",
-      "Scripts/moment.min.js",
+      "Scripts/jquery-3.1.1.js",
+      "Scripts/moment.js",
       "Scripts/bootstrap-datepicker.js",
-      "Scripts/foundation.min.js"
+      "Scripts/foundation.js"
+
     ]
   },
   {

@@ -114,11 +114,21 @@ namespace ClayInspectionScheduler.Models
 
       try
       {
-        ParseGroup(basic_access_group, ref d);
-        ParseGroup(inspector_access_group, ref d);
-        ParseGroup(mis_access_group, ref d);
-        d[""] = new UserAccess(""); // for the anonymous users
-        return d;
+        switch (Environment.MachineName.ToUpper())
+        {
+
+          case "CLAYBCCDMZIIS01":
+            d[""] = new UserAccess("");
+            break;
+          default:
+            ParseGroup(basic_access_group, ref d);
+            ParseGroup(inspector_access_group, ref d);
+            ParseGroup(mis_access_group, ref d);
+            d[""] = new UserAccess("");
+            break;
+
+        }
+          return d;
       }
       catch (Exception ex)
       {
@@ -131,7 +141,6 @@ namespace ClayInspectionScheduler.Models
     {
       try
       {
-
         var d = GetCachedAllUserAccess();
         string un = Username.Replace(@"CLAYBCC\", "").ToLower();
         if (d.ContainsKey(un))
@@ -154,7 +163,5 @@ namespace ClayInspectionScheduler.Models
     {
       return (Dictionary<string, UserAccess>)MyCache.GetItem("useraccess");
     }
-
-
   }
 }
