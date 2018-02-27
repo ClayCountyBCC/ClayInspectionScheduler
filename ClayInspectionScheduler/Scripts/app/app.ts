@@ -8,7 +8,6 @@
 /// <reference path="../typings/foundation/foundation.d.ts" />
 /// <reference path="../typings/bootstrap.datepicker/bootstrap.datepicker.d.ts" />
 /// <reference path="inspectorui.ts" />
-/// <reference path="inspectorview.ts" />
 /// <reference path="inspector.ts" />
 /// <reference path="quickremark.ts" />
 
@@ -26,7 +25,7 @@ namespace InspSched
   export let ThisPermit: Permit;
   export let IVInspections: Array<Inspection> = [];
   export let Inspectors: Array<Inspector> = [];
-  export let IV: Array<InspectorView> = [];  // this is going to be the processed array of Inspection data.
+  export let IV: Array<InspectionView> = [];  // this is going to be the processed array of Inspection data.
 
   let InspectionTable = <HTMLDivElement>document.getElementById('InspectionTable');
   let InspectionTypeSelect = <HTMLSelectElement>document.getElementById("InspTypeSelect");

@@ -1,8 +1,8 @@
 /// <reference path="shortinspection.ts" />
 var InspSched;
 (function (InspSched) {
-    var InspectorView = /** @class */ (function () {
-        function InspectorView(inspection) {
+    var InspectionView = /** @class */ (function () {
+        function InspectionView(inspection) {
             if (inspection === void 0) { inspection = null; }
             this.PermitNumber = "";
             this.Address = "";
@@ -20,8 +20,8 @@ var InspSched;
                 this.IsPrivateProvider = inspection.PrivateProviderInspectionRequestId > 0;
             }
         }
-        return InspectorView;
+        return InspectionView;
     }());
-    InspSched.InspectorView = InspectorView;
+    InspSched.InspectionView = InspectionView;
 })(InspSched || (InspSched = {}));
-//# sourceMappingURL=inspectorview.js.map
+//# sourceMappingURL=InspectionView.js.map

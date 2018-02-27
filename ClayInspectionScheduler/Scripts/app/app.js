@@ -8,7 +8,6 @@
 /// <reference path="../typings/foundation/foundation.d.ts" />
 /// <reference path="../typings/bootstrap.datepicker/bootstrap.datepicker.d.ts" />
 /// <reference path="inspectorui.ts" />
-/// <reference path="inspectorview.ts" />
 /// <reference path="inspector.ts" />
 /// <reference path="quickremark.ts" />
 var InspSched;

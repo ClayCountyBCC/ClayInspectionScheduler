@@ -1,7 +1,7 @@
 ﻿/// <reference path="shortinspection.ts" />
 namespace InspSched
 {
-  interface IInspectorView
+  interface IInspectionView
   {
     PermitNumber: string;
     Address: string;
@@ -12,7 +12,7 @@ namespace InspSched
     IsPrivateProvider: boolean;
   }
 
-  export class InspectorView implements IInspectorView
+  export class InspectionView implements IInspectionView
   {
     public PermitNumber: string = "";
     public Address: string = "";
@@ -33,8 +33,8 @@ namespace InspSched
         this.Inspector = inspection.InspectorName;
         this.IsPrivateProvider = inspection.PrivateProviderInspectionRequestId > 0;
       }
-
     }
+
   }
 
 

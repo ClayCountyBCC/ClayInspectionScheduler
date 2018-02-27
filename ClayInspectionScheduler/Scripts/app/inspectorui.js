@@ -1,6 +1,5 @@
 /// <reference path="app.ts" />
 /// <reference path="inspection.ts" />
-/// <reference path="inspectorview.ts" />
 /// <reference path="shortinspection.ts" />
 var InspSched;
 (function (InspSched) {
@@ -13,7 +12,7 @@ var InspSched;
                     if (InspSched.Inspectors.length === 0) {
                         LoadInspectors();
                     }
-                    InspSched.IV = ProcessIVData(inspections);
+                    InspSched.IV = ProcessIVInspections(inspections);
                     BuildInspectorUI();
                 }
             }, function () {
@@ -200,7 +199,7 @@ var InspSched;
             }
             return a;
         }
-        function ProcessIVData(inspections) {
+        function ProcessIVInspections(inspections) {
             // Let's get our filters.
             var inspector = document.getElementById("InspectorList").value;
             var day = document.querySelector('input[name="day"]:checked').value;
@@ -238,7 +237,7 @@ var InspSched;
                 var i = fInspections.filter(function (j) {
                     return j.PermitNo === p;
                 });
-                var iv = new InspSched.InspectorView(i[0]); // we'll base the inspectorView off of the first inspection returned.
+                var iv = new InspSched.InspectionView(i[0]); // we'll base the inspectorView off of the first inspection returned.
                 iv.Inspections = i.map(function (insp) {
                     return new InspSched.ShortInspection(insp.InspReqID, insp.InspectionCode + '-' + insp.InsDesc);
                 });
@@ -251,7 +250,7 @@ var InspSched;
             }
             return ivList;
         }
-        InspectorUI.ProcessIVData = ProcessIVData;
+        InspectorUI.ProcessIVInspections = ProcessIVInspections;
     })(InspectorUI = InspSched.InspectorUI || (InspSched.InspectorUI = {}));
 })(InspSched || (InspSched = {}));
 //# sourceMappingURL=inspectorui.js.map

@@ -1,6 +1,5 @@
 ﻿/// <reference path="app.ts" />
 /// <reference path="inspection.ts" />
-/// <reference path="inspectorview.ts" />
 /// <reference path="shortinspection.ts" />
 
 
@@ -18,7 +17,7 @@ namespace InspSched.InspectorUI
         {
           LoadInspectors();
         }
-        InspSched.IV = ProcessIVData(inspections);
+        InspSched.IV = ProcessIVInspections(inspections);
         BuildInspectorUI();
       }
     },
@@ -125,7 +124,7 @@ namespace InspSched.InspectorUI
     return df;
   }
 
-  function BuildRow(i: InspectorView, ch: LocationHash): DocumentFragment
+  function BuildRow(i: InspectionView, ch: LocationHash): DocumentFragment
   {
     let df = document.createDocumentFragment();
     let row = document.createElement("div");
@@ -225,8 +224,8 @@ namespace InspSched.InspectorUI
     return a;
   }
 
-  export function ProcessIVData(
-    inspections: Array<Inspection>): Array<InspectorView>
+  export function ProcessIVInspections(
+    inspections: Array<Inspection>): Array<InspectionView>
   {
     // Let's get our filters.
     let inspector: string = (<HTMLSelectElement>document.getElementById("InspectorList")).value;
@@ -234,7 +233,7 @@ namespace InspSched.InspectorUI
     let open: string = (<HTMLInputElement>document.querySelector('input[name="status"]:checked')).value;
     // We're going to filter our results if a day or inspector was passed.
     let isOpen: boolean = open === "Open";
-    let ivList: Array<InspectorView> = [];
+    let ivList: Array<InspectionView> = [];
     // if we have a day or inspector set to filter on
     // let's go ahead and filter the list of inspections
     // based on them.
@@ -280,7 +279,7 @@ namespace InspSched.InspectorUI
         {
           return j.PermitNo === p;
         });
-      let iv = new InspectorView(i[0]); // we'll base the inspectorView off of the first inspection returned.
+      let iv = new InspectionView(i[0]); // we'll base the inspectorView off of the first inspection returned.
       iv.Inspections = i.map(function (insp)
       {
         return new ShortInspection(insp.InspReqID, insp.InspectionCode + '-' + insp.InsDesc);
@@ -289,5 +288,6 @@ namespace InspSched.InspectorUI
     }
     return ivList;
   }
+
 
 }
