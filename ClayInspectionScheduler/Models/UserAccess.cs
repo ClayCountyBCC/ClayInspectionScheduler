@@ -29,6 +29,7 @@ namespace ClayInspectionScheduler.Models
       user_name = name;
       if(user_name.Length == 0)
       {
+        user_name = "clayIns";
         display_name = "Public User";
       }
       else
