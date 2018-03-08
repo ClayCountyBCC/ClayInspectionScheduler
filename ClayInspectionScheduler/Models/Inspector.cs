@@ -9,6 +9,7 @@ namespace ClayInspectionScheduler.Models
 {
   public class Inspector
   {
+    public int Id { get; set; }
     public string Name { get; set; }
     public string Color { get; set; }
     public bool CommercialPermit { get; set; }
@@ -29,6 +30,7 @@ namespace ClayInspectionScheduler.Models
 
       string query = $@"
         SELECT 
+          ID,
           LTRIM(RTRIM(Name)) Name,
           ISNULL(Color, '#FFFFFF') Color,
           Comm CommercialPermit,
@@ -38,7 +40,7 @@ namespace ClayInspectionScheduler.Models
           PL PlumbingPermit,  
           PrivateProvider,
           Intl Initials,
-          {(Models.Constants.UseProduction() == false ? 1 : 0)} InDevelopment
+          {(Constants.UseProduction() == false ? 1 : 0).ToString()} InDevelopment
         FROM bp_INSPECTORS
         WHERE 
           Active=1

@@ -242,7 +242,7 @@ namespace InspSched.InspectorUI
       function (i)
       {
         let inspectorCheck: boolean = inspector.length > 0 ? i.InspectorName === inspector : true;
-        let dayCheck: boolean = day.length > 0 ? i.Day === day || ( day === "Today" && i.ResultADC === "" && new Date(i.SchedDateTime) < d) : true;
+        let dayCheck: boolean = day.length > 0 ? i.Day === day || ( day === "Today" && i.ResultADC === "" && new Date(i.SchedDateTime.toString()) < d) : true;
 
         let openCheck: boolean = true;
         if (open.length === 0)

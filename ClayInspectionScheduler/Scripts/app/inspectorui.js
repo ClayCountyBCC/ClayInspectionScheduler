@@ -213,7 +213,7 @@ var InspSched;
             var d = new Date();
             var fInspections = inspections.filter(function (i) {
                 var inspectorCheck = inspector.length > 0 ? i.InspectorName === inspector : true;
-                var dayCheck = day.length > 0 ? i.Day === day || (day === "Today" && i.ResultADC === "" && new Date(i.SchedDateTime) < d) : true;
+                var dayCheck = day.length > 0 ? i.Day === day || (day === "Today" && i.ResultADC === "" && new Date(i.SchedDateTime.toString()) < d) : true;
                 var openCheck = true;
                 if (open.length === 0) {
                     openCheck = true;

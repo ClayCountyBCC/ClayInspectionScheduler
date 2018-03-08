@@ -243,7 +243,7 @@ var InspSched;
             var d = new Date();
             var fInspections = inspections.filter(function (i) {
                 var inspectorCheck = inspector.length > 0 ? i.InspectorName === inspector : true;
-                var dayCheck = day.length > 0 ? i.Day === day || (day === "Today" && i.ResultADC === "" && new Date(i.SchedDateTime) < d) : true;
+                var dayCheck = day.length > 0 ? i.Day === day || (day === "Today" && i.ResultADC === "" && new Date(i.SchedDateTime.toString()) < d) : true;
                 var openCheck = true;
                 if (open.length === 0) {
                     openCheck = true;
@@ -1219,7 +1219,7 @@ var InspSched;
             var d = new Date();
             d.setHours(0, 0, 0, 0);
             var elementState = comments.style.display.toString().toLowerCase();
-            if (((new Date(current[0].SchedDateTime) >= d) &&
+            if (((new Date(current[0].SchedDateTime.toString()) >= d) &&
                 addRemark != null) || current[0].ResultADC === "") {
                 completedRemark.style.display = elementState == 'flex' ? 'flex' : 'none';
                 addRemark.style.display = elementState == 'none' ? 'flex' : 'none';

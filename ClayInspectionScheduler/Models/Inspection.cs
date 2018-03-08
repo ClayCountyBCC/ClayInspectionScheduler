@@ -244,7 +244,7 @@ namespace ClayInspectionScheduler.Models
         -- and we want to include any from the past that aren't completed.
           OR (CAST(SchecDateTime AS DATE) < CAST(@Today AS DATE)
             AND ResultADC IS NULL))
-        ORDER BY InspReqID DESC";
+        ORDER BY B.ProjStreet, B.ProjAddrNumber";
 
 
        Constants.Get_Data<Inspection>(sql, dp);
@@ -655,7 +655,7 @@ namespace ClayInspectionScheduler.Models
 			      SET
               InspReqID = @InspectionId, 
               InspReqChrg = @Amount, 
-              HldInput = @HoldInput + @Amount
+              HldInput = @HoldInput
 			      WHERE 
               HoldID = @HoldId 
 		      END

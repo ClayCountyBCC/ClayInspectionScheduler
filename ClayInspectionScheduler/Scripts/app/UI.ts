@@ -1162,7 +1162,7 @@ namespace InspSched.UI
     d.setHours(0, 0, 0, 0);    
     let elementState = comments.style.display.toString().toLowerCase();
 
-    if (((new Date(current[0].SchedDateTime) >= d) &&
+    if (((new Date(current[0].SchedDateTime.toString()) >= d) &&
       addRemark != null) || current[0].ResultADC === "")
     {
       completedRemark.style.display = elementState == 'flex' ? 'flex' : 'none';
