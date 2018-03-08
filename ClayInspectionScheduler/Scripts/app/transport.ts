@@ -162,7 +162,7 @@ namespace InspSched.transport
     {
       x.then(function (response)
       {
-        var di = JSON.parse(response.Text);
+        var di = JSON.parse(response.Text);        
         resolve(di);
 
       }).catch(function ()

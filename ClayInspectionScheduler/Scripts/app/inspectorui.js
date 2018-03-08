@@ -8,6 +8,7 @@ var InspSched;
         function LoadDailyInspections() {
             InspSched.transport.DailyInspections().then(function (inspections) {
                 InspSched.IVInspections = inspections;
+                console.log('inspections', inspections);
                 if (InspSched.IVInspections.length > 0) {
                     if (InspSched.Inspectors.length === 0) {
                         LoadInspectors();

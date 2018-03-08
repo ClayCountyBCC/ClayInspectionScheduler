@@ -180,8 +180,7 @@ namespace ClayInspectionScheduler.Models
 
 
       string sql = @"
-          USE WATSC;
-
+        USE WATSC;
         WITH BaseFloodZone AS (
           SELECT DISTINCT
             LTRIM(RTRIM(FloodZone)) FloodZone,
@@ -214,7 +213,7 @@ namespace ClayInspectionScheduler.Models
           B.ProjAddrCombined StreetAddress,
           I.InspReqID,
           I.PermitNo, 
-          M.Comm,
+          ISNULL(M.Comm, A.Comm) Comm,
           ISNULL(I.InspectionCode, '') InspectionCode, 
           ISNULL(IR.InsDesc, 'No Inspections') InsDesc, 
           I.InspDateTime, 
@@ -237,7 +236,8 @@ namespace ClayInspectionScheduler.Models
         LEFT OUTER JOIN bpINS_REF IR ON IR.InspCd = I.InspectionCode
         LEFT OUTER JOIN bp_INSPECTORS IP ON I.Inspector = IP.Intl 
         LEFT OUTER JOIN FloodZoneData F ON I.BaseId = F.BaseID
-        LEFT OUTER JOIN bpMASTER_PERMIT M ON M.BaseId = B.BaseId
+        LEFT OUTER JOIN bpMASTER_PERMIT M ON M.PermitNo = I.PermitNo
+        LEFT OUTER JOIN bpASSOC_PERMIT A ON A.PermitNo = I.PermitNo
         WHERE 
         -- Here we want to see the inspections that were scheduled for today and tomorrow
           (CAST(SchecDateTime AS DATE) IN (CAST(@Today AS DATE), CAST(@Tomorrow AS DATE))

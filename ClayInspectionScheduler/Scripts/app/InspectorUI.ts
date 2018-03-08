@@ -11,6 +11,7 @@ namespace InspSched.InspectorUI
     transport.DailyInspections().then(function (inspections: Array<Inspection>)
     {
       InspSched.IVInspections = inspections;
+      console.log('inspections', inspections);
       if (InspSched.IVInspections.length > 0)
       {
         if (InspSched.Inspectors.length === 0)
