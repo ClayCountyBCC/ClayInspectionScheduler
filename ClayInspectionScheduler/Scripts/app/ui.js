@@ -478,8 +478,7 @@ var InspSched;
             inspRow.appendChild(DataRow);
             // Sections added below are dependent on access_type and date
             // cannot be public and cannot be earlier than today (will be changed to earlier date)
-            if (permit.access != InspSched.access_type.public_access &&
-                (inspection.Day != "" || inspection.ResultADC == "")) {
+            if (permit.access != InspSched.access_type.public_access) {
                 addRemarkTextDiv.appendChild(addRemarkInputGroup);
                 addRemarkTextDiv.appendChild(quickRemarkUL);
                 addRemarkButtonDiv.appendChild(addRemarkButton);

@@ -525,6 +525,7 @@ namespace ClayInspectionScheduler.Models
       }
       else
       {
+        sql += GetNotDeniedQueries();
         dp.Add("@ChargeCode", null);
       }
 
@@ -665,6 +666,19 @@ namespace ClayInspectionScheduler.Models
       return sql;
     }
 
+    private static string GetNotDeniedQueries()
+    {
+      return @"
+        DELETE C
+        FROM ccCashierItem C
+        INNER JOIN bpHold B ON C.HoldId = B.HoldID
+        WHERE B.InspReqID = @InspectionId;
+
+        DELETE
+        FROM bpHold 
+        WHERE 
+          InspReqID = @InspectionId;";
+    }
 
 
   }
