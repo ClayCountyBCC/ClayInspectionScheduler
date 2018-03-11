@@ -451,7 +451,12 @@ var InspSched;
             addressColumn.classList.add("align-middle");
             addressColumn.classList.add("align-center");
             addressColumn.classList.add("flex-container");
-            addressContainerContainer.appendChild(CreateAndSetSmaller("FloodZone: " + i.FloodZone + ", Geozone: " + i.GeoZone));
+            if (i.FloodZone.length > 0) {
+                addressContainerContainer.appendChild(CreateAndSetSmaller("FloodZone: " + i.FloodZone + ", Geozone: " + i.GeoZone));
+            }
+            else {
+                addressContainerContainer.appendChild(CreateAndSetSmaller("Geozone: " + i.GeoZone));
+            }
             if (i.IsPrivateProvider) {
                 addressContainerContainer.appendChild(CreateAndSetSmaller("Private Provider"));
             }
