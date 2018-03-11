@@ -1,9 +1,12 @@
 var InspSched;
 (function (InspSched) {
     var ShortInspection = /** @class */ (function () {
-        function ShortInspection(InspectionId, InspectionDesc) {
-            this.InspectionId = InspectionId;
-            this.InspectionDesc = InspectionDesc;
+        function ShortInspection(i) {
+            this.InspectionDesc = i.InspectionCode + '-' + i.InsDesc;
+            this.PermitNumber = i.PermitNo;
+            this.InspectionId = i.InspReqID;
+            this.Comments = i.Comment;
+            this.ResultADC = i.ResultADC;
         }
         return ShortInspection;
     }());

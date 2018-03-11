@@ -18,7 +18,7 @@ namespace InspSched.InspectorUI
         {
           LoadInspectors();
         }
-        InspSched.IV = ProcessIVInspections(inspections);
+        
         BuildInspectorUI();
       }
     },
@@ -28,6 +28,7 @@ namespace InspSched.InspectorUI
         InspSched.IVInspections = [];
       });
   }
+
   function ShowInspectionTab()
   {
     let e = document.getElementById("InspectorViewTab");
@@ -68,28 +69,69 @@ namespace InspSched.InspectorUI
     }
   }
 
-  function BuildInspectorUI()
+  export function BuildInspectorUI()
   {
     ShowInspectionTab(); // this shows the Inspector View Tab thinger
     // this function will take the 
     // IV data and create the html
     // and add it to the InspectorViewInspections div
-    let currentHash = new LocationHash(location.hash.substring(1));
-    let target = document.getElementById("InspectorViewInspections");
-    let df: DocumentFragment = document.createDocumentFragment();
-    UI.clearElement(target);
-    if (InspSched.IV.length > 0)
+    if (InspSched.HideTheseComments.length === 0)
     {
-      df.appendChild(BuildHeaderRow());
-      for (let i of InspSched.IV)
+      PopulateBadComments();
+    }
+    let target = document.getElementById("InspectorViewInspections");
+    UI.clearElement(target);
+    let currentHash = new LocationHash(location.hash.substring(1));
+    // Let's get our filters.
+    let inspector: string = (<HTMLSelectElement>document.getElementById("InspectorList")).value;
+    let day: string = (<HTMLInputElement>document.querySelector('input[name="day"]:checked')).value;
+    let viewType: string = (<HTMLInputElement>document.querySelector('input[name="view"]:checked')).value;
+    let open: string = (<HTMLInputElement>document.querySelector('input[name="status"]:checked')).value;
+    // We're going to filter our results if a day or inspector was passed.
+    let isOpen: boolean = open === "Open";
+
+    if (viewType === "address")
+    {
+      InspSched.InspectorViewByAddress = ProcessIVInspectionsByAddress(InspSched.IVInspections, inspector, day, open, isOpen);
+      console.log('inspectorviewbyaddress', InspSched.InspectorViewByAddress);
+      BuildInspectorViewByAddress(target, currentHash);
+    }
+    else
+    {
+      InspSched.InspectorViewByPermit = ProcessIVInspectionsByPermit(InspSched.IVInspections, inspector, day, open, isOpen);
+      BuildInspectorViewByPermit(target, currentHash);
+    }
+  }
+
+  function BuildInspectorViewByAddress(target: HTMLElement, currentHash: LocationHash)
+  {
+    let df: DocumentFragment = document.createDocumentFragment();
+    df.appendChild(BuildInspectorViewByAddressHeaderRow());
+    if (InspSched.InspectorViewByAddress.length > 0)
+    {
+      for (let i of InspSched.InspectorViewByAddress)
       {
-        df.appendChild(BuildRow(i, currentHash));
+        df.appendChild(BuildInspectorViewByAddressRow(i, currentHash));
       }
     }
     target.appendChild(df);
   }
 
-  function BuildHeaderRow(): DocumentFragment  
+  function BuildInspectorViewByPermit(target:HTMLElement, currentHash: LocationHash)
+  {
+    let df: DocumentFragment = document.createDocumentFragment();
+    df.appendChild(BuildInspectorViewByPermitHeaderRow());
+    if (InspSched.InspectorViewByPermit.length > 0)
+    {
+      for (let i of InspSched.InspectorViewByPermit)
+      {
+        df.appendChild(BuildInspectorViewByPermitRow(i, currentHash));
+      }
+    }
+    target.appendChild(df);
+  }
+  
+  function BuildInspectorViewByPermitHeaderRow(): DocumentFragment  
   {
     let df = document.createDocumentFragment();
     let row = document.createElement("div");
@@ -125,7 +167,7 @@ namespace InspSched.InspectorUI
     return df;
   }
 
-  function BuildRow(i: InspectionView, ch: LocationHash): DocumentFragment
+  function BuildInspectorViewByPermitRow(i: InspectionViewByPermit, ch: LocationHash): DocumentFragment
   {
     let df = document.createDocumentFragment();
     let row = document.createElement("div");
@@ -210,6 +252,25 @@ namespace InspSched.InspectorUI
     return e;
   }
 
+  function CreateAndSetSmaller(v: string, ...c: string[])
+  {
+    let e = document.createElement("div");
+    e.classList.add("align-middle");
+    e.classList.add("small-12");
+    e.classList.add("align-center");
+    e.classList.add("flex-container");
+    e.style.fontSize = "smaller";
+    e.appendChild(document.createTextNode(v));
+    if (c.length > 0)
+    {
+      for (let i of c)
+      {
+        e.classList.add(i); // optional class
+      }
+    }
+    return e;
+  }
+
   function CreateLink(v: string, l: string, ...c: string[]): HTMLAnchorElement
   {
     let a = document.createElement("a");
@@ -225,16 +286,14 @@ namespace InspSched.InspectorUI
     return a;
   }
 
-  export function ProcessIVInspections(
-    inspections: Array<Inspection>): Array<InspectionView>
+  export function ProcessIVInspectionsByPermit(
+    inspections: Array<Inspection>,
+    inspector: string,
+    day: string,
+    open: string,
+    isOpen: boolean): Array<InspectionViewByPermit>
   {
-    // Let's get our filters.
-    let inspector: string = (<HTMLSelectElement>document.getElementById("InspectorList")).value;
-    let day: string = (<HTMLInputElement>document.querySelector('input[name="day"]:checked')).value;
-    let open: string = (<HTMLInputElement>document.querySelector('input[name="status"]:checked')).value;
-    // We're going to filter our results if a day or inspector was passed.
-    let isOpen: boolean = open === "Open";
-    let ivList: Array<InspectionView> = [];
+    let ivList: Array<InspectionViewByPermit> = [];
     // if we have a day or inspector set to filter on
     // let's go ahead and filter the list of inspections
     // based on them.
@@ -280,10 +339,10 @@ namespace InspSched.InspectorUI
         {
           return j.PermitNo === p;
         });
-      let iv = new InspectionView(i[0]); // we'll base the inspectorView off of the first inspection returned.
+      let iv = new InspectionViewByPermit(i[0]); // we'll base the inspectorView off of the first inspection returned.
       iv.Inspections = i.map(function (insp)
       {
-        return new ShortInspection(insp.InspReqID, insp.InspectionCode + '-' + insp.InsDesc);
+        return new ShortInspection(insp);
       });
       ivList.push(iv);
     }
@@ -291,4 +350,233 @@ namespace InspSched.InspectorUI
   }
 
 
+  export function ProcessIVInspectionsByAddress(
+    inspections: Array<Inspection>,
+    inspector: string,
+    day: string,
+    open: string,
+    isOpen: boolean): Array<InspectionViewByAddress>
+  {
+
+    let ivList: Array<InspectionViewByAddress> = [];
+    // if we have a day or inspector set to filter on
+    // let's go ahead and filter the list of inspections
+    // based on them.
+    let d = new Date();
+    let fInspections: Array<Inspection> = inspections.filter(
+      function (i)
+      {
+        let inspectorCheck: boolean = inspector.length > 0 ? i.InspectorName === inspector : true;
+        let dayCheck: boolean = day.length > 0 ? i.Day === day || (day === "Today" && i.ResultADC === "" && new Date(i.SchedDateTime.toString()) < d) : true;
+
+        let openCheck: boolean = true;
+        if (open.length === 0)
+        {
+          openCheck = true;
+        }
+        else
+        {
+          if (isOpen)
+          {
+            openCheck = i.ResultADC.length === 0;
+          }
+          else
+          {
+            openCheck = i.ResultADC.length > 0;
+          }
+        }
+
+        return inspectorCheck && dayCheck && openCheck;
+      });
+    // get a unique list of addresses.
+    let addresses: Array<string> = fInspections.map(
+      function (p)
+      {
+        return p.StreetAddress;
+      });
+    addresses = addresses.filter(function (value, index, self) { return index === self.indexOf(value) });
+    console.log('addresses', addresses);
+
+    // let's coerce the inspection data into the IV format.
+    for (let a of addresses)
+    {
+      let i = fInspections.filter(
+        function (j)
+        {
+          return j.StreetAddress === a;
+        });
+      let iv = new InspectionViewByAddress(i[0]); // we'll base the inspectorView off of the first inspection returned.
+      iv.Inspections = i.map(function (insp)
+      {
+        return new ShortInspection(insp);
+      });
+      ivList.push(iv);
+    }
+    return ivList;
+  }
+
+  function BuildInspectorViewByAddressHeaderRow(): DocumentFragment  
+  {
+    let df = document.createDocumentFragment();
+    let row = document.createElement("div");
+    row.classList.add("row");
+    row.classList.add("flex-container");
+    row.classList.add("medium-12");
+    row.classList.add("large-12");
+    row.style.borderBottom = "solid 1px Black";
+    let address = CreateAndSet("Address");
+    let addressColumn = document.createElement("div");
+    addressColumn.classList.add("flex-container");
+    addressColumn.classList.add("columns");
+    addressColumn.classList.add("medium-3");
+    addressColumn.classList.add("align-middle");
+    addressColumn.classList.add("align-center");
+    addressColumn.appendChild(address);
+
+    let inspector = CreateAndSet("Inspector");
+    let inspectorColumn = document.createElement("div");
+    inspectorColumn.classList.add("flex-container");
+    inspectorColumn.classList.add("columns");
+    inspectorColumn.classList.add("medium-2");
+    inspectorColumn.classList.add("align-middle");
+    inspectorColumn.classList.add("align-center");
+    inspectorColumn.appendChild(inspector);
+    row.appendChild(addressColumn);
+    row.appendChild(inspectorColumn);
+    let secondcolumn = document.createElement("div");
+    secondcolumn.classList.add("columns");
+    secondcolumn.classList.add("medium-7");
+    secondcolumn.classList.add("large-7");
+    secondcolumn.classList.add("end");
+    let firstRow = document.createElement("div");
+    firstRow.classList.add("row");
+    firstRow.classList.add("medium-12");
+    firstRow.classList.add("large-12");
+    firstRow.appendChild(CreateAndSet("Permit", "columns", "small-4"));
+    firstRow.appendChild(CreateAndSet("Type", "columns", "small-6"));
+    firstRow.appendChild(CreateAndSet("Status", "columns", "small-2"));
+    //firstRow.appendChild(CreateAndSet("Comments", "columns", "small-7"));
+    secondcolumn.appendChild(firstRow);
+    row.appendChild(secondcolumn);
+    df.appendChild(row);
+    return df;
+  }
+
+  function BuildInspectorViewByAddressRow(i: InspectionViewByAddress, ch: LocationHash): DocumentFragment
+  {
+    let df = document.createDocumentFragment();
+    let row = document.createElement("div");
+    row.classList.add("row");
+    row.classList.add("no-page-break");
+    row.classList.add("flex-container");
+    row.classList.add("medium-12");
+    row.classList.add("large-12");
+    row.style.borderBottom = "solid 1px Black";
+    row.style.marginTop = ".5em";
+    ch.Permit = i.Address;
+    ch.InspectionId = 0;
+    let address = CreateAndSet(i.Address);
+    let addressContainer = document.createElement("div");
+    let addressContainerContainer = document.createElement("div");
+    addressContainerContainer.classList.add("row");
+    addressContainerContainer.classList.add("small-12");
+    addressContainer.classList.add("flex-container");
+    addressContainer.classList.add("small-12");
+    addressContainer.classList.add("align-middle");
+    addressContainer.classList.add("align-center");
+    addressContainer.appendChild(address);
+    addressContainerContainer.appendChild(addressContainer);
+    let addressColumn = document.createElement("div");
+    addressColumn.classList.add("column");
+    addressColumn.classList.add("medium-3");
+    addressColumn.classList.add("align-middle");
+    addressColumn.classList.add("align-center");
+    addressColumn.classList.add("flex-container");
+    addressContainerContainer.appendChild(CreateAndSetSmaller("FloodZone: " + i.FloodZone + ", Geozone: " + i.GeoZone));
+    if (i.IsPrivateProvider)
+    {
+      addressContainerContainer.appendChild(CreateAndSetSmaller("Private Provider"));
+    }
+    if (i.IsCommercial)
+    {
+      addressContainerContainer.appendChild(CreateAndSetSmaller("Commercial"));
+    }
+    addressColumn.appendChild(addressContainerContainer);
+    row.appendChild(addressColumn);
+
+    let inspectorContainer = document.createElement("div");
+    inspectorContainer.classList.add("column");
+    inspectorContainer.classList.add("medium-2");
+    inspectorContainer.classList.add("align-middle");
+    inspectorContainer.classList.add("align-center");
+    inspectorContainer.classList.add("flex-container");
+    inspectorContainer.appendChild(CreateAndSet(i.Inspector));
+    row.appendChild(inspectorContainer);
+
+    let secondcolumn = document.createElement("div");
+    secondcolumn.classList.add("columns");
+    secondcolumn.classList.add("medium-7");
+    secondcolumn.classList.add("large-7");
+    secondcolumn.classList.add("end");
+    for (let insp of i.Inspections)
+    {
+      let row = document.createElement("div");
+      row.classList.add("row");
+      row.classList.add("medium-12");
+      row.classList.add("large-12");      
+      ch.Permit = insp.PermitNumber;
+      ch.InspectionId = insp.InspectionId;
+      row.appendChild(CreateAndSet(insp.PermitNumber, "columns", "small-4"));
+      row.appendChild(CreateLink(insp.InspectionDesc, ch.ToHash(), "medium-6", "columns"));
+      row.appendChild(CreateAndSet(insp.ResultADC, "columns", "small-2"));
+      let secondRow = document.createElement("div");
+      secondRow.classList.add("row");
+      secondRow.classList.add("medium-12");
+      secondRow.classList.add("large-12");
+      secondRow.appendChild(CreateAndSet(CleanComments(insp.Comments)));
+      
+      secondcolumn.appendChild(row);
+      secondcolumn.appendChild(secondRow);
+    }    
+    row.appendChild(secondcolumn);
+    df.appendChild(row);
+    return df;
+  }
+
+  function CleanComments(comments: string): string
+  {
+    let c: Array<string> = [];
+    let split = comments.trim().split("\r\n");
+    for (let s of split)
+    {
+      if (!MatchBadComments(s))
+      {
+        c.push(s);
+      }
+    }
+    console.log('split', split);
+    return c.join("\r\n");
+  }
+
+  function PopulateBadComments()
+  {
+    // these will need to be lower case.
+    InspSched.HideTheseComments = [
+      "request created",
+      "status changed from"
+    ];
+  }
+
+  function MatchBadComments(comment: string):boolean
+  {
+    comment = comment.toLowerCase();
+    for (let c of InspSched.HideTheseComments)
+    {
+      if (comment.indexOf(c) !== -1)
+      {
+        return true;
+      }
+    }
+    return false;
+  }
 }

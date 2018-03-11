@@ -122,26 +122,6 @@ namespace ClayInspectionScheduler.Models
     public string StreetAddress { get; set; } = "";
     public string InspectorColor { get; set; } = "";
     public string Day { get; set; } = "";
-    //{
-    //  get
-    //  {
-    //    if (SchedDateTime == DateTime.MinValue) return "";
-    //    if (SchedDateTime.Date == DateTime.Today.Date)
-    //    {
-    //      return "Today";
-    //    }
-    //    else if (SchedDateTime.Date == DateTime.Today.AddDays(1).Date)
-    //    {
-    //      return "Tomorrow";
-    //    }
-    //    else if(SchedDateTime.Date > DateTime.Today.AddDays(1).Date)
-    //    {
-    //      return "Later";
-    //    }
-
-    //    return "";
-    //  }
-    //}
 
     public Inspection()
     {
@@ -163,21 +143,6 @@ namespace ClayInspectionScheduler.Models
 
       dp.Add("@Today", DateTime.Today.Date);
       dp.Add("@Tomorrow", tomorrow.Date);
-
-      Console.Write(dp);
-
-      //DECLARE @Today DATE = CAST(GETDATE() AS DATE);
-      //DECLARE @Tomorrow DATE =
-      //  CASE DATEPART(DW, @Today)
-      //    WHEN 1-- if today is Friday, Saturday, or Sunday
-      //      THEN CAST(DATEADD(DAY, 1, @Today) AS DATE) --set it to Monday
-      //   WHEN 6
-      //      THEN CAST(DATEADD(DAY, 3, @Today) AS DATE) --set it to Monday
-      //   WHEN 7
-      //      THEN CAST(DATEADD(DAY, 2, @Today) AS DATE) --set it to Monday
-      //  ELSE CAST(DATEADD(DAY, 1, @Today) AS DATE)-- Set it to tomorrow
-      //    END;
-
 
       string sql = @"
         USE WATSC;

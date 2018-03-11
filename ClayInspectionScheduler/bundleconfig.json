@@ -5,7 +5,8 @@
       "Scripts/app/ShortInspection.js",
       "Scripts/app/Permit.js",
       "Scripts/app/inspectorUI.js",
-      "Scripts/app/inspectionview.js",
+      "Scripts/app/InspectionViewByPermit.js",
+      "Scripts/app/InspectionViewByAddress.js",
       "Scripts/app/LocationHash.js",
       "Scripts/app/newinspection.js",
       "Scripts/app/ui.js",
@@ -17,7 +18,6 @@
       "Scripts/moment.js",
       "Scripts/bootstrap-datepicker.js",
       "Scripts/foundation.js"
-
     ]
   },
   {

@@ -1,27 +1,27 @@
 /// <reference path="shortinspection.ts" />
 var InspSched;
 (function (InspSched) {
-    var InspectionViewByPermit = /** @class */ (function () {
-        function InspectionViewByPermit(inspection) {
+    var InspectionViewByAddress = /** @class */ (function () {
+        function InspectionViewByAddress(inspection) {
             if (inspection === void 0) { inspection = null; }
-            this.PermitNumber = "";
             this.Address = "";
             this.GeoZone = "";
             this.FloodZone = "";
             this.Inspector = "";
             this.IsPrivateProvider = false;
+            this.IsCommercial = false;
             this.Inspections = [];
             if (inspection !== null) {
-                this.PermitNumber = inspection.PermitNo;
                 this.Address = inspection.StreetAddress;
                 this.FloodZone = inspection.FloodZone;
                 this.GeoZone = inspection.GeoZone;
                 this.Inspector = inspection.InspectorName;
                 this.IsPrivateProvider = inspection.PrivateProviderInspectionRequestId > 0;
+                this.IsCommercial = inspection.IsCommercial;
             }
         }
-        return InspectionViewByPermit;
+        return InspectionViewByAddress;
     }());
-    InspSched.InspectionViewByPermit = InspectionViewByPermit;
+    InspSched.InspectionViewByAddress = InspectionViewByAddress;
 })(InspSched || (InspSched = {}));
-//# sourceMappingURL=InspectionView.js.map
+//# sourceMappingURL=InspectionViewByAddress.js.map

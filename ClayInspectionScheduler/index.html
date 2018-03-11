@@ -172,23 +172,23 @@
             <div class="tabs-panel tabs-content" id="Inspector">
               <div style="border-bottom: dotted 1px gray; padding-bottom: .5em;"
                    class="row hide-for-print">
-                <div class="columns small-6 medium-6 large-3" id="inspection_day_filters">
+                <div class="columns small-12 medium-4" id="inspection_day_filters">
                   <label style="text-align: center;">By Day</label>
                   <div class="row align-center align-middle">
-                    <input onchange="InspSched.InspectorUI.LoadDailyInspections();"
+                    <input onchange="InspSched.InspectorUI.BuildInspectorUI();"
                            type="radio"
                            name="day"
                            value="Today"
                            id="dayToday"
                            checked />
                     <label for="dayToday">Today</label>
-                    <input onchange="InspSched.InspectorUI.LoadDailyInspections();"
+                    <input onchange="InspSched.InspectorUI.BuildInspectorUI();"
                            type="radio"
                            name="day"
                            value="Tomorrow"
                            id="dayTomorrow" />
                     <label for="dayTomorrow">Tomorrow</label>
-                    <input onchange="InspSched.InspectorUI.LoadDailyInspections();"
+                    <input onchange="InspSched.InspectorUI.BuildInspectorUI();"
                            type="radio"
                            name="day"
                            value=""
@@ -196,23 +196,41 @@
                     <label for="dayBoth">Both</label>
                   </div>
                 </div>
-                <div class="columns small-6 medium-6 large-3" id="inspection_status_filters">
+                <div class="columns small-6 medium-4" id="inspection_day_filters">
+                  <label style="text-align: center;">View By</label>
+                  <div class="row align-center align-middle">
+                    <input onchange="InspSched.InspectorUI.BuildInspectorUI();"
+                           type="radio"
+                           name="view"
+                           value="address"
+                           id="viewAddress"
+                           checked />
+                    <label for="viewAddress">Address</label>
+                    <input onchange="InspSched.InspectorUI.BuildInspectorUI();"
+                           type="radio"
+                           name="view"
+                           value="permit"
+                           id="viewPermit" />
+                    <label for="viewPermit">Permit</label>
+                  </div>
+                </div>
+                <div class="columns small-6 medium-4" id="inspection_status_filters">
                   <label style="text-align: center;">By Status</label>
                   <div class="row align-center align-middle">
-                    <input onchange="InspSched.InspectorUI.LoadDailyInspections();"
+                    <input onchange="InspSched.InspectorUI.BuildInspectorUI();"
                            type="radio"
                            name="status"
                            value="Open"
                            id="statusOpen"
                            checked />
                     <label for="statusOpen">Open</label>
-                    <input onchange="InspSched.InspectorUI.LoadDailyInspections();"
+                    <input onchange="InspSched.InspectorUI.BuildInspectorUI();"
                            type="radio"
                            name="status"
                            value="Closed"
                            id="statusClosed" />
                     <label for="statusClosed">Closed</label>
-                    <input onchange="InspSched.InspectorUI.LoadDailyInspections();"
+                    <input onchange="InspSched.InspectorUI.BuildInspectorUI();"
                            type="radio"
                            name="status"
                            value=""
@@ -220,7 +238,7 @@
                     <label for="statusBoth">Both</label>
                   </div>
                 </div>
-                <div class="columns small-6 medium-6 large-3 flex-container align-middle align-center" id="inspector_filters">
+                <div class="columns small-6 medium-6 flex-container align-middle align-center" id="inspector_filters">
                   <div class="flex-container row align-center align-middle flex-child-grow">
                     <select style="margin: 0;"
                             onchange="InspSched.InspectorUI.LoadDailyInspections();"
@@ -230,7 +248,7 @@
                     </select>
                   </div>
                 </div>
-                <div class="flex-container columns small-6 medium-6 large-3" id="inspector_view_buttons">
+                <div class="flex-container columns small-6 medium-6" id="inspector_view_buttons">
                   <div class="flex-container row align-center align-middle flex-child-grow">
                     <button style="margin-top: 0; margin-bottom: 0;"
                             onclick="InspSched.InspectorUI.LoadDailyInspections();"
@@ -245,7 +263,7 @@
                   </div>
                   <!--<div class="flex-container row align-center align-middle">
 
-                  </div>-->
+    </div>-->
                 </div>
               </div>
 
@@ -270,7 +288,7 @@
     </div>     <!--End Permit Information-->
   </div>     <!--End Inspection Scheduler-->
 
-  <script src="Scripts/app/bundle.min.js?201803081442"></script>
+  <script src="Scripts/app/bundle.js?201803081442"></script>
 
   <!--
   <script src="Scripts/jquery-3.1.1.js"></script>

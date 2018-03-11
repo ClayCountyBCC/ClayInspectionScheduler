@@ -14,6 +14,7 @@ var InspSched;
 (function (InspSched) {
     "use strict";
     var dpCalendar = null;
+    InspSched.InspectorViewType = "address";
     InspSched.InspectionTypes = [];
     InspSched.InspectionQuickRemarks = [];
     InspSched.CurrentPermits = [];
@@ -21,7 +22,9 @@ var InspSched;
     InspSched.IssuesExist = [];
     InspSched.IVInspections = [];
     InspSched.Inspectors = [];
-    InspSched.IV = []; // this is going to be the processed array of Inspection data.
+    InspSched.InspectorViewByPermit = []; // this is going to be the processed array of Inspection data.
+    InspSched.InspectorViewByAddress = [];
+    InspSched.HideTheseComments = []; // comments that contain these phrases will be hidden
     var InspectionTable = document.getElementById('InspectionTable');
     var InspectionTypeSelect = document.getElementById("InspTypeSelect");
     var PermitSearchButton = document.getElementById("PermitSearchButton");

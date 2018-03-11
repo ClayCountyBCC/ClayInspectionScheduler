@@ -16,6 +16,7 @@ namespace InspSched
   "use strict";
 
   let dpCalendar = null;
+  export let InspectorViewType: string = "address";
   export let InspectionTypes: Array<InspType> = [];
   export let InspectionQuickRemarks: Array<QuickRemark> = [];
   export let newInsp: NewInspection;
@@ -25,7 +26,9 @@ namespace InspSched
   export let ThisPermit: Permit;
   export let IVInspections: Array<Inspection> = [];
   export let Inspectors: Array<Inspector> = [];
-  export let IV: Array<InspectionView> = [];  // this is going to be the processed array of Inspection data.
+  export let InspectorViewByPermit: Array<InspectionViewByPermit> = [];  // this is going to be the processed array of Inspection data.
+  export let InspectorViewByAddress: Array<InspectionViewByAddress> = [];
+  export let HideTheseComments: Array<string> = []; // comments that contain these phrases will be hidden
 
   let InspectionTable = <HTMLDivElement>document.getElementById('InspectionTable');
   let InspectionTypeSelect = <HTMLSelectElement>document.getElementById("InspTypeSelect");

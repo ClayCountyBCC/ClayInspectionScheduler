@@ -24,4 +24,4 @@ var InspSched;
     }());
     InspSched.InspectionViewByPermit = InspectionViewByPermit;
 })(InspSched || (InspSched = {}));
-//# sourceMappingURL=InspectionView.js.map
+//# sourceMappingURL=InspectionViewByPermit.js.map
