@@ -525,8 +525,7 @@ h5 {
 @media print {
 
   @page {
-    size: landscape !important;
-    font-size: smaller;
+    font-size: 10px !important;
   }
   /* All your print styles go here */
   #header,
@@ -543,6 +542,7 @@ h5 {
 
   body {
     overflow: auto !important;
+    font-size: 10px !important;
   }
 
   #InspectionSchedulerTabs {

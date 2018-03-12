@@ -478,7 +478,7 @@ var InspSched;
                     c.push(s);
                 }
             }
-            console.log('split', split);
+            //console.log('split', split);
             return c.join("\r\n");
         }
         function PopulateBadComments() {
