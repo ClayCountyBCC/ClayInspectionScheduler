@@ -271,6 +271,7 @@ var InspSched;
             //ResultDescription.setAttribute("elementName", "ResultDescription");
             ResultDescription.className = "large-3 medium-6 small-6 InspResult column end ";
             ResultDescription.appendChild(document.createTextNode(inspection.ResultDescription.trim()));
+            ResultDescription.id = inspection.InspReqID + "_inspection_resultADC";
             // #endregion
             // #region add Remarks Container: add Remarks textarea, button, and radiobutton sections
             //*******************************************************************************
@@ -296,7 +297,6 @@ var InspSched;
             var remarkInput = document.createElement("input");
             remarkInput.type = "text";
             remarkInput.setAttribute("onkeyup", "InspSched.disableSaveCommentButton(" + inspection.InspReqID + ")");
-            //remarkInput.className = "remark-text";
             remarkInput.id = inspection.InspReqID + "_remark_textarea";
             remarkInput.style.margin = "0";
             if (inspection.Remarks) {
@@ -476,9 +476,10 @@ var InspSched;
             inspectionData.appendChild(inspector);
             DataRow.appendChild(inspectionData);
             inspRow.appendChild(DataRow);
-            // Sections added below are dependent on access_type and date
-            // cannot be public and cannot be earlier than today (will be changed to earlier date)
-            if (permit.access != InspSched.access_type.public_access) {
+            if (permit.access != InspSched.access_type.public_access &&
+                (InspSched.CanResultBeChanged(inspection.InspDateTime) ||
+                    inspection.ResultADC == "" ||
+                    inspection.ResultADC == null)) {
                 addRemarkTextDiv.appendChild(addRemarkInputGroup);
                 addRemarkTextDiv.appendChild(quickRemarkUL);
                 addRemarkButtonDiv.appendChild(addRemarkButton);
@@ -803,15 +804,58 @@ var InspSched;
             var thisHeading = document.getElementById('ErrorHeading');
             clearElement(thisHeading);
             var IssueList = document.createElement('ul');
+            IssueList.classList.add('column');
+            IssueList.classList.add('small-12');
+            IssueList.classList.add('align-center');
             var thisIssue = document.createElement('li');
             thisHeading.appendChild(document.createTextNode("The following issue is preventing the ability to schedule an inspection:"));
             thisIssue.appendChild(document.createTextNode(error));
             thisIssue.style.marginLeft = "2rem;";
             IssueList.appendChild(thisIssue);
             reasons.appendChild(IssueList);
+            var permitCheck = error.substr(8, 8);
+            if (InspSched.ThisPermit.access != InspSched.access_type.public_access &&
+                permitCheck == permitno &&
+                (error.substr(30, 5) == 'holds' || error.substr(30, 5) == 'charg')) {
+                IssueList.classList.remove('small-12');
+                IssueList.classList.add('small-9');
+                reasons.appendChild(CreateButtonToIMS(permitno, error));
+            }
             document.getElementById("NotScheduled").style.display = "flex";
         }
         UI.InformUserOfError = InformUserOfError;
+        function CreateButtonToIMS(permitNumber, error) {
+            var label = "";
+            var imsLink = "";
+            var isHold = true;
+            var buttonDiv = document.createElement('div');
+            buttonDiv.classList.add('column');
+            buttonDiv.classList.add('small-2');
+            buttonDiv.classList.add('flex-container');
+            buttonDiv.classList.add('align-center');
+            switch (error.substr(30, 6)) {
+                case "holds,":
+                    label = "IMS Holds";
+                    isHold = true;
+                    break;
+                case "charge":
+                    label = "IMS Charges";
+                    isHold = false;
+                    break;
+                default:
+                    return buttonDiv;
+            }
+            var linkButton = document.createElement('button');
+            linkButton.classList.add('small-8');
+            linkButton.classList.add('align-self-center');
+            linkButton.classList.add('button');
+            linkButton.classList.add('DetailsButton');
+            linkButton.value = isHold ? 'hold' : 'charge';
+            linkButton.setAttribute('onclick', 'InspSched.SendToIMS(' + permitNumber + ', this.value)');
+            linkButton.appendChild(document.createTextNode(label));
+            buttonDiv.appendChild(linkButton);
+            return buttonDiv;
+        }
         function IsGoodCancelDate(inspection, access) {
             var tomorrow = new Date();
             var inspDate = new Date(inspection.DisplaySchedDateTime);

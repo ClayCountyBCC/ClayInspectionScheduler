@@ -18,7 +18,7 @@ namespace InspSched.InspectorUI
         {
           LoadInspectors();
         }
-        
+
         BuildInspectorUI();
       }
     },
@@ -35,7 +35,7 @@ namespace InspSched.InspectorUI
     e.style.display = "flex";
   }
 
-  function LoadInspectors():void
+  function LoadInspectors(): void
   {
     transport.Inspectors().then(function (inspectors: Array<Inspector>)
     {
@@ -44,7 +44,7 @@ namespace InspSched.InspectorUI
       {
         developmentcheck.textContent = "Dev Environment";
       }
-      
+
 
       InspSched.Inspectors = inspectors;
 
@@ -117,7 +117,7 @@ namespace InspSched.InspectorUI
     target.appendChild(df);
   }
 
-  function BuildInspectorViewByPermit(target:HTMLElement, currentHash: LocationHash)
+  function BuildInspectorViewByPermit(target: HTMLElement, currentHash: LocationHash)
   {
     let df: DocumentFragment = document.createDocumentFragment();
     df.appendChild(BuildInspectorViewByPermitHeaderRow());
@@ -130,7 +130,7 @@ namespace InspSched.InspectorUI
     }
     target.appendChild(df);
   }
-  
+
   function BuildInspectorViewByPermitHeaderRow(): DocumentFragment  
   {
     let df = document.createDocumentFragment();
@@ -302,8 +302,8 @@ namespace InspSched.InspectorUI
       function (i)
       {
         let inspectorCheck: boolean = inspector.length > 0 ? i.InspectorName === inspector : true;
-        let dayCheck: boolean = day.length > 0 ? i.Day === day || ( day === "Today" && i.ResultADC === "" && new Date(i.SchedDateTime.toString()) < d) : true;
-
+        let dayCheck: boolean = day.length > 0 ? i.Day === day || (day === "Today" && i.ResultADC === "" && new Date(i.SchedDateTime.toString()) < d) : true;
+        console.log("i.scheddatetime", i.SchedDateTime, "d", d);
         let openCheck: boolean = true;
         if (open.length === 0)
         {
@@ -348,7 +348,6 @@ namespace InspSched.InspectorUI
     }
     return ivList;
   }
-
 
   export function ProcessIVInspectionsByAddress(
     inspections: Array<Inspection>,
@@ -500,7 +499,7 @@ namespace InspSched.InspectorUI
     {
       addressContainerContainer.appendChild(CreateAndSetSmaller("Geozone: " + i.GeoZone));
     }
-    
+
     if (i.IsPrivateProvider)
     {
       addressContainerContainer.appendChild(CreateAndSetSmaller("Private Provider"));
@@ -531,7 +530,7 @@ namespace InspSched.InspectorUI
       let row = document.createElement("div");
       row.classList.add("row");
       row.classList.add("medium-12");
-      row.classList.add("large-12");      
+      row.classList.add("large-12");
       ch.Permit = insp.PermitNumber;
       ch.InspectionId = insp.InspectionId;
       row.appendChild(CreateAndSet(insp.PermitNumber, "columns", "small-4"));
@@ -542,10 +541,10 @@ namespace InspSched.InspectorUI
       secondRow.classList.add("medium-12");
       secondRow.classList.add("large-12");
       secondRow.appendChild(CreateAndSet(CleanComments(insp.Comments)));
-      
+
       secondcolumn.appendChild(row);
       secondcolumn.appendChild(secondRow);
-    }    
+    }
     row.appendChild(secondcolumn);
     df.appendChild(row);
     return df;
@@ -575,7 +574,7 @@ namespace InspSched.InspectorUI
     ];
   }
 
-  function MatchBadComments(comment: string):boolean
+  function MatchBadComments(comment: string): boolean
   {
     comment = comment.toLowerCase();
     for (let c of InspSched.HideTheseComments)

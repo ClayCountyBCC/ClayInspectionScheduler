@@ -72,6 +72,20 @@ var InspSched;
             updateHash(PermitSearchField.value);
         }
     };
+    function SendToIMS(permitNumber, type) {
+        if (type == 'hold') {
+            window.open(InspSched.Inspectors[0].AppAddressStart +
+                "Holds.aspx?PermitNo=" +
+                permitNumber + "&OperId=&Nav=PL");
+        }
+        else {
+            window.open(InspSched.Inspectors[0].AppAddressStart +
+                (permitNumber[0] == '1' ? "MChrg" : "AChrg") +
+                ".aspx?PermitNo=" +
+                permitNumber + "&OperId=&Nav=PL");
+        }
+    }
+    InspSched.SendToIMS = SendToIMS;
     function SearchPermit() {
         InspSched.UI.CurrentDetailsOpen = "";
         InspectionTable.style.display = "none";
@@ -368,6 +382,7 @@ var InspSched;
         var value = document.querySelector('input[name="' + InspectionRequestId + '_results"]:checked').value;
         var completedCommentsDIV = document.getElementById(InspectionRequestId + "_textbox_div");
         var inspDateTime = document.getElementById(InspectionRequestId + "_inspection-date-time");
+        var updatedResultADC = document.getElementById(InspectionRequestId + "_inspection_resultADC");
         completedCommentsDIV.style.display = "flex";
         var remarkText = remarkTextarea.value;
         var commentText = commentTextarea.value;
@@ -378,6 +393,8 @@ var InspSched;
             remarkTextarea.value = updatedInspection.Remarks;
             completedComments.textContent = "";
             completedComments.textContent = updatedInspection.Comment;
+            InspSched.UI.clearElement(updatedResultADC);
+            updatedResultADC.appendChild(document.createTextNode(updatedInspection.ResultDescription));
             commentTextarea.value = "";
             InspSched.UI.clearElement(inspDateTime);
             inspDateTime.appendChild(document.createTextNode(updatedInspection.DisplayInspDateTime));
@@ -441,5 +458,24 @@ var InspSched;
         });
     }
     InspSched.FilterQuickRemarks = FilterQuickRemarks;
+    function CanResultBeChanged(CompletedInspectionDateTime) {
+        // Sections added below are dependent on access_type and date
+        // cannot be public and cannot be earlier than today (will be changed to earlier date)
+        var twoDaysAgo = new Date();
+        twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+        twoDaysAgo.setHours(0, 0, 0, 0);
+        var baseDate = new Date("0001-01-02");
+        baseDate = new Date(baseDate.setHours(0, 0, 0, 0));
+        var thisInspDate = new Date(CompletedInspectionDateTime);
+        thisInspDate = new Date(thisInspDate.setHours(0, 0, 0, 0));
+        var CanBeChanged = thisInspDate.getTime() == baseDate.getTime();
+        console.log("inspection has not beencompleted: ", CanBeChanged);
+        if (!CanBeChanged) {
+            CanBeChanged = thisInspDate.getTime() > twoDaysAgo.getTime();
+            console.log("inspection has been completed but can be changed: ", CanBeChanged);
+        }
+        return CanBeChanged;
+    }
+    InspSched.CanResultBeChanged = CanResultBeChanged;
 })(InspSched || (InspSched = {}));
 //# sourceMappingURL=app.js.map

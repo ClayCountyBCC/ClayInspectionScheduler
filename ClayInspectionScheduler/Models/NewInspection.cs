@@ -17,6 +17,8 @@ namespace ClayInspectionScheduler.Models
 
     public DateTime SchecDateTime { get; set; }
 
+    private bool TryingToScheduleFinal { get; set; }
+
     public string PrivProvFieldName
     {
       get
@@ -61,9 +63,12 @@ namespace ClayInspectionScheduler.Models
       List<string> Errors = new List<string>();
 
       // 0)
+      List<InspType> finals = (from it in inspTypes
+                               where it.Final == true
+                               select it).ToList();
+      Console.Write("Finals: ", finals);
 
-      
-       //= (List<InspType>)MyCache.GetItem("inspectiontypes,"+IsExternalUser.ToString());
+      //= (List<InspType>)MyCache.GetItem("inspectiontypes,"+IsExternalUser.ToString());
 
       var Permits = (from p in Permit.Get(this.PermitNo, CurrentAccess)
                      where p.PermitNo == this.PermitNo
@@ -123,29 +128,80 @@ namespace ClayInspectionScheduler.Models
             Errors.Add("Invalid Inspection for this permit type");
           }
 
+
           var inspections = Inspection.Get(CurrentPermit.PermitNo);
-          //bool IsFinal = false;
+
+          bool electricPassedFinal = false;
+          string electricPermitNumber = "";
+
+
           foreach (var i in inspections)
           {
-            
-            if (i.InspectionCode == this.InspectionCd && i.ResultADC == null && i.PermitNo == CurrentPermit.PermitNo)
+
+            if (i.InspectionCode == this.InspectionCd && i.ResultADC == "" && i.PermitNo == CurrentPermit.PermitNo)
             {
               Errors.Add("Inspection type exists on permit");
               break;
             }
 
 
-            // Adds functionality to return error when saving an inspection for permit that has already passed a final inspection.
-            //var types = InspType.Get(IsExternalUser);
-            //foreach (var t in types)
-            //{
-            //  if (t.InspCd == i.InspectionCode && t.Final && (i.ResultADC == "A" || i.ResultADC == "P"))
-            //  {
+            //Adds functionality to return error when saving an inspection for permit that has already passed a final inspection.
 
-            //  }
-            //}
+
+            foreach (var it in inspTypes)
+            {
+              if (it.InspCd == this.InspectionCd)
+              {
+                if (i.ResultADC == "A" || i.ResultADC == "P")
+                {
+                  if (CurrentPermit.PermitNo[0] == 2 && !CurrentPermit.NoFinalInspections)
+                  {
+                    electricPassedFinal = true; // Check for Building final inspection scheduling. Electric must passed final and 
+                  }
+                  else
+                  {
+                    electricPermitNumber = CurrentPermit.PermitNo;
+                  }
+
+                  if (CurrentPermit.ErrorText.Length == 0)
+                  {
+                    Errors.Add($"Permit #{i.PermitNo} has passed final inspection");
+                  }
+                }
+              }
+            }
+
+
+          }
+
+          // To schedule a building final: 
+          // 1. All fees, including Road impact and school impact fees, must be paid; AND
+          // 2. All associated permits must have a final inspection either scheduled, or passed.
+          // 3. The Final Building Inspection cannot be scheduled for any time before the latest incomplete
+          //    associated permit's final inspection.
+
+          // Currently, this only checks for a passed electric final and charges.
+          foreach (var f in finals)
+          {
+            if (this.InspectionCd == f.InspCd && Errors.Count == 0)
+            {
+              var charges = Charge.GetCharges(this.PermitNo, true);
+              if (charges.Count > 0)
+              {
+                Errors.Add($@"Permit #{this.PermitNo} has charges preventing a final inspection from being scheduled. 
+                              Please contact the Building Department for further assistance.");
+                break;
+              }
+
+              if (this.InspectionCd.Trim() == "123" && !electricPassedFinal)
+              {
+                Errors.Add($@"Permit #{electricPermitNumber} has not passed final inspection. A Final building Inspection Cannot be scheduled at this time.");
+                break;
+              }
+            }
           }
         }
+
         Console.Write(Errors);
 
       }
@@ -161,7 +217,7 @@ namespace ClayInspectionScheduler.Models
       dbArgs.Add("@SelectedDate", this.SchecDateTime.Date);
       dbArgs.Add("@IRID", dbType: DbType.Int64, direction: ParameterDirection.Output);
 
-       long? IRID = -1;
+      long? IRID = -1;
 
       // this function will save the inspection request.
       if (this.PrivProvFieldName.Length == 0) return -1;
@@ -185,8 +241,8 @@ namespace ClayInspectionScheduler.Models
         var i = Constants.Exec_Query(sqlPP, dbArgs);
         if (i > -1)
         {
-          IRID = dbArgs.Get<long?>( "@IRID" );
-          if(IRID != null)
+          IRID = dbArgs.Get<long?>("@IRID");
+          if (IRID != null)
           {
             return (int)IRID.Value;
           }
@@ -195,12 +251,12 @@ namespace ClayInspectionScheduler.Models
             return -1;
           }
         }
-        else 
+        else
         {
           return -1;
 
         }
-        
+
       }
       catch (Exception ex)
       {
@@ -229,9 +285,9 @@ namespace ClayInspectionScheduler.Models
       dbArgs.Add("@IRID", (IRID == -1) ? null : IRID.ToString());
       dbArgs.Add("@InitialComment", InitialComment);
       dbArgs.Add("@Comment", Comment);
-      dbArgs.Add("@SavedInspectionID",-1, dbType: DbType.Int32, direction: ParameterDirection.Output,size:8);
+      dbArgs.Add("@SavedInspectionID", -1, dbType: DbType.Int32, direction: ParameterDirection.Output, size: 8);
 
-      string sql =  $@"
+      string sql = $@"
       USE WATSC;     
 
       INSERT INTO bpINS_REQUEST
@@ -260,6 +316,12 @@ namespace ClayInspectionScheduler.Models
       EXEC add_inspection_comment @DisplayName, @SavedInspectionID, @InitialComment, @Comment;";
       try
       {
+        bool isFinal = (from it in inspTypes
+                        where it.InspCd == this.InspectionCd
+                        select it.Final).First();
+        Console.WriteLine("isFinal:", isFinal);
+
+
         var i = Constants.Exec_Query(sql, dbArgs);
         if (i > -1)
         {

@@ -12,6 +12,7 @@
     PrivateProvider: boolean;
     Initials: string;
     InDevelopment: boolean;
+    AppAddressStart: string;
   }
   export class Inspector implements IInspector
   {
@@ -24,8 +25,8 @@
     public PlumbingPermit: boolean;
     public PrivateProvider: boolean;
     public Initials: string;
-    public InDevelopment: boolean; 
- 
+    public InDevelopment: boolean;
+    public AppAddressStart: string;
 
     constructor()
     {

@@ -110,6 +110,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\CalendarDate.cs" />
+    <Compile Include="Models\Charge.cs" />
     <Compile Include="Models\DateCache.cs" />
     <Compile Include="Models\Hold.cs" />
     <Compile Include="Models\Constants.cs" />

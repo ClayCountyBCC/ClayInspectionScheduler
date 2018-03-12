@@ -294,6 +294,7 @@ var InspSched;
             var fInspections = inspections.filter(function (i) {
                 var inspectorCheck = inspector.length > 0 ? i.InspectorName === inspector : true;
                 var dayCheck = day.length > 0 ? i.Day === day || (day === "Today" && i.ResultADC === "" && new Date(i.SchedDateTime.toString()) < d) : true;
+                console.log("i.scheddatetime", i.SchedDateTime, "d", d);
                 var openCheck = true;
                 if (open.length === 0) {
                     openCheck = true;
@@ -920,6 +921,7 @@ var InspSched;
             //ResultDescription.setAttribute("elementName", "ResultDescription");
             ResultDescription.className = "large-3 medium-6 small-6 InspResult column end ";
             ResultDescription.appendChild(document.createTextNode(inspection.ResultDescription.trim()));
+            ResultDescription.id = inspection.InspReqID + "_inspection_resultADC";
             // #endregion
             // #region add Remarks Container: add Remarks textarea, button, and radiobutton sections
             //*******************************************************************************
@@ -945,7 +947,6 @@ var InspSched;
             var remarkInput = document.createElement("input");
             remarkInput.type = "text";
             remarkInput.setAttribute("onkeyup", "InspSched.disableSaveCommentButton(" + inspection.InspReqID + ")");
-            //remarkInput.className = "remark-text";
             remarkInput.id = inspection.InspReqID + "_remark_textarea";
             remarkInput.style.margin = "0";
             if (inspection.Remarks) {
@@ -1125,9 +1126,10 @@ var InspSched;
             inspectionData.appendChild(inspector);
             DataRow.appendChild(inspectionData);
             inspRow.appendChild(DataRow);
-            // Sections added below are dependent on access_type and date
-            // cannot be public and cannot be earlier than today (will be changed to earlier date)
-            if (permit.access != InspSched.access_type.public_access) {
+            if (permit.access != InspSched.access_type.public_access &&
+                (InspSched.CanResultBeChanged(inspection.InspDateTime) ||
+                    inspection.ResultADC == "" ||
+                    inspection.ResultADC == null)) {
                 addRemarkTextDiv.appendChild(addRemarkInputGroup);
                 addRemarkTextDiv.appendChild(quickRemarkUL);
                 addRemarkButtonDiv.appendChild(addRemarkButton);
@@ -1452,15 +1454,58 @@ var InspSched;
             var thisHeading = document.getElementById('ErrorHeading');
             clearElement(thisHeading);
             var IssueList = document.createElement('ul');
+            IssueList.classList.add('column');
+            IssueList.classList.add('small-12');
+            IssueList.classList.add('align-center');
             var thisIssue = document.createElement('li');
             thisHeading.appendChild(document.createTextNode("The following issue is preventing the ability to schedule an inspection:"));
             thisIssue.appendChild(document.createTextNode(error));
             thisIssue.style.marginLeft = "2rem;";
             IssueList.appendChild(thisIssue);
             reasons.appendChild(IssueList);
+            var permitCheck = error.substr(8, 8);
+            if (InspSched.ThisPermit.access != InspSched.access_type.public_access &&
+                permitCheck == permitno &&
+                (error.substr(30, 5) == 'holds' || error.substr(30, 5) == 'charg')) {
+                IssueList.classList.remove('small-12');
+                IssueList.classList.add('small-9');
+                reasons.appendChild(CreateButtonToIMS(permitno, error));
+            }
             document.getElementById("NotScheduled").style.display = "flex";
         }
         UI.InformUserOfError = InformUserOfError;
+        function CreateButtonToIMS(permitNumber, error) {
+            var label = "";
+            var imsLink = "";
+            var isHold = true;
+            var buttonDiv = document.createElement('div');
+            buttonDiv.classList.add('column');
+            buttonDiv.classList.add('small-2');
+            buttonDiv.classList.add('flex-container');
+            buttonDiv.classList.add('align-center');
+            switch (error.substr(30, 6)) {
+                case "holds,":
+                    label = "IMS Holds";
+                    isHold = true;
+                    break;
+                case "charge":
+                    label = "IMS Charges";
+                    isHold = false;
+                    break;
+                default:
+                    return buttonDiv;
+            }
+            var linkButton = document.createElement('button');
+            linkButton.classList.add('small-8');
+            linkButton.classList.add('align-self-center');
+            linkButton.classList.add('button');
+            linkButton.classList.add('DetailsButton');
+            linkButton.value = isHold ? 'hold' : 'charge';
+            linkButton.setAttribute('onclick', 'InspSched.SendToIMS(' + permitNumber + ', this.value)');
+            linkButton.appendChild(document.createTextNode(label));
+            buttonDiv.appendChild(linkButton);
+            return buttonDiv;
+        }
         function IsGoodCancelDate(inspection, access) {
             var tomorrow = new Date();
             var inspDate = new Date(inspection.DisplaySchedDateTime);
@@ -1857,6 +1902,20 @@ var InspSched;
             updateHash(PermitSearchField.value);
         }
     };
+    function SendToIMS(permitNumber, type) {
+        if (type == 'hold') {
+            window.open(InspSched.Inspectors[0].AppAddressStart +
+                "Holds.aspx?PermitNo=" +
+                permitNumber + "&OperId=&Nav=PL");
+        }
+        else {
+            window.open(InspSched.Inspectors[0].AppAddressStart +
+                (permitNumber[0] == '1' ? "MChrg" : "AChrg") +
+                ".aspx?PermitNo=" +
+                permitNumber + "&OperId=&Nav=PL");
+        }
+    }
+    InspSched.SendToIMS = SendToIMS;
     function SearchPermit() {
         InspSched.UI.CurrentDetailsOpen = "";
         InspectionTable.style.display = "none";
@@ -2153,6 +2212,7 @@ var InspSched;
         var value = document.querySelector('input[name="' + InspectionRequestId + '_results"]:checked').value;
         var completedCommentsDIV = document.getElementById(InspectionRequestId + "_textbox_div");
         var inspDateTime = document.getElementById(InspectionRequestId + "_inspection-date-time");
+        var updatedResultADC = document.getElementById(InspectionRequestId + "_inspection_resultADC");
         completedCommentsDIV.style.display = "flex";
         var remarkText = remarkTextarea.value;
         var commentText = commentTextarea.value;
@@ -2163,6 +2223,8 @@ var InspSched;
             remarkTextarea.value = updatedInspection.Remarks;
             completedComments.textContent = "";
             completedComments.textContent = updatedInspection.Comment;
+            InspSched.UI.clearElement(updatedResultADC);
+            updatedResultADC.appendChild(document.createTextNode(updatedInspection.ResultDescription));
             commentTextarea.value = "";
             InspSched.UI.clearElement(inspDateTime);
             inspDateTime.appendChild(document.createTextNode(updatedInspection.DisplayInspDateTime));
@@ -2226,6 +2288,25 @@ var InspSched;
         });
     }
     InspSched.FilterQuickRemarks = FilterQuickRemarks;
+    function CanResultBeChanged(CompletedInspectionDateTime) {
+        // Sections added below are dependent on access_type and date
+        // cannot be public and cannot be earlier than today (will be changed to earlier date)
+        var twoDaysAgo = new Date();
+        twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+        twoDaysAgo.setHours(0, 0, 0, 0);
+        var baseDate = new Date("0001-01-02");
+        baseDate = new Date(baseDate.setHours(0, 0, 0, 0));
+        var thisInspDate = new Date(CompletedInspectionDateTime);
+        thisInspDate = new Date(thisInspDate.setHours(0, 0, 0, 0));
+        var CanBeChanged = thisInspDate.getTime() == baseDate.getTime();
+        console.log("inspection has not beencompleted: ", CanBeChanged);
+        if (!CanBeChanged) {
+            CanBeChanged = thisInspDate.getTime() > twoDaysAgo.getTime();
+            console.log("inspection has been completed but can be changed: ", CanBeChanged);
+        }
+        return CanBeChanged;
+    }
+    InspSched.CanResultBeChanged = CanResultBeChanged;
 })(InspSched || (InspSched = {}));
 //# sourceMappingURL=app.js.map
 /*!

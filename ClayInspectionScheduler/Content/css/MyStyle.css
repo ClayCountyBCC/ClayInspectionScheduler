@@ -13,18 +13,18 @@ body {
 #PermitScreen,
 
 */
-#InspectionTable{
+#InspectionTable {
   display: none;
 }
+
 #SearchSelect,
 #CurrentPermitData,
 #PermitSelectContainer,
 #Searching,
 #SearchFailed,
 #NoPermit,
-#SearchFailed, 
-#InspectorViewTab
-{
+#SearchFailed,
+#InspectorViewTab {
   display: none;
 }
 
@@ -70,9 +70,10 @@ body {
   margin-top: 6px;
   text-align: center;
 }
-  .DetailsButton.disabled, .DetailsButton[disabled]{
+
+  .DetailsButton.disabled, .DetailsButton[disabled] {
     opacity: .25;
-    cursor:not-allowed;
+    cursor: not-allowed;
   }
 
 button {
@@ -471,16 +472,18 @@ h5 {
   resize: none;
   margin: 0;
   padding: 0;
-
 }
+
 .details-container {
   display: flex;
 }
-.textbox-div{
-  margin-top:1em;
+
+.textbox-div {
+  margin-top: 1em;
 }
-.completed-comments-textarea{
-  margin-top:1em;
+
+.completed-comments-textarea {
+  margin-top: 1em;
 }
 
 .App-Container {
@@ -499,8 +502,8 @@ h5 {
   height: 100%;
   max-height: 100%;
 }
-.quick-remark-list
-{
+
+.quick-remark-list {
   border: solid 1px lightgrey;
   padding: 1em;
   padding-top: 0;
@@ -509,72 +512,65 @@ h5 {
   overflow-y: auto;
   margin: 0;
 }
-.quick-remark-list > li
-{
-  list-style: none;
-}
+
+  .quick-remark-list > li {
+    list-style: none;
+  }
+
 .change-height-for-print {
-  height:100%;
+  height: 100%;
   max-height: 100%;
-
 }
-@media print
-{
 
-  @page
-  {
+@media print {
+
+  @page {
     size: landscape !important;
+    font-size: smaller;
   }
   /* All your print styles go here */
   #header,
   #footer,
   #nav,
   #InspectionSchedulerTabs,
-  #inspection_filter_container
-  {
+  #inspection_filter_container {
     display: none !important;
   }
-  #inspectorViewInspections{
+
+  #inspectorViewInspections {
     -ms-transform: scale(.75,.75) !important;
   }
 
-  body
-  {
-    overflow: auto !important ;
+  body {
+    overflow: auto !important;
   }
 
-  #InspectionSchedulerTabs
-  {
+  #InspectionSchedulerTabs {
     overflow-y: auto !important;
   }
 
-  .App-Container
-  {
+  .App-Container {
     display: flex !important;
-    width: auto !important ;
+    width: auto !important;
     height: auto !important;
   }
 
-  .change-height-for-print
-  {
-    height:auto !important;
+  .change-height-for-print {
+    height: auto !important;
     max-height: none !important;
     width: 100% !important;
   }
 
-  #PermitScreen
-  {
+  #PermitScreen {
     min-width: 100% !important;
     height: auto !important;
   }
 
-  .no-page-break
-  {
+  .no-page-break {
     page-break-inside: avoid !important;
   }
 
-  .tabs-content
-  {
-    border: none !important;    
+  .tabs-content {
+    border: none !important;
   }
 }

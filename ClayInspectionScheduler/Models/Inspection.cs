@@ -145,7 +145,7 @@ namespace ClayInspectionScheduler.Models
       dp.Add("@Tomorrow", tomorrow.Date);
 
       string sql = @"
-        USE WATSC;
+          USE WATSC;
         WITH BaseFloodZone AS (
           SELECT DISTINCT
             LTRIM(RTRIM(FloodZone)) FloodZone,
@@ -177,7 +177,7 @@ namespace ClayInspectionScheduler.Models
         SELECT
           B.ProjAddrCombined StreetAddress,
           I.InspReqID,
-          I.PermitNo, 
+          I.PermitNo,
           ISNULL(M.Comm, A.Comm) Comm,
           ISNULL(I.InspectionCode, '') InspectionCode, 
           ISNULL(IR.InsDesc, 'No Inspections') InsDesc, 
@@ -209,23 +209,23 @@ namespace ClayInspectionScheduler.Models
         -- and we want to include any from the past that aren't completed.
           OR (CAST(SchecDateTime AS DATE) < CAST(@Today AS DATE)
             AND ResultADC IS NULL))
-        ORDER BY B.ProjStreet, B.ProjAddrNumber";
+        ORDER BY B.ProjStreet, B.ProjClass, B.ProjPreDir, B.ProjPostDir, B.ProjAddrNumber";
 
 
-       Constants.Get_Data<Inspection>(sql, dp);
+      Constants.Get_Data<Inspection>(sql, dp);
       try
       {
         var il = Constants.Get_Data<Inspection>(sql, dp);
         return il;
       }
-      catch(Exception ex)
+      catch (Exception ex)
       {
         Constants.Log(ex, sql);
         return new List<Inspection>();
       }
-       
-       
-       }
+
+
+    }
 
     private static List<Inspection> GetRaw(int InspectionId)
     {
@@ -310,7 +310,7 @@ namespace ClayInspectionScheduler.Models
     public static Inspection Get(int InspectionId)
     {
       var t = GetRaw(InspectionId);
-      if(t.Count() == 1)
+      if (t.Count() == 1)
       {
         return t.First();
       }
@@ -339,7 +339,7 @@ namespace ClayInspectionScheduler.Models
       UserAccess ua)
     {
       Comment = Comment.Trim();
-      if(ua.current_access == UserAccess.access_type.public_access)
+      if (ua.current_access == UserAccess.access_type.public_access)
       {
         return null;
       }
@@ -446,7 +446,7 @@ namespace ClayInspectionScheduler.Models
       dp.Add("@ResultCode", ResultCode);
       dp.Add("@Poster", User.user_name);
       dp.Add("@User", User.display_name);
-      if(ResultCode != OldResult)
+      if (ResultCode != OldResult)
       {
         dp.Add("@FirstComment", $"Status changed from {GetResultDescription(OldResult)} to {GetResultDescription(ResultCode)}.");
         dp.Add("@SecondComment", Comments);
@@ -457,14 +457,14 @@ namespace ClayInspectionScheduler.Models
         dp.Add("@SecondComment", "");
       }
 
-
-
       string sql = @"
         USE WATSC;
         UPDATE bpINS_Request
         SET 
-          ResultADC = @ResultCode,
-          InspDateTime = GETDATE(),
+          ResultADC = CASE WHEN @ResultCode = 'I' THEN NULL
+                           WHEN @ResultCode IN ('A','D','P','N') THEN @ResultCode END,
+          InspDateTime = CASE WHEN @ResultCode = 'I' THEN NULL
+                              WHEN @ResultCode IN ('A','D','P','N') THEN GETDATE() END,
           Remarks = @Remarks,
           Poster = @Poster,
           ChrgCode = @ChargeCode
@@ -493,9 +493,6 @@ namespace ClayInspectionScheduler.Models
         sql += GetNotDeniedQueries();
         dp.Add("@ChargeCode", null);
       }
-
-
-
       int i = Constants.Exec_Query(sql, dp);
       return i > 0;
 
@@ -503,7 +500,7 @@ namespace ClayInspectionScheduler.Models
 
     private bool Validate(string PermitNumber, string ResultCode, string UserRemarks, UserAccess User)
     {
-      if(PermitNumber != PermitNo)
+      if (PermitNumber != PermitNo)
       {
         Errors.Add("The permit number does not match the inspection, please check your request and try again.");
         return false;
@@ -522,9 +519,9 @@ namespace ClayInspectionScheduler.Models
             return false;
           }
 
-          if(ResultCode == "A" | ResultCode == "D")
+          if (ResultCode == "A" | ResultCode == "D")
           {
-            if(PrivateProviderInspectionRequestId > 0)
+            if (PrivateProviderInspectionRequestId > 0)
             {
               Errors.Add("Private provider inspections must be marked as Not Performed or Performed.");
               return false;
@@ -537,7 +534,7 @@ namespace ClayInspectionScheduler.Models
             Errors.Add("Inspections completed prior to Today's date cannot be changed.");
             return false;
           }
-          if(ResultCode == "D" & UserRemarks.Length == 0)
+          if (ResultCode == "D" & UserRemarks.Length == 0)
           {
             Errors.Add("Disapprovals must have remarks included in order to be saved.");
             return false;
@@ -549,14 +546,14 @@ namespace ClayInspectionScheduler.Models
             User.current_access == UserAccess.access_type.basic_access |
             User.current_access == UserAccess.access_type.inspector_access)
           {
-            if(ResultADC.Length != 0)
+            if (ResultADC.Length != 0)
             {
               Errors.Add("Cannot cancel a completed inspection.  This inspection was completed on: " + InspDateTime.ToShortDateString());
               return false;
             }
-            if(UserRemarks.Trim().Length == 0 && User.current_access != UserAccess.access_type.public_access)
+            if (UserRemarks.Trim().Length == 0 && User.current_access != UserAccess.access_type.public_access)
             {
-              Errors.Add("You must include a reason why this inspection is being cancelled in the Remarks field.");
+              Errors.Add("You must include a reason why this inspection is being canceled in the Remarks field.");
               return false;
             }
             return true;
@@ -631,6 +628,7 @@ namespace ClayInspectionScheduler.Models
       return sql;
     }
 
+
     private static string GetNotDeniedQueries()
     {
       return @"
@@ -644,7 +642,5 @@ namespace ClayInspectionScheduler.Models
         WHERE 
           InspReqID = @InspectionId;";
     }
-
-
   }
 }

@@ -374,6 +374,7 @@ namespace InspSched.UI
     //ResultDescription.setAttribute("elementName", "ResultDescription");
     ResultDescription.className = "large-3 medium-6 small-6 InspResult column end ";
     ResultDescription.appendChild(document.createTextNode(inspection.ResultDescription.trim()));
+    ResultDescription.id = inspection.InspReqID + "_inspection_resultADC";
     // #endregion
 
     // #region add Remarks Container: add Remarks textarea, button, and radiobutton sections
@@ -402,11 +403,10 @@ namespace InspSched.UI
     addRemarkInputGroup.classList.add("input-group");
     addRemarkInputGroup.classList.add("small-12");
     addRemarkInputGroup.style.margin = "0";
-    
+
     let remarkInput: HTMLInputElement = (<HTMLInputElement>document.createElement("input"));
     remarkInput.type = "text";
     remarkInput.setAttribute("onkeyup", "InspSched.disableSaveCommentButton(" + inspection.InspReqID + ")");
-    //remarkInput.className = "remark-text";
     remarkInput.id = inspection.InspReqID + "_remark_textarea";
     remarkInput.style.margin = "0";
     if (inspection.Remarks)
@@ -417,7 +417,7 @@ namespace InspSched.UI
     remarkInput.classList.add("columns");
     let containerSpan: HTMLSpanElement = document.createElement("span");
     containerSpan.classList.add("input-group-button")
-    
+
     let quickRemarkButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
     quickRemarkButton.classList.add("button");
     quickRemarkButton.classList.add("dropdown");
@@ -439,14 +439,14 @@ namespace InspSched.UI
       {
         eventTarget.addEventListener("scroll", handler, false);
         window.addEventListener("resize", handler, true);
-        
+
         let remarkInput = document.getElementById(inspection.InspReqID + "_remark_textarea");
         quickRemarkUL.style.display = toggle ? "none" : "block";
         quickRemarkUL.style.width = addRemarkInputGroup.clientWidth.toString() + "px";
         quickRemarkUL.style.maxWidth = addRemarkInputGroup.clientWidth.toString() + "px";
-        
+
         quickRemarkUL.style.left = addRemarkInputGroup.offsetLeft.toString();
-        
+
         let windowHeight: number = window.innerHeight;
         let bottomHeight: number = windowHeight - (addRemarkInputGroup.offsetTop + addRemarkInputGroup.clientHeight - eventTarget.scrollTop);
         let topHeight: number = addRemarkInputGroup.offsetTop - eventTarget.scrollTop;
@@ -466,7 +466,7 @@ namespace InspSched.UI
           quickRemarkUL.style.top = (addRemarkInputGroup.offsetTop + addRemarkInputGroup.clientHeight - eventTarget.scrollTop).toString() + "px";
           quickRemarkUL.style.left = leftOffset.toString() + "px";
         }
-        
+
       }
       else
       {
@@ -475,12 +475,12 @@ namespace InspSched.UI
     }
     let quickRemarkUL: HTMLUListElement = (<HTMLUListElement>document.createElement("UL"));
     quickRemarkUL.id = "drop" + inspection.InspReqID.toString();
-    quickRemarkUL.classList.add("quick-remark-list");    
+    quickRemarkUL.classList.add("quick-remark-list");
     quickRemarkUL.classList.add("row");
     quickRemarkUL.style.backgroundColor = "white";
     quickRemarkUL.style.display = "none";
     quickRemarkUL.style.position = "fixed";
-    
+
     let filteredRemarks = FilterQuickRemarks(inspection.PermitNo[0], inspection.PrivateProviderInspectionRequestId > 0);
     for (let qr of filteredRemarks)
     {
@@ -497,7 +497,7 @@ namespace InspSched.UI
     containerSpan.appendChild(quickRemarkButton);
     addRemarkInputGroup.appendChild(remarkInput);
     addRemarkInputGroup.appendChild(containerSpan);
-    
+
 
     let addRemarkButtonDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
     //addRemarkButtonDiv.setAttribute("elementName", "addRemarkButtonDiv");
@@ -574,7 +574,7 @@ namespace InspSched.UI
     let SaveCommentButtonDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
     //SaveCommentButtonDiv.setAttribute("elementName", "SaveCommentuttonDiv");
     SaveCommentButtonDiv.className = "ButtonContainer column large-2 medium-2 small-12 flex-container align-center";
-    
+
     let SaveCommentButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
     SaveCommentButton.className = "button align-self-center column small-12 SaveCommentButton";
     //SaveCommentButton.setAttribute("elementName", "SaveCommentButton");
@@ -619,7 +619,7 @@ namespace InspSched.UI
     if (inspection.DisplayInspDateTime.toLowerCase() === 'incomplete')
     {
       inspDateTime.appendChild(document.createTextNode(inspection.DisplaySchedDateTime));
-      
+
     }
     else
     {
@@ -637,9 +637,10 @@ namespace InspSched.UI
     inspRow.appendChild(DataRow);
 
 
-    // Sections added below are dependent on access_type and date
-    // cannot be public and cannot be earlier than today (will be changed to earlier date)
-    if (permit.access != InspSched.access_type.public_access)
+    if (permit.access != InspSched.access_type.public_access &&
+      (CanResultBeChanged(inspection.InspDateTime) ||
+        inspection.ResultADC == "" ||
+        inspection.ResultADC == null))
     {
       addRemarkTextDiv.appendChild(addRemarkInputGroup);
       addRemarkTextDiv.appendChild(quickRemarkUL);
@@ -700,7 +701,7 @@ namespace InspSched.UI
         }
         else
         {
-          
+
           //detailButton.style.margin = "0";
           buttonDiv.appendChild(detailButton);
 
@@ -732,7 +733,7 @@ namespace InspSched.UI
     CommentContainer.appendChild(textboxdiv);
 
 
-    
+
     // SET COMMENTS
     if (inspection.Comment.length > 0)
     {
@@ -766,9 +767,9 @@ namespace InspSched.UI
   }
 
   function CheckBrowser()
-  { 
+  {
 
-    
+
     let browser: string = "";
     if ((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1) 
     {
@@ -784,7 +785,7 @@ namespace InspSched.UI
     }
     else if (navigator.userAgent.indexOf("Firefox") != -1) 
     {
-      browser ='Firefox';
+      browser = 'Firefox';
     }
     else if ((navigator.userAgent.indexOf("MSIE") != -1) || (!!document.DOCUMENT_NODE == true)) //IF IE > 10
     {
@@ -792,7 +793,7 @@ namespace InspSched.UI
     }
     else 
     {
-      browser ='unknown';
+      browser = 'unknown';
     }
     return browser;
   }
@@ -803,7 +804,7 @@ namespace InspSched.UI
     if (buttonId.length > 0)
     {
       InspButton.id = buttonId;
-    }    
+    }
     InspButton.value = "";
     InspButton.className = "column large-12 medium-12 small-12 align-self-center  NewInspButton";
     InspButton.appendChild(document.createTextNode(label));
@@ -1090,15 +1091,22 @@ namespace InspSched.UI
 
   export function InformUserOfError(permitno: string, error: string): void
   {
+
+
     Hide("InspectionScheduler");
     clearElement(document.getElementById('InspTypeSelect'));
 
     let reasons: HTMLDivElement = (<HTMLDivElement>document.getElementById('Reasons'));
     clearElement(reasons);
+
     let thisHeading: HTMLHeadingElement = (<HTMLHeadingElement>document.getElementById('ErrorHeading'));
     clearElement(thisHeading);
 
     let IssueList: HTMLUListElement = (<HTMLUListElement>document.createElement('ul'));
+    IssueList.classList.add('column');
+    IssueList.classList.add('small-12');
+    IssueList.classList.add('align-center');
+
     let thisIssue: HTMLLIElement = (<HTMLLIElement>document.createElement('li'));
 
     thisHeading.appendChild(document.createTextNode("The following issue is preventing the ability to schedule an inspection:"));
@@ -1108,7 +1116,58 @@ namespace InspSched.UI
 
     IssueList.appendChild(thisIssue);
     reasons.appendChild(IssueList);
+
+    var permitCheck = error.substr(8, 8);
+    if (ThisPermit.access != InspSched.access_type.public_access &&
+      permitCheck == permitno &&
+      (error.substr(30, 5) == 'holds' || error.substr(30, 5) == 'charg'))
+    {
+      IssueList.classList.remove('small-12');
+      IssueList.classList.add('small-9');
+      reasons.appendChild(CreateButtonToIMS(permitno, error));
+    }
+
     document.getElementById("NotScheduled").style.display = "flex";
+
+  }
+
+  function CreateButtonToIMS(permitNumber: string, error: string): HTMLDivElement
+  {
+
+    var label: string = "";
+    var imsLink: string = "";
+    var isHold: boolean = true;
+
+    let buttonDiv: HTMLDivElement = (<HTMLDivElement>document.createElement('div'));
+    buttonDiv.classList.add('column');
+    buttonDiv.classList.add('small-2');
+    buttonDiv.classList.add('flex-container');
+    buttonDiv.classList.add('align-center');
+
+    switch (error.substr(30, 6))
+    {
+      case "holds,":
+        label = "IMS Holds";
+        isHold = true;
+        break;
+      case "charge":
+        label = "IMS Charges";
+        isHold = false;
+        break;
+      default:
+        return buttonDiv;
+    }
+
+    let linkButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement('button'));
+    linkButton.classList.add('small-8');
+    linkButton.classList.add('align-self-center');
+    linkButton.classList.add('button');
+    linkButton.classList.add('DetailsButton');
+    linkButton.value = isHold ? 'hold' : 'charge';
+    linkButton.setAttribute('onclick', 'InspSched.SendToIMS(' + permitNumber + ', this.value)');
+    linkButton.appendChild(document.createTextNode(label));
+    buttonDiv.appendChild(linkButton);
+    return buttonDiv;
 
   }
 
@@ -1153,26 +1212,26 @@ namespace InspSched.UI
     }
 
     let addRemark: HTMLDivElement = (<HTMLDivElement>document.getElementById(InspectionId + '_add_remark'));
-    let completedRemark: HTMLDivElement = (<HTMLDivElement>document.getElementById(InspectionId+ '_completed_remark'));
+    let completedRemark: HTMLDivElement = (<HTMLDivElement>document.getElementById(InspectionId + '_completed_remark'));
     let comments: HTMLDivElement = (<HTMLDivElement>document.getElementById(InspectionId + '_comments'));
     let button = document.getElementById(InspectionId + '_details_btn');
 
     let d = new Date();
-    d.setHours(0, 0, 0, 0);    
+    d.setHours(0, 0, 0, 0);
     let elementState = comments.style.display.toString().toLowerCase();
 
     if (((new Date(current[0].SchedDateTime.toString()) >= d) &&
       addRemark != null) || current[0].ResultADC === "")
     {
       completedRemark.style.display = elementState == 'flex' ? 'flex' : 'none';
-        addRemark.style.display = elementState == 'none' ? 'flex' : 'none';
+      addRemark.style.display = elementState == 'none' ? 'flex' : 'none';
     }
 
     if (comments != null)
     {
       comments.style.display = elementState == 'none' ? 'flex' : 'none';
     }
-    let buttonString = (elementState == 'none' ? 'Hide ': '') + 'Details';
+    let buttonString = (elementState == 'none' ? 'Hide ' : '') + 'Details';
     document.getElementById(InspectionId + '_details_btn').textContent = buttonString;
     InspSched.UI.CurrentDetailsOpen = InspectionId;
   }

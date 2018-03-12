@@ -32,12 +32,19 @@ namespace ClayInspectionScheduler.Models
     private int TotalFinalInspections { get; set; } // Count the total final inspections for this permit
     private string ContractorStatus { get; set; } // check if Contractor is active
     private string PrivateProvider { get; set; } = "";
+    private List<Charge> Charges
+    {
+      get
+      {
+        return Charge.GetCharges(this.PermitNo);
+      }
+    }
     private List<Hold> Holds { get; set; }
     private string PermitTypeString
     {
       get
       {
-        switch(this.PermitNo[0].ToString())
+        switch (this.PermitNo[0].ToString())
         {
           case "2":
             return "EL";
@@ -153,12 +160,15 @@ namespace ClayInspectionScheduler.Models
 		        OR MPermitNo = @MPermitNo
 		        OR A.mPermitNo = @PermitNo)
    		    AND A.VoidDate IS NULL";
-      return Constants.Get_Data<Permit>(sql, dbArgs);
+
+      var permitlist = Constants.Get_Data<Permit>(sql, dbArgs);
+      return permitlist;
     }
 
     public static List<Permit> Get(
       string AssocKey,
-      UserAccess.access_type CurrentAccess)
+      UserAccess.access_type CurrentAccess
+      )
     {
       /**
        * Need to add the following functionality to this
@@ -166,12 +176,16 @@ namespace ClayInspectionScheduler.Models
        * 
        *    1. check if the permit has been issued (DateTime PermitIssueDate)
        *    2. check if holds exist
-       *      a. does hold stop final? (bool HoldStopAll) -- This may be unecessary
-       *      b. does hold stop all?  (bool HoldStopFinal)
+       *      a. does hold stop final? (bool HoldStopFinal) -- This may be unecessary
+       *      b. does hold stop all?  (bool HoldStopAll)
        *    3. check if there are charges (bool ChargesExist)
+       *      a. does charge prevent final? bool ChargeStopFinal)
+       *      b. does charge prevent all? (bool ChargeStopAll)
        *    4. Is Master Permit Co'd? (bool MasterCoClosed)
        *    
        **/
+
+
 
       try
       {
@@ -199,7 +213,7 @@ namespace ClayInspectionScheduler.Models
               l.Permit_URL = $@"http://{host}/WATSWeb/Permit/APermit{l.PermitTypeString}.aspx?PermitNo={l.PermitNo}";
             }
             l.access = CurrentAccess;
-            if(l.access == UserAccess.access_type.public_access)
+            if (l.access == UserAccess.access_type.public_access)
             {
               l.Permit_URL = "";
               if (l.Confidential == 1)
@@ -208,7 +222,7 @@ namespace ClayInspectionScheduler.Models
                 l.ProjCity = "Confidential";
               }
             }
-            if(l.ErrorText.Length == 0)
+            if (l.ErrorText.Length == 0)
             {
               l.Validate(PrivProvCheck);
             }
@@ -239,14 +253,11 @@ namespace ClayInspectionScheduler.Models
                            where h.SatNoInspection == 1
                            select h.PermitNo).ToList();
 
-      var ChargePermits = (from prmt in permits
-                           where prmt.TotalCharges > 0
-                           select prmt.PermitNo).ToList();
 
       var p = IsMasterClosed(permits);
       if (p.Count() > 0) return p;
       p = HoldsExist(permits, holds, NoInspections, MasterPermit);
-      p = ChargesExist(p, ChargePermits, MasterPermit);
+      p = ChargesExist(p, MasterPermit);
       if (p.Count() > 0) return p;
       return permits;
     }
@@ -264,7 +275,7 @@ namespace ClayInspectionScheduler.Models
                     where p.CoClosed == 1
                     select p);
 
-      if(closed.Count() > 0)
+      if (closed.Count() > 0)
       {
         var Error = $@"Permit #{ closed.First().PermitNo } has been closed, no additional inspections can be scheduled for this job.";
         return BulkUpdateError(permits, Error);
@@ -298,7 +309,7 @@ namespace ClayInspectionScheduler.Models
                where h.PermitNo == MasterPermit
                select h).Count() > 0)
           {
-            var Error = $@"Permit #{ MasterPermit} has a hold, no inspections can be scheduled.";
+            var Error = $@"Permit #{ MasterPermit} has existing holds, no inspections can be scheduled.";
             return BulkUpdateError(permits, Error);
           }
         }
@@ -321,7 +332,7 @@ namespace ClayInspectionScheduler.Models
               }
               else
               {
-                p.ErrorText = $@"Permit #{ p.PermitNo } has a hold, no inspections can be scheduled.";
+                p.ErrorText = $@"Permit #{ p.PermitNo } has existing holds, no inspections can be scheduled.";
               }
             }
           }
@@ -334,46 +345,41 @@ namespace ClayInspectionScheduler.Models
       return permits;
     }
 
-    private static List<Permit> ChargesExist(List<Permit> permits, List<string> ChargePermits, string MasterPermit)
+    private static List<Permit> ChargesExist(List<Permit> permits, string MasterPermit)
     {
       // Now let's check to see if we have any master permits that have
       // any holds or charges
+
+
       if (MasterPermit.Length > 0)
       {
+        var masterPermit = (from p in permits
+                            where p.PermitNo == MasterPermit
+                            select p).FirstOrDefault();
 
-        // check for charges on the master permit
-        if (ChargePermits.Count > 0)
+        if (MasterPermit.Length > 0 && masterPermit.Charges.Count > 0)
         {
-          if(ChargePermits.Contains(MasterPermit))
-          {
-            var Error = $"There are unpaid charges associated with Permit #{ MasterPermit }, no inspections can be scheduled.";
-            return BulkUpdateError(permits, Error);
-          }
+          var Error = $@"Permit #{masterPermit.PermitNo} has existing charges. No inpspections can be scheduled.";
+          return BulkUpdateError(permits, Error);
         }
       }
-
-
 
       // check for charges on permits...  this will prevent inspections on the associated permit and master permit only.
       // all other associated permits can schedule inspections up to and including a final
 
-
-      if (ChargePermits.Count() > 0)
+      foreach (Permit p in permits)
       {
-        foreach (Permit p in permits)
+        if (p.ErrorText.Length == 0)
         {
-          if (p.ErrorText.Length == 0)
+          if (p.Charges.Count > 0)
           {
-            if (ChargePermits.Contains(p.PermitNo) || p.PermitNo == MasterPermit)
+            if (p.PermitNo == MasterPermit)
             {
-              if (p.PermitNo == MasterPermit)
-              {
-                p.ErrorText = "There is an unpaid charge on an associated permit, no inspections can be scheduled";
-              }
-              else
-              {
-                p.ErrorText = $@"There are unpaid charges on an associated with permit #{p.PermitNo}, no inpspections can be scheduled.";
-              }
+              p.ErrorText = $"There are unpaid charges on permit #{p.PermitNo} has unpaid charges, no inspections can be scheduled";
+            }
+            else
+            {
+              p.ErrorText = $@"Permit #{p.PermitNo} has existing charges, no inpspections can be scheduled.";
             }
           }
         }
@@ -387,7 +393,7 @@ namespace ClayInspectionScheduler.Models
     {
       foreach (Permit p in permits)
       {
-        if(p.ErrorText.Length == 0)
+        if (p.ErrorText.Length == 0)
           p.ErrorText = ErrorText;
       }
       return permits;
@@ -471,7 +477,7 @@ namespace ClayInspectionScheduler.Models
       {
         return false;
       }
-      if(this.ContractorId == "" || this.ContractorId == null)
+      if (this.ContractorId == "" || this.ContractorId == null)
       {
         ErrorText = "There is no contractor selected on this permit. Please contact the Building Department if you would like to schedule an inspection.";
       }
@@ -498,12 +504,19 @@ namespace ClayInspectionScheduler.Models
 
     private bool PassedFinal()
     {
-      if(this.TotalFinalInspections > 0)
+      if (this.TotalFinalInspections > 0)
       {
         ErrorText = $"Permit #{this.PermitNo} has passed a final inspection";
         return true;
       }
       return false;
+    }
+
+    private List<Charge> GetCharges(string PermitNumber)
+    {
+      var charges = Charge.GetCharges(PermitNumber);
+
+      return charges;
     }
 
   }

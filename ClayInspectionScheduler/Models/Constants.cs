@@ -27,8 +27,8 @@ namespace ClayInspectionScheduler.Models
         // Test Environment Machines
           return false;
 
-        case "MISHL05":
-        case "MISSL01":
+        //case "MISHL05":
+        //case "MISSL01":
         case "CLAYBCCIIS01":
         case "CLAYBCCDMZIIS01":
           // TODO: will need to add the DMZ machine name(s) here.
