@@ -1,0 +1,181 @@
+﻿<!doctype html>
+<html>
+
+<head>
+    <style>
+        .control {
+            font-family: arial;
+            display: block;
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 5px;
+            padding-top: 3px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+            .control input {
+                position: absolute;
+                z-index: -1;
+                opacity: 0;
+            }
+        .control_indicator {
+            position: absolute;
+            top: 2px;
+            left: 0;
+            height: 20px;
+            width: 20px;
+            background: #e6e6e6;
+            border: 0px solid #000000;
+        }
+        .control-radio .control_indicator {
+            border-radius: 50%;
+        }
+        
+        .control:hover input ~ .control_indicator,
+        .control input:focus ~ .control_indicator {
+            background: #cccccc;
+        }
+        
+        .control input:checked ~ .control_indicator {
+            background: #2aa1c0;
+        }
+        .control:hover input:not([disabled]):checked ~ .control_indicator,
+        .control input:checked:focus ~ .control_indicator {
+            background: #0e6647d;
+        }
+        .control input:disabled ~ .control_indicator {
+            background: #e6e6e6;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        .control_indicator:after {
+            box-sizing: unset;
+            content: '';
+            position: absolute;
+            display: none;
+        }
+        .control input:checked ~ .control_indicator:after {
+            display: block;
+        }
+        .control-radio .control_indicator:after {
+            left: 2px;
+            top: 2px;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #ffffff;
+        }
+        .control-radio input:disabled ~ .control_indicator:after {
+            background: #7b7b7b;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="control-group">
+        <label class="control control-radio">
+            Approve
+            <input type="radio" name="radio" checked="checked" />
+            <span class="control_indicator"></span>
+        </label>
+        <label class="control control-radio">
+            Disapprove
+            <input type="radio" name="radio" />
+            <span class="control_indicator"></span>
+        </label>
+				<label class="control control-radio">
+            Cancel
+            <input type="radio" name="radio" />
+            <span class="control_indicator"></span>
+        </label>
+				<label class="control control-radio">
+            Comment Only
+            <input type="radio" name="radio" />
+            <span class="control_indicator"></span>
+        </label>
+    </div>
+		
+		<div class="InspRow large-12 medium-12 small-12 row flex-container align-middle">
+
+		<div class="large-10 medium-10 small-12 ">
+			<div class="large-2 medium-6 small-6 column InspPermit ">
+				<a href="http://claybccimstrn/WATSWeb/Permit/APermitPL.aspx?PermitNo=31700711" style="text-decoration: underline;">31700711</a>
+			</div>
+			<div class="large-2 medium-6 small-6 column InspDate">01/22/2018</div>
+			<div class="large-5 medium-6 small-6  InspType column">PFF  - Plumbing Final</div>
+			<div class="large-3 medium-6 small-12 InspResult column end">Unassigned</div>
+		</div>
+		<div class="ButtonContainer row large-2 medium-2 small-12 flex-container align-center ">
+
+			<button id="" class="column large-12 medium-12 small-12 align-self-center  NewInspButton" onclick="InspSched.CancelInspection('1084097', '31700711');" style="margin-bottom: 2px; text-align: center;">Cancel</button>
+
+			<button id="" class="column large-12 medium-12 small-12 align-self-center  NewInspButton" onclick="InspSched.ShowDetails('1084097_details', '31700711');" style="margin-top: 2px; text-align: center;">Details</button>
+
+		</div>
+		<div id="1084097_details" class="row large-12 medium-12 small-12">
+
+
+
+			<label class="row large-12 medium-12 small-12 align-left">Remarks:</label>
+			<div class="large-10 medium-10 small-10 inspRemarks column">
+				<div class="row large-12">Inspector Name - 2017-01-26: They failed cause they don't know what they're doing. This is me telling them publicly.</div>
+			</div>
+			<div class="large-2 medium-2 small-2 InspResult column end" style="text-align:center;">Disapprove</div>
+
+
+
+			<label class="large-12 medium-12 small-12 column">Add Remark(Internal Only)</label>
+			<div class="large-12 medium-12 small-12 column" style="padding-left: 1em;">
+			<textarea contenteditable="true" style="resize: none; max-height: 40px; margin: 0px 553px 16px 0px;overflow-y: scroll" class="large-8 medium-12 small-12 contenteditable="></textarea>
+			<div class="control-group"layout="row" >
+				<label class="control control-radio" for="approve">
+					Approve
+					<input id="approve" type="radio" name="radio" checked="checked" />
+					<span class="control_indicator"></span>
+				</label>
+				<label class="control control-radio" for="disapprove">Disapprove
+				<input id="control_indicator approve" type="radio" name="radio" checked="checked" />
+										<span class="control_indicator"></span>
+
+					
+					</label>
+            
+       
+				
+				
+				<label class="control control-radio" for="cancel">
+            Cancel
+            <input id="cancel" type="radio" name="radio" />
+            <span class="control_indicator"></span>
+        </label>
+				<label class="control control-radio" for="comment_only">
+            Comment Only
+            <input id="comment_only" type="radio" name="radio" />
+            <span class="control_indicator"></span>
+        </label>
+				</div>
+				<input type="radio" name="editList" id="always" value="always"/>
+				<label for="always">Always</label>
+
+				<input type="radio" name="editList" id="never" value="never"/>
+				<label for="never">Never</label>
+
+				<input type="radio" name="editList" id="change" value="costChange"/>
+				<label for="change">Cost Change</label>
+			</div>
+
+
+				<!-- THIS IS WHERE I WILL ADD THE SELECTIONS FOR APPROVE/PERFORMED/DISAPPROVE/NOT_PERFORMED
+
+				<div class="row">
+					<label class="large-12 medium-12 small-12 row " style="text-align:  left;">Internally Viewable Comments:</label>
+					<div class="large-12 medium-12 small-12 row" id="1084097_comments" style="overflow-y: scroll;padding-left:1em;">
+					</div>
+				</div>-->
+
+
+			</div>
+  </div>                    
+</body>
+
+</html>
