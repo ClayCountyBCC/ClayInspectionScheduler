@@ -122,7 +122,6 @@ namespace ClayInspectionScheduler.Models
     public string StreetAddress { get; set; } = "";
     public string InspectorColor { get; set; } = "";
     public string Day { get; set; } = "";
-
     public Inspection()
     {
 
@@ -462,9 +461,9 @@ namespace ClayInspectionScheduler.Models
         UPDATE bpINS_Request
         SET 
           ResultADC = CASE WHEN @ResultCode = 'I' THEN NULL
-                           WHEN @ResultCode IN ('A','D','P','N') THEN @ResultCode END,
+                           WHEN @ResultCode IN ('A','D','P','N','C') THEN @ResultCode END,
           InspDateTime = CASE WHEN @ResultCode = 'I' THEN NULL
-                              WHEN @ResultCode IN ('A','D','P','N') THEN GETDATE() END,
+                              WHEN @ResultCode IN ('A','D','P','N','C') THEN GETDATE() END,
           Remarks = @Remarks,
           Poster = @Poster,
           ChrgCode = @ChargeCode

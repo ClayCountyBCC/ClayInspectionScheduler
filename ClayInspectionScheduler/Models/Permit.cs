@@ -18,7 +18,7 @@ namespace ClayInspectionScheduler.Models
     public string ProjAddrCombined { get; set; }
     public string ProjCity { get; set; }
     public string ErrorText { get; set; } = "";
-    public bool NoFinalInspections { get; set; } // If this is true, they can't schedule a final inspection on the client.
+    public bool NoFinalInspections { get; set; } // If this is true, then cannot schedule a final inspection.
     public string Permit_URL { get; set; } = "";
     private string ContractorId { get; set; } = "";
     private int Confidential { get; set; }
@@ -29,7 +29,7 @@ namespace ClayInspectionScheduler.Models
     private decimal TotalCharges { get; set; } // check for charges
     private DateTime IssueDate { get; set; } = DateTime.MinValue;
     private int CoClosed { get; set; } // check if master is Co'd
-    private int TotalFinalInspections { get; set; } // Count the total final inspections for this permit
+    public int TotalFinalInspections { get; set; } // Count the total final inspections for this permit
     private string ContractorStatus { get; set; } // check if Contractor is active
     private string PrivateProvider { get; set; } = "";
     private List<Charge> Charges
@@ -245,6 +245,8 @@ namespace ClayInspectionScheduler.Models
       var holds = Hold.Get((from prmt in permits
                             select prmt.PermitNo).ToList<string>());
 
+
+
       var MasterPermit = (from prmt in permits
                           where prmt.CoClosed != -1
                           select prmt.PermitNo).DefaultIfEmpty("").First();
@@ -253,11 +255,16 @@ namespace ClayInspectionScheduler.Models
                            where h.SatNoInspection == 1
                            select h.PermitNo).ToList();
 
+      var ChargePermits = (from prmt in permits
+                           where prmt.Charges.Count > 0
+                           select prmt.PermitNo).ToList();
 
       var p = IsMasterClosed(permits);
       if (p.Count() > 0) return p;
-      p = HoldsExist(permits, holds, NoInspections, MasterPermit);
-      p = ChargesExist(p, MasterPermit);
+      p = ChargesExist(permits, ChargePermits, MasterPermit);
+
+      p = HoldsExist(p, holds, NoInspections, MasterPermit);
+
       if (p.Count() > 0) return p;
       return permits;
     }
@@ -345,7 +352,7 @@ namespace ClayInspectionScheduler.Models
       return permits;
     }
 
-    private static List<Permit> ChargesExist(List<Permit> permits, string MasterPermit)
+    private static List<Permit> ChargesExist(List<Permit> permits, List<string> chargePermits, string MasterPermit)
     {
       // Now let's check to see if we have any master permits that have
       // any holds or charges
@@ -369,24 +376,19 @@ namespace ClayInspectionScheduler.Models
 
       foreach (Permit p in permits)
       {
-        if (p.ErrorText.Length == 0)
+        if (p.ErrorText.Length == 0 && p.Charges.Count > 0)
         {
-          if (p.Charges.Count > 0)
+          if (p.PermitNo == MasterPermit)
           {
-            if (p.PermitNo == MasterPermit)
-            {
-              p.ErrorText = $"There are unpaid charges on permit #{p.PermitNo} has unpaid charges, no inspections can be scheduled";
-            }
-            else
-            {
-              p.ErrorText = $@"Permit #{p.PermitNo} has existing charges, no inpspections can be scheduled.";
-            }
+            p.ErrorText = $"There are unpaid charges on permit #{p.PermitNo}, no inspections can be scheduled";
+          }
+          else
+          {
+            p.ErrorText = $@"Permit #{p.PermitNo} has existing charges, no inpspections can be scheduled.";
           }
         }
       }
-
       return permits;
-
     }
 
     private static List<Permit> BulkUpdateError(List<Permit> permits, string ErrorText)

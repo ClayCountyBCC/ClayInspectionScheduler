@@ -204,6 +204,9 @@ var InspSched;
         IssueContainer.style.display = "none";
         LoadInspectionTypes();
         InspSched.InspectorUI.LoadDailyInspections();
+        if (InspSched.Inspectors.length == 0) {
+            InspSched.UI.Show('inspector-contact-link');
+        }
         LoadInspectionQuickRemarks();
     }
     function LoadInspectionTypes() {

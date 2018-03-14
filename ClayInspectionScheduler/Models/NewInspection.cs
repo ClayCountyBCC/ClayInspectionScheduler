@@ -66,6 +66,11 @@ namespace ClayInspectionScheduler.Models
       List<InspType> finals = (from it in inspTypes
                                where it.Final == true
                                select it).ToList();
+      foreach (var f in finals)
+      {
+        if (f.InspCd == this.InspectionCd)
+          this.TryingToScheduleFinal = true;
+      }
       Console.Write("Finals: ", finals);
 
       //= (List<InspType>)MyCache.GetItem("inspectiontypes,"+IsExternalUser.ToString());
@@ -135,6 +140,11 @@ namespace ClayInspectionScheduler.Models
           string electricPermitNumber = "";
 
 
+          if (CurrentPermit.TotalFinalInspections > 0)
+          {
+            Errors.Add($"Permit #{CurrentPermit.PermitNo} has passed final inspection");
+          }
+
           foreach (var i in inspections)
           {
 
@@ -148,60 +158,62 @@ namespace ClayInspectionScheduler.Models
             //Adds functionality to return error when saving an inspection for permit that has already passed a final inspection.
 
 
-            foreach (var it in inspTypes)
+
+            // To schedule a building final: 
+            // 1. All fees, including Road impact and school impact fees, must be paid; AND
+            // 2. All associated permits must have a final inspection either scheduled, or passed.
+            // 3. The Final Building Inspection cannot be scheduled for any time before the latest incomplete
+            //    associated permit's final inspection.
+
+            // Currently, this only checks for a passed electric final and charges.
+
+
+
+            //foreach (var f in finals)
+            //{
+            //  if (f.InspCd == this.InspectionCd)
+            //  {
+            //    if (i.ResultADC == "A" || i.ResultADC == "P")
+            //    {
+            //      if (CurrentPermit.PermitNo[0] == 2 && !CurrentPermit.NoFinalInspections)
+            //      {
+            //        electricPassedFinal = true; // Check for Building final inspection scheduling. Electric must passed final and 
+            //      }
+            //      else
+            //      {
+            //        electricPermitNumber = CurrentPermit.PermitNo;
+            //      }
+
+            //      if (CurrentPermit.ErrorText.Length == 0)
+            //      {
+            //        Errors.Add($"Permit #{i.PermitNo} has passed final inspection");
+
+            //      }
+            //    }
+            //  }
+            //}
+            foreach (var f in finals)
             {
-              if (it.InspCd == this.InspectionCd)
+
+              if (this.InspectionCd == f.InspCd && Errors.Count == 0)
               {
-                if (i.ResultADC == "A" || i.ResultADC == "P")
+                var charges = Charge.GetCharges(this.PermitNo, true);
+                if (charges.Count > 0)
                 {
-                  if (CurrentPermit.PermitNo[0] == 2 && !CurrentPermit.NoFinalInspections)
-                  {
-                    electricPassedFinal = true; // Check for Building final inspection scheduling. Electric must passed final and 
-                  }
-                  else
-                  {
-                    electricPermitNumber = CurrentPermit.PermitNo;
-                  }
-
-                  if (CurrentPermit.ErrorText.Length == 0)
-                  {
-                    Errors.Add($"Permit #{i.PermitNo} has passed final inspection");
-                  }
-                }
-              }
-            }
-
-
-          }
-
-          // To schedule a building final: 
-          // 1. All fees, including Road impact and school impact fees, must be paid; AND
-          // 2. All associated permits must have a final inspection either scheduled, or passed.
-          // 3. The Final Building Inspection cannot be scheduled for any time before the latest incomplete
-          //    associated permit's final inspection.
-
-          // Currently, this only checks for a passed electric final and charges.
-          foreach (var f in finals)
-          {
-            if (this.InspectionCd == f.InspCd && Errors.Count == 0)
-            {
-              var charges = Charge.GetCharges(this.PermitNo, true);
-              if (charges.Count > 0)
-              {
-                Errors.Add($@"Permit #{this.PermitNo} has charges preventing a final inspection from being scheduled. 
+                  Errors.Add($@"Permit #{this.PermitNo} has existing charges preventing a final inspection from being scheduled. 
                               Please contact the Building Department for further assistance.");
-                break;
-              }
+                  break;
+                }
 
-              if (this.InspectionCd.Trim() == "123" && !electricPassedFinal)
-              {
-                Errors.Add($@"Permit #{electricPermitNumber} has not passed final inspection. A Final building Inspection Cannot be scheduled at this time.");
-                break;
+                if (this.InspectionCd.Trim() == "123" && !electricPassedFinal)
+                {
+                  Errors.Add($@"Permit #{electricPermitNumber} has not passed final inspection. A Final building Inspection Cannot be scheduled at this time.");
+                  break;
+                }
               }
             }
           }
         }
-
         Console.Write(Errors);
 
       }
@@ -316,10 +328,10 @@ namespace ClayInspectionScheduler.Models
       EXEC add_inspection_comment @DisplayName, @SavedInspectionID, @InitialComment, @Comment;";
       try
       {
-        bool isFinal = (from it in inspTypes
-                        where it.InspCd == this.InspectionCd
-                        select it.Final).First();
-        Console.WriteLine("isFinal:", isFinal);
+        //bool isFinal = (from it in inspTypes
+        //                where it.InspCd == this.InspectionCd
+        //                select it.Final).First();
+        //Console.WriteLine("isFinal:", isFinal);
 
 
         var i = Constants.Exec_Query(sql, dbArgs);

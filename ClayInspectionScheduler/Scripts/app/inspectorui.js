@@ -29,6 +29,7 @@ var InspSched;
             InspSched.transport.Inspectors().then(function (inspectors) {
                 var developmentcheck = document.getElementById("isDevelopment");
                 if (inspectors[0].InDevelopment) {
+                    InspSched.UI.Hide('inspector-contact-link');
                     developmentcheck.textContent = "Dev Environment";
                 }
                 InspSched.Inspectors = inspectors;

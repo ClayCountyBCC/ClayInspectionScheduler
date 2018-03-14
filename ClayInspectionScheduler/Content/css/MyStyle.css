@@ -9,6 +9,10 @@ body {
 .column, .columns {
   min-height: 1px;
 }
+
+#inspector-contact-link {
+  display: none;
+}
 /*
 #PermitScreen,
 
@@ -520,6 +524,10 @@ h5 {
 .change-height-for-print {
   height: 100%;
   max-height: 100%;
+}
+
+.tab-no-border {
+  border: none;
 }
 
 @media print {

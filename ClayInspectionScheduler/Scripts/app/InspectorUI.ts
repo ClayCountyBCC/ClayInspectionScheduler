@@ -42,7 +42,9 @@ namespace InspSched.InspectorUI
       let developmentcheck = (<HTMLSpanElement>document.getElementById("isDevelopment"));
       if (inspectors[0].InDevelopment)
       {
+        InspSched.UI.Hide('inspector-contact-link');
         developmentcheck.textContent = "Dev Environment";
+
       }
 
 
@@ -286,7 +288,7 @@ namespace InspSched.InspectorUI
     return a;
   }
 
-  function CreateTargettedLink(v: string, l: string, target: string,...c: string[]): HTMLAnchorElement
+  function CreateTargettedLink(v: string, l: string, target: string, ...c: string[]): HTMLAnchorElement
   {
     let a = document.createElement("a");
     a.href = l;
