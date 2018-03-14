@@ -10,7 +10,7 @@ body {
   min-height: 1px;
 }
 
-#inspector-contact-link {
+.inspector-link {
   display: none;
 }
 /*
@@ -530,6 +530,7 @@ h5 {
   border: none;
 }
 
+
 @media print {
 
   @page {
@@ -544,17 +545,18 @@ h5 {
     display: none !important;
   }
 
+  .no-underline-for-print {
+    text-decoration: none;
+  }
   #inspectorViewInspections {
     -ms-transform: scale(.75,.75) !important;
   }
 
   body {
-    overflow: auto !important;
     font-size: 10px !important;
   }
 
   #InspectionSchedulerTabs {
-    overflow-y: auto !important;
   }
 
   .App-Container {
@@ -580,5 +582,12 @@ h5 {
 
   .tabs-content {
     border: none !important;
+  }
+  a{
+  text-decoration:none !important;
+  }
+  a[href]:after {
+    content: none !important;
+
   }
 }

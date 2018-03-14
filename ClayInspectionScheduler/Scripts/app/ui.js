@@ -453,8 +453,8 @@ var InspSched;
             // Set permit number as link if internal user 
             if (permit.access !== InspSched.access_type.public_access) {
                 var link = document.createElement("a");
-                link.style.textDecoration = "underline";
                 link.href = permit.Permit_URL;
+                link.classList.add('no-underline-for-print');
                 link.appendChild(document.createTextNode(inspection.PermitNo));
                 permitNumber.appendChild(link);
                 //permit.Permit_URL.substring()

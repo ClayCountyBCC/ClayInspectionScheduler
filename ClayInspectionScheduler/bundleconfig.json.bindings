@@ -1,1 +1,1 @@
-﻿///<binding BeforeBuild='Update all files, Clean output files, Scripts/app/bundle.js, Scripts/app/bundle.min.js' />
+﻿///<binding Clean output files, Scripts/app/bundle.js, Scripts/app/bundle.min.js' />

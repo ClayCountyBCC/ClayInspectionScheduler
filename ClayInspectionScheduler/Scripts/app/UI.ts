@@ -604,8 +604,8 @@ namespace InspSched.UI
     if (permit.access !== InspSched.access_type.public_access)
     {
       let link = <HTMLAnchorElement>document.createElement("a");
-      link.style.textDecoration = "underline";
       link.href = permit.Permit_URL;
+      link.classList.add('no-underline-for-print');
       link.appendChild(document.createTextNode(inspection.PermitNo));
       permitNumber.appendChild(link);
       //permit.Permit_URL.substring()

@@ -48,6 +48,11 @@ var InspSched;
                     }
                     BuildInspectorUI();
                 }
+                else {
+                    if (InspSched.Inspectors.length === 0) {
+                        InspSched.UI.Show('inspector-contact-link');
+                    }
+                }
             }, function () {
                 console.log('error in LoadInspectionTypes');
                 InspSched.IVInspections = [];
@@ -62,7 +67,6 @@ var InspSched;
             InspSched.transport.Inspectors().then(function (inspectors) {
                 var developmentcheck = document.getElementById("isDevelopment");
                 if (inspectors[0].InDevelopment) {
-                    InspSched.UI.Hide('inspector-contact-link');
                     developmentcheck.textContent = "Dev Environment";
                 }
                 InspSched.Inspectors = inspectors;
@@ -1121,8 +1125,8 @@ var InspSched;
             // Set permit number as link if internal user 
             if (permit.access !== InspSched.access_type.public_access) {
                 var link = document.createElement("a");
-                link.style.textDecoration = "underline";
                 link.href = permit.Permit_URL;
+                link.classList.add('no-underline-for-print');
                 link.appendChild(document.createTextNode(inspection.PermitNo));
                 permitNumber.appendChild(link);
                 //permit.Permit_URL.substring()
@@ -2052,9 +2056,6 @@ var InspSched;
         IssueContainer.style.display = "none";
         LoadInspectionTypes();
         InspSched.InspectorUI.LoadDailyInspections();
-        if (InspSched.Inspectors.length == 0) {
-            InspSched.UI.Show('inspector-contact-link');
-        }
         LoadInspectionQuickRemarks();
     }
     function LoadInspectionTypes() {

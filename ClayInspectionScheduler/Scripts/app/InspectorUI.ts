@@ -18,8 +18,14 @@ namespace InspSched.InspectorUI
         {
           LoadInspectors();
         }
-
         BuildInspectorUI();
+      }
+      else
+      {
+        if (InspSched.Inspectors.length === 0)
+        {
+          InspSched.UI.Show('inspector-contact-link');
+        }
       }
     },
       function ()
@@ -39,17 +45,14 @@ namespace InspSched.InspectorUI
   {
     transport.Inspectors().then(function (inspectors: Array<Inspector>)
     {
+
       let developmentcheck = (<HTMLSpanElement>document.getElementById("isDevelopment"));
       if (inspectors[0].InDevelopment)
       {
-        InspSched.UI.Hide('inspector-contact-link');
         developmentcheck.textContent = "Dev Environment";
 
       }
-
-
       InspSched.Inspectors = inspectors;
-
       PopulateInspectorDropdown();
     },
       function ()

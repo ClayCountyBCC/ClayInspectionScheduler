@@ -77,7 +77,7 @@ namespace ClayInspectionScheduler.Models
         case "N":
           return "Not Performed";
         case "":
-          return "Incomplete";
+          return "Scheduled";
         default:
           return "";
 
