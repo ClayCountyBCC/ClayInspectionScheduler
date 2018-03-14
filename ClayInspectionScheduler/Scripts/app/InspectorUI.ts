@@ -286,6 +286,22 @@ namespace InspSched.InspectorUI
     return a;
   }
 
+  function CreateTargettedLink(v: string, l: string, target: string,...c: string[]): HTMLAnchorElement
+  {
+    let a = document.createElement("a");
+    a.href = l;
+    a.appendChild(document.createTextNode(v));
+    a.target = target;
+    if (c.length > 0)
+    {
+      for (let i of c)
+      {
+        a.classList.add(i);
+      }
+    }
+    return a;
+  }
+
   export function ProcessIVInspectionsByPermit(
     inspections: Array<Inspection>,
     inspector: string,
@@ -474,7 +490,7 @@ namespace InspSched.InspectorUI
     row.style.marginTop = ".5em";
     ch.Permit = i.Address;
     ch.InspectionId = 0;
-    let address = CreateAndSet(i.Address);
+    let address = CreateTargettedLink(i.Address, "http://apps.claycountygov.com/inspectionview/#inspectionid=" + i.Inspections[0].InspectionId.toString(), "inspectionview");
     let addressContainer = document.createElement("div");
     let addressContainerContainer = document.createElement("div");
     addressContainerContainer.classList.add("row");

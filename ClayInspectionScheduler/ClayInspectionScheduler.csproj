@@ -146,7 +146,9 @@
     <Content Include="Global.asax" />
     <Content Include="index.html" />
     <Content Include="Scripts\app\bundle.js" />
-    <Content Include="Scripts\app\bundle.min.js" />
+    <Content Include="Scripts\app\bundle.min.js">
+      <DependentUpon>bundle.js</DependentUpon>
+    </Content>
     <Content Include="Scripts\app\es6-promise.min.js" />
     <Content Include="Scripts\app\tsconfig.json" />
     <Content Include="Scripts\app\tslint.json" />

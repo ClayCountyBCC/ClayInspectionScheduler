@@ -667,7 +667,7 @@ namespace InspSched
     var baseDate = new Date("0001-01-02");
     baseDate = new Date(baseDate.setHours(0, 0, 0, 0));
 
-    var thisInspDate: Date = new Date(CompletedInspectionDateTime);
+    var thisInspDate: Date = new Date(CompletedInspectionDateTime.toString());
     thisInspDate = new Date(thisInspDate.setHours(0, 0, 0, 0));
 
     var CanBeChanged = thisInspDate.getTime() == baseDate.getTime();

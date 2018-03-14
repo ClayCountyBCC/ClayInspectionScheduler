@@ -285,6 +285,23 @@ var InspSched;
             }
             return a;
         }
+        function CreateTargettedLink(v, l, target) {
+            var c = [];
+            for (var _i = 3; _i < arguments.length; _i++) {
+                c[_i - 3] = arguments[_i];
+            }
+            var a = document.createElement("a");
+            a.href = l;
+            a.appendChild(document.createTextNode(v));
+            a.target = target;
+            if (c.length > 0) {
+                for (var _a = 0, c_4 = c; _a < c_4.length; _a++) {
+                    var i = c_4[_a];
+                    a.classList.add(i);
+                }
+            }
+            return a;
+        }
         function ProcessIVInspectionsByPermit(inspections, inspector, day, open, isOpen) {
             var ivList = [];
             // if we have a day or inspector set to filter on
@@ -435,7 +452,7 @@ var InspSched;
             row.style.marginTop = ".5em";
             ch.Permit = i.Address;
             ch.InspectionId = 0;
-            var address = CreateAndSet(i.Address);
+            var address = CreateTargettedLink(i.Address, "http://apps.claycountygov.com/inspectionview/#inspectionid=" + i.Inspections[0].InspectionId.toString(), "inspectionview");
             var addressContainer = document.createElement("div");
             var addressContainerContainer = document.createElement("div");
             addressContainerContainer.classList.add("row");
@@ -2296,7 +2313,7 @@ var InspSched;
         twoDaysAgo.setHours(0, 0, 0, 0);
         var baseDate = new Date("0001-01-02");
         baseDate = new Date(baseDate.setHours(0, 0, 0, 0));
-        var thisInspDate = new Date(CompletedInspectionDateTime);
+        var thisInspDate = new Date(CompletedInspectionDateTime.toString());
         thisInspDate = new Date(thisInspDate.setHours(0, 0, 0, 0));
         var CanBeChanged = thisInspDate.getTime() == baseDate.getTime();
         console.log("inspection has not beencompleted: ", CanBeChanged);

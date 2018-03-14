@@ -466,7 +466,7 @@ var InspSched;
         twoDaysAgo.setHours(0, 0, 0, 0);
         var baseDate = new Date("0001-01-02");
         baseDate = new Date(baseDate.setHours(0, 0, 0, 0));
-        var thisInspDate = new Date(CompletedInspectionDateTime);
+        var thisInspDate = new Date(CompletedInspectionDateTime.toString());
         thisInspDate = new Date(thisInspDate.setHours(0, 0, 0, 0));
         var CanBeChanged = thisInspDate.getTime() == baseDate.getTime();
         console.log("inspection has not beencompleted: ", CanBeChanged);
