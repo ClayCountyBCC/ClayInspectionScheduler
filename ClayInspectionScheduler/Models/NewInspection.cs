@@ -66,6 +66,10 @@ namespace ClayInspectionScheduler.Models
       List<InspType> finals = (from it in inspTypes
                                where it.Final == true
                                select it).ToList();
+
+      List<string> finalInspectionCodes = (from it in inspTypes
+                               where it.Final == true
+                               select it.InspCd).ToList();
       foreach (var f in finals)
       {
         if (f.InspCd == this.InspectionCd)
@@ -218,10 +222,10 @@ namespace ClayInspectionScheduler.Models
             Console.WriteLine(permitsWithNoFinalsScheduledOrPassed);
 
 
-            if (this.PermitNo[0] == '1')
+            if (this.PermitNo[0] == '1' && Permits.Count > 1 && finalInspectionCodes.Contains(this.InspectionCd))
             {
               if (permitsWithNoFinalsScheduledOrPassed.Contains(this.PermitNo) && 
-                      PermitsWithScheduledOrPassedFinals.Count < Permits.Count-1)
+                      PermitsWithScheduledOrPassedFinals.Count < Permits.Count-1 )
               {
                 Errors.Add($"All permits associated with permit #{p.PermitNo} must have final inspections scheduled or passed, before a Building final can be scheduled.");
                 return Errors;
