@@ -76,12 +76,15 @@ namespace ClayInspectionScheduler.Models
       //= (List<InspType>)MyCache.GetItem("inspectiontypes,"+IsExternalUser.ToString());
 
       var Permits = (from p in Permit.Get(this.PermitNo, CurrentAccess)
-                     where p.PermitNo == this.PermitNo
                      select p).ToList();
 
 
-      Permit CurrentPermit;
-      if (Permits.Count == 0)
+      Permit CurrentPermit = (from p in Permits
+                       where p.PermitNo == this.PermitNo
+                       select p).FirstOrDefault();
+
+
+      if (CurrentPermit == null)
       {
         Errors.Add($"Permit number {PermitNo} was not found.");
 
@@ -91,7 +94,6 @@ namespace ClayInspectionScheduler.Models
       }
       else
       {
-        CurrentPermit = Permits.First();
         if (CurrentPermit.ErrorText.Length > 0)
         {
           Errors.Add(CurrentPermit.ErrorText);
@@ -99,7 +101,6 @@ namespace ClayInspectionScheduler.Models
         }
 
         // validate user selected date
-
         var start = DateTime.Parse(CurrentPermit.Dates.minDate_string);
         var end = DateTime.Parse(CurrentPermit.Dates.maxDate_string);
         var badDates = (from d in CurrentPermit.Dates.badDates_string
@@ -112,6 +113,7 @@ namespace ClayInspectionScheduler.Models
           SchecDateTime.Date > end)
         {
           Errors.Add("Invalid Date Selected");
+          return Errors;
         }
         // Is the scheduled date one of the dates they aren't allowed to use?
         if (badDates.Contains(SchecDateTime.ToShortDateString()))
@@ -124,6 +126,7 @@ namespace ClayInspectionScheduler.Models
              select i).Count() == 0)
         {
           Errors.Add("Invalid Inspection Type");
+          return Errors;
         }
         else
         {
@@ -131,88 +134,106 @@ namespace ClayInspectionScheduler.Models
           if (InspectionCd[0] != PermitNo[0])
           {
             Errors.Add("Invalid Inspection for this permit type");
+            return Errors;
           }
-
-
+          
           var inspections = Inspection.Get(CurrentPermit.PermitNo);
-
-          bool electricPassedFinal = false;
-          string electricPermitNumber = "";
-
 
           if (CurrentPermit.TotalFinalInspections > 0)
           {
-            Errors.Add($"Permit #{CurrentPermit.PermitNo} has passed final inspection");
+           Errors.Add($"Permit #{CurrentPermit.PermitNo} has passed final inspection");
+            return Errors;
           }
 
-          foreach (var i in inspections)
+
+
+
+          var PassedOrScheduledInspections = (from ic in inspections
+                               where (ic.InspDateTime == DateTime.MinValue || 
+                                     ic.ResultADC == "A" ||
+                                     ic.ResultADC == "P")
+                               select ic).ToList();
+
+          foreach (var i in PassedOrScheduledInspections)
           {
 
-            if (i.InspectionCode == this.InspectionCd && i.ResultADC == "" && i.PermitNo == CurrentPermit.PermitNo)
+
+            if (this.InspectionCd == i.InspectionCode && (i.ResultADC == "" || i.ResultADC == null))
             {
               Errors.Add("Inspection type exists on permit");
-              break;
+              Console.Write(i);
             }
 
 
-            //Adds functionality to return error when saving an inspection for permit that has already passed a final inspection.
+            var IncompleteInspection = (from ic in PassedOrScheduledInspections
+                                        where i.InspectionCode == this.InspectionCd &&
+                                        (i.ResultADC == "" || i.ResultADC == null)
+                                        select ic).ToList();
 
+            Console.Write(IncompleteInspection);
 
-
-            // To schedule a building final: 
-            // 1. All fees, including Road impact and school impact fees, must be paid; AND
-            // 2. All associated permits must have a final inspection either scheduled, or passed.
-            // 3. The Final Building Inspection cannot be scheduled for any time before the latest incomplete
-            //    associated permit's final inspection.
-
-            // Currently, this only checks for a passed electric final and charges.
-
-
-
-            //foreach (var f in finals)
             //{
-            //  if (f.InspCd == this.InspectionCd)
-            //  {
-            //    if (i.ResultADC == "A" || i.ResultADC == "P")
-            //    {
-            //      if (CurrentPermit.PermitNo[0] == 2 && !CurrentPermit.NoFinalInspections)
-            //      {
-            //        electricPassedFinal = true; // Check for Building final inspection scheduling. Electric must passed final and 
-            //      }
-            //      else
-            //      {
-            //        electricPermitNumber = CurrentPermit.PermitNo;
-            //      }
-
-            //      if (CurrentPermit.ErrorText.Length == 0)
-            //      {
-            //        Errors.Add($"Permit #{i.PermitNo} has passed final inspection");
-
-            //      }
-            //    }
-            //  }
+            //  Errors.Add("Inspection type exists on permit");
+            //  return Errors;
             //}
-            foreach (var f in finals)
+
+          }
+
+
+
+          //Adds functionality to return error when saving an inspection for permit that has already passed a final inspection.
+
+
+
+          // To schedule a building final: 
+          // 1. All fees, including Road impact and school impact fees, must be paid; AND
+          // 2. All associated permits must have a final inspection either scheduled, or passed.
+          // 3. The Final Building Inspection cannot be scheduled for any time before the latest incomplete
+          //    associated permit's final inspection.
+          var PermitsWithScheduledOrPassedFinals = new List<string>();
+          var permitsWithNoFinalsScheduledOrPassed = new List<string>();
+
+          foreach (var f in finals)
+          {
+            PermitsWithScheduledOrPassedFinals.AddRange(from ic in PassedOrScheduledInspections
+                                                        where ic.InspectionCode == f.InspCd &&
+                                                           (ic.InspDateTime == DateTime.MinValue ||  
+                                                            ic.ResultADC == "A" ||
+                                                            ic.ResultADC == "P")
+                                                      select ic.PermitNo);
+          }
+
+          Console.WriteLine(PermitsWithScheduledOrPassedFinals);
+
+          foreach (var p in Permits)
+          {
+            var currentCheck = (from pf in PermitsWithScheduledOrPassedFinals
+                                where pf == p.PermitNo
+                                select pf).FirstOrDefault();
+
+            if (currentCheck == null)
             {
+              permitsWithNoFinalsScheduledOrPassed.Add(p.PermitNo);
+            }
+            Console.WriteLine(permitsWithNoFinalsScheduledOrPassed);
 
-              if (this.InspectionCd == f.InspCd && Errors.Count == 0)
+
+            if (this.PermitNo[0] == '1')
+            {
+              if (permitsWithNoFinalsScheduledOrPassed.Contains(this.PermitNo) && 
+                      PermitsWithScheduledOrPassedFinals.Count < Permits.Count-1)
               {
-                var charges = Charge.GetCharges(this.PermitNo, true);
-                if (charges.Count > 0)
-                {
-                  Errors.Add($@"Permit #{this.PermitNo} has existing charges preventing a final inspection from being scheduled. 
-                              Please contact the Building Department for further assistance.");
-                  break;
-                }
-
-                if (this.InspectionCd.Trim() == "123" && !electricPassedFinal)
-                {
-                  Errors.Add($@"Permit #{electricPermitNumber} has not passed final inspection. A Final building Inspection Cannot be scheduled at this time.");
-                  break;
-                }
+                Errors.Add($"All permits associated with permit #{p.PermitNo} must have final inspections scheduled or passed, before a Building final can be scheduled.");
+                return Errors;
               }
             }
+
+
           }
+
+          Console.WriteLine(permitsWithNoFinalsScheduledOrPassed);
+
+
         }
         Console.Write(Errors);
 

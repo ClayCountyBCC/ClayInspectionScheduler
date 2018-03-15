@@ -50,11 +50,7 @@
         </span>
       </div>
     </div>
-    <div class="flex-container small-12 align-center hide-for-print">
-      <div id="Searching"><h3>Searching...<i class="fi-loop spin-cw"></i></h3></div>
-      <div id="SearchFailed"></div>
-      <div id="SearchFailed" class="large-12 medium-12 small-12 row"></div>
-    </div>
+
 
     <!-- Permit Information removed flex-child-grow -->
     <div class="large-12 align-center row flex-container"
@@ -81,11 +77,15 @@
 
           <div id="ScrollTab"
                style="height: 100%; max-height: 100%; overflow-x: auto; overflow-y: auto;"
-               class="tabs-content" data-tabs-content="InspectionSchedulerTabs">
-
+               class="tabs-content tab-no-border" data-tabs-content="InspectionSchedulerTabs">
+            <div class="flex-container small-12 align-center hide-for-print tab-no-border">
+              <div id="Searching"><h3>Searching...<i class="fi-loop spin-cw"></i></h3></div>
+              <div id="SearchFailed"></div>
+              <div id="SearchFailed" class="large-12 medium-12 small-12 row"></div>
+            </div>
             <!-- Tab 1 : Inspection View -->
             <!-- style="height: 100%; max-height: 100%;" -->
-            <div class="tabs-panel is-active tabs-content" id="InspectionView">
+            <div class="tabs-panel is-active tabs-content tab-no-border" id="InspectionView">
 
               <!--style="max-height: 350px;"-->
               <div class="large-12 medium-12 small-12" id="InspectionTable">
@@ -113,7 +113,7 @@
             </div>
 
             <!-- Tab 2 : Scheduler -->
-            <div class="tabs-panel" id="Scheduler">
+            <div class="tabs-panel tab-no-border" id="Scheduler">
               <div class="row align-justify" id="PermitInfoDiv">
 
                 <div class="large-6 medium-6 small-12 PermitSelectDiv column flex-container align-center" style="text-align:center;" id="PermitSelectContainer">
@@ -271,16 +271,16 @@
                   </div>
                   <!--<div class="flex-container row align-center align-middle">
 
-                  </div>-->
+        </div>-->
                 </div>
               </div>
 
               <!-- The menu for the inspector view will go here
-              they will use this to pick today/tomorrow
-              and choose an inspector
-              and refresh the data
-              open/closed
-              -->
+    they will use this to pick today/tomorrow
+    and choose an inspector
+    and refresh the data
+    open/closed
+    -->
 
 
               <div style="margin-top: .5em;"
@@ -295,7 +295,7 @@
 
     </div>     <!--End Permit Information-->
   </div>     <!--End Inspection Scheduler-->
-  <script src="Scripts/app/bundle.min.js?201803141228"></script>
+  <script src="Scripts/app/bundle.min.js?201803141559"></script>
 
   <!--<script src="Scripts/jquery-3.1.1.js"></script>
   <script src="Scripts/moment.js"></script>

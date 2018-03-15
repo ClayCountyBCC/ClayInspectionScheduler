@@ -529,6 +529,9 @@ h5 {
 .tab-no-border {
   border: none;
 }
+tabs-content{
+  border: none !important;
+}
 
 
 @media print {
