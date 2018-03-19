@@ -1216,11 +1216,13 @@ namespace InspSched.UI
     let comments: HTMLDivElement = (<HTMLDivElement>document.getElementById(InspectionId + '_comments'));
     let button = document.getElementById(InspectionId + '_details_btn');
 
+    let inspectionDate = new Date(current[0].InspDateTime.toString);
     let d = new Date();
-    d.setHours(0, 0, 0, 0);
+    var priorDate = new Date();
+    priorDate.setDate(priorDate.getDate() - 2);
     let elementState = comments.style.display.toString().toLowerCase();
 
-    if (((new Date(current[0].SchedDateTime.toString()) >= d) &&
+    if (( inspectionDate > priorDate &&
       addRemark != null) || current[0].ResultADC === "")
     {
       completedRemark.style.display = elementState == 'flex' ? 'flex' : 'none';

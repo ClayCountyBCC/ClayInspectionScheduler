@@ -162,7 +162,7 @@ namespace ClayInspectionScheduler.Models
           {
 
 
-            if (this.InspectionCd == i.InspectionCode && (i.ResultADC == "" || i.ResultADC == null))
+            if (this.PermitNo == i.PermitNo && this.InspectionCd == i.InspectionCode && (i.ResultADC == "" || i.ResultADC == null))
             {
               Errors.Add("Inspection type exists on permit");
               Console.Write(i);

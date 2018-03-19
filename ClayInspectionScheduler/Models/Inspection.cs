@@ -528,9 +528,9 @@ namespace ClayInspectionScheduler.Models
           }
 
           // If they are trying to change something that was completed before today.
-          if (InspDateTime != DateTime.MinValue && InspDateTime.Date < DateTime.Today.Date)
+          if (InspDateTime != DateTime.MinValue && InspDateTime.Date < DateTime.Today.AddDays(-2).Date)
           {
-            Errors.Add("Inspections completed prior to Today's date cannot be changed.");
+            Errors.Add("Inspections completed more than two days ago cannot be changed.");
             return false;
           }
           if (ResultCode == "D" & UserRemarks.Length == 0)
@@ -545,7 +545,7 @@ namespace ClayInspectionScheduler.Models
             User.current_access == UserAccess.access_type.basic_access |
             User.current_access == UserAccess.access_type.inspector_access)
           {
-            if (ResultADC.Length != 0)
+            if (ResultADC.Length != 0 && InspDateTime.ToLocalTime() < DateTime.Today.AddDays(-2))
             {
               Errors.Add("Cannot cancel a completed inspection.  This inspection was completed on: " + InspDateTime.ToShortDateString());
               return false;

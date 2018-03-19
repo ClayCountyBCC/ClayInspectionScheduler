@@ -886,10 +886,12 @@ var InspSched;
             var completedRemark = document.getElementById(InspectionId + '_completed_remark');
             var comments = document.getElementById(InspectionId + '_comments');
             var button = document.getElementById(InspectionId + '_details_btn');
+            var inspectionDate = new Date(current[0].InspDateTime.toString);
             var d = new Date();
-            d.setHours(0, 0, 0, 0);
+            var priorDate = new Date();
+            priorDate.setDate(priorDate.getDate() - 2);
             var elementState = comments.style.display.toString().toLowerCase();
-            if (((new Date(current[0].SchedDateTime.toString()) >= d) &&
+            if ((inspectionDate > priorDate &&
                 addRemark != null) || current[0].ResultADC === "") {
                 completedRemark.style.display = elementState == 'flex' ? 'flex' : 'none';
                 addRemark.style.display = elementState == 'none' ? 'flex' : 'none';
