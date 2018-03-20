@@ -6,6 +6,7 @@ using System.Linq;
 using System.Web;
 using System.Data;
 using System.Runtime.Caching;
+using System.Security.Policy;
 using Dapper;
 
 namespace ClayInspectionScheduler.Models
@@ -13,7 +14,7 @@ namespace ClayInspectionScheduler.Models
   public class Permit
   {
     // Had to make public in order to allow me to update the cancel button
-    public UserAccess.access_type access { get; set; }
+    public UserAccess.access_type Access { get; set; }
     public string PermitNo { get; set; }
     public string ProjAddrCombined { get; set; }
     public string ProjCity { get; set; }
@@ -32,14 +33,8 @@ namespace ClayInspectionScheduler.Models
     public int TotalFinalInspections { get; set; } // Count the total final inspections for this permit
     private string ContractorStatus { get; set; } // check if Contractor is active
     private string PrivateProvider { get; set; } = "";
-    private List<Charge> Charges
-    {
-      get
-      {
-        return Charge.GetCharges(this.PermitNo);
-      }
-    }
-    private List<Hold> Holds { get; set; }
+    public List<Charge> Charges => Charge.GetCharges(this.PermitNo);
+    public List<Hold> Holds { get; set; }
     private string PermitTypeString
     {
       get
@@ -64,7 +59,7 @@ namespace ClayInspectionScheduler.Models
     {
       get
       {
-        var dc = DateCache.getDateCache(this.access == UserAccess.access_type.public_access, this.SuspendGraceDate);
+        var dc = DateCache.getDateCache(this.Access == UserAccess.access_type.public_access, this.SuspendGraceDate);
         return dc;
       }
     }
@@ -167,7 +162,8 @@ namespace ClayInspectionScheduler.Models
 
     public static List<Permit> Get(
       string AssocKey,
-      UserAccess.access_type CurrentAccess
+      UserAccess.access_type CurrentAccess,
+      InspType newInspectionType = null
       )
     {
       /**
@@ -176,27 +172,34 @@ namespace ClayInspectionScheduler.Models
        * 
        *    1. check if the permit has been issued (DateTime PermitIssueDate)
        *    2. check if holds exist
-       *      a. does hold stop final? (bool HoldStopFinal) -- This may be unecessary
-       *      b. does hold stop all?  (bool HoldStopAll)
+       *      a. does hold allow a pre-inspection to be scheduled? bool HoldAllowPre
+       *        - Need a way to determine if get() is being called from NewInspection so
+       *          hold will count against a new inspection being scheduled.\
+       *        - If not called from NewInsection, AllowPreInspection holds will not generate an error
+       *          to prevent a scheduling attempt.
+       *        - If hold allows pre-Inspections, only pre-Inspections can be scheduled for that hold only.
+       *        - If other holds exist, then those controls still apply.
+       *        
+       *        TODO: update UI to only include inspections eligble for scheduling.
+       *      b. does hold stop final? (bool HoldStopFinal) -- This may be unecessary
+       *      c. does hold stop all?  (bool HoldStopAll)
+       *   
        *    3. check if there are charges (bool ChargesExist)
        *      a. does charge prevent final? bool ChargeStopFinal)
        *      b. does charge prevent all? (bool ChargeStopAll)
        *    4. Is Master Permit Co'd? (bool MasterCoClosed)
        *    
        **/
-
-
-
       try
       {
         var permits = GetRaw(AssocKey);
-        if (!permits.Any(p => p.PermitNo == AssocKey))
+        if (permits.All(p => p.PermitNo != AssocKey))
         {
           return new List<Permit>();
         }
         else
         {
-          permits = BulkValidate(permits);
+          permits = BulkValidate(permits, newInspectionType);
           var PrivProvCheck = (from prmt in permits
                                where prmt.CoClosed != -1
                                select prmt.PrivateProvider).DefaultIfEmpty("").First();
@@ -204,16 +207,11 @@ namespace ClayInspectionScheduler.Models
           string host = Constants.UseProduction() ? "claybccims" : "claybccimstrn";
           foreach (Permit l in permits)
           {
-            if (l.PermitTypeString == "BL")
-            {
-              l.Permit_URL = $@"http://{host}/WATSWeb/Permit/MainBL.aspx?PermitNo={l.PermitNo}&Nav=PL&OperId=&PopUp=";
-            }
-            else
-            {
-              l.Permit_URL = $@"http://{host}/WATSWeb/Permit/APermit{l.PermitTypeString}.aspx?PermitNo={l.PermitNo}";
-            }
-            l.access = CurrentAccess;
-            if (l.access == UserAccess.access_type.public_access)
+            l.Permit_URL = l.PermitTypeString == "BL" ? 
+              $@"http://{host}/WATSWeb/Permit/MainBL.aspx?PermitNo={l.PermitNo}&Nav=PL&OperId=&PopUp=" : 
+              $@"http://{host}/WATSWeb/Permit/APermit{l.PermitTypeString}.aspx?PermitNo={l.PermitNo}";
+            l.Access = CurrentAccess;
+            if (l.Access == UserAccess.access_type.public_access)
             {
               l.Permit_URL = "";
               if (l.Confidential == 1)
@@ -240,7 +238,7 @@ namespace ClayInspectionScheduler.Models
       }
     }
 
-    public static List<Permit> BulkValidate(List<Permit> permits)
+    public static List<Permit> BulkValidate(List<Permit> permits,InspType newInspectionType = null)
     {
       var holds = Hold.Get((from prmt in permits
                             select prmt.PermitNo).ToList<string>());
@@ -260,13 +258,12 @@ namespace ClayInspectionScheduler.Models
                            select prmt.PermitNo).ToList();
 
       var p = IsMasterClosed(permits);
-      if (p.Count() > 0) return p;
+      if (p.Any()) return p;
       p = ChargesExist(permits, ChargePermits, MasterPermit);
 
-      p = HoldsExist(p, holds, NoInspections, MasterPermit);
+      p = HoldsExist(p, holds, NoInspections, MasterPermit, newInspectionType);
 
-      if (p.Count() > 0) return p;
-      return permits;
+      return !p.Any() ? permits : p;
     }
 
     public static List<Permit> IsMasterClosed(List<Permit> permits)
@@ -282,7 +279,7 @@ namespace ClayInspectionScheduler.Models
                     where p.CoClosed == 1
                     select p);
 
-      if (closed.Count() > 0)
+      if (closed.Any())
       {
         var Error = $@"Permit #{ closed.First().PermitNo } has been closed, no additional inspections can be scheduled for this job.";
         return BulkUpdateError(permits, Error);
@@ -290,65 +287,69 @@ namespace ClayInspectionScheduler.Models
       return new List<Permit>();
     }
 
-    private static List<Permit> HoldsExist(List<Permit> permits, List<Hold> holds, List<string> NoInspections, string MasterPermit)
+    private static List<Permit> HoldsExist(List<Permit> permits, List<Hold> holds, List<string> NoInspections, string MasterPermit, InspType newInspectionType)
     {
-      if (holds.Count() == 0 && NoInspections.Count == 0)
+
+      if (!holds.Any() && !NoInspections.Any())
         return permits;
 
       Console.WriteLine("Holds: " + holds);
 
       // first let's check for any SatFinalflg holds and update the permits
-      var NoFinals = (from h in holds where h.SatFinalFlag == 1 select h.PermitNo).ToList();
+      var NoFinals = (from h in holds where h.SatFinalFlg == 1 select h.PermitNo).ToList();
+      var HoldsThatAllowPreInspections = (from h in holds where h.AllowPreInspections == true select h.HldCd).ToList();
+      var holdsAffectingMaster = new List<Hold>();
 
-      foreach (Permit p in permits)
+      foreach (var p in permits)
       {
         p.NoFinalInspections = NoFinals.Contains(p.PermitNo);
       }
 
+        holdsAffectingMaster = 
+          (from h in holds
+          where h.PermitNo == MasterPermit || 
+                h.PermitNo == "" || 
+                h.PermitNo == null
+          select h).ToList();
+
+      Console.WriteLine("MasterPermitWithError: " + holdsAffectingMaster);
+
+      if (newInspectionType == null || newInspectionType.PreInspection)
+      {
+        holdsAffectingMaster.RemoveAll(h => HoldsThatAllowPreInspections.Contains(h.HldCd));
+      }
+      Console.WriteLine("MasterPermitWithErrorWithPreInspectionHoldsRemoved: " + holdsAffectingMaster);
+
       // Now let's check to see if we have any master permits that have
       // any holds or charges
-      if (MasterPermit.Length > 0)
+      if (MasterPermit.Length > 0 && holdsAffectingMaster.Any())
       {
-        // check for holds on master permit
-        if (holds.Count() > 0)
-        {
-          if ((from h in holds
-               where h.PermitNo == MasterPermit
-               select h).Count() > 0)
-          {
             var Error = $@"Permit #{ MasterPermit} has existing holds, no inspections can be scheduled.";
             return BulkUpdateError(permits, Error);
-          }
-        }
       }
 
       // Do any permits have a hold where the flag SatNoInspection = 1?
       // Any permits that have a hold with this flag cannot have inspections scheduled.
 
-      if (NoInspections.Count() > 0)
+      if (!NoInspections.Any()) return permits;
       {
-        foreach (Permit p in permits)
+        foreach (var p in permits)
         {
-          if (p.ErrorText.Length == 0)
+          if (p.ErrorText.Length != 0) continue;
+          if (!NoInspections.Contains(p.PermitNo) && p.PermitNo != MasterPermit) continue;
+          if (p.PermitNo == MasterPermit)
           {
-            if (NoInspections.Contains(p.PermitNo) || p.PermitNo == MasterPermit)
-            {
-              if (p.PermitNo == MasterPermit)
-              {
+              if(permits.Count() > 1 && !holdsAffectingMaster.Any())
+              { 
                 p.ErrorText = "There is a hold on an associated permit, no inspections can be scheduled";
               }
-              else
-              {
-                p.ErrorText = $@"Permit #{ p.PermitNo } has existing holds, no inspections can be scheduled.";
-              }
-            }
+          }
+          else
+          {
+              p.ErrorText = $@"Permit #{p.PermitNo} has existing holds, no inspections can be scheduled.";
           }
         }
       }
-
-
-
-
       return permits;
     }
 
@@ -437,7 +438,7 @@ namespace ClayInspectionScheduler.Models
         return;
       }
 
-      if (this.access == UserAccess.access_type.public_access)
+      if (this.Access == UserAccess.access_type.public_access)
       {
         if (PassedFinal()) return;
         if (PrivateProvider.Length > 0)

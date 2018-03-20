@@ -15,8 +15,9 @@ namespace ClayInspectionScheduler.Models
     public string PermitNo { get; set; }
     public string HldCd { get; set; }
     public string HoldDesc { get; set; }
-    public int SatFinalFlag { get; set; }
+    public int SatFinalFlg { get; set; }
     public int SatNoInspection { get; set; }
+    public bool AllowPreInspections { get; set; }
 
     public Hold()
     {
@@ -41,7 +42,8 @@ namespace ClayInspectionScheduler.Models
  	          H.HldCd,
 	          HR.HoldDesc,
 	          HR.SatFinalFlg,
-	          HR.SatNoInspection
+	          HR.SatNoInspection,
+            HR.AllowPreInspections
           FROM bpHOLD H
           INNER JOIN bpHOLD_REF HR ON H.HldCd = HR.HoldCode
           LEFT OUTER JOIN bpBASE_PERMIT B ON B.BaseId = H.BaseId
@@ -51,7 +53,7 @@ namespace ClayInspectionScheduler.Models
             AND h.HldDate IS NULL
 	          AND HR.Active = 1
 	          AND	H.BASEID = (SELECT BASEID FROM PermitBASEIDs)
-            AND (HR.SatFinalFlg = 1 or HR.SatNoInspection = 1)";
+            AND (HR.SatFinalFlg = 1 or HR.SatNoInspection = 1 or AllowPreInspections = 1)";
       try
       {
         using (IDbConnection db =

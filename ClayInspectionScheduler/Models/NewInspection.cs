@@ -70,6 +70,10 @@ namespace ClayInspectionScheduler.Models
       List<string> finalInspectionCodes = (from it in inspTypes
                                where it.Final == true
                                select it.InspCd).ToList();
+      var currentInspectionType = (from i in inspTypes
+        where i.InspCd == InspectionCd
+        select i).ToList().First();
+
       foreach (var f in finals)
       {
         if (f.InspCd == this.InspectionCd)
@@ -79,13 +83,14 @@ namespace ClayInspectionScheduler.Models
 
       //= (List<InspType>)MyCache.GetItem("inspectiontypes,"+IsExternalUser.ToString());
 
-      var Permits = (from p in Permit.Get(this.PermitNo, CurrentAccess)
+      var Permits = (from p in Permit.Get(this.PermitNo, CurrentAccess, currentInspectionType)
                      select p).ToList();
 
 
       Permit CurrentPermit = (from p in Permits
                        where p.PermitNo == this.PermitNo
                        select p).FirstOrDefault();
+
 
 
       if (CurrentPermit == null)
@@ -101,7 +106,7 @@ namespace ClayInspectionScheduler.Models
         if (CurrentPermit.ErrorText.Length > 0)
         {
           Errors.Add(CurrentPermit.ErrorText);
-          return Errors;
+
         }
 
         // validate user selected date
@@ -117,7 +122,7 @@ namespace ClayInspectionScheduler.Models
           SchecDateTime.Date > end)
         {
           Errors.Add("Invalid Date Selected");
-          return Errors;
+
         }
         // Is the scheduled date one of the dates they aren't allowed to use?
         if (badDates.Contains(SchecDateTime.ToShortDateString()))
@@ -125,12 +130,12 @@ namespace ClayInspectionScheduler.Models
           Errors.Add("Invalid Date Selected");
         }
         // Is the inspection type valid?
-        if ((from i in inspTypes
+        if (!(from i in inspTypes
              where i.InspCd == InspectionCd
-             select i).Count() == 0)
+             select i).Any())
         {
           Errors.Add("Invalid Inspection Type");
-          return Errors;
+
         }
         else
         {
@@ -138,7 +143,6 @@ namespace ClayInspectionScheduler.Models
           if (InspectionCd[0] != PermitNo[0])
           {
             Errors.Add("Invalid Inspection for this permit type");
-            return Errors;
           }
           
           var inspections = Inspection.Get(CurrentPermit.PermitNo);
@@ -146,11 +150,8 @@ namespace ClayInspectionScheduler.Models
           if (CurrentPermit.TotalFinalInspections > 0)
           {
            Errors.Add($"Permit #{CurrentPermit.PermitNo} has passed final inspection");
-            return Errors;
           }
-
-
-
+          
 
           var PassedOrScheduledInspections = (from ic in inspections
                                where (ic.InspDateTime == DateTime.MinValue || 
@@ -160,35 +161,22 @@ namespace ClayInspectionScheduler.Models
 
           foreach (var i in PassedOrScheduledInspections)
           {
-
-
-            if (this.PermitNo == i.PermitNo && this.InspectionCd == i.InspectionCode && (i.ResultADC == "" || i.ResultADC == null))
+            if (this.PermitNo == i.PermitNo && this.InspectionCd == i.InspectionCode && string.IsNullOrEmpty(i.ResultADC))
             {
               Errors.Add("Inspection type exists on permit");
-              Console.Write(i);
             }
-
-
             var IncompleteInspection = (from ic in PassedOrScheduledInspections
                                         where i.InspectionCode == this.InspectionCd &&
-                                        (i.ResultADC == "" || i.ResultADC == null)
+                                        string.IsNullOrEmpty(i.ResultADC)
                                         select ic).ToList();
 
             Console.Write(IncompleteInspection);
-
-            //{
-            //  Errors.Add("Inspection type exists on permit");
-            //  return Errors;
-            //}
-
           }
 
 
 
           //Adds functionality to return error when saving an inspection for permit that has already passed a final inspection.
-
-
-
+          
           // To schedule a building final: 
           // 1. All fees, including Road impact and school impact fees, must be paid; AND
           // 2. All associated permits must have a final inspection either scheduled, or passed.
@@ -227,17 +215,13 @@ namespace ClayInspectionScheduler.Models
               if (permitsWithNoFinalsScheduledOrPassed.Contains(this.PermitNo) && 
                       PermitsWithScheduledOrPassedFinals.Count < Permits.Count-1 )
               {
-                Errors.Add($"All permits associated with permit #{p.PermitNo} must have final inspections scheduled or passed, before a Building final can be scheduled.");
-                return Errors;
+                Errors.Add($@"All permits associated with permit #{p.PermitNo}
+                           must have final inspections scheduled or passed, 
+                           before a Building final can be scheduled.");
               }
             }
-
-
           }
-
           Console.WriteLine(permitsWithNoFinalsScheduledOrPassed);
-
-
         }
         Console.Write(Errors);
 

@@ -17,6 +17,8 @@ namespace ClayInspectionScheduler.Models
 
     public bool Final { get; set; }
 
+    public bool PreInspection { get; set; }
+
     public InspType()
     {
 
@@ -25,14 +27,15 @@ namespace ClayInspectionScheduler.Models
     public static List<InspType> Get()
     {
       
-      string sql = @"
+      var sql = @"
         
         USE WATSC;
 
         SELECT
           DISTINCT I.InsDesc,
           LTRIM(RTRIM(I.InspCd)) InspCd,
-          Final
+          Final,
+          PreInspection
         FROM
           bpINS_REF I
         WHERE
