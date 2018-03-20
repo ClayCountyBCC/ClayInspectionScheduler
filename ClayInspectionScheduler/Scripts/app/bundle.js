@@ -1558,7 +1558,7 @@ var InspSched;
             var completedRemark = document.getElementById(InspectionId + '_completed_remark');
             var comments = document.getElementById(InspectionId + '_comments');
             var button = document.getElementById(InspectionId + '_details_btn');
-            var inspectionDate = new Date(current[0].InspDateTime.toString);
+            var inspectionDate = new Date(current[0].InspDateTime.toString());
             var d = new Date();
             var priorDate = new Date();
             priorDate.setDate(priorDate.getDate() - 2);
