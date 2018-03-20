@@ -1216,7 +1216,7 @@ namespace InspSched.UI
     let comments: HTMLDivElement = (<HTMLDivElement>document.getElementById(InspectionId + '_comments'));
     let button = document.getElementById(InspectionId + '_details_btn');
 
-    let inspectionDate = new Date(current[0].InspDateTime.toString());
+    let inspectionDate = new Date(current[0].InspDateTime.toString);
     let d = new Date();
     var priorDate = new Date();
     priorDate.setDate(priorDate.getDate() - 2);
