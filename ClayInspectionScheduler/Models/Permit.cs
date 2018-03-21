@@ -287,7 +287,7 @@ namespace ClayInspectionScheduler.Models
       return new List<Permit>();
     }
 
-    private static List<Permit> HoldsExist(List<Permit> permits, List<Hold> holds, List<string> NoInspections, string MasterPermit, InspType newInspectionType)
+    private static List<Permit> HoldsExist(List<Permit> permits, List<Hold> holds, List<string> NoInspections, string MasterPermit, InspType newInspectionType = null)
     {
 
       if (!holds.Any() && !NoInspections.Any())
@@ -480,16 +480,26 @@ namespace ClayInspectionScheduler.Models
       {
         return false;
       }
-      if (this.ContractorId == "" || this.ContractorId == null)
+
+      if (PermitNo[0] == '6' && ContractorId == "")
       {
-        ErrorText = "There is no contractor selected on this permit. Please contact the Building Department if you would like to schedule an inspection.";
+        ContractorId = "FIRE";
       }
 
-      if (this.ContractorStatus != "A")
+        if (string.IsNullOrEmpty(this.ContractorId))
+      {
+        
+        ErrorText = "There is no contractor selected on this permit. Please contact the Building Department if you would like to schedule an inspection.";
+      }
+      
+
+
+      if (this.ContractorStatus != "A" && (this.PermitNo[0] != '6'))
       {
         ErrorText = "There is an issue with the contractor's status";
         return true;
       }
+      
       else if (this.LiabilityExpirationDate <= DateTime.Today)
       {
         ErrorText = "The Contractor's Liability Insurance expiration date has passed";

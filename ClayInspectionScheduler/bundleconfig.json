@@ -21,9 +21,10 @@
     ]
   },
   {
-    "outputFileName": "Scripts/app/bundle.min.js",
+    "outputFileName": "Scripts/app/bundle.js",
     "inputFiles": [
       "Scripts/app/bundle.js"
     ]
+
   }
 ]
