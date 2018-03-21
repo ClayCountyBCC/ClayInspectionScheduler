@@ -71,7 +71,7 @@ namespace InspSched.UI
     {
 
       CurrentPermits = permits;
-      InspSched.CurrentPermits = permits
+      InspSched.CurrentPermits = permits;
       ProcessResults(permits, key);
 
       return true;

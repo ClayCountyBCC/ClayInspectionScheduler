@@ -14,7 +14,7 @@ namespace ClayInspectionScheduler.Models
   public class Permit
   {
     // Had to make public in order to allow me to update the cancel button
-    public UserAccess.access_type Access { get; set; }
+    public UserAccess.access_type access { get; set; }
     public string PermitNo { get; set; }
     public string ProjAddrCombined { get; set; }
     public string ProjCity { get; set; }
@@ -59,7 +59,7 @@ namespace ClayInspectionScheduler.Models
     {
       get
       {
-        var dc = DateCache.getDateCache(this.Access == UserAccess.access_type.public_access, this.SuspendGraceDate);
+        var dc = DateCache.getDateCache(this.access == UserAccess.access_type.public_access, this.SuspendGraceDate);
         return dc;
       }
     }
@@ -210,8 +210,8 @@ namespace ClayInspectionScheduler.Models
             l.Permit_URL = l.PermitTypeString == "BL" ? 
               $@"http://{host}/WATSWeb/Permit/MainBL.aspx?PermitNo={l.PermitNo}&Nav=PL&OperId=&PopUp=" : 
               $@"http://{host}/WATSWeb/Permit/APermit{l.PermitTypeString}.aspx?PermitNo={l.PermitNo}";
-            l.Access = CurrentAccess;
-            if (l.Access == UserAccess.access_type.public_access)
+            l.access = CurrentAccess;
+            if (l.access == UserAccess.access_type.public_access)
             {
               l.Permit_URL = "";
               if (l.Confidential == 1)
@@ -438,7 +438,7 @@ namespace ClayInspectionScheduler.Models
         return;
       }
 
-      if (this.Access == UserAccess.access_type.public_access)
+      if (this.access == UserAccess.access_type.public_access)
       {
         if (PassedFinal()) return;
         if (PrivateProvider.Length > 0)
