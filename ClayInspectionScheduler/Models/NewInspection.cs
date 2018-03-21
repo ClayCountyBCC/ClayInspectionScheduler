@@ -17,7 +17,7 @@ namespace ClayInspectionScheduler.Models
 
     public DateTime SchecDateTime { get; set; }
 
-    private bool TryingToScheduleFinal { get; set; }
+    private bool DoImpactFeesMatter { get; set; }
 
     public string PrivProvFieldName
     {
@@ -50,7 +50,8 @@ namespace ClayInspectionScheduler.Models
       this.SchecDateTime = SchecDateTime;
     }
 
-    public List<string> Validate(UserAccess.access_type CurrentAccess, List<InspType> inspTypes)
+    public List<string> Validate(UserAccess.access_type CurrentAccess, 
+      List<InspType> inspTypes)
     {
       // List of things that need to be validated:
       // 0) Make sure the permit is able to be scheduled to be inspected.
@@ -68,28 +69,31 @@ namespace ClayInspectionScheduler.Models
                                select it).ToList();
 
       List<string> finalInspectionCodes = (from it in inspTypes
-                               where it.Final == true
-                               select it.InspCd).ToList();
-      var currentInspectionType = (from i in inspTypes
-        where i.InspCd == InspectionCd
-        select i).ToList().First();
+                                           where it.Final == true
+                                           select it.InspCd).ToList();
 
-      foreach (var f in finals)
-      {
-        if (f.InspCd == this.InspectionCd)
-          this.TryingToScheduleFinal = true;
-      }
-      Console.Write("Finals: ", finals);
+      var currentInspectionType = (from i in inspTypes
+                                   where i.InspCd == InspectionCd
+                                   select i).ToList().First();
+
+      // DoImpactFeesMatter is how we indicate to the permit that the impact fees matter.      
+      this.DoImpactFeesMatter = finals.Any(f => f.InspCd == InspectionCd) || InspectionCd == "205";
+      //foreach (var f in finals)
+      //{
+      //  if (f.InspCd == this.InspectionCd)
+      //    this.TryingToScheduleFinal = true;
+      //}
+      //Console.Write("Finals: ", finals);
 
       //= (List<InspType>)MyCache.GetItem("inspectiontypes,"+IsExternalUser.ToString());
 
-      var Permits = (from p in Permit.Get(this.PermitNo, CurrentAccess, currentInspectionType)
+      var Permits = (from p in Permit.Get(this.PermitNo, CurrentAccess, currentInspectionType, DoImpactFeesMatter)
                      select p).ToList();
 
 
       Permit CurrentPermit = (from p in Permits
-                       where p.PermitNo == this.PermitNo
-                       select p).FirstOrDefault();
+                              where p.PermitNo == this.PermitNo
+                              select p).FirstOrDefault();
 
 
 
@@ -151,13 +155,13 @@ namespace ClayInspectionScheduler.Models
           {
            Errors.Add($"Permit #{CurrentPermit.PermitNo} has passed final inspection");
           }
-          
+
 
           var PassedOrScheduledInspections = (from ic in inspections
-                               where (ic.InspDateTime == DateTime.MinValue || 
-                                     ic.ResultADC == "A" ||
-                                     ic.ResultADC == "P")
-                               select ic).ToList();
+                                              where (ic.InspDateTime == DateTime.MinValue ||
+                                                    ic.ResultADC == "A" ||
+                                                    ic.ResultADC == "P")
+                                              select ic).ToList();
 
           foreach (var i in PassedOrScheduledInspections)
           {
@@ -165,12 +169,13 @@ namespace ClayInspectionScheduler.Models
             {
               Errors.Add("Inspection type exists on permit");
             }
-            var IncompleteInspection = (from ic in PassedOrScheduledInspections
-                                        where i.InspectionCode == this.InspectionCd &&
-                                        string.IsNullOrEmpty(i.ResultADC)
-                                        select ic).ToList();
+            // commenting out debug code
+            //var IncompleteInspection = (from ic in PassedOrScheduledInspections
+            //                            where i.InspectionCode == this.InspectionCd &&
+            //                            string.IsNullOrEmpty(i.ResultADC)
+            //                            select ic).ToList();
 
-            Console.Write(IncompleteInspection);
+            //Console.Write(IncompleteInspection);
           }
 
 
@@ -195,8 +200,6 @@ namespace ClayInspectionScheduler.Models
                                                       select ic.PermitNo);
           }
 
-          Console.WriteLine(PermitsWithScheduledOrPassedFinals);
-
           foreach (var p in Permits)
           {
             var currentCheck = (from pf in PermitsWithScheduledOrPassedFinals
@@ -207,8 +210,6 @@ namespace ClayInspectionScheduler.Models
             {
               permitsWithNoFinalsScheduledOrPassed.Add(p.PermitNo);
             }
-            Console.WriteLine(permitsWithNoFinalsScheduledOrPassed);
-
 
             if (this.PermitNo[0] == '1' && Permits.Count > 1 && finalInspectionCodes.Contains(this.InspectionCd))
             {
@@ -221,9 +222,7 @@ namespace ClayInspectionScheduler.Models
               }
             }
           }
-          Console.WriteLine(permitsWithNoFinalsScheduledOrPassed);
         }
-        Console.Write(Errors);
 
       }
       return Errors;

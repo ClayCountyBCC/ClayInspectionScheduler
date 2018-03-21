@@ -33,7 +33,8 @@ namespace ClayInspectionScheduler.Models
     public int TotalFinalInspections { get; set; } // Count the total final inspections for this permit
     private string ContractorStatus { get; set; } // check if Contractor is active
     private string PrivateProvider { get; set; } = "";
-    public List<Charge> Charges => Charge.GetCharges(this.PermitNo);
+    public List<Charge> Charges { get; set; } = new List<Charge>();
+
     public List<Hold> Holds { get; set; }
     private string PermitTypeString
     {
@@ -69,7 +70,7 @@ namespace ClayInspectionScheduler.Models
 
     }
 
-    private static List<Permit> GetRaw(string PermitNumber)
+    private static List<Permit> GetRaw(string PermitNumber, bool DoImpactFeesMatter)
     {
       var dbArgs = new DynamicParameters();
       dbArgs.Add("@PermitNo", PermitNumber);
@@ -157,13 +158,18 @@ namespace ClayInspectionScheduler.Models
    		    AND A.VoidDate IS NULL";
 
       var permitlist = Constants.Get_Data<Permit>(sql, dbArgs);
+      foreach(Permit p in permitlist)
+      {
+        p.Charges = Charge.GetCharges(p.PermitNo, DoImpactFeesMatter);
+      }
       return permitlist;
     }
 
     public static List<Permit> Get(
       string AssocKey,
       UserAccess.access_type CurrentAccess,
-      InspType newInspectionType = null
+      InspType newInspectionType = null,
+      bool DoImpactFeesMatter = false
       )
     {
       /**
@@ -192,12 +198,8 @@ namespace ClayInspectionScheduler.Models
        **/
       try
       {
-        var permits = GetRaw(AssocKey);
-        if (permits.All(p => p.PermitNo != AssocKey))
-        {
-          return new List<Permit>();
-        }
-        else
+        var permits = GetRaw(AssocKey, DoImpactFeesMatter);
+        if (permits.Any(p => p.PermitNo == AssocKey))
         {
           permits = BulkValidate(permits, newInspectionType);
           var PrivProvCheck = (from prmt in permits
@@ -207,8 +209,8 @@ namespace ClayInspectionScheduler.Models
           string host = Constants.UseProduction() ? "claybccims" : "claybccimstrn";
           foreach (Permit l in permits)
           {
-            l.Permit_URL = l.PermitTypeString == "BL" ? 
-              $@"http://{host}/WATSWeb/Permit/MainBL.aspx?PermitNo={l.PermitNo}&Nav=PL&OperId=&PopUp=" : 
+            l.Permit_URL = l.PermitTypeString == "BL" ?
+              $@"http://{host}/WATSWeb/Permit/MainBL.aspx?PermitNo={l.PermitNo}&Nav=PL&OperId=&PopUp=" :
               $@"http://{host}/WATSWeb/Permit/APermit{l.PermitTypeString}.aspx?PermitNo={l.PermitNo}";
             l.access = CurrentAccess;
             if (l.access == UserAccess.access_type.public_access)
@@ -227,6 +229,10 @@ namespace ClayInspectionScheduler.Models
 
           }
         }
+        else
+        {
+          return new List<Permit>();
+        }
 
 
         return permits;
@@ -238,7 +244,9 @@ namespace ClayInspectionScheduler.Models
       }
     }
 
-    public static List<Permit> BulkValidate(List<Permit> permits,InspType newInspectionType = null)
+    public static List<Permit> BulkValidate(
+      List<Permit> permits,
+      InspType newInspectionType)
     {
       var holds = Hold.Get((from prmt in permits
                             select prmt.PermitNo).ToList<string>());
@@ -287,38 +295,50 @@ namespace ClayInspectionScheduler.Models
       return new List<Permit>();
     }
 
-    private static List<Permit> HoldsExist(List<Permit> permits, List<Hold> holds, List<string> NoInspections, string MasterPermit, InspType newInspectionType = null)
+    private static List<Permit> HoldsExist(
+      List<Permit> permits, 
+      List<Hold> holds, 
+      List<string> NoInspections, 
+      string MasterPermit, 
+      InspType newInspectionType = null)
     {
 
       if (!holds.Any() && !NoInspections.Any())
         return permits;
 
-      Console.WriteLine("Holds: " + holds);
-
       // first let's check for any SatFinalflg holds and update the permits
-      var NoFinals = (from h in holds where h.SatFinalFlg == 1 select h.PermitNo).ToList();
-      var HoldsThatAllowPreInspections = (from h in holds where h.AllowPreInspections == true select h.HldCd).ToList();
+      var NoFinals = (from h in holds
+                      where h.SatFinalFlg == 1
+                      select h.PermitNo).Distinct().ToList();
+
+      var HoldsThatAllowPreInspections = (from h in holds
+                                          where h.AllowPreInspections
+                                          select h.HldCd).ToList();
+
       var holdsAffectingMaster = new List<Hold>();
 
       foreach (var p in permits)
       {
-        p.NoFinalInspections = NoFinals.Contains(p.PermitNo);
+        // We need to make sure that the permit number is in our list, or 
+        // NULL, if a hold tied to the clearance sheet is found.
+        p.NoFinalInspections = NoFinals.Contains(p.PermitNo) || NoFinals.Contains(null);
       }
 
-        holdsAffectingMaster = 
-          (from h in holds
-          where h.PermitNo == MasterPermit || 
-                h.PermitNo == "" || 
-                h.PermitNo == null
-          select h).ToList();
+      holdsAffectingMaster = (from h in holds
+                              where (h.PermitNo == MasterPermit ||
+                                    h.PermitNo == "" ||
+                                    h.PermitNo == null) &&
+                                    h.SatFinalFlg == 0 // added this to eliminate the No Final holds from this list.
+                              select h).ToList();
 
-      Console.WriteLine("MasterPermitWithError: " + holdsAffectingMaster);
+      // If not called from NewInsection, AllowPreInspection holds will not generate an error
+      //  to prevent a scheduling attempt.
+      // If hold allows pre - Inspections, only pre-Inspections can be scheduled for that hold only.
 
       if (newInspectionType == null || newInspectionType.PreInspection)
       {
         holdsAffectingMaster.RemoveAll(h => HoldsThatAllowPreInspections.Contains(h.HldCd));
       }
-      Console.WriteLine("MasterPermitWithErrorWithPreInspectionHoldsRemoved: " + holdsAffectingMaster);
 
       // Now let's check to see if we have any master permits that have
       // any holds or charges
@@ -353,7 +373,10 @@ namespace ClayInspectionScheduler.Models
       return permits;
     }
 
-    private static List<Permit> ChargesExist(List<Permit> permits, List<string> chargePermits, string MasterPermit)
+    private static List<Permit> ChargesExist(
+      List<Permit> permits, 
+      List<string> chargePermits, 
+      string MasterPermit)
     {
       // Now let's check to see if we have any master permits that have
       // any holds or charges
@@ -367,7 +390,7 @@ namespace ClayInspectionScheduler.Models
 
         if (MasterPermit.Length > 0 && masterPermit.Charges.Count > 0)
         {
-          var Error = $@"Permit #{masterPermit.PermitNo} has existing charges. No inpspections can be scheduled.";
+          var Error = $@"Permit #{masterPermit.PermitNo} has existing charges. No inspections can be scheduled.";
           return BulkUpdateError(permits, Error);
         }
       }
@@ -523,13 +546,6 @@ namespace ClayInspectionScheduler.Models
         return true;
       }
       return false;
-    }
-
-    private List<Charge> GetCharges(string PermitNumber)
-    {
-      var charges = Charge.GetCharges(PermitNumber);
-
-      return charges;
     }
 
   }

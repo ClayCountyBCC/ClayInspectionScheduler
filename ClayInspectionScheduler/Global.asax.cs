@@ -19,7 +19,15 @@ namespace ClayInspectionScheduler
         GlobalConfiguration.Configure(WebApiConfig.Register);
         Models.InspType.GetCachedInspectionTypes();
         Models.Inspector.GetCached();
-        Models.UserAccess.GetCachedAllUserAccess();
+        switch (Environment.MachineName.ToUpper())
+        {
+          case "MISSL01":
+            break;
+          default:
+            Models.UserAccess.GetCachedAllUserAccess();
+            break;
+        }
+        
         Models.QuickRemark.GetCachedInspectionQuickRemarks();
       }
       catch(Exception e)

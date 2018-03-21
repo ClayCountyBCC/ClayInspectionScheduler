@@ -142,15 +142,22 @@ namespace ClayInspectionScheduler.Models
     {
       try
       {
-        var d = GetCachedAllUserAccess();
         string un = Username.Replace(@"CLAYBCC\", "").ToLower();
-        if (d.ContainsKey(un))
+        switch (Environment.MachineName.ToUpper())
         {
-          return d[un]; // we're dun
-        }
-        else
-        {
-          return d[""];
+          case "MISSL01":
+            return new UserAccess(un);
+          default:
+            var d = GetCachedAllUserAccess();
+
+            if (d.ContainsKey(un))
+            {
+              return d[un]; // we're dun
+            }
+            else
+            {
+              return d[""];
+            }
         }
       }
       catch(Exception ex)
