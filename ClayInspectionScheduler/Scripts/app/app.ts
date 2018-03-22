@@ -289,7 +289,7 @@ namespace InspSched
     IssueContainer.style.display = "none";
     LoadInspectionTypes();
     InspectorUI.LoadDailyInspections();
-
+    window.setInterval(InspectorUI.LoadDailyInspections, 60 * 5 * 1000); // update every 5 minutes.
     LoadInspectionQuickRemarks();
     
   }

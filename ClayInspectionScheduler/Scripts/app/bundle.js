@@ -2058,6 +2058,7 @@ var InspSched;
         IssueContainer.style.display = "none";
         LoadInspectionTypes();
         InspSched.InspectorUI.LoadDailyInspections();
+        window.setInterval(InspSched.InspectorUI.LoadDailyInspections, 60 * 5 * 1000); // update every 5 minutes.
         LoadInspectionQuickRemarks();
     }
     function LoadInspectionTypes() {
