@@ -52,6 +52,7 @@ namespace ClayInspectionScheduler.Models
             H.Deleted IS NULL 
             AND h.HldDate IS NULL
 	          AND HR.Active = 1
+            AND H.HldCd NOT IN ('1SWF')
 	          AND	H.BASEID = (SELECT BASEID FROM PermitBASEIDs)
             AND (HR.SatFinalFlg = 1 or HR.SatNoInspection = 1 or AllowPreInspections = 1)";
       try

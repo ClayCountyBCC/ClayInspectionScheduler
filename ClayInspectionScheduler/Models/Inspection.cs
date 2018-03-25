@@ -619,7 +619,19 @@ namespace ClayInspectionScheduler.Models
               InspReqChrg = @Amount, 
               HldInput = @HoldInput
 			      WHERE 
-              HoldID = @HoldId 
+              HoldID = @HoldId;
+
+            -- If we are updating the hold, there is probably an existing charge that will need to be removed
+            -- This happens if someone updates an item that was disapproved (ie: the hold and charge were already added)
+            -- We will insert the new charge after this section is done.
+
+            DELETE 
+            FROM ccCashierItem 
+            WHERE 
+            Narrative = @HoldInput
+            AND HoldID = @HoldId
+            AND CashierId IS NULL;
+
 		      END
 		    
         INSERT INTO ccCashierItem (NTUser, CatCode, Assoc, AssocKey, BaseFee, Total, Variable, Narrative, HoldID) 
