@@ -101,7 +101,10 @@ namespace ClayInspectionScheduler.Models
             {
               if (up != null)
               {
-                d.Add(up.SamAccountName.ToLower(), new UserAccess(up));
+                if (!d.ContainsKey(up.SamAccountName.ToLower()))
+                {
+                  d.Add(up.SamAccountName.ToLower(), new UserAccess(up));
+                }
               }
             }
           }
@@ -121,10 +124,10 @@ namespace ClayInspectionScheduler.Models
           case "CLAYBCCDMZIIS01":
             d[""] = new UserAccess("");
             break;
-          default:
-            ParseGroup(basic_access_group, ref d);
+          default:            
             ParseGroup(inspector_access_group, ref d);
             ParseGroup(mis_access_group, ref d);
+            ParseGroup(basic_access_group, ref d);
             d[""] = new UserAccess("");
             break;
 

@@ -91,7 +91,8 @@ namespace ClayInspectionScheduler.Controllers
     public IHttpActionResult List()
     {
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
-      if(ua.current_access == UserAccess.access_type.inspector_access)
+      if(ua.current_access == UserAccess.access_type.basic_access |
+        ua.current_access == UserAccess.access_type.inspector_access)
       {
         var il = Inspection.GetInspectorList();
         if(il == null)
