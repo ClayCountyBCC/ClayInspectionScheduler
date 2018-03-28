@@ -661,25 +661,26 @@ namespace InspSched.UI
 
     // #endregion Initial Append Rows to Inspection Row
 
-    let detailButton = BuildButton(inspection.InspReqID + "_details_btn", "Details", "InspSched.UI.ToggleInspDetails(this.value)", inspection.InspReqID.toString())
-    detailButton.className = "column large-12 medium-12 small-12 align-self-center  DetailsButton";
-    let buttonDiv = <HTMLDivElement>document.createElement("div");
-    buttonDiv.className = "row small-12";
-    InspButtonContainer.appendChild(buttonDiv);
-    //Create function to make New/Cancel/Details Button
+      let detailButton = BuildButton(inspection.InspReqID + "_details_btn", "Details", "InspSched.UI.ToggleInspDetails(this.value)", inspection.InspReqID.toString())
+      detailButton.className = "column large-12 medium-12 small-12 align-self-center  DetailsButton";
+      let buttonDiv = <HTMLDivElement>document.createElement("div");
+      buttonDiv.className = "row small-12";
+      InspButtonContainer.appendChild(buttonDiv);
+      //Create function to make New/Cancel/Details Button
     if (permit.ErrorText.length === 0)
     {
-      buttonDiv.appendChild(BuildButton("", "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
-    }
-    else
-    {
-      detailButton.style.margin = "0";
-    }
+        buttonDiv.appendChild(BuildButton("", "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
+      }
+      else {
+        detailButton.style.margin = "0";
+      }
     if (permit.access !== InspSched.access_type.public_access)
     {
-      buttonDiv.appendChild(detailButton);
+      if (inspection.InspReqID !== 0)
+      {
+        buttonDiv.appendChild(detailButton);
+      }
     }
-
 
     if (inspection.ResultADC.length == 0) 
     {
@@ -701,14 +702,14 @@ namespace InspSched.UI
         }
         else
         {
-
-          //detailButton.style.margin = "0";
-          buttonDiv.appendChild(detailButton);
+          if (inspection.InspReqID !== 0)
+          {
+            buttonDiv.appendChild(detailButton);
+          }
 
         }
       }
     }
-
     DataRow.appendChild(InspButtonContainer);
 
     if (inspection.DisplayInspDateTime.length > 0)

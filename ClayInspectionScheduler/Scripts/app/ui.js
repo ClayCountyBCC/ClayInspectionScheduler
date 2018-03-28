@@ -504,7 +504,9 @@ var InspSched;
                 detailButton.style.margin = "0";
             }
             if (permit.access !== InspSched.access_type.public_access) {
-                buttonDiv.appendChild(detailButton);
+                if (inspection.InspReqID !== 0) {
+                    buttonDiv.appendChild(detailButton);
+                }
             }
             if (inspection.ResultADC.length == 0) {
                 if (IsGoodCancelDate(inspection, permit.access)) {
@@ -519,8 +521,9 @@ var InspSched;
                         }
                     }
                     else {
-                        //detailButton.style.margin = "0";
-                        buttonDiv.appendChild(detailButton);
+                        if (inspection.InspReqID !== 0) {
+                            buttonDiv.appendChild(detailButton);
+                        }
                     }
                 }
             }

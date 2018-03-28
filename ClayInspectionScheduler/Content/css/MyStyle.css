@@ -533,7 +533,21 @@ tabs-content{
   border: none !important;
 }
 
+textarea::-webkit-input-placeholder {
+  color: rgba(235, 0, 0, 0.30);
+}
 
+textarea:-moz-placeholder { /* Firefox 18- */
+  color: rgba(235, 0, 0, 0.30);
+}
+
+textarea::-moz-placeholder { /* Firefox 19+ */
+  color: rgba(235, 0, 0, 0.30);
+}
+
+textarea:-ms-input-placeholder {
+  color: rgba(235, 0, 0, 0.30);
+}
 @media print {
 
   @page {
