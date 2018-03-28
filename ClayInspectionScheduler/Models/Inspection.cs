@@ -302,7 +302,8 @@ namespace ClayInspectionScheduler.Models
         LEFT OUTER JOIN bpINS_REQUEST i ON P.PermitNo = i.PermitNo
         LEFT OUTER JOIN bpINS_REF ir ON ir.InspCd = i.InspectionCode
         LEFT OUTER JOIN bp_INSPECTORS ip ON i.Inspector = ip.Intl 
-        ORDER BY ISNULL(InspDateTime, GETDATE()) DESC, InspReqID ASC";
+        ORDER BY CASE WHEN ISNULL(LTRIM(RTRIM(ResultADC)), '') = '' THEN 1 ELSE 0 END DESC, 
+          ISNULL(InspDateTime, GETDATE()) DESC, InspReqID ASC";
       return Constants.Get_Data<Inspection>(sql, dbArgs);
     }
 
