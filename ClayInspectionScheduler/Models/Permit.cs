@@ -16,6 +16,7 @@ namespace ClayInspectionScheduler.Models
     // Had to make public in order to allow me to update the cancel button
     public UserAccess.access_type access { get; set; }
     public string PermitNo { get; set; }
+    public string StreetAddress { get; set; } = "";
     public string ProjAddrCombined { get; set; }
     public string ProjCity { get; set; }
     public string ErrorText { get; set; } = "";
@@ -103,14 +104,18 @@ namespace ClayInspectionScheduler.Models
         distinct M.PermitNo PermitNo,
         M.PermitNo MPermitNo,
         M.IssueDate,
+        ISNULL(B.ProjAddrNumber, '') +
+          CASE WHEN LEN(LTRIM(RTRIM(B.ProjPreDir))) > 0 THEN LTRIM(RTRIM(B.ProjPreDir)) ELSE '' END + 
+          ISNULL(B.ProjStreet, '') + 
+          CASE WHEN LEN(LTRIM(RTRIM(B.ProjPostDir))) > 0 THEN LTRIM(RTRIM(B.ProjPostDir)) ELSE '' END StreetAddress,
         B.ProjAddrCombined,
         B.ProjCity,
         CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) SuspendGraceDate,
         B.Confidential,
         B.ContractorId,
         CAST(CASE WHEN M.CoClosed = 1 THEN 1 ELSE 0 END AS INT) CoClosed,
-        C.WC_ExpDt WorkersCompExpirationDate,
-        C.LiabInsExpDt LiabilityExpirationDate,
+        DATEADD(dd,-1,C.WC_ExpDt) WorkersCompExpirationDate,
+        DATEADD(dd,-1,C.LiabInsExpDt) LiabilityExpirationDate,
         ISNULL(C.Status, '') ContractorStatus,
         ISNULL(TC.TotalCharges, 0) TotalCharges,
         ISNULL(PF.TotalFinalInspections, 0) TotalFinalInspections, 
@@ -133,14 +138,18 @@ namespace ClayInspectionScheduler.Models
         distinct A.PermitNo PermitNo,
         ISNULL(A.MPermitNo, '') MPermitNo,
         A.IssueDate,
+        ISNULL(B.ProjAddrNumber, '') +
+          CASE WHEN LEN(LTRIM(RTRIM(B.ProjPreDir))) > 0 THEN LTRIM(RTRIM(B.ProjPreDir)) ELSE '' END + 
+          ISNULL(B.ProjStreet, '') + 
+          CASE WHEN LEN(LTRIM(RTRIM(B.ProjPostDir))) > 0 THEN LTRIM(RTRIM(B.ProjPostDir)) ELSE '' END StreetAddress,
         B.ProjAddrCombined,
         B.ProjCity,
         CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) SuspendGraceDate,
         B.Confidential,
         A.ContractorId,
         CAST(-1 AS INT) AS CoClosed,
-        C.WC_ExpDt WorkersCompExpirationDate,
-        C.LiabInsExpDt LiabilityExpirationDate,
+        DATEADD(dd,-1,C.WC_ExpDt) WorkersCompExpirationDate,
+        DATEADD(dd,-1,C.LiabInsExpDt) LiabilityExpirationDate,
         ISNULL(C.Status, '') ContractorStatus,
         ISNULL(TC.TotalCharges, 0) TotalCharges,
         ISNULL(PF.TotalFinalInspections, 0) TotalFinalInspections,
@@ -209,6 +218,7 @@ namespace ClayInspectionScheduler.Models
           string host = Constants.UseProduction() ? "claybccims" : "claybccimstrn";
           foreach (Permit l in permits)
           {
+
             l.Permit_URL = l.PermitTypeString == "BL" ?
               $@"http://{host}/WATSWeb/Permit/MainBL.aspx?PermitNo={l.PermitNo}&Nav=PL&OperId=&PopUp=" :
               $@"http://{host}/WATSWeb/Permit/APermit{l.PermitTypeString}.aspx?PermitNo={l.PermitNo}";
@@ -450,7 +460,7 @@ namespace ClayInspectionScheduler.Models
            IF NOT, BULK UPDATE ASSOC PERMITS TO DISPLAY ERROR
         As of 2/12, an inspection cannot be scheduled if the address is blank, because it hasn't been properly addressed yet.
       */
-      if (this.ProjAddrCombined.Trim().Length == 0)
+      if (this.StreetAddress.Trim().Length == 0)
       {
         ErrorText = $"Permit #{this.PermitNo} does not have a valid address. Please contact the building department for assistance.";
         return;
