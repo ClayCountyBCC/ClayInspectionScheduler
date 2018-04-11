@@ -661,19 +661,20 @@ namespace InspSched.UI
 
     // #endregion Initial Append Rows to Inspection Row
 
-      let detailButton = BuildButton(inspection.InspReqID + "_details_btn", "Details", "InspSched.UI.ToggleInspDetails(this.value)", inspection.InspReqID.toString())
-      detailButton.className = "column large-12 medium-12 small-12 align-self-center  DetailsButton";
-      let buttonDiv = <HTMLDivElement>document.createElement("div");
-      buttonDiv.className = "row small-12";
-      InspButtonContainer.appendChild(buttonDiv);
-      //Create function to make New/Cancel/Details Button
+    let detailButton = BuildButton(inspection.InspReqID + "_details_btn", "Details", "InspSched.UI.ToggleInspDetails(this.value)", inspection.InspReqID.toString())
+    detailButton.className = "column large-12 medium-12 small-12 align-self-center  DetailsButton";
+    let buttonDiv = <HTMLDivElement>document.createElement("div");
+    buttonDiv.className = "row small-12";
+    InspButtonContainer.appendChild(buttonDiv);
+    //Create function to make New/Cancel/Details Button
     if (permit.ErrorText.length === 0)
     {
-        buttonDiv.appendChild(BuildButton("", "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
-      }
-      else {
-        detailButton.style.margin = "0";
-      }
+      buttonDiv.appendChild(BuildButton("", "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
+    }
+    else 
+    {
+      detailButton.style.margin = "0";
+    }
     if (permit.access !== InspSched.access_type.public_access)
     {
       if (inspection.InspReqID !== 0)
@@ -766,7 +767,6 @@ namespace InspSched.UI
     return inspRow;
 
   }
-
   function CheckBrowser()
   {
 
@@ -1119,7 +1119,7 @@ namespace InspSched.UI
     reasons.appendChild(IssueList);
 
     var permitCheck = error.substr(8, 8);
-    if (ThisPermit.access != InspSched.access_type.public_access &&
+    if (InspSched.ThisPermit.access != InspSched.access_type.public_access &&
       permitCheck == permitno &&
       (error.substr(30, 5) == 'holds' || error.substr(30, 5) == 'charg'))
     {
@@ -1174,11 +1174,10 @@ namespace InspSched.UI
 
   function IsGoodCancelDate(inspection: Inspection, access: access_type): boolean
   {
-    let tomorrow = new Date();
-    let inspDate = new Date(inspection.DisplaySchedDateTime);
-    var dayOfMonth = tomorrow.getDate() + 1;
+    let today = new Date(new Date().toLocaleDateString())
+    let inspDate = new Date(inspection.SchedDateTime.toString());
 
-    if (inspDate < tomorrow && (access == InspSched.access_type.public_access))
+    if (inspDate <= today && (access == InspSched.access_type.public_access))
       return false;
 
     return true;

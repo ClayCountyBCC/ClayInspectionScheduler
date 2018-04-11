@@ -22,6 +22,7 @@ namespace ClayInspectionScheduler
         switch (Environment.MachineName.ToUpper())
         {
           case "MISSL01":
+          case "MISHL05":
             break;
           default:
             Models.UserAccess.GetCachedAllUserAccess();

@@ -316,7 +316,7 @@ var InspSched;
             var fInspections = inspections.filter(function (i) {
                 var inspectorCheck = inspector.length > 0 ? i.InspectorName === inspector : true;
                 var dayCheck = day.length > 0 ? i.Day === day || (day === "Today" && i.ResultADC === "" && new Date(i.SchedDateTime.toString()) < d) : true;
-                console.log("i.scheddatetime", i.SchedDateTime, "d", d);
+                //console.log("i.scheddatetime", i.SchedDateTime, "d", d);
                 var openCheck = true;
                 if (open.length === 0) {
                     openCheck = true;
@@ -1532,10 +1532,9 @@ var InspSched;
             return buttonDiv;
         }
         function IsGoodCancelDate(inspection, access) {
-            var tomorrow = new Date();
-            var inspDate = new Date(inspection.DisplaySchedDateTime);
-            var dayOfMonth = tomorrow.getDate() + 1;
-            if (inspDate < tomorrow && (access == InspSched.access_type.public_access))
+            var today = new Date(new Date().toLocaleDateString());
+            var inspDate = new Date(inspection.SchedDateTime.toString());
+            if (inspDate <= today && (access == InspSched.access_type.public_access))
                 return false;
             return true;
         }

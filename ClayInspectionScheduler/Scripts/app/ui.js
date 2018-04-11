@@ -860,10 +860,9 @@ var InspSched;
             return buttonDiv;
         }
         function IsGoodCancelDate(inspection, access) {
-            var tomorrow = new Date();
-            var inspDate = new Date(inspection.DisplaySchedDateTime);
-            var dayOfMonth = tomorrow.getDate() + 1;
-            if (inspDate < tomorrow && (access == InspSched.access_type.public_access))
+            var today = new Date(new Date().toLocaleDateString());
+            var inspDate = new Date(inspection.SchedDateTime.toString());
+            if (inspDate <= today && (access == InspSched.access_type.public_access))
                 return false;
             return true;
         }

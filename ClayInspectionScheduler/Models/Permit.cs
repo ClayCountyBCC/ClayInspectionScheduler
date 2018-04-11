@@ -25,6 +25,7 @@ namespace ClayInspectionScheduler.Models
     private string ContractorId { get; set; } = "";
     private int Confidential { get; set; }
     private DateTime SuspendGraceDate { get; set; } = DateTime.MinValue;
+    private string Inspection_Notice { get; set; }
     private DateTime WorkersCompExpirationDate { get; set; } = DateTime.MaxValue;
     private DateTime LiabilityExpirationDate { get; set; } = DateTime.MaxValue;
     private DateTime PermitIssueDate { get; set; } = DateTime.MaxValue; // check if permt
@@ -61,7 +62,7 @@ namespace ClayInspectionScheduler.Models
     {
       get
       {
-        var dc = DateCache.getDateCache(this.access == UserAccess.access_type.public_access, this.SuspendGraceDate);
+        var dc = DateCache.getDateCache(this.access == UserAccess.access_type.public_access, this.SuspendGraceDate, this.Inspection_Notice == "180+");
         return dc;
       }
     }
@@ -79,7 +80,7 @@ namespace ClayInspectionScheduler.Models
       USE WATSC;
       DECLARE @MPermitNo CHAR(8) = (SELECT MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = @PermitNo);
       
-      WITH TotalCharges(PermitNo, TotalCharges) AS (
+ WITH TotalCharges(PermitNo, TotalCharges) AS (
         Select 
           AssocKey PermitNo,
           SUM(Total) AS TotalCharges
@@ -110,7 +111,8 @@ namespace ClayInspectionScheduler.Models
           CASE WHEN LEN(LTRIM(RTRIM(B.ProjPostDir))) > 0 THEN LTRIM(RTRIM(B.ProjPostDir)) ELSE '' END StreetAddress,
         B.ProjAddrCombined,
         B.ProjCity,
-        CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) SuspendGraceDate,
+       CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) SuspendGraceDate,
+        Inspection_Notice,
         B.Confidential,
         B.ContractorId,
         CAST(CASE WHEN M.CoClosed = 1 THEN 1 ELSE 0 END AS INT) CoClosed,
@@ -144,7 +146,8 @@ namespace ClayInspectionScheduler.Models
           CASE WHEN LEN(LTRIM(RTRIM(B.ProjPostDir))) > 0 THEN LTRIM(RTRIM(B.ProjPostDir)) ELSE '' END StreetAddress,
         B.ProjAddrCombined,
         B.ProjCity,
-        CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) SuspendGraceDate,
+       CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) SuspendGraceDate,
+        Inspection_Notice,
         B.Confidential,
         A.ContractorId,
         CAST(-1 AS INT) AS CoClosed,
@@ -426,11 +429,17 @@ namespace ClayInspectionScheduler.Models
         {
           if (p.PermitNo == MasterPermit)
           {
-            p.ErrorText = $"There are unpaid charges on permit #{p.PermitNo}, no inspections can be scheduled";
+            if (p.TotalCharges > 0)
+            {
+              p.ErrorText = $"There are unpaid charges on permit #{p.PermitNo}, no inspections can be scheduled";
+            }
           }
           else
           {
-            p.ErrorText = $@"Permit #{p.PermitNo} has existing charges, no inpspections can be scheduled.";
+            if (p.TotalCharges > 0)
+            {
+              p.ErrorText = $@"Permit #{p.PermitNo} has existing charges, no inpspections can be scheduled.";
+            }
           }
         }
       }
@@ -509,7 +518,7 @@ namespace ClayInspectionScheduler.Models
 
     private bool CheckSuspendGraceDate(DateTime SuspendGraceDate)
     {
-      if (SuspendGraceDate.ToShortDateString() == DateTime.Today.ToShortDateString())
+      if (SuspendGraceDate.ToShortDateString() == DateTime.Today.ToShortDateString() && Inspection_Notice.Trim() == "180+")
       {
         this.ErrorText = "The Grace Date for this contractor has passed. Please contact the Building Department for assistance.";
         return true;

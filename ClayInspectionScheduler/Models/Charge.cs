@@ -44,7 +44,7 @@ namespace ClayInspectionScheduler.Models
         C.Total 
       FROM ccCashierItem C
       INNER JOIN ccCatCd CC ON C.CatCode = CC.CatCode
-      WHERE TOTAL IS NOT NULL
+      WHERE TOTAL > 0
         AND CashierId IS NULL
         AND UnCollectable = 0
         AND AssocKey = @PermitNumber

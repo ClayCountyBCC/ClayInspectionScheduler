@@ -41,10 +41,10 @@ namespace ClayInspectionScheduler.Models
       }
     }
     
-    private void SetMaxDate(DateTime SuspendGraceDt)
+    private void SetMaxDate(DateTime SuspendGraceDt, bool ContractorOnNotice)
     {
       // do all the funky stuff in here
-      if (SuspendGraceDt > goodDates.First() && SuspendGraceDt < goodDates.Last())
+      if (SuspendGraceDt >= goodDates.First() && SuspendGraceDt < goodDates.Last() && ContractorOnNotice)
       {
         maxDate = SuspendGraceDt;
         //goodDates.RemoveAll(x => x > SuspendGraceDt);
@@ -100,11 +100,11 @@ namespace ClayInspectionScheduler.Models
 
     }
 
-    public static DateCache getDateCache(bool IsExternalUser, DateTime SuspendGraceDt)
+    public static DateCache getDateCache(bool IsExternalUser, DateTime SuspendGraceDt, bool ContractorOnNotice)
     {
       var CIP = new CacheItemPolicy() { AbsoluteExpiration = DateTime.Today.AddDays(1) };
       var dc = (DateCache)MyCache.GetItem("datecache," + IsExternalUser.ToString(), CIP);
-      dc.SetMaxDate(SuspendGraceDt);
+      dc.SetMaxDate(SuspendGraceDt, ContractorOnNotice);
       return dc;
     }
 

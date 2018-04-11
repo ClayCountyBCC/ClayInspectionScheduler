@@ -135,7 +135,7 @@ namespace ClayInspectionScheduler.Models
 
     private static List<Inspection> GetRawInspectionList()
     {
-      var dc = DateCache.getDateCache(false, DateTime.MinValue);
+      var dc = DateCache.getDateCache(false, DateTime.MinValue, false );
 
       var dp = new DynamicParameters();
       var tomorrow = (from g in dc.goodDates where g > DateTime.Today.Date orderby g select g).First();
@@ -396,7 +396,7 @@ namespace ClayInspectionScheduler.Models
           return null;
         }
 
-        if (current.Validate(PermitNumber, ResultCode, Remarks, User))
+        if (current.Validate(PermitNumber, current.ResultADC, ResultCode, Remarks, User))
         {
           // let's do some saving
           switch (ResultCode)
@@ -461,9 +461,9 @@ namespace ClayInspectionScheduler.Models
         USE WATSC;
         UPDATE bpINS_Request
         SET 
-          ResultADC = CASE WHEN @ResultCode = 'I' THEN NULL
+          ResultADC = CASE WHEN @ResultCode = '' THEN NULL
                            WHEN @ResultCode IN ('A','D','P','N','C') THEN @ResultCode END,
-          InspDateTime = CASE WHEN @ResultCode = 'I' THEN NULL
+          InspDateTime = CASE WHEN @ResultCode = '' THEN NULL
                               WHEN @ResultCode IN ('A','D','P','N','C') THEN GETDATE() END,
           Remarks = @Remarks,
           Poster = @Poster,
@@ -498,7 +498,7 @@ namespace ClayInspectionScheduler.Models
 
     }
 
-    private bool Validate(string PermitNumber, string ResultCode, string UserRemarks, UserAccess User)
+    private bool Validate(string PermitNumber, string currentResultADC, string ResultCode, string UserRemarks, UserAccess User)
     {
       if (PermitNumber != PermitNo)
       {
@@ -519,7 +519,7 @@ namespace ClayInspectionScheduler.Models
             return false;
           }
 
-          if (ResultCode == "A" | ResultCode == "D")
+          if (ResultCode == "A" || ResultCode == "D")
           {
             if (PrivateProviderInspectionRequestId > 0)
             {
@@ -529,7 +529,7 @@ namespace ClayInspectionScheduler.Models
           }
 
           // If they are trying to change something that was completed before today.
-          if (InspDateTime != DateTime.MinValue && InspDateTime.Date < DateTime.Today.AddDays(-2).Date)
+          if (currentResultADC != "" && InspDateTime != DateTime.MinValue.Date && InspDateTime.Date < DateTime.Today.AddDays(-2).Date)
           {
             Errors.Add("Inspections completed more than two days ago cannot be changed.");
             return false;
