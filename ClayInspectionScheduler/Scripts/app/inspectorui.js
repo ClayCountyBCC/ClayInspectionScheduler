@@ -6,13 +6,13 @@ var InspSched;
     var InspectorUI;
     (function (InspectorUI) {
         function LoadDailyInspections() {
+            if (InspSched.Inspectors.length === 0) {
+                LoadInspectors();
+            }
             InspSched.transport.DailyInspections().then(function (inspections) {
                 InspSched.IVInspections = inspections;
                 console.log('inspections', inspections);
                 if (InspSched.IVInspections.length > 0) {
-                    if (InspSched.Inspectors.length === 0) {
-                        LoadInspectors();
-                    }
                     BuildInspectorUI();
                 }
                 else {
@@ -33,24 +33,36 @@ var InspSched;
         function LoadInspectors() {
             InspSched.transport.Inspectors().then(function (inspectors) {
                 var developmentcheck = document.getElementById("isDevelopment");
-                if (inspectors[0].InDevelopment) {
+                if (inspectors.length > 0 && inspectors[0].InDevelopment) {
                     developmentcheck.textContent = "Dev Environment";
                 }
                 InspSched.Inspectors = inspectors;
-                PopulateInspectorDropdown();
+                InspSched.UserIsContractInspector = inspectors.length == 1;
+                PopulateInspectorDropdown(InspSched.UserIsContractInspector);
             }, function () {
                 console.log('error in LoadInspectionTypes');
                 InspSched.IVInspections = [];
             });
         }
-        function PopulateInspectorDropdown() {
+        function PopulateInspectorDropdown(UserIsContractInspector) {
+            if (UserIsContractInspector === void 0) { UserIsContractInspector = false; }
+            if (UserIsContractInspector) {
+                document.getElementById('unassigned_select_option').style.display = 'none';
+                document.getElementById('default_inspection_option').style.display = 'none';
+            }
             var ddl = document.getElementById('InspectorList');
             for (var _i = 0, _a = InspSched.Inspectors; _i < _a.length; _i++) {
                 var i = _a[_i];
-                var o = document.createElement("option");
-                o.value = i.Name;
-                o.appendChild(document.createTextNode(i.Name));
-                ddl.options.add(o);
+                if (!document.getElementById(i.Name + '_option')) {
+                    var o = document.createElement("option");
+                    o.id = i.Name + '_option';
+                    o.value = i.Name;
+                    o.appendChild(document.createTextNode(i.Name));
+                    ddl.options.add(o);
+                    if (UserIsContractInspector) {
+                        o.setAttribute('selected', 'true');
+                    }
+                }
             }
         }
         function BuildInspectorUI() {
@@ -65,7 +77,8 @@ var InspSched;
             InspSched.UI.clearElement(target);
             var currentHash = new InspSched.LocationHash(location.hash.substring(1));
             // Let's get our filters.
-            var inspector = document.getElementById("InspectorList").value;
+            var inspector = InspSched.UserIsContractInspector ? InspSched.Inspectors[0].Name :
+                document.getElementById("InspectorList").value;
             var day = document.querySelector('input[name="day"]:checked').value;
             var viewType = document.querySelector('input[name="view"]:checked').value;
             var open = document.querySelector('input[name="status"]:checked').value;

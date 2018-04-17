@@ -8,17 +8,22 @@ namespace InspSched.InspectorUI
 
   export function LoadDailyInspections()
   {
+    if (InspSched.Inspectors.length === 0)
+    {
+      LoadInspectors(); 
+    }
+    
     transport.DailyInspections().then(function (inspections: Array<Inspection>)
     {
+      
       InspSched.IVInspections = inspections;
       console.log('inspections', inspections);
       if (InspSched.IVInspections.length > 0)
       {
-        if (InspSched.Inspectors.length === 0)
-        {
-          LoadInspectors();
-        }
+
+        
         BuildInspectorUI();
+
       }
       else
       {
@@ -42,18 +47,18 @@ namespace InspSched.InspectorUI
   }
 
   function LoadInspectors(): void
-  {
+  {    
     transport.Inspectors().then(function (inspectors: Array<Inspector>)
     {
 
       let developmentcheck = (<HTMLSpanElement>document.getElementById("isDevelopment"));
-      if (inspectors[0].InDevelopment)
+      if (inspectors.length > 0 && inspectors[0].InDevelopment)
       {
         developmentcheck.textContent = "Dev Environment";
-
       }
       InspSched.Inspectors = inspectors;
-      PopulateInspectorDropdown();
+      InspSched.UserIsContractInspector = inspectors.length == 1
+      PopulateInspectorDropdown(InspSched.UserIsContractInspector);
     },
       function ()
       {
@@ -61,16 +66,30 @@ namespace InspSched.InspectorUI
         InspSched.IVInspections = [];
       });
   }
-
-  function PopulateInspectorDropdown(): void
+  
+  function PopulateInspectorDropdown(UserIsContractInspector: boolean = false): void
   {
+    if (UserIsContractInspector)
+    {
+      document.getElementById('unassigned_select_option').style.display = 'none';
+      document.getElementById('default_inspection_option').style.display = 'none';
+    }
     let ddl = <HTMLSelectElement>document.getElementById('InspectorList');
     for (let i of InspSched.Inspectors)
     {
-      let o = <HTMLOptionElement>document.createElement("option");
-      o.value = i.Name;
-      o.appendChild(document.createTextNode(i.Name));
-      ddl.options.add(o);
+      if (!document.getElementById(i.Name + '_option'))
+      {
+        let o = <HTMLOptionElement>document.createElement("option");
+        o.id = i.Name + '_option';
+        o.value = i.Name;
+        o.appendChild(document.createTextNode(i.Name));
+        ddl.options.add(o);
+        if (UserIsContractInspector)
+        {
+          o.setAttribute('selected', 'true');
+        }
+      }
+
     }
   }
 
@@ -88,7 +107,9 @@ namespace InspSched.InspectorUI
     UI.clearElement(target);
     let currentHash = new LocationHash(location.hash.substring(1));
     // Let's get our filters.
-    let inspector: string = (<HTMLSelectElement>document.getElementById("InspectorList")).value;
+
+    var inspector: string = InspSched.UserIsContractInspector ? InspSched.Inspectors[0].Name :
+                            (<HTMLSelectElement>document.getElementById("InspectorList")).value
     let day: string = (<HTMLInputElement>document.querySelector('input[name="day"]:checked')).value;
     let viewType: string = (<HTMLInputElement>document.querySelector('input[name="view"]:checked')).value;
     let open: string = (<HTMLInputElement>document.querySelector('input[name="status"]:checked')).value;

@@ -127,7 +127,7 @@ namespace ClayInspectionScheduler.Models
 
     }
 
-    public static List<Inspection> GetInspectorList()
+    public static List<Inspection> GetInspectionList()
     {
       var il = GetRawInspectionList();
       return il;
@@ -457,8 +457,11 @@ namespace ClayInspectionScheduler.Models
         dp.Add("@SecondComment", "");
       }
 
-      string sql = @"
+      string sql = $@"
         USE WATSC;
+        DECLARE @Initials CHAR(2) = (SELECT Inspector FROM bpINS_REQUEST WHERE InspReqId = @InspectionId) 
+        DECLARE @InspectorName VARCHAR(30) = (SELECT Name FROM bp_INSPECTORS WHERE Intl = @Initials)
+
         UPDATE bpINS_Request
         SET 
           ResultADC = CASE WHEN @ResultCode = '' THEN NULL
@@ -469,9 +472,13 @@ namespace ClayInspectionScheduler.Models
           Poster = @Poster,
           ChrgCode = @ChargeCode
         WHERE
-          InspReqId=@InspectionId;
+          InspReqId=@InspectionId";
 
-        EXEC add_inspection_comment @User, @InspectionId, @FirstComment, @SecondComment;";
+      sql += (UserAccess.GetUserAccess(User.user_name).current_access == UserAccess.access_type.contract_access) ? 
+          "LTRIM(RTRIM(LOWER(@InspectorName))) = RTRIM(LTRIM(LOWER(LEFT(@User, LEN(@InspectorName)))));" : 
+          "";
+
+      sql += "EXEC add_inspection_comment @User, @InspectionId, @FirstComment, @SecondComment;";
 
       if (PrivateProviderInspectionId > 0)
       {

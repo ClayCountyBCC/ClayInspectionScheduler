@@ -11,6 +11,8 @@ namespace ClayInspectionScheduler.Models
     private const string basic_access_group = "gInspectionAppAccess"; // We may make this an argument if we end up using this code elsewhere.
     private const string inspector_access_group = "gInspectionAppInspectors";
     private const string mis_access_group = "gICT";
+    private const string contract_inspection_access_group = "gUniversalEngineering";
+
     public bool authenticated { get; set; } = false;
     public string user_name { get; set; }
     public int employee_id { get; set; } = 0;
@@ -21,6 +23,7 @@ namespace ClayInspectionScheduler.Models
       public_access = 1, // They get treated like public users.
       basic_access = 2,
       inspector_access = 3,
+      contract_access = 4
     }
     public access_type current_access { get; set; } = access_type.public_access; // default to public access.
 
@@ -80,6 +83,10 @@ namespace ClayInspectionScheduler.Models
             {
               current_access = access_type.basic_access;
             }
+            else
+            {
+              current_access = access_type.contract_access;
+            }
           }
         }
       }
@@ -128,6 +135,7 @@ namespace ClayInspectionScheduler.Models
             ParseGroup(inspector_access_group, ref d);
             ParseGroup(mis_access_group, ref d);
             ParseGroup(basic_access_group, ref d);
+            ParseGroup(contract_inspection_access_group, ref d);
             d[""] = new UserAccess("");
             break;
 

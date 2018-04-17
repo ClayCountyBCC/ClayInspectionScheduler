@@ -377,226 +377,222 @@ namespace InspSched.UI
     ResultDescription.id = inspection.InspReqID + "_inspection_resultADC";
     // #endregion
 
-    // #region add Remarks Container: add Remarks textarea, button, and radiobutton sections
-    //*******************************************************************************
-    let addRemarkContainer: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-    //addRemarkContainer.setAttribute("elementName", "addRemarkContainer");
-    addRemarkContainer.className = "large-12 medium-12 small-12 row flex-container align-middle add-remark-container";
-    addRemarkContainer.id = inspection.InspReqID + "_add_remark";
-    addRemarkContainer.style.display = "none";
-
-    //***************************************
-    let addRemark: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-    addRemark.className = "row large-12 medium-12 small-12 flex-container flex-child-grow";
-
-
-
-    let addRemarkLabel: HTMLLabelElement = (<HTMLLabelElement>document.createElement("label"));
-    addRemarkLabel.className = "large-12 medium-12 small-12 row ";
-    addRemarkLabel.textContent = "Public Remarks:";
-    addRemarkLabel.style.textAlign = "left";
-
-    let addRemarkTextDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-    addRemarkTextDiv.className = "large-10 medium-8 small-12";
-    addRemarkTextDiv.classList.add("flex-container");
-    let addRemarkInputGroup: HTMLDivElement = document.createElement("div");
-    addRemarkInputGroup.classList.add("input-group");
-    addRemarkInputGroup.classList.add("small-12");
-    addRemarkInputGroup.style.margin = "0";
-
-    let remarkInput: HTMLInputElement = (<HTMLInputElement>document.createElement("input"));
-    remarkInput.type = "text";
-    remarkInput.setAttribute("onkeyup", "InspSched.disableSaveCommentButton(" + inspection.InspReqID + ")");
-    remarkInput.id = inspection.InspReqID + "_remark_textarea";
-    remarkInput.style.margin = "0";
-    if (inspection.Remarks)
+      let addRemarkContainer: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
+      let addRemark: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
+      let addRemarkLabel: HTMLLabelElement = (<HTMLLabelElement>document.createElement("label"));
+      let addRemarkTextDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
+      let addRemarkInputGroup: HTMLDivElement = document.createElement("div");
+      let remarkInput: HTMLInputElement = (<HTMLInputElement>document.createElement("input"));
+      let containerSpan: HTMLSpanElement = document.createElement("span");
+      let quickRemarkButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
+      let eventTarget = document.getElementById("ScrollTab");
+      let quickRemarkUL: HTMLUListElement = (<HTMLUListElement>document.createElement("UL"));
+      let addRemarkButtonDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
+      let addRemarkButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
+      let radioButtonSection: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
+      let CommentContainer: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
+      let textboxdiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
+      let thiscomment: HTMLTextAreaElement = (<HTMLTextAreaElement>document.createElement("textarea"));
+      let AddCommentDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
+      let commentlabel: HTMLLabelElement = (<HTMLLabelElement>document.createElement("label"));
+      let AddCommentTextarea: HTMLTextAreaElement = (<HTMLTextAreaElement>document.createElement("textarea"));
+      let SaveCommentButtonDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
+      let SaveCommentButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
+     
+    if (permit.access === access_type.inspector_access || (permit.access === access_type.contract_access && inspection.InspectorName === InspSched.Inspectors[0].Name))
     {
-      remarkInput.value = inspection.Remarks;
-    }
-    remarkInput.classList.add("input-group-field");
-    remarkInput.classList.add("columns");
-    let containerSpan: HTMLSpanElement = document.createElement("span");
-    containerSpan.classList.add("input-group-button")
+      // #region add Remarks Container: add Remarks textarea, button, and radiobutton sections
+      //*******************************************************************************
 
-    let quickRemarkButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
-    quickRemarkButton.classList.add("button");
-    quickRemarkButton.classList.add("dropdown");
-    quickRemarkButton.classList.add("arrow-only");
-    quickRemarkButton.style.borderLeftWidth = "0";
-    quickRemarkButton.classList.add("end");
-    let eventTarget = document.getElementById("ScrollTab");
-    let handler = function handleScrollForRealThisTime()
-    {
-      quickRemarkUL.style.display = "none";
-      eventTarget.removeEventListener("scroll", handler, false);
-      window.removeEventListener("resize", handler, true);
-    };
-    quickRemarkButton.onclick = function (e: Event)
-    {
-      let toggle = quickRemarkUL.style.display === "block";
 
-      if (!toggle)
-      {
-        eventTarget.addEventListener("scroll", handler, false);
-        window.addEventListener("resize", handler, true);
+      //addRemarkContainer.setAttribute("elementName", "addRemarkContainer");
+      addRemarkContainer.className = "large-12 medium-12 small-12 row flex-container align-middle add-remark-container";
+      addRemarkContainer.id = inspection.InspReqID + "_add_remark";
+      addRemarkContainer.style.display = "none";
 
-        let remarkInput = document.getElementById(inspection.InspReqID + "_remark_textarea");
-        quickRemarkUL.style.display = toggle ? "none" : "block";
-        quickRemarkUL.style.width = addRemarkInputGroup.clientWidth.toString() + "px";
-        quickRemarkUL.style.maxWidth = addRemarkInputGroup.clientWidth.toString() + "px";
+      //***************************************
+      addRemark.className = "row large-12 medium-12 small-12 flex-container flex-child-grow";
 
-        quickRemarkUL.style.left = addRemarkInputGroup.offsetLeft.toString();
 
-        let windowHeight: number = window.innerHeight;
-        let bottomHeight: number = windowHeight - (addRemarkInputGroup.offsetTop + addRemarkInputGroup.clientHeight - eventTarget.scrollTop);
-        let topHeight: number = addRemarkInputGroup.offsetTop - eventTarget.scrollTop;
-        let leftOffset: number = addRemarkInputGroup.offsetLeft;
-        console.log('windowHeight: ', windowHeight, 'bottomHeight: ', bottomHeight, 'topHeight: ', topHeight);
 
-        quickRemarkUL.style.height = "103px";
-        if (bottomHeight < topHeight)
-        {
-          console.log('use top');
-          quickRemarkUL.style.top = (topHeight - 103).toString() + "px";
-          quickRemarkUL.style.left = leftOffset.toString() + "px";
-        }
-        else
-        {
-          console.log('use bottom');
-          quickRemarkUL.style.top = (addRemarkInputGroup.offsetTop + addRemarkInputGroup.clientHeight - eventTarget.scrollTop).toString() + "px";
-          quickRemarkUL.style.left = leftOffset.toString() + "px";
-        }
+      addRemarkLabel.className = "large-12 medium-12 small-12 row ";
+      addRemarkLabel.textContent = "Public Remarks:";
+      addRemarkLabel.style.textAlign = "left";
 
+      addRemarkTextDiv.className = "large-10 medium-8 small-12";
+      addRemarkTextDiv.classList.add("flex-container");
+      addRemarkInputGroup.classList.add("input-group");
+      addRemarkInputGroup.classList.add("small-12");
+      addRemarkInputGroup.style.margin = "0";
+
+      remarkInput.type = "text";
+      remarkInput.setAttribute("onkeyup", "InspSched.disableSaveCommentButton(" + inspection.InspReqID + ")");
+      remarkInput.id = inspection.InspReqID + "_remark_textarea";
+      remarkInput.style.margin = "0";
+      if (inspection.Remarks) {
+        remarkInput.value = inspection.Remarks;
       }
-      else
-      {
-        handler();
-      }
-    }
-    let quickRemarkUL: HTMLUListElement = (<HTMLUListElement>document.createElement("UL"));
-    quickRemarkUL.id = "drop" + inspection.InspReqID.toString();
-    quickRemarkUL.classList.add("quick-remark-list");
-    quickRemarkUL.classList.add("row");
-    quickRemarkUL.style.backgroundColor = "white";
-    quickRemarkUL.style.display = "none";
-    quickRemarkUL.style.position = "fixed";
+      remarkInput.classList.add("input-group-field");
+      remarkInput.classList.add("columns");
+      containerSpan.classList.add("input-group-button")
 
-    let filteredRemarks = FilterQuickRemarks(inspection.PermitNo[0], inspection.PrivateProviderInspectionRequestId > 0);
-    for (let qr of filteredRemarks)
-    {
-      let quickRemarkLi: HTMLLIElement = (<HTMLLIElement>document.createElement("LI"));
-      let link: HTMLAnchorElement = document.createElement("a");
-      link.onclick = function (e: Event)
-      {
-        return InspSched.UI.SetRemarkText(inspection.InspReqID, qr.Remark);
+      quickRemarkButton.classList.add("button");
+      quickRemarkButton.classList.add("dropdown");
+      quickRemarkButton.classList.add("arrow-only");
+      quickRemarkButton.style.borderLeftWidth = "0";
+      quickRemarkButton.classList.add("end");
+      let handler = function handleScrollForRealThisTime() {
+        quickRemarkUL.style.display = "none";
+        eventTarget.removeEventListener("scroll", handler, false);
+        window.removeEventListener("resize", handler, true);
       };
-      link.appendChild(document.createTextNode(qr.Remark));
-      quickRemarkLi.appendChild(link);
-      quickRemarkUL.appendChild(quickRemarkLi);
+      quickRemarkButton.onclick = function (e: Event) {
+        let toggle = quickRemarkUL.style.display === "block";
+
+        if (!toggle) {
+          eventTarget.addEventListener("scroll", handler, false);
+          window.addEventListener("resize", handler, true);
+
+          let remarkInput = document.getElementById(inspection.InspReqID + "_remark_textarea");
+          quickRemarkUL.style.display = toggle ? "none" : "block";
+          quickRemarkUL.style.width = addRemarkInputGroup.clientWidth.toString() + "px";
+          quickRemarkUL.style.maxWidth = addRemarkInputGroup.clientWidth.toString() + "px";
+
+          quickRemarkUL.style.left = addRemarkInputGroup.offsetLeft.toString();
+
+          let windowHeight: number = window.innerHeight;
+          let bottomHeight: number = windowHeight - (addRemarkInputGroup.offsetTop + addRemarkInputGroup.clientHeight - eventTarget.scrollTop);
+          let topHeight: number = addRemarkInputGroup.offsetTop - eventTarget.scrollTop;
+          let leftOffset: number = addRemarkInputGroup.offsetLeft;
+          console.log('windowHeight: ', windowHeight, 'bottomHeight: ', bottomHeight, 'topHeight: ', topHeight);
+
+          quickRemarkUL.style.height = "103px";
+          if (bottomHeight < topHeight) {
+            console.log('use top');
+            quickRemarkUL.style.top = (topHeight - 103).toString() + "px";
+            quickRemarkUL.style.left = leftOffset.toString() + "px";
+          }
+          else {
+            console.log('use bottom');
+            quickRemarkUL.style.top = (addRemarkInputGroup.offsetTop + addRemarkInputGroup.clientHeight - eventTarget.scrollTop).toString() + "px";
+            quickRemarkUL.style.left = leftOffset.toString() + "px";
+          }
+
+        }
+        else {
+          handler();
+        }
+      }
+      quickRemarkUL.id = "drop" + inspection.InspReqID.toString();
+      quickRemarkUL.classList.add("quick-remark-list");
+      quickRemarkUL.classList.add("row");
+      quickRemarkUL.style.backgroundColor = "white";
+      quickRemarkUL.style.display = "none";
+      quickRemarkUL.style.position = "fixed";
+
+      let filteredRemarks = FilterQuickRemarks(inspection.PermitNo[0], inspection.PrivateProviderInspectionRequestId > 0);
+      for (let qr of filteredRemarks) {
+        let quickRemarkLi: HTMLLIElement = (<HTMLLIElement>document.createElement("LI"));
+        let link: HTMLAnchorElement = document.createElement("a");
+        link.onclick = function (e: Event) {
+          return InspSched.UI.SetRemarkText(inspection.InspReqID, qr.Remark);
+        };
+        link.appendChild(document.createTextNode(qr.Remark));
+        quickRemarkLi.appendChild(link);
+        quickRemarkUL.appendChild(quickRemarkLi);
+      }
+      containerSpan.appendChild(quickRemarkButton);
+      addRemarkInputGroup.appendChild(remarkInput);
+      addRemarkInputGroup.appendChild(containerSpan);
+
+
+      //addRemarkButtonDiv.setAttribute("elementName", "addRemarkButtonDiv");
+      addRemarkButtonDiv.className = "ButtonContainer column large-2 medium-4 small-12 flex-container align-center flex-child-grow";
+
+      //addRemarkButton.setAttribute("elementName", "addRemarkButton");
+      addRemarkButton.setAttribute("disabled", "disabled");
+      addRemarkButton.setAttribute("value", inspection.ResultADC);
+      addRemarkButton.id = inspection.InspReqID + "_save_remark_button";
+      addRemarkButton.setAttribute("onclick", "(InspSched.UpdateInspection(" + permit.PermitNo + ", " + inspection.InspReqID + "))");
+      addRemarkButton.className = "align-self-center columns DetailsButton large-12 medium-12-small-12";
+      addRemarkButton.style.margin = "0";
+      addRemarkButton.textContent = "Save Result";
+
+
+      //***************************************
+      //radioButtonSection.setAttribute("elementName", "radioButtonSection");
+      radioButtonSection.className = "large-12 medium-12 small-12 column";
+      radioButtonSection.style.paddingLeft = "1em";
+
+
+
+      // #endregion Remarks Container: add Remarks textarea, button, and radiobutton sections
+
+      // #region Comment Section
+      //*********************************************************************************
+      CommentContainer.className = "large-12 medium-12 small-12 row flex-container comment-container completed-comments-textarea";
+      //CommentContainer.setAttribute("elementName", "CommentContainer");
+      CommentContainer.style.display = "none";
+      CommentContainer.id = inspection.InspReqID + "_comments";
+
+
+      //textboxdiv.setAttribute("elementName", "textboxdiv");
+      textboxdiv.className = "large-12 medium-12 small-12 row completed-comments-textarea ";
+      textboxdiv.style.display = "none";
+      textboxdiv.id = inspection.InspReqID.toString() + "_textbox_div";
+
+
+      //thiscomment.setAttribute("elementName", "thiscomment");
+      thiscomment.id = inspection.InspReqID + "_audit"
+      thiscomment.className = "row large-12 medium-12 small-12 No-Edit";
+      thiscomment.rows = 4;
+      thiscomment.readOnly = true;
+      thiscomment.contentEditable = "false";
+      thiscomment.style.margin = "0";
+      thiscomment.style.overflowY = "scroll";
+      thiscomment.style.display = "flex";
+
+      //AddCommentDiv.setAttribute("elementName", "AddCommentDiv");
+      AddCommentDiv.className = "row large-12 medium-12 small-12 flex-container flex-child-grow";
+      AddCommentDiv.style.paddingLeft = "1em";
+
+      //commentlabel.setAttribute("elementName", "commentlabel");
+      commentlabel.className = "large-12 medium-12 small-12 row ";
+      commentlabel.style.textAlign = "left";
+      commentlabel.innerText = "Add Comments:";
+
+      //AddCommentTextarea.setAttribute("elementName", "AddCommentTextarea");
+      AddCommentTextarea.className = "large-10 medium-10 small-12 column Comment-Textarea";
+      AddCommentTextarea.style.resize = "none";
+      AddCommentTextarea.rows = 3;
+      AddCommentTextarea.id = inspection.InspReqID + "_comment_textarea";
+      AddCommentTextarea.maxLength = 200;
+
+
+      //SaveCommentButtonDiv.setAttribute("elementName", "SaveCommentuttonDiv");
+      SaveCommentButtonDiv.className = "ButtonContainer column large-2 medium-2 small-12 flex-container align-center";
+
+      SaveCommentButton.className = "button align-self-center column small-12 SaveCommentButton";
+      //SaveCommentButton.setAttribute("elementName", "SaveCommentButton");
+      SaveCommentButton.setAttribute("onclick", "InspSched.SaveComment('" + inspection.InspReqID + "','" + AddCommentTextarea.value + "')");
+      SaveCommentButton.textContent = "Save Comment";
+      SaveCommentButton.id = inspection.InspReqID + "_save_comment_button";
+
+
+
+      //if (inspection.comments.length > 0)
+      //{
+      //  CommentContainer.appendChild(1234567_textboxdiv);
+      //}
+      //1234567_commnents.appendChild(AddCommentDiv);
+
+      //AddCommentDiv.appendChild(commentlabel);
+      //AddCommentDiv.appendChild(AddCommentTextarea);
+      //SaveCommentButtonDiv.appendChild(SaveCommentButton)
+      //AddCommentDiv.appendChild(SaveCommentButtonDiv);
+
+
     }
-    containerSpan.appendChild(quickRemarkButton);
-    addRemarkInputGroup.appendChild(remarkInput);
-    addRemarkInputGroup.appendChild(containerSpan);
-
-
-    let addRemarkButtonDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-    //addRemarkButtonDiv.setAttribute("elementName", "addRemarkButtonDiv");
-    addRemarkButtonDiv.className = "ButtonContainer column large-2 medium-4 small-12 flex-container align-center flex-child-grow";
-
-    let addRemarkButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
-    //addRemarkButton.setAttribute("elementName", "addRemarkButton");
-    addRemarkButton.setAttribute("disabled", "disabled");
-    addRemarkButton.setAttribute("value", inspection.ResultADC);
-    addRemarkButton.id = inspection.InspReqID + "_save_remark_button";
-    addRemarkButton.setAttribute("onclick", "(InspSched.UpdateInspection(" + permit.PermitNo + ", " + inspection.InspReqID + "))");
-    addRemarkButton.className = "align-self-center columns DetailsButton large-12 medium-12-small-12";
-    addRemarkButton.style.margin = "0";
-    addRemarkButton.textContent = "Save Result";
-
-
-    //***************************************
-    let radioButtonSection: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-    //radioButtonSection.setAttribute("elementName", "radioButtonSection");
-    radioButtonSection.className = "large-12 medium-12 small-12 column";
-    radioButtonSection.style.paddingLeft = "1em";
-
-
-
-    // #endregion Remarks Container: add Remarks textarea, button, and radiobutton sections
-
-    // #region Comment Section
-    //*********************************************************************************
-    let CommentContainer: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-    CommentContainer.className = "large-12 medium-12 small-12 row flex-container comment-container completed-comments-textarea";
-    //CommentContainer.setAttribute("elementName", "CommentContainer");
-    CommentContainer.style.display = "none";
-    CommentContainer.id = inspection.InspReqID + "_comments";
-
-
-    let textboxdiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-    //textboxdiv.setAttribute("elementName", "textboxdiv");
-    textboxdiv.className = "large-12 medium-12 small-12 row completed-comments-textarea ";
-    textboxdiv.style.display = "none";
-    textboxdiv.id = inspection.InspReqID.toString() + "_textbox_div";
-
-
-    let thiscomment: HTMLTextAreaElement = (<HTMLTextAreaElement>document.createElement("textarea"));
-    //thiscomment.setAttribute("elementName", "thiscomment");
-    thiscomment.id = inspection.InspReqID + "_audit"
-    thiscomment.className = "row large-12 medium-12 small-12 No-Edit";
-    thiscomment.rows = 4;
-    thiscomment.readOnly = true;
-    thiscomment.contentEditable = "false";
-    thiscomment.style.margin = "0";
-    thiscomment.style.overflowY = "scroll";
-    thiscomment.style.display = "flex";
-
-    let AddCommentDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-    //AddCommentDiv.setAttribute("elementName", "AddCommentDiv");
-    AddCommentDiv.className = "row large-12 medium-12 small-12 flex-container flex-child-grow";
-    AddCommentDiv.style.paddingLeft = "1em";
-
-    let commentlabel: HTMLLabelElement = (<HTMLLabelElement>document.createElement("label"));
-    //commentlabel.setAttribute("elementName", "commentlabel");
-    commentlabel.className = "large-12 medium-12 small-12 row ";
-    commentlabel.style.textAlign = "left";
-    commentlabel.innerText = "Add Comments:";
-
-    let AddCommentTextarea: HTMLTextAreaElement = (<HTMLTextAreaElement>document.createElement("textarea"));
-    //AddCommentTextarea.setAttribute("elementName", "AddCommentTextarea");
-    AddCommentTextarea.className = "large-10 medium-10 small-12 column Comment-Textarea";
-    AddCommentTextarea.style.resize = "none";
-    AddCommentTextarea.rows = 3;
-    AddCommentTextarea.id = inspection.InspReqID + "_comment_textarea";
-    AddCommentTextarea.maxLength = 200;
-
-
-    let SaveCommentButtonDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
-    //SaveCommentButtonDiv.setAttribute("elementName", "SaveCommentuttonDiv");
-    SaveCommentButtonDiv.className = "ButtonContainer column large-2 medium-2 small-12 flex-container align-center";
-
-    let SaveCommentButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
-    SaveCommentButton.className = "button align-self-center column small-12 SaveCommentButton";
-    //SaveCommentButton.setAttribute("elementName", "SaveCommentButton");
-    SaveCommentButton.setAttribute("onclick", "InspSched.SaveComment('" + inspection.InspReqID + "','" + AddCommentTextarea.value + "')");
-    SaveCommentButton.textContent = "Save Comment";
-    SaveCommentButton.id = inspection.InspReqID + "_save_comment_button";
-
-
-
-    //if (inspection.comments.length > 0)
-    //{
-    //  CommentContainer.appendChild(1234567_textboxdiv);
-    //}
-    //1234567_commnents.appendChild(AddCommentDiv);
-
-    //AddCommentDiv.appendChild(commentlabel);
-    //AddCommentDiv.appendChild(AddCommentTextarea);
-    //SaveCommentButtonDiv.appendChild(SaveCommentButton)
-    //AddCommentDiv.appendChild(SaveCommentButtonDiv);
-
-
-
     // #endregion Comment Secion
 
     //*********************************************
@@ -616,7 +612,7 @@ namespace InspSched.UI
     }
 
     // if inspection is incomplete, set date to InspSched, else InspDate
-    if (inspection.DisplayInspDateTime.toLowerCase() === 'incomplete')
+    if (inspection.DisplayInspDateTime.toLowerCase() === 'scheduled') 
     {
       inspDateTime.appendChild(document.createTextNode(inspection.DisplaySchedDateTime));
 
@@ -660,7 +656,6 @@ namespace InspSched.UI
 
 
     // #endregion Initial Append Rows to Inspection Row
-
     let detailButton = BuildButton(inspection.InspReqID + "_details_btn", "Details", "InspSched.UI.ToggleInspDetails(this.value)", inspection.InspReqID.toString())
     detailButton.className = "column large-12 medium-12 small-12 align-self-center  DetailsButton";
     let buttonDiv = <HTMLDivElement>document.createElement("div");
@@ -669,7 +664,12 @@ namespace InspSched.UI
     //Create function to make New/Cancel/Details Button
     if (permit.ErrorText.length === 0)
     {
-      buttonDiv.appendChild(BuildButton("", "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
+      if (!InspSched.UserIsContractInspector ||
+        (InspSched.UserIsContractInspector &&
+          inspection.InspectorName.toLocaleLowerCase().substr(0, InspSched.Inspectors[0].Name.length) ==
+          InspSched.Inspectors[0].Name.toLowerCase())) {
+        buttonDiv.appendChild(BuildButton("", "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
+      }
     }
     else 
     {
@@ -679,7 +679,14 @@ namespace InspSched.UI
     {
       if (inspection.InspReqID !== 0)
       {
-        buttonDiv.appendChild(detailButton);
+        if (!InspSched.UserIsContractInspector ||
+          (InspSched.UserIsContractInspector &&
+            inspection.InspectorName.toLocaleLowerCase().substr(0, InspSched.Inspectors[0].Name.length) ==
+            InspSched.Inspectors[0].Name.toLowerCase()))
+        {
+          buttonDiv.appendChild(detailButton);
+        }
+
       }
     }
 
@@ -697,15 +704,25 @@ namespace InspSched.UI
             buttonDiv.appendChild(cancelButton);
             if (permit.ErrorText.length === 0)
             {
-              cancelButton.style.marginTop = "6px";
-            }
+              if (!InspSched.UserIsContractInspector ||
+                (InspSched.UserIsContractInspector &&
+                  inspection.InspectorName.toLocaleLowerCase().substr(0, InspSched.Inspectors[0].Name.length) ==
+                  InspSched.Inspectors[0].Name.toLowerCase())) {
+                buttonDiv.appendChild(BuildButton("", "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
+              }            }
           }
         }
         else
         {
           if (inspection.InspReqID !== 0)
           {
-            buttonDiv.appendChild(detailButton);
+            if (!InspSched.UserIsContractInspector ||
+              (InspSched.UserIsContractInspector &&
+                inspection.InspectorName.toLocaleLowerCase().substr(0, InspSched.Inspectors[0].Name.length) ==
+                InspSched.Inspectors[0].Name.toLowerCase()))
+            {
+              buttonDiv.appendChild(detailButton);
+            }
           }
 
         }
@@ -767,6 +784,7 @@ namespace InspSched.UI
     return inspRow;
 
   }
+
   function CheckBrowser()
   {
 
