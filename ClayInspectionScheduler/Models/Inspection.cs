@@ -520,7 +520,7 @@ namespace ClayInspectionScheduler.Models
         case "P":
         case "N":
           // only inspectors can change the result
-          if (User.current_access != UserAccess.access_type.inspector_access)
+          if (User.current_access == UserAccess.access_type.public_access)
           {
             Errors.Add("Unauthorized Access.");
             return false;
