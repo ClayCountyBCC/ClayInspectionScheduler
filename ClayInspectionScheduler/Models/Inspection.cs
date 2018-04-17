@@ -396,7 +396,7 @@ namespace ClayInspectionScheduler.Models
           return null;
         }
 
-        if (current.Validate(PermitNumber, current.ResultADC, ResultCode, Remarks, User))
+        if (current.Validate(PermitNumber, current, ResultCode, Remarks, User))
         {
           // let's do some saving
           switch (ResultCode)
@@ -475,7 +475,7 @@ namespace ClayInspectionScheduler.Models
           InspReqId=@InspectionId";
 
       sql += (UserAccess.GetUserAccess(User.user_name).current_access == UserAccess.access_type.contract_access) ? 
-          "LTRIM(RTRIM(LOWER(@InspectorName))) = RTRIM(LTRIM(LOWER(LEFT(@User, LEN(@InspectorName)))));" : 
+          "AND LTRIM(RTRIM(LOWER(@InspectorName))) = RTRIM(LTRIM(LOWER(LEFT(@User, LEN(@InspectorName)))));" : 
           "";
 
       sql += "EXEC add_inspection_comment @User, @InspectionId, @FirstComment, @SecondComment;";
@@ -505,8 +505,14 @@ namespace ClayInspectionScheduler.Models
 
     }
 
-    private bool Validate(string PermitNumber, string currentResultADC, string ResultCode, string UserRemarks, UserAccess User)
+    private bool Validate(string PermitNumber, Inspection currentInpsection, string ResultCode, string UserRemarks, UserAccess User)
     {
+      if(User.current_access == UserAccess.access_type.contract_access)
+      {
+        var inspList = Inspector.GetCached().RemoveAll(i => i.NTUsername != User.user_name);
+
+
+      }
       if (PermitNumber != PermitNo)
       {
         Errors.Add("The permit number does not match the inspection, please check your request and try again.");
@@ -536,9 +542,18 @@ namespace ClayInspectionScheduler.Models
           }
 
           // If they are trying to change something that was completed before today.
-          if (currentResultADC != "" && InspDateTime != DateTime.MinValue.Date && InspDateTime.Date < DateTime.Today.AddDays(-2).Date)
+          if (currentInpsection.ResultADC != "" && 
+              InspDateTime != DateTime.MinValue.Date && 
+              InspDateTime.Date < DateTime.Today.AddDays(-2).Date)
           {
             Errors.Add("Inspections completed more than two days ago cannot be changed.");
+            return false;
+          }
+          if (currentInpsection.ResultADC != "" &&
+              InspDateTime != DateTime.MinValue.Date && 
+              User.current_access == UserAccess.access_type.contract_access)
+          {
+            Errors.Add("Completed inspections cannot be changed. Please contact the Building departent for assistance.");
             return false;
           }
           if (ResultCode == "D" & UserRemarks.Length == 0)

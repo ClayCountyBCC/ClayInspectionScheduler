@@ -27,8 +27,8 @@ body {
 #Searching,
 #SearchFailed,
 #NoPermit,
-#SearchFailed,
-#InspectorViewTab {
+#SearchFailed
+{
   display: none;
 }
 

@@ -294,7 +294,7 @@ var InspSched;
             var AddCommentTextarea = document.createElement("textarea");
             var SaveCommentButtonDiv = document.createElement("div");
             var SaveCommentButton = document.createElement("button");
-            if (permit.access === InspSched.access_type.inspector_access || (permit.access === InspSched.access_type.contract_access && inspection.InspectorName === InspSched.Inspectors[0].Name)) {
+            if (1 == 1) {
                 // #region add Remarks Container: add Remarks textarea, button, and radiobutton sections
                 //*******************************************************************************
                 //addRemarkContainer.setAttribute("elementName", "addRemarkContainer");
@@ -452,8 +452,8 @@ var InspSched;
             }
             // #endregion Comment Secion
             //*********************************************
-            // Set permit number as link if internal user 
-            if (permit.access !== InspSched.access_type.public_access) {
+            // Set permit number as link if internal user: not contract_access or public_access
+            if (permit.access !== InspSched.access_type.public_access && permit.access !== InspSched.access_type.contract_access) {
                 var link = document.createElement("a");
                 link.href = permit.Permit_URL;
                 link.classList.add('no-underline-for-print');
@@ -620,7 +620,7 @@ var InspSched;
         }
         function BuildRadioButtonRow(InspectionId, checked, access, privateProvidercheck) {
             var RadioButtonSubrow = document.createElement("div");
-            if (access === InspSched.access_type.inspector_access) {
+            if (access == InspSched.access_type.inspector_access || access == InspSched.access_type.contract_access) {
                 RadioButtonSubrow.className = "large-10 medium-10 small-12 flex-container flex-dir-row flex-child-grow align-justify row";
                 RadioButtonSubrow.id = InspectionId + "_radio_list";
                 var approveradio = document.createElement("input");
