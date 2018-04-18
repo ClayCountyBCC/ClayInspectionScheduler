@@ -12,7 +12,7 @@ var InspSched;
             InspSched.transport.DailyInspections().then(function (inspections) {
                 InspSched.IVInspections = inspections;
                 console.log('inspections', inspections);
-                if (InspSched.IVInspections.length > 0 && InspSched.Inspectors.length > 0) {
+                if (InspSched.IVInspections.length > 0 || InspSched.Inspectors.length > 0) {
                     BuildInspectorUI();
                 }
                 else {
