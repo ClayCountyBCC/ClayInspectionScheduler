@@ -101,7 +101,7 @@ namespace ClayInspectionScheduler.Models
         if (this.ResultADC == "C")
           return (InspDateTime == DateTime.MinValue) ? "N/A" : InspDateTime.ToString("MM/dd/yyyy");
 
-        return (InspDateTime == DateTime.MinValue) ? "incomplete" : InspDateTime.ToString("MM/dd/yyyy");
+        return (InspDateTime == DateTime.MinValue) ? "Scheduled" : InspDateTime.ToString("MM/dd/yyyy");
 
       }
 
@@ -459,9 +459,6 @@ namespace ClayInspectionScheduler.Models
 
       string sql = $@"
         USE WATSC;
-        DECLARE @Initials CHAR(2) = (SELECT Inspector FROM bpINS_REQUEST WHERE InspReqId = @InspectionId) 
-        DECLARE @InspectorName VARCHAR(30) = (SELECT Name FROM bp_INSPECTORS WHERE Intl = @Initials)
-
         UPDATE bpINS_Request
         SET 
           ResultADC = CASE WHEN @ResultCode = '' THEN NULL
@@ -472,13 +469,9 @@ namespace ClayInspectionScheduler.Models
           Poster = @Poster,
           ChrgCode = @ChargeCode
         WHERE
-          InspReqId=@InspectionId";
-
-      sql += (UserAccess.GetUserAccess(User.user_name).current_access == UserAccess.access_type.contract_access) ? 
-          "AND LTRIM(RTRIM(LOWER(@InspectorName))) = RTRIM(LTRIM(LOWER(LEFT(@User, LEN(@InspectorName)))));" : 
-          "";
-
-      sql += "EXEC add_inspection_comment @User, @InspectionId, @FirstComment, @SecondComment;";
+          InspReqId=@InspectionId
+          
+          EXEC add_inspection_comment @User, @InspectionId, @FirstComment, @SecondComment;";
 
       if (PrivateProviderInspectionId > 0)
       {
@@ -509,9 +502,16 @@ namespace ClayInspectionScheduler.Models
     {
       if(User.current_access == UserAccess.access_type.contract_access)
       {
-        var inspList = Inspector.GetCached().RemoveAll(i => i.NTUsername != User.user_name);
-
-
+        List<Inspector> inspList = Inspector.GetCached();
+        inspList.RemoveAll(i => i.NTUsername != User.user_name);
+        if (inspList.Count() > 1)
+        {
+          Errors.Add("This inspection is not assigned to this inspector.");
+        }
+        if(inspList.First().Name != currentInpsection.InspectorName)
+        {
+          Errors.Add("This inspection is not assigned to this inspector.");
+        }
       }
       if (PermitNumber != PermitNo)
       {
@@ -661,7 +661,6 @@ namespace ClayInspectionScheduler.Models
         VALUES (@Poster,'REI',@PermitType,@PermitNumber,@Amount,@Amount,1, @HoldInput, @HoldId)";
       return sql;
     }
-
 
     private static string GetNotDeniedQueries()
     {

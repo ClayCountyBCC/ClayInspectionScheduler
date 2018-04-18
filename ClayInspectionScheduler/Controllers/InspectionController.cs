@@ -91,29 +91,26 @@ namespace ClayInspectionScheduler.Controllers
     public IHttpActionResult List()
     {
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
-      if (ua.current_access == UserAccess.access_type.basic_access |
-        ua.current_access == UserAccess.access_type.inspector_access)
+      if (ua.current_access != UserAccess.access_type.public_access)
       {
         var il = Inspection.GetInspectionList();
+
         if (il == null)
         {
           return InternalServerError();
         }
         else
         {
+          if (ua.current_access == UserAccess.access_type.contract_access)
+          {
+            il.RemoveAll(i => !ua.display_name.ToLower().StartsWith(i.InspectorName.ToLower()));
+          }
           return Ok(il);
         }
 
       }
       else
       {
-        if (ua.current_access == UserAccess.access_type.contract_access)
-        {
-          var il = Inspection.GetInspectionList();
-          il.RemoveAll(i => !ua.display_name.ToLower().StartsWith(i.InspectorName.ToLower()));
-          return Ok(il);
-        }
-
         return Ok(new List<Inspection>());
       }
     }

@@ -18,12 +18,9 @@ namespace InspSched.InspectorUI
       
       InspSched.IVInspections = inspections;
       console.log('inspections', inspections);
-      if (InspSched.IVInspections.length > 0)
+      if (InspSched.IVInspections.length > 0 && InspSched.Inspectors.length > 0)
       {
-
-        
         BuildInspectorUI();
-
       }
       else
       {

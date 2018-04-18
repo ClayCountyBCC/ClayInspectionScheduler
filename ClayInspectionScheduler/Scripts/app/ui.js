@@ -504,6 +504,7 @@ var InspSched;
                     (InspSched.UserIsContractInspector &&
                         inspection.InspectorName.toLocaleLowerCase().substr(0, InspSched.Inspectors[0].Name.length) ==
                             InspSched.Inspectors[0].Name.toLowerCase())) {
+                    console.log('inspection.InspectorName.toLocaleLowerCase().substr(0, InspSched.Inspectors[0].Name.length', inspection.InspectorName.toLocaleLowerCase().substr(0, InspSched.Inspectors[0].Name.length), 'InspSched.Inspectors[0].Name.toLowerCase()', InspSched.Inspectors[0].Name.toLowerCase());
                     buttonDiv.appendChild(BuildButton("", "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
                 }
             }
@@ -530,7 +531,7 @@ var InspSched;
                             if (permit.ErrorText.length === 0) {
                                 if (!InspSched.UserIsContractInspector ||
                                     (InspSched.UserIsContractInspector &&
-                                        inspection.InspectorName.toLocaleLowerCase().substr(0, InspSched.Inspectors[0].Name.length) ==
+                                        inspection.InspectorName.toLowerCase().substr(0, InspSched.Inspectors[0].Name.length) ==
                                             InspSched.Inspectors[0].Name.toLowerCase())) {
                                     buttonDiv.appendChild(BuildButton("", "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
                                 }

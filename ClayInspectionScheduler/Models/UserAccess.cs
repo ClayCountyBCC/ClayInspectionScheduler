@@ -83,7 +83,7 @@ namespace ClayInspectionScheduler.Models
             {
               current_access = access_type.basic_access;
             }
-            else
+            else if(groups.Contains(contract_inspection_access_group))
             {
               current_access = access_type.contract_access;
             }
@@ -154,6 +154,7 @@ namespace ClayInspectionScheduler.Models
       try
       {
         string un = Username.Replace(@"CLAYBCC\", "").ToLower();
+        //un = "testuser"; /* change "testuser" to user_name you wish to test */
         switch (Environment.MachineName.ToUpper())
         {
           case "MISSL01":
