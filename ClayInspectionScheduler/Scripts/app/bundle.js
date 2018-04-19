@@ -46,13 +46,11 @@ var InspSched;
             InspSched.transport.DailyInspections().then(function (inspections) {
                 InspSched.IVInspections = inspections;
                 console.log('inspections', inspections);
-                if (InspSched.IVInspections.length > 0 && InspSched.Inspectors.length > 0) {
+                if (InspSched.IVInspections.length > 0 || InspSched.Inspectors.length > 0) {
                     BuildInspectorUI();
                 }
-                else {
-                    if (InspSched.Inspectors.length === 0) {
-                        InspSched.UI.Show('inspector-contact-link');
-                    }
+                if (InspSched.Inspectors.length < 2) {
+                    InspSched.UI.Show('inspector-contact-link');
                 }
             }, function () {
                 console.log('error in LoadInspectionTypes');
@@ -1184,13 +1182,16 @@ var InspSched;
             var buttonDiv = document.createElement("div");
             buttonDiv.className = "row small-12";
             InspButtonContainer.appendChild(buttonDiv);
-            //Create function to make New/Cancel/Details Button
-            if (permit.ErrorText.length === 0) {
-                if (!InspSched.UserIsContractInspector ||
+            var DoesInspectorCheckOut = false;
+            if (InspSched.Inspectors.length > 0) {
+                DoesInspectorCheckOut =
                     (InspSched.UserIsContractInspector &&
                         inspection.InspectorName.toLocaleLowerCase().substr(0, InspSched.Inspectors[0].Name.length) ==
-                            InspSched.Inspectors[0].Name.toLowerCase())) {
-                    console.log('inspection.InspectorName.toLocaleLowerCase().substr(0, InspSched.Inspectors[0].Name.length', inspection.InspectorName.toLocaleLowerCase().substr(0, InspSched.Inspectors[0].Name.length), 'InspSched.Inspectors[0].Name.toLowerCase()', InspSched.Inspectors[0].Name.toLowerCase());
+                            InspSched.Inspectors[0].Name.toLowerCase());
+            }
+            //Create function to make New/Cancel/Details Button
+            if (permit.ErrorText.length === 0) {
+                if (!InspSched.UserIsContractInspector || DoesInspectorCheckOut) {
                     buttonDiv.appendChild(BuildButton("", "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
                 }
             }
@@ -1199,10 +1200,7 @@ var InspSched;
             }
             if (permit.access !== InspSched.access_type.public_access) {
                 if (inspection.InspReqID !== 0) {
-                    if (!InspSched.UserIsContractInspector ||
-                        (InspSched.UserIsContractInspector &&
-                            inspection.InspectorName.toLocaleLowerCase().substr(0, InspSched.Inspectors[0].Name.length) ==
-                                InspSched.Inspectors[0].Name.toLowerCase())) {
+                    if (!InspSched.UserIsContractInspector || DoesInspectorCheckOut) {
                         buttonDiv.appendChild(detailButton);
                     }
                 }
@@ -1215,21 +1213,13 @@ var InspSched;
                             var cancelButton = BuildButton("", "Cancel", "InspSched.CancelInspection(" + inspection.InspReqID + ", '" + inspection.PermitNo + "');");
                             buttonDiv.appendChild(cancelButton);
                             if (permit.ErrorText.length === 0) {
-                                if (!InspSched.UserIsContractInspector ||
-                                    (InspSched.UserIsContractInspector &&
-                                        inspection.InspectorName.toLowerCase().substr(0, InspSched.Inspectors[0].Name.length) ==
-                                            InspSched.Inspectors[0].Name.toLowerCase())) {
-                                    buttonDiv.appendChild(BuildButton("", "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
-                                }
+                                buttonDiv.appendChild(BuildButton("", "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
                             }
                         }
                     }
                     else {
                         if (inspection.InspReqID !== 0) {
-                            if (!InspSched.UserIsContractInspector ||
-                                (InspSched.UserIsContractInspector &&
-                                    inspection.InspectorName.toLocaleLowerCase().substr(0, InspSched.Inspectors[0].Name.length) ==
-                                        InspSched.Inspectors[0].Name.toLowerCase())) {
+                            if (!InspSched.UserIsContractInspector || DoesInspectorCheckOut) {
                                 buttonDiv.appendChild(detailButton);
                             }
                         }
@@ -2097,8 +2087,14 @@ var InspSched;
         IssueContainer.style.display = "none";
         LoadInspectionTypes();
         InspSched.InspectorUI.LoadDailyInspections();
-        window.setInterval(InspSched.InspectorUI.LoadDailyInspections, 60 * 5 * 1000); // update every 5 minutes.
+        window.setInterval(LoadInspectionsIfBetween6AMand6PM(), 60 * 5 * 1000); // update every 5 minutes.
         LoadInspectionQuickRemarks();
+    }
+    function LoadInspectionsIfBetween6AMand6PM() {
+        var d = new Date();
+        if (d.getHours() > 6 && d.getHours() < 18) {
+            InspSched.InspectorUI.LoadDailyInspections();
+        }
     }
     function LoadInspectionTypes() {
         InspSched.transport.GetInspType().then(function (insptypes) {

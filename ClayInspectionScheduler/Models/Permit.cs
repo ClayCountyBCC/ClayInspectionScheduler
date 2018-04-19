@@ -31,7 +31,7 @@ namespace ClayInspectionScheduler.Models
     private DateTime PermitIssueDate { get; set; } = DateTime.MaxValue; // check if permt
     private decimal TotalCharges { get; set; } // check for charges
     private DateTime IssueDate { get; set; } = DateTime.MinValue;
-    private int CoClosed { get; set; } // check if master is Co'd
+    public int CoClosed { get; set; } // check if master is Co'd
     public int TotalFinalInspections { get; set; } // Count the total final inspections for this permit
     private string ContractorStatus { get; set; } // check if Contractor is active
     private string PrivateProvider { get; set; } = "";

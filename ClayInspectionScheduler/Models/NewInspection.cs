@@ -206,7 +206,7 @@ namespace ClayInspectionScheduler.Models
                                 where pf == p.PermitNo
                                 select pf).FirstOrDefault();
 
-            if (currentCheck == null)
+            if (currentCheck == null && p.CoClosed == -1)
             {
               permitsWithNoFinalsScheduledOrPassed.Add(p.PermitNo);
             }

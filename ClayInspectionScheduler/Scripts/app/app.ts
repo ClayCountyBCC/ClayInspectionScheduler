@@ -290,11 +290,21 @@ namespace InspSched
     IssueContainer.style.display = "none";
     LoadInspectionTypes();
     InspectorUI.LoadDailyInspections();
-    window.setInterval(InspectorUI.LoadDailyInspections, 60 * 5 * 1000); // update every 5 minutes.
+    window.setInterval(LoadInspectionsIfBetween6AMand6PM(), 60 * 5 * 1000); // update every 5 minutes.
     LoadInspectionQuickRemarks();
-    
+
   }
 
+  function LoadInspectionsIfBetween6AMand6PM(): void
+  {
+    var d = new Date();
+
+    if (d.getHours() > 6 && d.getHours() < 18)
+    {
+      InspectorUI.LoadDailyInspections();
+    }
+
+  }
   function LoadInspectionTypes()
   {
     transport.GetInspType().then(function (insptypes: Array<InspType>)

@@ -15,10 +15,8 @@ var InspSched;
                 if (InspSched.IVInspections.length > 0 || InspSched.Inspectors.length > 0) {
                     BuildInspectorUI();
                 }
-                else {
-                    if (InspSched.Inspectors.length === 0) {
-                        InspSched.UI.Show('inspector-contact-link');
-                    }
+                if (InspSched.Inspectors.length < 2) {
+                    InspSched.UI.Show('inspector-contact-link');
                 }
             }, function () {
                 console.log('error in LoadInspectionTypes');

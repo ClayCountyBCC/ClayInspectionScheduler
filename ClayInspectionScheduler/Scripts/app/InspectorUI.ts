@@ -22,12 +22,9 @@ namespace InspSched.InspectorUI
       {
         BuildInspectorUI();
       }
-      else
+      if (InspSched.Inspectors.length < 2)
       {
-        if (InspSched.Inspectors.length === 0)
-        {
-          InspSched.UI.Show('inspector-contact-link');
-        }
+        InspSched.UI.Show('inspector-contact-link');
       }
     },
       function ()
