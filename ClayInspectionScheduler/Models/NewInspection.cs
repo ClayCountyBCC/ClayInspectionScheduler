@@ -50,7 +50,7 @@ namespace ClayInspectionScheduler.Models
       this.SchecDateTime = SchecDateTime;
     }
 
-    public List<string> Validate(UserAccess.access_type CurrentAccess, 
+    public List<string> Validate(UserAccess.access_type CurrentAccess,
       List<InspType> inspTypes)
     {
       // List of things that need to be validated:
@@ -135,8 +135,8 @@ namespace ClayInspectionScheduler.Models
         }
         // Is the inspection type valid?
         if (!(from i in inspTypes
-             where i.InspCd == InspectionCd
-             select i).Any())
+              where i.InspCd == InspectionCd
+              select i).Any())
         {
           Errors.Add("Invalid Inspection Type");
 
@@ -148,12 +148,12 @@ namespace ClayInspectionScheduler.Models
           {
             Errors.Add("Invalid Inspection for this permit type");
           }
-          
+
           var inspections = Inspection.Get(CurrentPermit.PermitNo);
 
           if (CurrentPermit.TotalFinalInspections > 0)
           {
-           Errors.Add($"Permit #{CurrentPermit.PermitNo} has passed final inspection");
+            Errors.Add($"Permit #{CurrentPermit.PermitNo} has passed final inspection");
           }
 
 
@@ -181,7 +181,7 @@ namespace ClayInspectionScheduler.Models
 
 
           //Adds functionality to return error when saving an inspection for permit that has already passed a final inspection.
-          
+
           // To schedule a building final: 
           // 1. All fees, including Road impact and school impact fees, must be paid; AND
           // 2. All associated permits must have a final inspection either scheduled, or passed.
@@ -192,29 +192,33 @@ namespace ClayInspectionScheduler.Models
 
           foreach (var f in finals)
           {
-            PermitsWithScheduledOrPassedFinals.AddRange(from ic in PassedOrScheduledInspections
-                                                        where ic.InspectionCode == f.InspCd &&
-                                                           (ic.InspDateTime == DateTime.MinValue ||  
-                                                            ic.ResultADC == "A" ||
-                                                            ic.ResultADC == "P")
-                                                      select ic.PermitNo);
+            //PermitsWithScheduledOrPassedFinals.AddRange(from ic in PassedOrScheduledInspections
+            //                                            where ic.InspectionCode == f.InspCd &&
+            //                                               (ic.InspDateTime == DateTime.MinValue ||
+            //                                                ic.ResultADC == "A" ||
+            //                                                ic.ResultADC == "P")
+            //                                            select ic.PermitNo);
+
+            permitsWithNoFinalsScheduledOrPassed.AddRange(from ic in PassedOrScheduledInspections
+                                                          where ic.InspectionCode == f.InspCd &&
+                                                             (ic.InspDateTime != DateTime.MinValue ||
+                                                              ic.ResultADC != "A" ||
+                                                              ic.ResultADC != "P" ||
+                                                              ic.ResultADC != "")
+                                                          select ic.PermitNo);
           }
+
+
 
           foreach (var p in Permits)
           {
-            var currentCheck = (from pf in PermitsWithScheduledOrPassedFinals
-                                where pf == p.PermitNo
-                                select pf).FirstOrDefault();
-
-            if (currentCheck == null && p.CoClosed == -1)
+            if (p.CoClosed > -1)
             {
-              permitsWithNoFinalsScheduledOrPassed.Add(p.PermitNo);
-            }
+              permitsWithNoFinalsScheduledOrPassed.Remove(p.PermitNo);
 
-            if (this.PermitNo[0] == '1' && Permits.Count > 1 && finalInspectionCodes.Contains(this.InspectionCd))
-            {
-              if (permitsWithNoFinalsScheduledOrPassed.Contains(this.PermitNo) && 
-                      PermitsWithScheduledOrPassedFinals.Count < Permits.Count-1 )
+              if (Permits.Count > 1 &&
+                   finalInspectionCodes.Contains(this.InspectionCd) &&
+                   permitsWithNoFinalsScheduledOrPassed.Count > 0)
               {
                 Errors.Add($@"All permits associated with permit #{p.PermitNo}
                            must have final inspections scheduled or passed, 
