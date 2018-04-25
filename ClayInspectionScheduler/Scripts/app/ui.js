@@ -505,10 +505,13 @@ var InspSched;
                         inspection.InspectorName.toLocaleLowerCase().substr(0, InspSched.Inspectors[0].Name.length) ==
                             InspSched.Inspectors[0].Name.toLowerCase());
             }
+            var newButtonExists = document.getElementById(inspection.InspReqID + "_newButton");
             //Create function to make New/Cancel/Details Button
             if (permit.ErrorText.length === 0) {
-                if (!InspSched.UserIsContractInspector || DoesInspectorCheckOut) {
-                    buttonDiv.appendChild(BuildButton("", "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
+                if (newButtonExists == null && (!InspSched.UserIsContractInspector || DoesInspectorCheckOut)) {
+                    var newButton = BuildButton("", "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');");
+                    newButton.id = inspection.InspReqID + "_newButton";
+                    buttonDiv.appendChild(newButton);
                 }
             }
             else {
@@ -527,10 +530,10 @@ var InspSched;
                         var privprovstring = permit.ErrorText.substr(2, 16).toLowerCase();
                         if (privprovstring != "private provider" || inspection.PrivateProviderInspectionRequestId != null) {
                             var cancelButton = BuildButton("", "Cancel", "InspSched.CancelInspection(" + inspection.InspReqID + ", '" + inspection.PermitNo + "');");
-                            buttonDiv.appendChild(cancelButton);
-                            if (permit.ErrorText.length === 0) {
-                                buttonDiv.appendChild(BuildButton("", "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
+                            if (newButtonExists == null) {
+                                cancelButton.style.marginTop = "5px";
                             }
+                            buttonDiv.appendChild(cancelButton);
                         }
                     }
                     else {

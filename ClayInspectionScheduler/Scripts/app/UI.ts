@@ -672,19 +672,22 @@ namespace InspSched.UI
     }
     
 
-
+    var newButtonExists = document.getElementById(inspection.InspReqID + "_newButton");
     //Create function to make New/Cancel/Details Button
     if (permit.ErrorText.length === 0)
     {
-      if (!InspSched.UserIsContractInspector || DoesInspectorCheckOut) 
+      if (newButtonExists == null && (!InspSched.UserIsContractInspector || DoesInspectorCheckOut))
       {
-        buttonDiv.appendChild(BuildButton("", "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
+        var newButton = BuildButton("", "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');");
+        newButton.id = inspection.InspReqID + "_newButton"
+        buttonDiv.appendChild(newButton);
       }
     }
     else 
     {
       detailButton.style.margin = "0";
     }
+
     if (permit.access !== InspSched.access_type.public_access)
     {
       if (inspection.InspReqID !== 0)
@@ -708,11 +711,13 @@ namespace InspSched.UI
           if (privprovstring != "private provider" || inspection.PrivateProviderInspectionRequestId != null)
           {
             let cancelButton = BuildButton("", "Cancel", "InspSched.CancelInspection(" + inspection.InspReqID + ", '" + inspection.PermitNo + "');")
-            buttonDiv.appendChild(cancelButton);
-            if (permit.ErrorText.length === 0)
-            {              
-              buttonDiv.appendChild(BuildButton("", "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');"));
+            if (newButtonExists == null)
+            {
+              cancelButton.style.marginTop = "5px";
             }
+
+            buttonDiv.appendChild(cancelButton);
+
           }
         }
         else
@@ -817,7 +822,7 @@ namespace InspSched.UI
   }
 
   function BuildButton(buttonId: string, label: string, functionCall: string, value?: string): HTMLButtonElement
-  {
+  { 
     let InspButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
     if (buttonId.length > 0)
     {
@@ -827,6 +832,7 @@ namespace InspSched.UI
     InspButton.className = "column large-12 medium-12 small-12 align-self-center  NewInspButton";
     InspButton.appendChild(document.createTextNode(label));
     InspButton.setAttribute("onclick", functionCall);
+
 
     InspButton.value = (value == null ? "" : value);
 

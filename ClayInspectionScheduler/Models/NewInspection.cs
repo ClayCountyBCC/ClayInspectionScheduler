@@ -189,36 +189,47 @@ namespace ClayInspectionScheduler.Models
           //    associated permit's final inspection.
           var PermitsWithScheduledOrPassedFinals = new List<string>();
           var permitsWithNoFinalsScheduledOrPassed = new List<string>();
-
+          string masterPermit = "";
           foreach (var f in finals)
           {
-            //PermitsWithScheduledOrPassedFinals.AddRange(from ic in PassedOrScheduledInspections
-            //                                            where ic.InspectionCode == f.InspCd &&
-            //                                               (ic.InspDateTime == DateTime.MinValue ||
-            //                                                ic.ResultADC == "A" ||
-            //                                                ic.ResultADC == "P")
-            //                                            select ic.PermitNo);
+            PermitsWithScheduledOrPassedFinals.AddRange(from ic in PassedOrScheduledInspections
+                                                        where ic.InspectionCode == f.InspCd &&
+                                                           (ic.InspDateTime == DateTime.MinValue ||
+                                                            ic.ResultADC == "A" ||
+                                                            ic.ResultADC == "P")
+                                                        select ic.PermitNo);
 
-            permitsWithNoFinalsScheduledOrPassed.AddRange(from ic in PassedOrScheduledInspections
-                                                          where ic.InspectionCode == f.InspCd &&
-                                                             (ic.InspDateTime != DateTime.MinValue ||
-                                                              ic.ResultADC != "A" ||
-                                                              ic.ResultADC != "P" ||
-                                                              ic.ResultADC != "")
-                                                          select ic.PermitNo);
           }
-
-
 
           foreach (var p in Permits)
           {
-            if (p.CoClosed > -1)
+            if(p.CoClosed != -1)
+            {
+              masterPermit = p.PermitNo;
+            }
+            var currentCheck = (from pf in PermitsWithScheduledOrPassedFinals
+                                where pf == p.PermitNo
+                                select pf).FirstOrDefault();
+
+            if (currentCheck == null)
+            {
+              permitsWithNoFinalsScheduledOrPassed.Add(p.PermitNo);
+            }
+
+
+          }
+
+          foreach (var p in Permits)
+          {
+
+            if (p.CoClosed != -1 )
             {
               permitsWithNoFinalsScheduledOrPassed.Remove(p.PermitNo);
 
               if (Permits.Count > 1 &&
                    finalInspectionCodes.Contains(this.InspectionCd) &&
-                   permitsWithNoFinalsScheduledOrPassed.Count > 0)
+                   permitsWithNoFinalsScheduledOrPassed.Count > 0 &&
+                   this.PermitNo.Trim() == masterPermit.Trim())
               {
                 Errors.Add($@"All permits associated with permit #{p.PermitNo}
                            must have final inspections scheduled or passed, 
