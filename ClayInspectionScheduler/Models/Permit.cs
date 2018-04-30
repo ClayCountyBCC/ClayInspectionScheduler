@@ -262,9 +262,6 @@ namespace ClayInspectionScheduler.Models
       InspType newInspectionType)
     {
 
-
-
-
       var MasterPermit = (from prmt in permits
                           where prmt.CoClosed != -1
                           select prmt.PermitNo).DefaultIfEmpty("").First();
@@ -348,8 +345,12 @@ namespace ClayInspectionScheduler.Models
       var isBuildingFinal = newInspectionType != null &&
                             newInspectionType.Final == true &&
                             newInspectionType.InspCd[0] == 1;
+      foreach (var p in permits)
+      {
+          p.NoFinalInspections = NoFinals.Contains(p.PermitNo);
+      }
 
-      if(!isBuildingFinal)
+        if (!isBuildingFinal)
       {
         holdsAffectingMaster.RemoveAll(h => h.SatFinalFlg == 1);
       }
@@ -376,8 +377,6 @@ namespace ClayInspectionScheduler.Models
       {
         foreach (var p in permits)
         {
-          p.NoFinalInspections = !p.NoFinalInspections && NoFinals.Contains(p.PermitNo);
-
           if (p.ErrorText.Length != 0) continue;
 
           if (!CannotInspectPermits.Contains(p.PermitNo) && p.PermitNo != MasterPermit) continue;

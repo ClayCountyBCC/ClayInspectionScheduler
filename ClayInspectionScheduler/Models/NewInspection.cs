@@ -150,8 +150,13 @@ namespace ClayInspectionScheduler.Models
           }
 
           var inspections = Inspection.Get(CurrentPermit.PermitNo);
+          CurrentPermit.Holds = Hold.GetThisPermitsHolds(CurrentPermit.PermitNo);
 
-          if (CurrentPermit.TotalFinalInspections > 0)
+          var needsFireInspection = (from h in CurrentPermit.Holds
+                                     where h.HldCd == "FD05"
+                                     select h.HldCd.ToString()).ToList();
+
+          if (CurrentPermit.TotalFinalInspections > 0 && needsFireInspection.Count() == 0)
           {
             Errors.Add($"Permit #{CurrentPermit.PermitNo} has passed final inspection");
           }
@@ -235,6 +240,14 @@ namespace ClayInspectionScheduler.Models
                            must have final inspections scheduled or passed, 
                            before a Building final can be scheduled.");
               }
+              else if(this.InspectionCd == "123" && this.PermitNo == masterPermit && p.NoFinalInspections == true)
+              {
+
+                Errors.Add($@"Permit {masterPermit} has existing holds, 
+                           this is preventing the Building Final
+                           from being scheduled.");
+              }
+
             }
           }
         }
