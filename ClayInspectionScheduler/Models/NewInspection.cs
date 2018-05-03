@@ -156,16 +156,16 @@ namespace ClayInspectionScheduler.Models
                                      where h.HldCd == "FD05"
                                      select h.HldCd.ToString()).ToList();
 
-          if (CurrentPermit.TotalFinalInspections > 0 && needsFireInspection.Count() == 0)
+          if (CurrentPermit.TotalFinalInspections > 0 && needsFireInspection.Count() == 0 && CurrentPermit.PermitNo[0] != '6')
           {
             Errors.Add($"Permit #{CurrentPermit.PermitNo} has passed final inspection");
           }
 
 
           var PassedOrScheduledInspections = (from ic in inspections
-                                              where (ic.InspDateTime == DateTime.MinValue ||
-                                                    ic.ResultADC == "A" ||
-                                                    ic.ResultADC == "P")
+                                              where (ic.ResultADC != "C" &&
+                                                     ic.ResultADC != "D" &&
+                                                     ic.ResultADC != "N")
                                               select ic).ToList();
 
           foreach (var i in PassedOrScheduledInspections)
@@ -199,16 +199,18 @@ namespace ClayInspectionScheduler.Models
           {
             PermitsWithScheduledOrPassedFinals.AddRange(from ic in PassedOrScheduledInspections
                                                         where ic.InspectionCode == f.InspCd &&
-                                                           (ic.InspDateTime == DateTime.MinValue ||
-                                                            ic.ResultADC == "A" ||
-                                                            ic.ResultADC == "P")
+                                                           (ic.ResultADC != "C" &&
+                                                            ic.ResultADC != "D" &&
+                                                            ic.ResultADC != "N") &&
+                                                            !PermitsWithScheduledOrPassedFinals.Contains(ic.PermitNo) &&
+                                                            ic.PermitNo[0] != '6'
                                                         select ic.PermitNo);
 
           }
 
           foreach (var p in Permits)
           {
-            if(p.CoClosed != -1)
+            if (p.CoClosed != -1)
             {
               masterPermit = p.PermitNo;
             }
@@ -219,6 +221,14 @@ namespace ClayInspectionScheduler.Models
             if (currentCheck == null)
             {
               permitsWithNoFinalsScheduledOrPassed.Add(p.PermitNo);
+            }
+            else
+            {
+              if (p.PermitNo == this.PermitNo)
+              {
+                Errors.Add($@"Permit {p.PermitNo} has a scheduled final inspection.");
+
+              }
             }
 
 

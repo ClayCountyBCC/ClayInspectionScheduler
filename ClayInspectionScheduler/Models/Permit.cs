@@ -491,10 +491,10 @@ namespace ClayInspectionScheduler.Models
         this.ErrorText = $"Permit #{this.PermitNo} has not yet been issued. Please contact the building department for assistance.";
         return;
       }
-
+      if (PassedFinal()) return;
       if (this.access == UserAccess.access_type.public_access)
       {
-        if (PassedFinal()) return;
+        
         if (PrivateProvider.Length > 0)
         {
           if (CheckPrivProv(PrivateProvider)) return;
@@ -571,7 +571,7 @@ namespace ClayInspectionScheduler.Models
 
     private bool PassedFinal()
     {
-      if (this.TotalFinalInspections > 0)
+      if (this.TotalFinalInspections > 0 && this.PermitTypeString != "FR")
       {
         ErrorText = $"Permit #{this.PermitNo} has passed a final inspection";
         return true;
