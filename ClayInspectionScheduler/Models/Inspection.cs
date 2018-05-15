@@ -503,12 +503,19 @@ namespace ClayInspectionScheduler.Models
       if(User.current_access == UserAccess.access_type.contract_access)
       {
         List<Inspector> inspList = Inspector.GetCached();
-        inspList.RemoveAll(i => i.NTUsername != User.user_name);
-        if (inspList.Count() > 1)
+        //inspList.RemoveAll(i => i.NTUsername != User.user_name);
+        //if (inspList.Count() > 1)
+        //{
+        //  Errors.Add("This inspection is not assigned to this inspector.");
+        //}
+        var inspectors = (from i in inspList
+                         where i.NTUsername == User.user_name
+                         select i).ToList();
+        if(inspectors.Count() == 0)
         {
-          Errors.Add("This inspection is not assigned to this inspector.");
+          Errors.Add("Inspector not found.");
         }
-        if(inspList.First().Name != currentInpsection.InspectorName)
+        if(inspectors.First().Name != currentInpsection.InspectorName)
         {
           Errors.Add("This inspection is not assigned to this inspector.");
         }

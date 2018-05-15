@@ -124,10 +124,10 @@ namespace ClayInspectionScheduler.Controllers
       {
         if(ua.current_access == UserAccess.access_type.contract_access)
         {
-          var contractInspectorList = Inspector.GetCached();
-          contractInspectorList.RemoveAll(i => !ua.display_name.ToLower().StartsWith(i.Name.ToLower()));
-
-          return Ok(contractInspectorList);
+          var inspectors = (from i in Inspector.GetCached()
+                            where i.NTUsername == ua.user_name
+                            select i).ToList();
+          return Ok(inspectors);
         }
         return Ok(Inspector.GetCached());
 

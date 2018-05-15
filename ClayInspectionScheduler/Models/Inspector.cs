@@ -46,7 +46,7 @@ namespace ClayInspectionScheduler.Models
           PrivateProvider,
           Intl Initials,
           {(Constants.UseProduction() == false ? 1 : 0).ToString()} InDevelopment,
-          NTUsername
+          LOWER(NTUsername) NTUserName
         FROM bp_INSPECTORS
         WHERE 
           Active=1
