@@ -140,9 +140,10 @@ namespace InspSched.UI
   function buildPermitSelectOptGroup(lbl: string, val: string): HTMLElement
   {
     //let og = document.createElement( "optgroup" );
-    let og = document.createElement("optgroup");
-    og.label = lbl;
-    og.value = val;
+    let og = <HTMLOptGroupElement>document.createElement("optgroup");
+
+    og.label = lbl;    
+    //og.value = val;
 
     return og;
   }

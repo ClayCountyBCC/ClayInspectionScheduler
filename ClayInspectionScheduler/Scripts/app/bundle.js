@@ -785,7 +785,7 @@ var InspSched;
             //let og = document.createElement( "optgroup" );
             var og = document.createElement("optgroup");
             og.label = lbl;
-            og.value = val;
+            //og.value = val;
             return og;
         }
         function createOptGroupElement(value, className) {
@@ -1278,7 +1278,8 @@ var InspSched;
             else if (navigator.userAgent.indexOf("Firefox") != -1) {
                 browser = 'Firefox';
             }
-            else if ((navigator.userAgent.indexOf("MSIE") != -1) || (!!document.DOCUMENT_NODE == true)) {
+            else if ((navigator.userAgent.indexOf("MSIE") != -1) || (!!document.DOCUMENT_NODE == true)) //IF IE > 10
+             {
                 browser = 'IE';
             }
             else {
