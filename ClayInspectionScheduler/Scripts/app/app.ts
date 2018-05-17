@@ -179,8 +179,6 @@ namespace InspSched
     {
       if (permit.PermitNo == permitNumSelect.value)
       {
-        // THIS LINE FOR TESTING ONLY
-        permit.access = access_type.inspector_access;
 
         InspSched.ThisPermit = permit;
 

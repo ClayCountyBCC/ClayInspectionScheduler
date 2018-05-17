@@ -510,7 +510,7 @@ namespace InspSched.InspectorUI
     row.style.marginTop = ".5em";
     ch.Permit = i.Address;
     ch.InspectionId = 0;
-    let address = CreateTargettedLink(i.Address, "http://apps.claycountygov.com/inspectionview/#inspectionid=" + i.Inspections[0].InspectionId.toString(), "inspectionview");
+    let address = CreateTargettedLink(i.Address, "/inspectionview/#inspectionid=" + i.Inspections[0].InspectionId.toString(), "inspectionview");
     let addressContainer = document.createElement("div");
     let addressContainerContainer = document.createElement("div");
     addressContainerContainer.classList.add("row");
