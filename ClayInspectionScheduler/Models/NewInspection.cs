@@ -202,8 +202,7 @@ namespace ClayInspectionScheduler.Models
                                                            (ic.ResultADC != "C" &&
                                                             ic.ResultADC != "D" &&
                                                             ic.ResultADC != "N") &&
-                                                            !PermitsWithScheduledOrPassedFinals.Contains(ic.PermitNo) &&
-                                                            ic.PermitNo[0] != '6'
+                                                            !PermitsWithScheduledOrPassedFinals.Contains(ic.PermitNo)
                                                         select ic.PermitNo);
 
           }

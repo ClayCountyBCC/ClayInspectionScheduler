@@ -27,7 +27,7 @@ namespace ClayInspectionScheduler.Models
         //// Test Environment Machines
         //  return false;
 
-        //case "MISHL05":
+        case "MISHL05":
         case "MISSL01":
         case "CLAYBCCIIS01":
         case "CLAYBCCDMZIIS01":

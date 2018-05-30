@@ -469,7 +469,7 @@ var InspSched;
             row.style.marginTop = ".5em";
             ch.Permit = i.Address;
             ch.InspectionId = 0;
-            var address = CreateTargettedLink(i.Address, "http://apps.claycountygov.com/inspectionview/#inspectionid=" + i.Inspections[0].InspectionId.toString(), "inspectionview");
+            var address = CreateTargettedLink(i.Address, "/inspectionview/#inspectionid=" + i.Inspections[0].InspectionId.toString(), "inspectionview");
             var addressContainer = document.createElement("div");
             var addressContainerContainer = document.createElement("div");
             addressContainerContainer.classList.add("row");
