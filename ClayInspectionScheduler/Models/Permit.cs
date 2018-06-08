@@ -480,17 +480,18 @@ namespace ClayInspectionScheduler.Models
            WILL NEED TO UPDATE TO INCLUDE A CHECK IF THE MASTER PERMIT HAS BEEN ISSUED
            IF NOT, BULK UPDATE ASSOC PERMITS TO DISPLAY ERROR
         As of 2/12, an inspection cannot be scheduled if the address is blank, because it hasn't been properly addressed yet.
-      */
-      if (this.StreetAddress.Trim().Length == 0)
-      {
-        ErrorText = $"Permit #{this.PermitNo} does not have a valid address. Please contact the building department for assistance.";
-        return;
-      }
+      */      
       if (this.IssueDate == DateTime.MinValue)
       {
         this.ErrorText = $"Permit #{this.PermitNo} has not yet been issued. Please contact the building department for assistance.";
         return;
       }
+      if (this.StreetAddress.Trim().Length == 0)
+      {
+        ErrorText = $"Permit #{this.PermitNo} does not have a valid address. Please contact the building department for assistance.";
+        return;
+      }
+
       if (PassedFinal()) return;
       if (this.access == UserAccess.access_type.public_access)
       {

@@ -78,6 +78,7 @@ var InspSched;
                 var permit = permits_1[_i];
                 if (permit.PermitNo == key) {
                     current.appendChild(buildPermitSelectOption(permit, key));
+                    InspSched.ThisPermit = permit;
                     GetInspList(key, permit);
                 }
                 else {
@@ -92,7 +93,7 @@ var InspSched;
             clearElement(street);
             clearElement(city);
             var permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === key; })[0];
-            street.appendChild(document.createTextNode(permit.ProjAddrCombined.trim()));
+            street.appendChild(document.createTextNode(permit.ProjAddrCombined != null ? permit.ProjAddrCombined.trim() : "UNKNOWN"));
             city.appendChild(document.createTextNode(permit.ProjCity.trim()));
             Show('PermitSelectContainer');
         }

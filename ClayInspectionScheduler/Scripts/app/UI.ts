@@ -106,7 +106,9 @@ namespace InspSched.UI
     {
       if (permit.PermitNo == key)
       {
+        
         current.appendChild(buildPermitSelectOption(permit, key));
+        InspSched.ThisPermit = permit;
         GetInspList(key, permit);
 
       }
@@ -128,7 +130,7 @@ namespace InspSched.UI
 
     let permit: Permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === key })[0];
 
-    street.appendChild(document.createTextNode(permit.ProjAddrCombined.trim()));
+    street.appendChild(document.createTextNode(permit.ProjAddrCombined != null ? permit.ProjAddrCombined.trim() : "UNKNOWN") );
     city.appendChild(document.createTextNode(permit.ProjCity.trim()));
 
 

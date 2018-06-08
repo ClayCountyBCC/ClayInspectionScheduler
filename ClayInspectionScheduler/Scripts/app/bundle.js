@@ -762,6 +762,7 @@ var InspSched;
                 var permit = permits_1[_i];
                 if (permit.PermitNo == key) {
                     current.appendChild(buildPermitSelectOption(permit, key));
+                    InspSched.ThisPermit = permit;
                     GetInspList(key, permit);
                 }
                 else {
