@@ -498,20 +498,20 @@ namespace ClayInspectionScheduler.Models
 
     }
 
-    private bool Validate(string PermitNumber, Inspection currentInpsection, string ResultCode, string UserRemarks, UserAccess User)
+    private bool Validate(string PermitNumber, Inspection currentInspection, string ResultCode, string UserRemarks, UserAccess User)
     {
-      if(User.current_access == UserAccess.access_type.contract_access)
+      if (User.current_access == UserAccess.access_type.contract_access)
       {
         List<Inspector> inspList = Inspector.GetCached();
 
         var inspectors = (from i in inspList
-                         where i.NTUsername == User.user_name
-                         select i).ToList();
-        if(inspectors.Count() == 0)
+                          where i.NTUsername == User.user_name
+                          select i).ToList();
+        if (inspectors.Count() == 0)
         {
           Errors.Add("Inspector not found.");
         }
-        if(inspectors.First().Name != currentInpsection.InspectorName)
+        if (inspectors.First().Name != currentInspection.InspectorName)
         {
           Errors.Add("This inspection is not assigned to this inspector.");
         }
@@ -545,15 +545,15 @@ namespace ClayInspectionScheduler.Models
           }
 
           // If they are trying to change something that was completed before today.
-          if (currentInpsection.ResultADC != "" && 
-              InspDateTime != DateTime.MinValue.Date && 
+          if (currentInspection.ResultADC != "" &&
+              InspDateTime != DateTime.MinValue.Date &&
               InspDateTime.Date < DateTime.Today.AddDays(-2).Date)
           {
             Errors.Add("Inspections completed more than two days ago cannot be changed.");
             return false;
           }
-          if (currentInpsection.ResultADC != "" &&
-              InspDateTime != DateTime.MinValue.Date && 
+          if (currentInspection.ResultADC != "" &&
+              InspDateTime != DateTime.MinValue.Date &&
               User.current_access == UserAccess.access_type.contract_access)
           {
             Errors.Add("Completed inspections cannot be changed. Please contact the Building departent for assistance.");
@@ -567,9 +567,10 @@ namespace ClayInspectionScheduler.Models
           return true;
 
         case "C":
-          if (User.current_access == UserAccess.access_type.public_access |
-            User.current_access == UserAccess.access_type.basic_access |
-            User.current_access == UserAccess.access_type.inspector_access)
+          if (User.current_access == UserAccess.access_type.public_access ||
+            User.current_access == UserAccess.access_type.basic_access ||
+            User.current_access == UserAccess.access_type.inspector_access ||
+            User.current_access == UserAccess.access_type.contract_access)
           {
             if (ResultADC.Length != 0 && InspDateTime.ToLocalTime() < DateTime.Today.AddDays(-2))
             {
