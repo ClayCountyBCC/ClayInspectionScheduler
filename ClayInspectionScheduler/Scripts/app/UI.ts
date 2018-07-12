@@ -959,8 +959,8 @@ namespace InspSched.UI
   export function LoadInspTypeSelect(key: string)
   {
 
-    let thistype: string = key[0];
-    var label: string = getInspTypeString(thistype);
+    let permitType: string = key[0];
+    var label: string = getInspTypeString(permitType);
 
     let InspTypeList: HTMLSelectElement = (<HTMLSelectElement>document.getElementById('InspTypeSelect'));
     let optionLabel: HTMLOptionElement = (<HTMLOptionElement>document.createElement("option"));
@@ -977,7 +977,11 @@ namespace InspSched.UI
     let filteredInspectionTypes = InspSched.InspectionTypes.filter(
       function (inspectionType)
       {
-        if (inspectionType.InspCd[0] === thistype)
+        if (permitType == "9" || permitType == "0") 
+        {
+          permitType = "1";
+        }
+        if (inspectionType.InspCd[0] == permitType)
         {
           if (permit.NoFinalInspections)
           {
@@ -993,7 +997,7 @@ namespace InspSched.UI
     //for (let type of InspSched.InspectionTypes)
     for (let type of filteredInspectionTypes)
     {
-      if (type.InspCd[0] == thistype)
+      if (type.InspCd[0] == permitType)
       {
         let option: HTMLOptionElement = <HTMLOptionElement>document.createElement("option");
         option.label = type.InsDesc;

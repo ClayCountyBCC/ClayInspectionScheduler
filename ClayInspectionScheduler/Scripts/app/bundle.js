@@ -1385,8 +1385,8 @@ var InspSched;
         }
         UI.BuildScheduler = BuildScheduler;
         function LoadInspTypeSelect(key) {
-            var thistype = key[0];
-            var label = getInspTypeString(thistype);
+            var permitType = key[0];
+            var label = getInspTypeString(permitType);
             var InspTypeList = document.getElementById('InspTypeSelect');
             var optionLabel = document.createElement("option");
             clearElement(InspTypeList);
@@ -1397,7 +1397,10 @@ var InspSched;
             InspTypeList.appendChild(optionLabel);
             var permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === key; })[0];
             var filteredInspectionTypes = InspSched.InspectionTypes.filter(function (inspectionType) {
-                if (inspectionType.InspCd[0] === thistype) {
+                if (permitType == "9" || permitType == "0") {
+                    permitType = "1";
+                }
+                if (inspectionType.InspCd[0] == permitType) {
                     if (permit.NoFinalInspections) {
                         return !inspectionType.Final;
                     }
@@ -1409,7 +1412,7 @@ var InspSched;
             //for (let type of InspSched.InspectionTypes)
             for (var _i = 0, filteredInspectionTypes_1 = filteredInspectionTypes; _i < filteredInspectionTypes_1.length; _i++) {
                 var type = filteredInspectionTypes_1[_i];
-                if (type.InspCd[0] == thistype) {
+                if (type.InspCd[0] == permitType) {
                     var option = document.createElement("option");
                     option.label = type.InsDesc;
                     option.value = type.InspCd;

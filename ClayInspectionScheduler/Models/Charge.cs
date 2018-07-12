@@ -38,12 +38,12 @@ namespace ClayInspectionScheduler.Models
 
       SELECT
         -- RTRIM(LTRIM(C.AssocKey)) PermitNo,
-        C.CashierId,
-        C.CatCode,
+        RTRIM(LTRIM(C.CashierId)),
+        RTRIM(LTRIM(C.CatCode)),
         CC.[Description] Description,
         C.Total 
       FROM ccCashierItem C
-      INNER JOIN ccCatCd CC ON C.CatCode = CC.CatCode
+      INNER JOIN ccCatCd CC ON RTRIM(LTRIM(C.CatCode)) = RTRIM(LTRIM(CC.CatCode))
       WHERE TOTAL > 0
         AND CashierId IS NULL
         AND UnCollectable = 0
