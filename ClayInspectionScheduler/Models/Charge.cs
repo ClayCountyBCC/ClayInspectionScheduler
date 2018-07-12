@@ -38,12 +38,12 @@ namespace ClayInspectionScheduler.Models
 
       SELECT
         -- RTRIM(LTRIM(C.AssocKey)) PermitNo,
-        RTRIM(LTRIM(C.CashierId)),
-        RTRIM(LTRIM(C.CatCode)),
+       C.CashierId,
+        C.CatCode,
         CC.[Description] Description,
         C.Total 
       FROM ccCashierItem C
-      INNER JOIN ccCatCd CC ON RTRIM(LTRIM(C.CatCode)) = RTRIM(LTRIM(CC.CatCode))
+      INNER JOIN ccCatCd CC ON C.CatCode = CC.CatCode
       WHERE TOTAL > 0
         AND CashierId IS NULL
         AND UnCollectable = 0
@@ -56,12 +56,12 @@ namespace ClayInspectionScheduler.Models
 
         if(!tryingToScheduleFinal)
         {
-          charges.RemoveAll(x => x.CatCode == "IFSF" || 
-                                 x.CatCode == "IFMH" || 
-                                 x.CatCode == "IFMF" || 
-                                 x.CatCode == "IFSCH" || 
-                                 x.CatCode == "IFRD2" || 
-                                 x.CatCode == "IFRD3");
+          charges.RemoveAll(x => x.CatCode.Trim() == "IFSF" ||
+                                 x.CatCode.Trim() == "IFMH" ||
+                                 x.CatCode.Trim() == "IFMF" ||
+                                 x.CatCode.Trim() == "IFSCH" ||
+                                 x.CatCode.Trim() == "IFRD2" ||
+                                 x.CatCode.Trim() == "IFRD3");
         }
 
         foreach(var c in charges)
