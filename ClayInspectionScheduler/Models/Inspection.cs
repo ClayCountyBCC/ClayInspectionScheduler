@@ -223,7 +223,6 @@ namespace ClayInspectionScheduler.Models
         return new List<Inspection>();
       }
 
-
     }
 
     private static List<Inspection> GetRaw(int InspectionId)
@@ -678,6 +677,25 @@ namespace ClayInspectionScheduler.Models
         FROM bpHold 
         WHERE 
           InspReqID = @InspectionId;";
+    }
+
+    public static bool PassedElectricalEquipmentCheck(string permitNumber)
+    {
+      var l = new List<int>();
+      var dbArgs = new Dapper.DynamicParameters();
+      dbArgs.Add("@PermitNo", permitNumber);
+
+      string sql = @"
+        USE WATSC;
+        
+        SELECT 
+          InspReqID
+        FROM bpINS_REQUEST IR
+        WHERE PermitNo = @PermitNo
+          AND InspectionCode = '205'
+  ";
+      l.AddRange(Constants.Get_Data<int>(sql, dbArgs));
+      return l.Count() > 0;
     }
   }
 }

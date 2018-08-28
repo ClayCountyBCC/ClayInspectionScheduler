@@ -11,21 +11,21 @@ using System.Collections;
 namespace ClayInspectionScheduler.Models
 {
 
-  
+
   public class Charge
   {
 
-    public string PermitNo{ get; set; }
+    public string PermitNo { get; set; }
     public string CashierId { get; set; }
     public string CatCode { get; set; }
-    public string Description{ get;set; }
+    public string Description { get; set; }
     public decimal Total { get; set; }
-    
+
 
     public Charge()
-    { 
-    
-    
+    {
+
+
     }
 
     public static List<Charge> GetCharges(string PermitNumber, bool tryingToScheduleFinal = false)
@@ -38,7 +38,7 @@ namespace ClayInspectionScheduler.Models
 
       SELECT
         -- RTRIM(LTRIM(C.AssocKey)) PermitNo,
-       C.CashierId,
+        C.CashierId,
         C.CatCode,
         CC.[Description] Description,
         C.Total 
@@ -49,33 +49,87 @@ namespace ClayInspectionScheduler.Models
         AND UnCollectable = 0
         AND AssocKey = @PermitNumber
       ";
-      
-      try{
+
+      try
+      {
 
         var charges = Constants.Get_Data<Charge>(sql, dbArgs);
 
-        if(!tryingToScheduleFinal)
+        if (!tryingToScheduleFinal)
         {
           charges.RemoveAll(x => x.CatCode.Trim() == "IFSF" ||
                                  x.CatCode.Trim() == "IFMH" ||
                                  x.CatCode.Trim() == "IFMF" ||
                                  x.CatCode.Trim() == "IFSCH" ||
                                  x.CatCode.Trim() == "IFRD2" ||
-                                 x.CatCode.Trim() == "IFRD3");
+                                 x.CatCode.Trim() == "IFRD3" ||
+                                 x.CatCode.Trim() == "RCA" ||
+                                 x.CatCode.Trim() == "XRCA" || 
+                                 x.CatCode.Trim() == "CLA" ||
+                                 x.CatCode.Trim() == "XCLA" );
         }
 
-        foreach(var c in charges)
+        foreach (var c in charges)
         {
           c.Total = decimal.Round(c.Total, 2, MidpointRounding.AwayFromZero);
         }
 
 
         return charges;
-        
-      }catch(Exception ex)
+
+      }
+      catch (Exception ex)
       {
         Constants.Log(ex, sql);
         return new List<Charge>();
+      }
+    }
+
+    public static bool UserCannotScheduleTempPowerEquipmentCheck(string permitNumber)
+    {
+      var dbArgs = new DynamicParameters();
+      dbArgs.Add("@PermitNumber", permitNumber);
+
+      var sql = @"
+      USE WATSC;
+      DECLARE @BaseId INT = (SELECT DISTINCT TOP 1 BaseId FROM bpMASTER_PERMIT WHERE PERMITNO = @PermitNumber);
+
+      WITH PropUseCode (AssocKey,PropUseCode) AS (
+      SELECT DISTINCT CI.AssocKey, B.PropUseCode FROM ccCashierItem CI
+      INNER JOIN bpMASTER_PERMIT M ON CI.AssocKey = M.PermitNo
+      INNER JOIN bpBASE_PERMIT B ON M.BaseID = M.BaseID 
+      WHERE B.PropUseCode IN ('101') AND AssocKey = @PermitNumber)
+      ,ChargeItemIds (ItemId) AS (
+      SELECT DISTINCT
+        ITEMID
+        FROM ccCashierItem C
+      INNER JOIN PropUseCode P ON P.AssocKey = C.AssocKey
+      INNER JOIN ccCatCd CC ON C.CatCode = CC.CatCode
+      WHERE TOTAL > 0
+        AND CashierId IS NULL
+        AND UnCollectable = 0
+        AND C.AssocKey = @PermitNumber
+        AND C.CatCode IN 
+          ('IFSF','IFMH','IFMF','IFSCH','IFRD2','IFRD3','RCA','XRCA','CLA','XCLA'))
+
+    
+      SELECT 
+        DISTINCT Itemid
+      FROM ChargeItemIds 
+
+      ";
+
+      try
+      {
+        var i = Constants.Get_Data<string>(sql, dbArgs);
+        
+        return i.Count() ==  0;
+      }
+
+      catch (Exception ex)
+      {
+        Constants.Log(ex, sql);
+        return false;
       }
     }
   }

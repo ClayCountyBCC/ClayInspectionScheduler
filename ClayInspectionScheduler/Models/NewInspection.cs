@@ -77,7 +77,7 @@ namespace ClayInspectionScheduler.Models
                                    select i).ToList().First();
 
       // DoImpactFeesMatter is how we indicate to the permit that the impact fees matter.      
-      this.DoImpactFeesMatter = finals.Any(f => f.InspCd == InspectionCd) || InspectionCd == "205";
+      this.DoImpactFeesMatter = finals.Any(f => f.InspCd == InspectionCd);
       //foreach (var f in finals)
       //{
       //  if (f.InspCd == this.InspectionCd)
@@ -110,9 +110,22 @@ namespace ClayInspectionScheduler.Models
         if (CurrentPermit.ErrorText.Length > 0)
         {
           Errors.Add(CurrentPermit.ErrorText);
-
         }
 
+        if (CurrentPermit.PermitNo[0] == '2')
+        {
+
+          var mp = (from p in Permits
+                    where p.CoClosed == 0
+                    select p.PermitNo).DefaultIfEmpty("").First();
+          var canSchedule = Charge.UserCannotScheduleTempPowerEquipmentCheck(mp);
+
+          if (!canSchedule && currentInspectionType.InspCd == "205")
+           {
+            Errors.Add($@"A Temporary Power/Equipment Check cannot be scheduled if there are outstanding solid waste fees or Impact fees.
+                          Please contact the building department for assitance");
+           }
+        }
         // validate user selected date
         var start = DateTime.Parse(CurrentPermit.Dates.minDate_string);
         var end = DateTime.Parse(CurrentPermit.Dates.maxDate_string);
@@ -139,7 +152,6 @@ namespace ClayInspectionScheduler.Models
               select i).Any())
         {
           Errors.Add("Invalid Inspection Type");
-
         }
         else
         {
