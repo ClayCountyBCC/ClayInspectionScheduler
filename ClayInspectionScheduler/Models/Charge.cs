@@ -91,31 +91,30 @@ namespace ClayInspectionScheduler.Models
       dbArgs.Add("@PermitNumber", permitNumber);
 
       var sql = @"
-      USE WATSC;
-      DECLARE @BaseId INT = (SELECT DISTINCT TOP 1 BaseId FROM bpMASTER_PERMIT WHERE PERMITNO = @PermitNumber);
+        USE WATSC;
 
-      WITH PropUseCode (AssocKey,PropUseCode) AS (
-      SELECT DISTINCT CI.AssocKey, B.PropUseCode FROM ccCashierItem CI
-      INNER JOIN bpMASTER_PERMIT M ON CI.AssocKey = M.PermitNo
-      INNER JOIN bpBASE_PERMIT B ON M.BaseID = M.BaseID 
-      WHERE B.PropUseCode IN ('101') AND AssocKey = @PermitNumber)
-      ,ChargeItemIds (ItemId) AS (
-      SELECT DISTINCT
-        ITEMID
-        FROM ccCashierItem C
-      INNER JOIN PropUseCode P ON P.AssocKey = C.AssocKey
-      INNER JOIN ccCatCd CC ON C.CatCode = CC.CatCode
-      WHERE TOTAL > 0
-        AND CashierId IS NULL
-        AND UnCollectable = 0
-        AND C.AssocKey = @PermitNumber
-        AND C.CatCode IN 
-          ('IFSF','IFMH','IFMF','IFSCH','IFRD2','IFRD3','RCA','XRCA','CLA','XCLA'))
+        WITH PermitsThatNeedDefaultIF_SW_charges (PermitNo) AS (
+        SELECT DISTINCT M.PermitNo
+        FROM bpMASTER_PERMIT M
+        INNER JOIN bpBASE_PERMIT B ON B.BaseID = M.BaseID
+        WHERE PropUseCode IN ('101','225'))
+        ,ChargeItemIds (ItemId, AssocKey) AS (
+        SELECT DISTINCT
+          ITEMID, AssocKey
+          FROM ccCashierItem C
+        INNER JOIN ccCatCd CC ON C.CatCode = CC.CatCode
+        WHERE TOTAL > 0
+          AND CashierId IS NULL
+          AND UnCollectable = 0
+          AND C.AssocKey = @PermitNumber
+          AND C.CatCode IN 
+            ('IFSF','IFMH','IFMF','IFSCH','IFRD2','IFRD3','RCA','XRCA','CLA','XCLA'))
 
-    
-      SELECT 
-        DISTINCT Itemid
-      FROM ChargeItemIds 
+        SELECT 
+          DISTINCT Itemid
+        FROM ChargeItemIds C
+        INNER JOIN PermitsThatNeedDefaultIF_SW_charges P ON P.PermitNo = C.AssocKey
+        WHERE C.AssocKey = @PermitNumber
 
       ";
 
@@ -123,7 +122,7 @@ namespace ClayInspectionScheduler.Models
       {
         var i = Constants.Get_Data<string>(sql, dbArgs);
         
-        return i.Count() ==  0;
+        return i == null || i.Count() ==  0;
       }
 
       catch (Exception ex)

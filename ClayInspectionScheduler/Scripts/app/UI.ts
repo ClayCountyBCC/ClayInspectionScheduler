@@ -849,7 +849,7 @@ namespace InspSched.UI
 
     if (access == access_type.inspector_access || access == access_type.contract_access)
     {
-      RadioButtonSubrow.className = "large-10 medium-10 small-12 flex-container flex-dir-row flex-child-grow align-justify row";
+      RadioButtonSubrow.className = "small-12 flex-container flex-child-grow row";
       RadioButtonSubrow.id = InspectionId + "_radio_list";
 
       let approveradio: HTMLInputElement = (<HTMLInputElement>document.createElement("input"));
@@ -864,8 +864,7 @@ namespace InspSched.UI
       approveradio.value = (privateProvidercheck > 0 ? "P" : "A");
 
       let approve: HTMLLabelElement = (<HTMLLabelElement>document.createElement("label"));
-      approve.className = "column large-2 small-6";
-      approve.htmlFor = (privateProvidercheck > 0 ? "perform" : "approve") + "_selection";
+      approve.className = "column large-2 small-6 ";
       approve.appendChild(approveradio);
       approve.appendChild(document.createTextNode(privateProvidercheck > 0 ? "Performed" : "Approved"));
 
@@ -882,8 +881,7 @@ namespace InspSched.UI
       disapproveradio.value = (privateProvidercheck > 0 ? "N" : "D");
 
       let disapprove: HTMLLabelElement = (<HTMLLabelElement>document.createElement("label"));
-      disapprove.className = "column large-2 small-6";
-      disapprove.htmlFor = (privateProvidercheck > 0 ? "not_performed" : "disapprove") + "_selection";
+      disapprove.className = "column large-2 small-6 ";
       disapprove.appendChild(disapproveradio);
       disapprove.appendChild(document.createTextNode(privateProvidercheck > 0 ? "Not Performed" : "Disapproved"));
 
@@ -910,7 +908,6 @@ namespace InspSched.UI
 
     let cancel: HTMLLabelElement = (<HTMLLabelElement>document.createElement("label"));
     cancel.className = "column large-2 small-6";
-    cancel.htmlFor = "cancelradio_selection";
     cancel.appendChild(cancelradio);
     cancel.appendChild(document.createTextNode("Cancel"));
 
@@ -926,8 +923,7 @@ namespace InspSched.UI
     incompleteradio.value = "";
 
     let incomplete: HTMLLabelElement = (<HTMLLabelElement>document.createElement("label"));
-    incomplete.className = "column large-2 small-6";
-    incomplete.htmlFor = "incompleteradio_selection";
+    incomplete.className = "column large-2 small-6 end";
     incomplete.appendChild(incompleteradio);
     incomplete.appendChild(document.createTextNode("Incomplete"));
 

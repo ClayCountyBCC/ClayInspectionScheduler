@@ -534,19 +534,23 @@ tabs-content{
 }
 
 textarea::-webkit-input-placeholder {
-  color: rgba(235, 0, 0, 0.30);
+  color: rgba(175, 0, 0, 0.80);
+  font-weight:bold;
 }
 
 textarea:-moz-placeholder { /* Firefox 18- */
-  color: rgba(235, 0, 0, 0.30);
+  color: rgba(175, 0, 0, 0.80);
+  font-weight: bold;
 }
 
 textarea::-moz-placeholder { /* Firefox 19+ */
-  color: rgba(235, 0, 0, 0.30);
+  color: rgba(175, 0, 0, 0.80);
+  font-weight: bold;
 }
 
 textarea:-ms-input-placeholder {
-  color: rgba(235, 0, 0, 0.30);
+  color: rgba(175, 0, 0, 0.80);
+  font-weight:bold;
 }
 @media print {
 
