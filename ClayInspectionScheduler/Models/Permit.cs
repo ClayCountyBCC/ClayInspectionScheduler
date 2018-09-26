@@ -3,6 +3,7 @@ using System.Data.SqlClient;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Data;
 using System.Runtime.Caching;
@@ -276,7 +277,7 @@ namespace ClayInspectionScheduler.Models
           h.PermitNo = MasterPermit;
         }
       }
-
+      
       var CannotInspectPermits = (from h in holds
                            where h.SatNoInspection == 1 &&
                            h.PermitNo != MasterPermit
@@ -287,12 +288,21 @@ namespace ClayInspectionScheduler.Models
                            select prmt.PermitNo).ToList();
 
       var p = IsMasterClosed(permits);
-      if (p.Any()) return p;
+
+      if (p.Any())
+      {
+        return p;
+      }
       p = ChargesExist(permits, ChargePermits, MasterPermit);
 
       p = HoldsExist(p, holds, CannotInspectPermits, MasterPermit, newInspectionType);
 
-      return !p.Any() ? permits : p;
+
+
+      // this will only be reached if there are no bulk charge, hold, or master closed errors.
+      permits = BulkContractorStatusCheck(p, MasterPermit);
+      
+      return p;
     }
 
     public static List<Permit> IsMasterClosed(List<Permit> permits)
@@ -459,9 +469,7 @@ namespace ClayInspectionScheduler.Models
     public void Validate(string PrivateProvider)
     {
 
-
-      /*
-      They cannot schedule an inspection if:
+      /* They cannot schedule an inspection if:
         the Contractor associated with permit --
           Anything other than A in the Status field in clContractor (S is Suspended)
           Worker's comp date is past
@@ -475,35 +483,42 @@ namespace ClayInspectionScheduler.Models
           Has a hold associated with it that is not ('1SWF', 'PPCC')
           Has a hold that does not hold up the final inspection?
           If the user is external and a final inspection has already been completed
-          
 
-           WILL NEED TO UPDATE TO INCLUDE A CHECK IF THE MASTER PERMIT HAS BEEN ISSUED
-           IF NOT, BULK UPDATE ASSOC PERMITS TO DISPLAY ERROR
+
+            WILL NEED TO UPDATE TO INCLUDE A CHECK IF THE MASTER PERMIT HAS BEEN ISSUED
+            IF NOT, BULK UPDATE ASSOC PERMITS TO DISPLAY ERROR
         As of 2/12, an inspection cannot be scheduled if the address is blank, because it hasn't been properly addressed yet.
-      */      
-      if (this.IssueDate == DateTime.MinValue)
-      {
-        this.ErrorText = $"Permit #{this.PermitNo} has not yet been issued. Please contact the building department for assistance.";
-        return;
-      }
-      if (this.StreetAddress.Trim().Length == 0)
-      {
-        ErrorText = $"Permit #{this.PermitNo} does not have a valid address. Please contact the building department for assistance.";
-        return;
-      }
 
-      if (PassedFinal()) return;
-      if (this.access == UserAccess.access_type.public_access)
+      */
+      if (this.ErrorText.Length == 0)
       {
-        
-        if (PrivateProvider.Length > 0)
+        if (this.IssueDate == DateTime.MinValue)
         {
-          if (CheckPrivProv(PrivateProvider)) return;
+          this.ErrorText = $"Permit #{this.PermitNo} has not yet been issued. Please contact the building department for assistance.";
+          return;
         }
-        if (CheckSuspendGraceDate(this.SuspendGraceDate)) return;
-      }
+        if (this.StreetAddress.Trim().Length == 0)
+        {
+          ErrorText = $"Permit #{this.PermitNo} does not have a valid address. Please contact the building department for assistance.";
+          return;
+        }
 
-      if (ContractorIssues()) return;
+        if (PassedFinal()) return;
+        if (this.access == UserAccess.access_type.public_access)
+        {
+
+          if (PrivateProvider.Length > 0)
+          {
+            if (CheckPrivProv(PrivateProvider)) return;
+          }
+          if (CheckSuspendGraceDate(this.SuspendGraceDate)) return;
+        }
+
+        if(ContractorIssues())
+        {
+          
+        }
+      }
     }
 
     private bool CheckPrivProv(string PrivProvValidate)
@@ -541,9 +556,8 @@ namespace ClayInspectionScheduler.Models
         ContractorId = "FIRE";
       }
 
-        if (string.IsNullOrEmpty(this.ContractorId))
+      if (string.IsNullOrEmpty(this.ContractorId))
       {
-        
         ErrorText = "There is no contractor selected on this permit. Please contact the Building Department if you would like to schedule an inspection.";
       }
       
@@ -551,9 +565,12 @@ namespace ClayInspectionScheduler.Models
 
       if (this.ContractorStatus != "A" && (this.PermitNo[0] != '6'))
       {
+        // TODO: if bldg, stop all inspections, if trade, stop that permit and bldg permit inspection.
         ErrorText = "There is an issue with the contractor's status";
         return true;
       }
+
+      // TODO: update for new contractor status checks. do not allow any permit if bldg contractor suspended, do not allow trade or bldg insection if trade contractor is suspended.
       
       else if (this.LiabilityExpirationDate <= DateTime.Today)
       {
@@ -570,6 +587,61 @@ namespace ClayInspectionScheduler.Models
       return false;
     }
 
+    public static List<Permit> BulkContractorStatusCheck(List<Permit> permits, string masterPermit = "")
+    {
+      foreach (var permit in permits)
+      {
+        permit.ContractorIssues();
+      }
+
+      var suspendedContractorPermits = new List<string>();
+      suspendedContractorPermits = (from permit in permits
+                                    where permit.ContractorStatus != "A"
+                                    select permit.PermitNo).ToList();
+
+      if (suspendedContractorPermits.Count() > 0)
+      {
+        if (suspendedContractorPermits.Contains(masterPermit))
+        {
+          // TODO: add code to check if master permit. if yes, bulk update error for all
+          var Error = $@"Building permit #{masterPermit} has an issue with the contractor's status, no new inspections can be scheduled.";
+          BulkUpdateError(permits, Error);
+        }
+        else
+        {
+          var permitsWithBadContractors = new List<string>();
+          int masterPermitIndex =-1;
+
+          foreach (var permit in permits)
+          {
+            if (permit.PermitNo == masterPermit) masterPermitIndex = permits.IndexOf(permit);
+
+            if (suspendedContractorPermits.Contains(permit.PermitNo))
+            {
+              
+              permitsWithBadContractors.Add(permit.PermitNo);
+              permit.ErrorText = $@"Permit #{permit.PermitNo} has an issue with the contractors status, no new inspections can be scheduled.";
+            }
+
+            var errorString = "Permit(s) ";
+            foreach(var p in permitsWithBadContractors)
+            {
+              errorString += p + "\n";
+            }
+            errorString += $" have contractor issues. No new inspections can be scheduled on these permits, and building permit {masterPermit}.";
+
+            if(masterPermitIndex != -1)
+            {
+              permits[masterPermitIndex].ErrorText = errorString;
+            }
+          }
+            
+        }
+
+      }
+      return permits;
+    }
+   
     private bool PassedFinal()
     {
       if (this.TotalFinalInspections > 0 && this.PermitTypeString != "FR")
