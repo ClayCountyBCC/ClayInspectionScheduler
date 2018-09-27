@@ -514,10 +514,7 @@ namespace ClayInspectionScheduler.Models
           if (CheckSuspendGraceDate(this.SuspendGraceDate)) return;
         }
 
-        if(ContractorIssues())
-        {
-          
-        }
+        if (ContractorIssues()) return;
       }
     }
 
@@ -589,6 +586,9 @@ namespace ClayInspectionScheduler.Models
 
     public static List<Permit> BulkContractorStatusCheck(List<Permit> permits, string masterPermit = "")
     {
+      
+
+      
       foreach (var permit in permits)
       {
         permit.ContractorIssues();
@@ -596,7 +596,8 @@ namespace ClayInspectionScheduler.Models
 
       var suspendedContractorPermits = new List<string>();
       suspendedContractorPermits = (from permit in permits
-                                    where permit.ContractorStatus != "A"
+                                    where permit.ContractorStatus != "A" &&
+                                    permit.ContractorId != "OWNER"
                                     select permit.PermitNo).ToList();
 
       if (suspendedContractorPermits.Count() > 0)
@@ -616,9 +617,8 @@ namespace ClayInspectionScheduler.Models
           {
             if (permit.PermitNo == masterPermit) masterPermitIndex = permits.IndexOf(permit);
 
-            if (suspendedContractorPermits.Contains(permit.PermitNo))
+            if (suspendedContractorPermits.Contains(permit.PermitNo) )
             {
-              
               permitsWithBadContractors.Add(permit.PermitNo);
               permit.ErrorText = $@"Permit #{permit.PermitNo} has an issue with the contractors status, no new inspections can be scheduled.";
             }
