@@ -597,7 +597,9 @@ namespace ClayInspectionScheduler.Models
       var suspendedContractorPermits = new List<string>();
       suspendedContractorPermits = (from permit in permits
                                     where permit.ContractorStatus != "A" &&
-                                    permit.ContractorId != "OWNER"
+                                    permit.ContractorId != "OWNER" &&
+                                    permit.PermitNo[0] != '6'
+
                                     select permit.PermitNo).ToList();
 
       if (suspendedContractorPermits.Count() > 0)
