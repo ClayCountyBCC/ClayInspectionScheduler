@@ -155,7 +155,7 @@ namespace ClayInspectionScheduler.Models
       try
       {
         string un = Username.Replace(@"CLAYBCC\", "").ToLower();
-        //un = ""; /* change "" to user_name you wish to test */
+        //un = "universalengineering"; /* change "" to user_name you wish to test */
         switch (Environment.MachineName.ToUpper())
         {
           //case "MISSL01":
