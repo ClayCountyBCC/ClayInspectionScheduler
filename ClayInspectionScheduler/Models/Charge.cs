@@ -122,7 +122,7 @@ namespace ClayInspectionScheduler.Models
       {
         var i = Constants.Get_Data<string>(sql, dbArgs);
         
-        return i == null || i.Count() ==  0;
+        return i != null && i.Count() !=  0;
       }
 
       catch (Exception ex)
@@ -135,7 +135,7 @@ namespace ClayInspectionScheduler.Models
     // TODO: find more information on implementing this. 
     // this would determine if an impact fee should exist on this permit. (does not currently do that, only returns a list of itemIds) 
 
-    //public static bool PermitShouldHaveIF_and_SW_Fees(string permitNumber)
+    //public static bool PermitShouldHaveSolidWasteFees(string permitNumber)
     //{
     //  var dbArgs = new DynamicParameters();
     //  dbArgs.Add("@PermitNumber", permitNumber);

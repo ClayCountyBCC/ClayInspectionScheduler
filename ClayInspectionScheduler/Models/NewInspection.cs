@@ -122,8 +122,8 @@ namespace ClayInspectionScheduler.Models
 
           if (!canSchedule && currentInspectionType.InspCd == "205")
            {
-            Errors.Add($@"A Temporary Power/Equipment Check cannot be scheduled if there are outstanding solid waste fees or Impact fees.
-                          Please contact the building department for assitance");
+            Errors.Add($@"A Temporary Power/Equipment Check cannot be scheduled if there are unpaid solid waste fees.
+                          Please contact the building department for assitance.");
            }
         }
         // validate user selected date
