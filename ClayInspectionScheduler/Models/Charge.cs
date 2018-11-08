@@ -92,29 +92,29 @@ namespace ClayInspectionScheduler.Models
 
       var sql = @"
         USE WATSC;
-
+        
         WITH PermitsThatNeedDefaultIF_SW_charges (PermitNo) AS (
         SELECT DISTINCT M.PermitNo
         FROM bpMASTER_PERMIT M
         INNER JOIN bpBASE_PERMIT B ON B.BaseID = M.BaseID
         WHERE PropUseCode IN ('101','225'))
-        ,ChargeItemIds (ItemId, AssocKey) AS (
+        ,ChargeItemIds (ItemId, CashierId, AssocKey) AS (
         SELECT DISTINCT
-          ITEMID, AssocKey
+          ITEMID, CashierID, AssocKey
           FROM ccCashierItem C
         INNER JOIN ccCatCd CC ON C.CatCode = CC.CatCode
-        WHERE TOTAL > 0
-          AND CashierId IS NULL
-          AND UnCollectable = 0
+        WHERE UnCollectable = 0
           AND C.AssocKey = @PermitNumber
           AND C.CatCode IN 
             ('IFSF','IFMH','IFMF','IFSCH','IFRD2','IFRD3','RCA','XRCA','CLA','XCLA'))
+            
 
         SELECT 
           DISTINCT Itemid
         FROM ChargeItemIds C
         INNER JOIN PermitsThatNeedDefaultIF_SW_charges P ON P.PermitNo = C.AssocKey
         WHERE C.AssocKey = @PermitNumber
+          AND CashierId IS NULL
 
       ";
 
@@ -122,7 +122,7 @@ namespace ClayInspectionScheduler.Models
       {
         var i = Constants.Get_Data<string>(sql, dbArgs);
         
-        return i != null && i.Count() !=  0;
+        return i != null && i.Count() >  0;
       }
 
       catch (Exception ex)
