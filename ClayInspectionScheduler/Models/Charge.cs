@@ -20,6 +20,10 @@ namespace ClayInspectionScheduler.Models
     public string CatCode { get; set; }
     public string Description { get; set; }
     public decimal Total { get; set; }
+    public int OTid { get; set; } = -1;
+    public string PmtType { get; set; } = "";
+    public string PropUseCode { get; set; } = "";
+
 
 
     public Charge()
@@ -90,39 +94,75 @@ namespace ClayInspectionScheduler.Models
       var dbArgs = new DynamicParameters();
       dbArgs.Add("@PermitNumber", permitNumber);
 
+      var i = new List<Charge>();
+
+      var PropUseCodes = new List<string>()
+      {
+        "101","225","700"
+      };
+
+
       var sql = @"
+
         USE WATSC;
-        
-        WITH PermitsThatNeedDefaultIF_SW_charges (PermitNo) AS (
-        SELECT DISTINCT M.PermitNo
+
+        WITH PermitsThatNeedDefaultIF_SW_charges (PermitNo, PropUseCode) AS (
+        SELECT DISTINCT M.PermitNo, B.PropUseCode
         FROM bpMASTER_PERMIT M
         INNER JOIN bpBASE_PERMIT B ON B.BaseID = M.BaseID
-        WHERE PropUseCode IN ('101','225'))
-        ,ChargeItemIds (ItemId, CashierId, AssocKey) AS (
+        WHERE M.PermitNo = @PermitNumber)
+        ,ChargeItemIds (ItemId, CashierId, AssocKey, OTID, CatCode) AS (
         SELECT DISTINCT
-          ITEMID, CashierID, AssocKey
+          ITEMID, CashierID, AssocKey, OTId, LTRIM(RTRIM(C.CatCode)) CatCode
           FROM ccCashierItem C
         INNER JOIN ccCatCd CC ON C.CatCode = CC.CatCode
         WHERE UnCollectable = 0
-          AND C.AssocKey = @PermitNumber
-          AND C.CatCode IN 
+         AND C.AssocKey = @PermitNumber
+         AND C.CatCode IN 
             ('IFSF','IFMH','IFMF','IFSCH','IFRD2','IFRD3','RCA','XRCA','CLA','XCLA'))
             
-
         SELECT 
-          DISTINCT Itemid
+          DISTINCT C.CashierId, C.Itemid, C.OTid, CP.PmtType, C.CatCode, P.PropUseCode
         FROM ChargeItemIds C
+        LEFT OUTER JOIN ccCashierPayment CP ON CP.OTid = C.OTID
         INNER JOIN PermitsThatNeedDefaultIF_SW_charges P ON P.PermitNo = C.AssocKey
         WHERE C.AssocKey = @PermitNumber
-          AND CashierId IS NULL
 
       ";
 
       try
       {
-        var i = Constants.Get_Data<string>(sql, dbArgs);
-        
-        return i != null && i.Count() >  0;
+        i.AddRange(Constants.Get_Data<Charge>(sql, dbArgs));
+
+        if (i.Any())
+        {
+
+          var listOfImpactFees = (from c in i
+                                  where ((c.CatCode == "IFSF" || c.CatCode == "IFMH" || c.CatCode == "IFMF" || c.CatCode == "IFSCH") && c.PmtType == "IFEX")
+                                  select c).ToList();
+
+
+          var paidImpactAndSolidWasteFees = (from c in i
+                                             where ((c.CatCode == "IFSF" || c.CatCode == "IFMH" || 
+                                                     c.CatCode == "IFMF" || c.CatCode == "IFSCH" ||
+                                                     c.CatCode == "IFRD2" || c.CatCode == "IFRD3" ||
+                                                     c.CatCode == "RCA" || c.CatCode == "XRCA" || 
+                                                     c.CatCode == "CLA" || c.CatCode == "XCLA") &&
+                                                     c.CashierId != null)
+                                             select c).ToList();
+
+
+          if (!PropUseCodes.Contains(i[0].PropUseCode) || listOfImpactFees.Count() == 1 || paidImpactAndSolidWasteFees.Count() == 4)
+          {
+            return true;
+          }
+
+
+          Console.Write("TestStop");
+        }
+
+        return false;
+        //return i != null && i.Count() == 4;
       }
 
       catch (Exception ex)
