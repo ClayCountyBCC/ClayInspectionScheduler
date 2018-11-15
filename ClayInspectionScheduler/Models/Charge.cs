@@ -143,12 +143,7 @@ namespace ClayInspectionScheduler.Models
 
 
           var paidImpactAndSolidWasteFees = (from c in i
-                                             where ((c.CatCode == "IFSF" || c.CatCode == "IFMH" || 
-                                                     c.CatCode == "IFMF" || c.CatCode == "IFSCH" ||
-                                                     c.CatCode == "IFRD2" || c.CatCode == "IFRD3" ||
-                                                     c.CatCode == "RCA" || c.CatCode == "XRCA" || 
-                                                     c.CatCode == "CLA" || c.CatCode == "XCLA") &&
-                                                     c.CashierId != null)
+                                             where (c.CashierId != null)
                                              select c).ToList();
 
 
