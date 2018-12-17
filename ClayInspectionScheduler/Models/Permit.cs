@@ -23,6 +23,7 @@ namespace ClayInspectionScheduler.Models
     public string ErrorText { get; set; } = "";
     public bool NoFinalInspections { get; set; } // If this is true, then cannot schedule a final inspection.
     public string Permit_URL { get; set; } = "";
+    public string PropUseCode { get; set; } = "";
     private string ContractorId { get; set; } = "";
     private int Confidential { get; set; }
     private DateTime SuspendGraceDate { get; set; } = DateTime.MinValue;
@@ -36,6 +37,7 @@ namespace ClayInspectionScheduler.Models
     public int TotalFinalInspections { get; set; } // Count the total final inspections for this permit
     private string ContractorStatus { get; set; } // check if Contractor is active
     private string PrivateProvider { get; set; } = "";
+    
     public List<Charge> Charges { get; set; } = new List<Charge>();
 
     public List<Hold> Holds { get; set; }
@@ -81,7 +83,7 @@ namespace ClayInspectionScheduler.Models
       USE WATSC;
       DECLARE @MPermitNo CHAR(8) = (SELECT MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = @PermitNo);
       
- WITH TotalCharges(PermitNo, TotalCharges) AS (
+      WITH TotalCharges(PermitNo, TotalCharges) AS (
         Select 
           AssocKey PermitNo,
           SUM(Total) AS TotalCharges
@@ -105,6 +107,7 @@ namespace ClayInspectionScheduler.Models
       SELECT 
         distinct M.PermitNo PermitNo,
         M.PermitNo MPermitNo,
+        B.PropUseCode,
         M.IssueDate,
         ISNULL(B.ProjAddrNumber, '') +
           CASE WHEN LEN(LTRIM(RTRIM(B.ProjPreDir))) > 0 THEN LTRIM(RTRIM(B.ProjPreDir)) ELSE '' END + 
@@ -140,6 +143,7 @@ namespace ClayInspectionScheduler.Models
       SELECT 
         distinct A.PermitNo PermitNo,
         ISNULL(A.MPermitNo, '') MPermitNo,
+        '' PropUseCode,
         A.IssueDate,
         ISNULL(B.ProjAddrNumber, '') +
           CASE WHEN LEN(LTRIM(RTRIM(B.ProjPreDir))) > 0 THEN LTRIM(RTRIM(B.ProjPreDir)) ELSE '' END + 
@@ -587,8 +591,6 @@ namespace ClayInspectionScheduler.Models
     public static List<Permit> BulkContractorStatusCheck(List<Permit> permits, string masterPermit = "")
     {
       
-
-      
       foreach (var permit in permits)
       {
         permit.ContractorIssues();
@@ -597,7 +599,7 @@ namespace ClayInspectionScheduler.Models
       var suspendedContractorPermits = new List<string>();
       suspendedContractorPermits = (from permit in permits
                                     where permit.ContractorStatus != "A" &&
-                                    permit.ContractorId != "OWNER" &&
+                                    permit.ContractorId.ToUpper() != "OWNER" &&
                                     permit.PermitNo[0] != '6'
 
                                     select permit.PermitNo).ToList();

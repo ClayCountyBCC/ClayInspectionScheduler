@@ -117,10 +117,10 @@ namespace ClayInspectionScheduler.Models
 
           var mp = (from p in Permits
                     where p.CoClosed == 0
-                    select p.PermitNo).DefaultIfEmpty("").First();
-          var canSchedule = Charge.UserCannotScheduleTempPowerEquipmentCheck(mp);
+                    select p).DefaultIfEmpty(new Permit()).First();
+          var canSchedule = Charge.UserCannotScheduleTempPowerEquipmentCheck(mp.PermitNo, mp.PropUseCode );
 
-          if (!canSchedule && currentInspectionType.InspCd == "205")
+          if (!canSchedule && (currentInspectionType.InspCd == "205" || currentInspectionType.InspCd == "123"))
            {
             Errors.Add($@"A Temporary Power/Equipment Check cannot be scheduled if there are unpaid impact or solid waste fees.
                           Please contact the building department for assistance.");

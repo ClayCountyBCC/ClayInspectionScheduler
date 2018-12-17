@@ -89,7 +89,7 @@ namespace ClayInspectionScheduler.Models
       }
     }
 
-    public static bool UserCannotScheduleTempPowerEquipmentCheck(string permitNumber)
+    public static bool UserCannotScheduleTempPowerEquipmentCheck(string permitNumber, string propUseCode)
     {
       var dbArgs = new DynamicParameters();
       dbArgs.Add("@PermitNumber", permitNumber);
@@ -98,7 +98,7 @@ namespace ClayInspectionScheduler.Models
 
       var PropUseCodes = new List<string>()
       {
-        "101","225","700"
+        "101","225","700","101M","102","103","104","105","700","106"
       };
 
 
@@ -134,11 +134,15 @@ namespace ClayInspectionScheduler.Models
       {
         i.AddRange(Constants.Get_Data<Charge>(sql, dbArgs));
 
-        if (i.Any())
+        if (i.Any() || !PropUseCodes.Contains(propUseCode))
         {
 
           var listOfImpactFees = (from c in i
-                                  where ((c.CatCode == "IFSF" || c.CatCode == "IFMH" || c.CatCode == "IFMF" || c.CatCode == "IFSCH") && c.PmtType == "IFEX")
+                                  where ((c.CatCode == "IFSF" || 
+                                          c.CatCode == "IFMH" || 
+                                          c.CatCode == "IFMF" || 
+                                          c.CatCode == "IFSCH") 
+                                    && c.PmtType == "IFEX")
                                   select c).ToList();
 
 
@@ -147,7 +151,7 @@ namespace ClayInspectionScheduler.Models
                                              select c).ToList();
 
 
-          if (!PropUseCodes.Contains(i[0].PropUseCode) || listOfImpactFees.Count() == 1 || paidImpactAndSolidWasteFees.Count() == 4)
+          if (!PropUseCodes.Contains(propUseCode) || listOfImpactFees.Count() == 1 || paidImpactAndSolidWasteFees.Count() > 3)
           {
             return true;
           }
