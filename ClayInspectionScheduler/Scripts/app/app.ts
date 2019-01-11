@@ -288,7 +288,7 @@ namespace InspSched
     IssueContainer.style.display = "none";
     LoadInspectionTypes();
     InspectorUI.LoadDailyInspections();
-    window.setInterval(LoadInspectionsIfBetween6AMand6PM(), 60 * 5 * 1000); // update every 5 minutes.
+    window.setInterval(LoadInspectionsIfBetween6AMand6PM, 60 * 5 * 1000); // update every 5 minutes.
     LoadInspectionQuickRemarks();
 
   }

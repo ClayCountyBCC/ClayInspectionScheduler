@@ -61,13 +61,7 @@ namespace ClayInspectionScheduler.Models
 
         if (!tryingToScheduleFinal)
         {
-          charges.RemoveAll(x => x.CatCode.Trim() == "IFSF" ||
-                                 x.CatCode.Trim() == "IFMH" ||
-                                 x.CatCode.Trim() == "IFMF" ||
-                                 x.CatCode.Trim() == "IFSCH" ||
-                                 x.CatCode.Trim() == "IFRD2" ||
-                                 x.CatCode.Trim() == "IFRD3" ||
-                                 x.CatCode.Trim() == "RCA" ||
+          charges.RemoveAll(x => x.CatCode.Trim() == "RCA" ||
                                  x.CatCode.Trim() == "XRCA" || 
                                  x.CatCode.Trim() == "CLA" ||
                                  x.CatCode.Trim() == "XCLA" );
@@ -98,7 +92,7 @@ namespace ClayInspectionScheduler.Models
 
       var PropUseCodes = new List<string>()
       {
-        "101","225","700","101M","102","103","104","105","700","106"
+        "101","225","101M","102","103","104","105","106"
       };
 
 
@@ -119,7 +113,7 @@ namespace ClayInspectionScheduler.Models
         WHERE UnCollectable = 0
          AND C.AssocKey = @PermitNumber
          AND C.CatCode IN 
-            ('IFSF','IFMH','IFMF','IFSCH','IFRD2','IFRD3','RCA','XRCA','CLA','XCLA'))
+            ('IFSF','IFMH','IFMF','IFSCH','IFRD2','IFRD3'))
             
         SELECT 
           DISTINCT C.CashierId, C.Itemid, C.OTid, CP.PmtType, C.CatCode, P.PropUseCode
@@ -138,11 +132,12 @@ namespace ClayInspectionScheduler.Models
         {
 
           var listOfImpactFees = (from c in i
-                                  where ((c.CatCode == "IFSF" || 
+                                  where (c.CatCode == "IFSF" || 
                                           c.CatCode == "IFMH" || 
                                           c.CatCode == "IFMF" || 
-                                          c.CatCode == "IFSCH") 
-                                    && c.PmtType == "IFEX")
+                                          c.CatCode == "IFSCH" ||
+                                          c.CatCode == "IFRD2" ||
+                                          c.CatCode == "IFRD3")
                                   select c).ToList();
 
 
@@ -151,17 +146,14 @@ namespace ClayInspectionScheduler.Models
                                              select c).ToList();
 
 
-          if (!PropUseCodes.Contains(propUseCode) || listOfImpactFees.Count() == 1 || paidImpactAndSolidWasteFees.Count() > 3)
+          if (!PropUseCodes.Contains(propUseCode) || listOfImpactFees.Count() == 2)
           {
             return true;
           }
 
-
-          Console.Write("TestStop");
         }
 
         return false;
-        //return i != null && i.Count() == 4;
       }
 
       catch (Exception ex)

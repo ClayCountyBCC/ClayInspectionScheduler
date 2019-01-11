@@ -26,7 +26,12 @@ namespace ClayInspectionScheduler.Models
     public string PropUseCode { get; set; } = "";
     private string ContractorId { get; set; } = "";
     private int Confidential { get; set; }
-    private DateTime SuspendGraceDate { get; set; } = DateTime.MinValue;
+    private DateTime ContractorLiabilityInsuranceExpDate { get; set; } = DateTime.MinValue;
+    private DateTime ContractorWorkmansCompInsuranceExpDate { get; set; } = DateTime.MinValue;
+    private DateTime ContractorStateRegistrationExpDate { get; set; } = DateTime.MinValue;
+    private DateTime ContractorCountyLicenseExpDate { get; set; } = DateTime.MinValue;
+    private DateTime ContractorStateCertExpDate { get; set; } = DateTime.MinValue;
+    private DateTime ContractorSuspendGraceDate { get; set; } = DateTime.MinValue;
     private string Inspection_Notice { get; set; }
     private DateTime WorkersCompExpirationDate { get; set; } = DateTime.MaxValue;
     private DateTime LiabilityExpirationDate { get; set; } = DateTime.MaxValue;
@@ -65,7 +70,7 @@ namespace ClayInspectionScheduler.Models
     {
       get
       {
-        var dc = DateCache.getDateCache(this.access == UserAccess.access_type.public_access, this.SuspendGraceDate, this.Inspection_Notice == "180+");
+        var dc = DateCache.getDateCache(this.access == UserAccess.access_type.public_access, this.ContractorSuspendGraceDate, this.Inspection_Notice == "180+");
         return dc;
       }
     }
@@ -115,7 +120,12 @@ namespace ClayInspectionScheduler.Models
           CASE WHEN LEN(LTRIM(RTRIM(B.ProjPostDir))) > 0 THEN LTRIM(RTRIM(B.ProjPostDir)) ELSE '' END StreetAddress,
         B.ProjAddrCombined,
         B.ProjCity,
-       CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) SuspendGraceDate,
+        C.LiabInsExpDt ContractorLiabilityInsuranceExpDate, 
+        CASE WHEN C.WC_Exempt = 1 THEN NULL ELSE C.WC_ExpDt END WC_ExpDt,
+        CASE WHEN YEAR(C.StRegExpDt) = 1900 THEN NULL ELSE C.StRegExpDt END StRegExpDt,
+        CASE WHEN YEAR(C.CertExpDt) = 1900 THEN NULL ELSE C.CertExpDt END ContractorStateCertExpDate,
+        CASE WHEN YEAR(C.ExpDt) = 1900 THEN NULL ELSE C.ExpDt END ContractorCountyLicenseExpDate,
+        CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) ContractorSuspendGraceDate,
         Inspection_Notice,
         B.Confidential,
         B.ContractorId,
@@ -151,7 +161,12 @@ namespace ClayInspectionScheduler.Models
           CASE WHEN LEN(LTRIM(RTRIM(B.ProjPostDir))) > 0 THEN LTRIM(RTRIM(B.ProjPostDir)) ELSE '' END StreetAddress,
         B.ProjAddrCombined,
         B.ProjCity,
-       CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) SuspendGraceDate,
+        C.LiabInsExpDt ContractorLiabilityInsuranceExpDate, 
+        CASE WHEN C.WC_Exempt = 1 THEN NULL ELSE C.WC_ExpDt END ContractorWorkmansCompInsuranceExpDate,
+        CASE WHEN YEAR(C.StRegExpDt) = 1900 THEN NULL ELSE C.StRegExpDt END ContractorStateRegistrationExpDate,
+        CASE WHEN YEAR(C.CertExpDt) = 1900 THEN NULL ELSE C.CertExpDt END ContractorStateCertExpDate,
+        CASE WHEN YEAR(C.ExpDt) = 1900 THEN NULL ELSE C.ExpDt END ContractorCountyLicenseExpDate,
+        CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) ContractorSuspendGraceDate,
         Inspection_Notice,
         B.Confidential,
         A.ContractorId,
@@ -359,12 +374,13 @@ namespace ClayInspectionScheduler.Models
       var isBuildingFinal = newInspectionType != null &&
                             newInspectionType.Final == true &&
                             newInspectionType.InspCd[0] == 1;
+
       foreach (var p in permits)
       {
           p.NoFinalInspections = NoFinals.Contains(p.PermitNo);
       }
 
-        if (!isBuildingFinal)
+      if (!isBuildingFinal)
       {
         holdsAffectingMaster.RemoveAll(h => h.SatFinalFlg == 1);
       }
@@ -515,7 +531,7 @@ namespace ClayInspectionScheduler.Models
           {
             if (CheckPrivProv(PrivateProvider)) return;
           }
-          if (CheckSuspendGraceDate(this.SuspendGraceDate)) return;
+          if (CheckSuspendGraceDate(this.ContractorSuspendGraceDate)) return;
         }
 
         if (ContractorIssues()) return;
@@ -535,7 +551,21 @@ namespace ClayInspectionScheduler.Models
 
     private bool CheckSuspendGraceDate(DateTime SuspendGraceDate)
     {
-      if (SuspendGraceDate.ToShortDateString() == DateTime.Today.ToShortDateString() && Inspection_Notice.Trim() == "180+")
+      var contractorDateList = new List<DateTime>()
+      {
+        ContractorCountyLicenseExpDate,
+        ContractorLiabilityInsuranceExpDate,
+        ContractorStateRegistrationExpDate,
+        ContractorStateCertExpDate,
+        ContractorWorkmansCompInsuranceExpDate,
+        ContractorSuspendGraceDate
+      };
+
+      contractorDateList.Sort();
+
+      Console.WriteLine("Sorted List Check Spot");
+
+      if (ContractorSuspendGraceDate.ToShortDateString() == DateTime.Today.ToShortDateString() && Inspection_Notice.Trim() == "180+")
       {
         this.ErrorText = "The Grace Date for this contractor has passed. Please contact the Building Department for assistance.";
         return true;

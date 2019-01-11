@@ -202,7 +202,7 @@ var InspSched;
         IssueContainer.style.display = "none";
         LoadInspectionTypes();
         InspSched.InspectorUI.LoadDailyInspections();
-        window.setInterval(LoadInspectionsIfBetween6AMand6PM(), 60 * 5 * 1000); // update every 5 minutes.
+        window.setInterval(LoadInspectionsIfBetween6AMand6PM, 60 * 5 * 1000); // update every 5 minutes.
         LoadInspectionQuickRemarks();
     }
     function LoadInspectionsIfBetween6AMand6PM() {
