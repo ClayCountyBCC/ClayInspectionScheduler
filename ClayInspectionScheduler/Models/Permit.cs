@@ -302,6 +302,19 @@ namespace ClayInspectionScheduler.Models
                            h.PermitNo != MasterPermit
                            select h.PermitNo).ToList();
 
+
+      foreach (var prmt in permits)
+      {
+        if (prmt.PermitNo == MasterPermit && (newInspectionType == null || newInspectionType.InspCd != "205"))
+        {
+          prmt.Charges.RemoveAll(c => c.CatCode == "IFSF" ||
+                                      c.CatCode == "IFMH" ||
+                                      c.CatCode == "IFMF" ||
+                                      c.CatCode == "IFSCH" ||
+                                      c.CatCode == "IFRD2" ||
+                                      c.CatCode == "IFRD3");
+        }
+      }
       var ChargePermits = (from prmt in permits
                            where prmt.Charges.Count > 0
                            select prmt.PermitNo).ToList();
