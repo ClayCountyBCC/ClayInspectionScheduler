@@ -26,6 +26,7 @@ namespace ClayInspectionScheduler.Models
     public string PropUseCode { get; set; } = "";
     private string ContractorId { get; set; } = "";
     private int Confidential { get; set; }
+    private DateTime MaxContractorScheduleDate { get; set; }
     private DateTime ContractorLiabilityInsuranceExpDate { get; set; } = DateTime.MinValue;
     private DateTime ContractorWorkmansCompInsuranceExpDate { get; set; } = DateTime.MinValue;
     private DateTime ContractorStateRegistrationExpDate { get; set; } = DateTime.MinValue;
@@ -33,16 +34,14 @@ namespace ClayInspectionScheduler.Models
     private DateTime ContractorStateCertExpDate { get; set; } = DateTime.MinValue;
     private DateTime ContractorSuspendGraceDate { get; set; } = DateTime.MinValue;
     private string Inspection_Notice { get; set; }
-    private DateTime WorkersCompExpirationDate { get; set; } = DateTime.MaxValue;
-    private DateTime LiabilityExpirationDate { get; set; } = DateTime.MaxValue;
-    private DateTime PermitIssueDate { get; set; } = DateTime.MaxValue; // check if permt
     private decimal TotalCharges { get; set; } // check for charges
     private DateTime IssueDate { get; set; } = DateTime.MinValue;
+    public DateTime CreatedDate { get; set; } = DateTime.MinValue;
     public int CoClosed { get; set; } // check if master is Co'd
     public int TotalFinalInspections { get; set; } // Count the total final inspections for this permit
     private string ContractorStatus { get; set; } // check if Contractor is active
     private string PrivateProvider { get; set; } = "";
-    
+
     public List<Charge> Charges { get; set; } = new List<Charge>();
 
     public List<Hold> Holds { get; set; }
@@ -70,7 +69,8 @@ namespace ClayInspectionScheduler.Models
     {
       get
       {
-        var dc = DateCache.getDateCache(this.access == UserAccess.access_type.public_access, this.ContractorSuspendGraceDate, this.Inspection_Notice == "180+");
+        SetMaxContractorScheduleDate();
+        var dc = DateCache.getDateCache(this.access == UserAccess.access_type.public_access, this.MaxContractorScheduleDate, this.Inspection_Notice == "180+");
         return dc;
       }
     }
@@ -113,6 +113,7 @@ namespace ClayInspectionScheduler.Models
         distinct M.PermitNo PermitNo,
         M.PermitNo MPermitNo,
         B.PropUseCode,
+        M.CreatedDt CreatedDate,
         M.IssueDate,
         ISNULL(B.ProjAddrNumber, '') +
           CASE WHEN LEN(LTRIM(RTRIM(B.ProjPreDir))) > 0 THEN LTRIM(RTRIM(B.ProjPreDir)) ELSE '' END + 
@@ -155,6 +156,7 @@ namespace ClayInspectionScheduler.Models
         ISNULL(A.MPermitNo, '') MPermitNo,
         '' PropUseCode,
         A.IssueDate,
+        A.CreatedDt CreatedDate,
         ISNULL(B.ProjAddrNumber, '') +
           CASE WHEN LEN(LTRIM(RTRIM(B.ProjPreDir))) > 0 THEN LTRIM(RTRIM(B.ProjPreDir)) ELSE '' END + 
           ISNULL(B.ProjStreet, '') + 
@@ -194,6 +196,7 @@ namespace ClayInspectionScheduler.Models
       {
         p.Charges = Charge.GetCharges(p.PermitNo, DoImpactFeesMatter);
       }
+
       return permitlist;
     }
 
@@ -277,11 +280,42 @@ namespace ClayInspectionScheduler.Models
       }
     }
 
+    private void SetMaxContractorScheduleDate()
+    {
+      var dates = new List<DateTime>(){
+          ContractorLiabilityInsuranceExpDate,
+          ContractorWorkmansCompInsuranceExpDate,
+          ContractorStateRegistrationExpDate,
+          ContractorCountyLicenseExpDate,
+          ContractorStateCertExpDate,
+          ContractorSuspendGraceDate
+      };
+
+      dates.RemoveAll(d => d == DateTime.MinValue);
+      var newDates  = dates.OrderBy(d => d.Date).ToList();
+      if (newDates != null)
+      {
+        if (newDates.Count() > 0)
+        {
+          MaxContractorScheduleDate = newDates.First();
+        }
+        else
+        {
+          if(ContractorId.ToUpper() == "OWNER")
+          {
+            MaxContractorScheduleDate = DateTime.MaxValue; 
+          }
+           
+        }
+      }
+      Console.Write("breakpoint");
+    }
+
     public static List<Permit> BulkValidate(
       List<Permit> permits,
       InspType newInspectionType)
     {
-
+      
       var MasterPermit = (from prmt in permits
                           where prmt.CoClosed != -1
                           select prmt.PermitNo).DefaultIfEmpty("").First();
@@ -298,8 +332,8 @@ namespace ClayInspectionScheduler.Models
       }
       
       var CannotInspectPermits = (from h in holds
-                           where h.SatNoInspection == 1 &&
-                           h.PermitNo != MasterPermit
+                           where h.SatNoInspection == 1 && 
+                           h.PermitNo != MasterPermit 
                            select h.PermitNo).ToList();
 
 
@@ -544,13 +578,12 @@ namespace ClayInspectionScheduler.Models
           {
             if (CheckPrivProv(PrivateProvider)) return;
           }
-          if (CheckSuspendGraceDate(this.ContractorSuspendGraceDate)) return;
         }
 
-        if (ContractorIssues()) return;
+        // if (ContractorIssues()) return;
       }
     }
-
+    
     private bool CheckPrivProv(string PrivProvValidate)
     {
 
@@ -562,6 +595,7 @@ namespace ClayInspectionScheduler.Models
       return false;
     }
 
+ 
     private bool CheckSuspendGraceDate(DateTime SuspendGraceDate)
     {
       var contractorDateList = new List<DateTime>()
@@ -586,7 +620,6 @@ namespace ClayInspectionScheduler.Models
       return false;
 
     }
-
     private bool ContractorIssues()
     {
       // Contractor Owners do not have any valid data for these fields
@@ -615,20 +648,47 @@ namespace ClayInspectionScheduler.Models
       }
 
       // TODO: update for new contractor status checks. do not allow any permit if bldg contractor suspended, do not allow trade or bldg insection if trade contractor is suspended.
-      
-      else if (this.LiabilityExpirationDate <= DateTime.Today)
+      //var maxDate = ExpirationDates;
+      if (ContractorLiabilityInsuranceExpDate < DateTime.Today)
       {
         ErrorText = "The Contractor's Liability Insurance expiration date has passed";
         return true;
       }
-      else if (this.WorkersCompExpirationDate <= DateTime.Today)
+      if (ContractorWorkmansCompInsuranceExpDate != DateTime.MinValue && this.ContractorWorkmansCompInsuranceExpDate <= DateTime.Today)
       {
         ErrorText = "The Contractor's Workman's Compensation Insurance expiration date has passed";
         return true;
       }
-      // returns true if contractor issues exist for this permit.
+
+      if ((ContractorStateCertExpDate < DateTime.Today && ContractorCountyLicenseExpDate < DateTime.Today) && ContractorSuspendGraceDate >= DateTime.Today)
+      {
+        ErrorText = "The following dates have expired:\n";
+        if (ContractorStateCertExpDate > DateTime.MinValue)
+        {
+          ErrorText += "State Certification: " + ContractorStateCertExpDate.ToShortDateString() + System.Environment.NewLine;
+        }
+
+        if (ContractorCountyLicenseExpDate > DateTime.MinValue)
+        {
+          ErrorText += "County License: " + ContractorCountyLicenseExpDate.ToShortDateString() + System.Environment.NewLine;
+        }
+
+        ErrorText += "Please reach out to the Building Department for assistance or if this is in error.";
+
+        return true;
+      }
+
       //"The grace period for this permit has passed."
-      return false;
+      
+      //if(ContractorSuspendGraceDate < DateTime.Today && )
+      //{
+      //  ErrorText += @"Contractor's Grace Period has passed, 
+      //                 please reach out to the Building Department 
+      //                 for assistance or if this is in error";
+      //}
+
+      return ErrorText.Length > 0;
+
     }
 
     public static List<Permit> BulkContractorStatusCheck(List<Permit> permits, string masterPermit = "")
@@ -698,6 +758,7 @@ namespace ClayInspectionScheduler.Models
       }
       return false;
     }
+
 
   }
 

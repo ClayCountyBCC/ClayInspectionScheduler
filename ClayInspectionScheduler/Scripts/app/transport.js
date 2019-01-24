@@ -8,6 +8,8 @@ var InspSched;
     (function (transport) {
         "use strict";
         function GetPermit(key) {
+            if (key == null)
+                return;
             var x = XHR.Get("API/Permit/Get/" + key);
             return new Promise(function (resolve, reject) {
                 x.then(function (response) {
@@ -34,6 +36,8 @@ var InspSched;
         }
         transport.GetInspType = GetInspType;
         function GetInspections(key) {
+            if (key == null)
+                return;
             var x = XHR.Get("API/Inspection/Permit/" + key);
             return new Promise(function (resolve, reject) {
                 x.then(function (response) {
@@ -79,6 +83,8 @@ var InspSched;
         }
         transport.AddComment = AddComment;
         function CancelInspection(InspectionId, PermitNumber) {
+            if (PermitNumber == null || InspectionId == null)
+                return;
             var x = XHR.Post("API/Inspection/PublicCancel/" + PermitNumber + "/" + InspectionId);
             return new Promise(function (resolve, reject) {
                 x.then(function (response) {

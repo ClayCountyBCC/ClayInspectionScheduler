@@ -9,6 +9,7 @@ namespace InspSched.transport
 
   export function GetPermit(key: string): Promise<Array<Permit>>
   {
+    if (key == null) return;
     var x = XHR.Get("API/Permit/Get/" + key);
     return new Promise<Array<Permit>>(function (resolve, reject)
     {
@@ -43,6 +44,7 @@ namespace InspSched.transport
 
   export function GetInspections(key: string): Promise<Array<Inspection>>
   {
+    if (key == null) return;
 
     var x = XHR.Get("API/Inspection/Permit/" + key);
     return new Promise<Array<Inspection>>(function (resolve, reject)
@@ -108,6 +110,8 @@ namespace InspSched.transport
 
   export function CancelInspection(InspectionId: number, PermitNumber: string)
   {
+    if (PermitNumber == null || InspectionId == null) return;
+
     var x = XHR.Post("API/Inspection/PublicCancel/" + PermitNumber + "/" + InspectionId);
     return new Promise(function (resolve, reject)
     {

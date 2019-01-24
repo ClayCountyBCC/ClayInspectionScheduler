@@ -305,7 +305,7 @@ namespace InspSched.UI
 
     let inspRow: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
     //inspRow.setAttribute("elementName", "inspRow");
-
+    
     // Set Inspection Row element classes 
     if (inspection.ResultADC.length == 0)
       inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle";
@@ -316,6 +316,7 @@ namespace InspSched.UI
     else if (inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'N')
       inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle FailRow";
 
+    inspRow.classList.add("no-page-break");
 
     // #region DataRow
     //*******************************************************************************************

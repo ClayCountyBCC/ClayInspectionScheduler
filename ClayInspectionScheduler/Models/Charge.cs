@@ -43,7 +43,7 @@ namespace ClayInspectionScheduler.Models
       SELECT
         -- RTRIM(LTRIM(C.AssocKey)) PermitNo,
         C.CashierId,
-        C.CatCode,
+        LTRIM(RTRIM(C.CatCode)) CatCode,
         CC.[Description] Description,
         C.Total 
       FROM ccCashierItem C
@@ -83,7 +83,7 @@ namespace ClayInspectionScheduler.Models
       }
     }
 
-    public static bool UserCannotScheduleTempPowerEquipmentCheck(string permitNumber, string propUseCode)
+    public static bool UserCannotScheduleTempPowerEquipmentCheck(string permitNumber, string propUseCode,DateTime createdDate)
     {
       var dbArgs = new DynamicParameters();
       dbArgs.Add("@PermitNumber", permitNumber);
@@ -130,6 +130,7 @@ namespace ClayInspectionScheduler.Models
 
         if (i.Any() || !PropUseCodes.Contains(propUseCode))
         {
+          var minRoadImpactFeeDate = new DateTime(2017,12,31,23,59,59);
 
           var listOfImpactFees = (from c in i
                                   where (c.CatCode == "IFSF" || 
@@ -146,7 +147,9 @@ namespace ClayInspectionScheduler.Models
                                              select c).ToList();
 
 
-          if (!PropUseCodes.Contains(propUseCode) || listOfImpactFees.Count() == 2)
+          if (!PropUseCodes.Contains(propUseCode) || 
+             (createdDate > minRoadImpactFeeDate && listOfImpactFees.Count() == 2) || 
+             (createdDate<= minRoadImpactFeeDate && listOfImpactFees.Count() == 1))
           {
             return true;
           }

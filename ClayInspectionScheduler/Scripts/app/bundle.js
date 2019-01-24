@@ -908,6 +908,7 @@ var InspSched;
                 inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle CancelRow";
             else if (inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'N')
                 inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle FailRow";
+            inspRow.classList.add("no-page-break");
             // #region DataRow
             //*******************************************************************************************
             var DataRow = document.createElement("div");
@@ -1731,6 +1732,8 @@ var InspSched;
     (function (transport) {
         "use strict";
         function GetPermit(key) {
+            if (key == null)
+                return;
             var x = XHR.Get("API/Permit/Get/" + key);
             return new Promise(function (resolve, reject) {
                 x.then(function (response) {
@@ -1757,6 +1760,8 @@ var InspSched;
         }
         transport.GetInspType = GetInspType;
         function GetInspections(key) {
+            if (key == null)
+                return;
             var x = XHR.Get("API/Inspection/Permit/" + key);
             return new Promise(function (resolve, reject) {
                 x.then(function (response) {
@@ -1802,6 +1807,8 @@ var InspSched;
         }
         transport.AddComment = AddComment;
         function CancelInspection(InspectionId, PermitNumber) {
+            if (PermitNumber == null || InspectionId == null)
+                return;
             var x = XHR.Post("API/Inspection/PublicCancel/" + PermitNumber + "/" + InspectionId);
             return new Promise(function (resolve, reject) {
                 x.then(function (response) {

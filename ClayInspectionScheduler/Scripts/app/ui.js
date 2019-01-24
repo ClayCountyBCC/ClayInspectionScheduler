@@ -224,6 +224,7 @@ var InspSched;
                 inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle CancelRow";
             else if (inspection.ResultADC == 'F' || inspection.ResultADC == 'D' || inspection.ResultADC == 'N')
                 inspRow.className = "InspRow large-12 medium-12 small-12 row flex-container align-middle FailRow";
+            inspRow.classList.add("no-page-break");
             // #region DataRow
             //*******************************************************************************************
             var DataRow = document.createElement("div");
