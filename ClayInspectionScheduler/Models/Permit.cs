@@ -614,7 +614,7 @@ namespace ClayInspectionScheduler.Models
 
       if (ContractorSuspendGraceDate.ToShortDateString() == DateTime.Today.ToShortDateString() && Inspection_Notice.Trim() == "180+")
       {
-        this.ErrorText = "The Grace Date for this contractor has passed. Please contact the Building Department for assistance.";
+        ErrorText = "The Grace Date for this contractor has passed. Please contact the Building Department for assistance.";
         return true;
       }
       return false;
@@ -628,9 +628,10 @@ namespace ClayInspectionScheduler.Models
         return false;
       }
 
-      if (PermitNo[0] == '6' && ContractorId == "")
+      if (PermitNo[0] == '6')
       {
         ContractorId = "FIRE";
+        return false;
       }
 
       if (string.IsNullOrEmpty(this.ContractorId))
@@ -649,18 +650,21 @@ namespace ClayInspectionScheduler.Models
 
       // TODO: update for new contractor status checks. do not allow any permit if bldg contractor suspended, do not allow trade or bldg insection if trade contractor is suspended.
       //var maxDate = ExpirationDates;
-      if (ContractorLiabilityInsuranceExpDate < DateTime.Today)
+      if (ContractorLiabilityInsuranceExpDate < DateTime.Today && (this.PermitNo[0] != '6'))
       {
         ErrorText = "The Contractor's Liability Insurance expiration date has passed";
         return true;
       }
-      if (ContractorWorkmansCompInsuranceExpDate != DateTime.MinValue && this.ContractorWorkmansCompInsuranceExpDate <= DateTime.Today)
+      if (ContractorWorkmansCompInsuranceExpDate != DateTime.MinValue && 
+          ContractorWorkmansCompInsuranceExpDate <= DateTime.Today )
       {
         ErrorText = "The Contractor's Workman's Compensation Insurance expiration date has passed";
         return true;
       }
 
-      if ((ContractorStateCertExpDate < DateTime.Today && ContractorCountyLicenseExpDate < DateTime.Today) && ContractorSuspendGraceDate >= DateTime.Today)
+      if (ContractorStateCertExpDate < DateTime.Today && 
+          ContractorCountyLicenseExpDate < DateTime.Today && 
+          ContractorSuspendGraceDate >= DateTime.Today  )
       {
         ErrorText = "The following dates have expired:\n";
         if (ContractorStateCertExpDate > DateTime.MinValue)

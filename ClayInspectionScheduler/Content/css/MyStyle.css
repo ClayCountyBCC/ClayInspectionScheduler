@@ -556,6 +556,8 @@ textarea:-ms-input-placeholder {
 
   @page {
     font-size: 10px !important;
+    
+   
   }
   /* All your print styles go here */
   #header,
@@ -569,8 +571,16 @@ textarea:-ms-input-placeholder {
   .no-underline-for-print {
     text-decoration: none;
   }
-  #inspectorViewInspections {
+
+  #inspectorViewInspections,
+  #InspListData {
     -ms-transform: scale(.75,.75) !important;
+  }
+  #InspListData {
+
+  }
+    #scroll-tab {
+    overflow: hidden !important;
   }
 
   body {
@@ -604,11 +614,12 @@ textarea:-ms-input-placeholder {
   .tabs-content {
     border: none !important;
   }
-  a{
-  text-decoration:none !important;
-  }
-  a[href]:after {
-    content: none !important;
 
+  a {
+    text-decoration: none !important;
   }
+
+    a[href]:after {
+      content: none !important;
+    }
 }
