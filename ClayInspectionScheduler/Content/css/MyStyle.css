@@ -556,8 +556,6 @@ textarea:-ms-input-placeholder {
 
   @page {
     font-size: 10px !important;
-    
-   
   }
   /* All your print styles go here */
   #header,
@@ -576,24 +574,13 @@ textarea:-ms-input-placeholder {
   #InspListData {
     -ms-transform: scale(.75,.75) !important;
   }
-  #InspListData {
 
-  }
-    #scroll-tab {
-    overflow: hidden !important;
-  }
-
-  body {
-    font-size: 10px !important;
-  }
-
-  #InspectionSchedulerTabs {
-  }
 
   .App-Container {
-    display: flex !important;
+    display: block !important;
     width: auto !important;
     height: auto !important;
+    display: block !important;
   }
 
   .change-height-for-print {
@@ -602,24 +589,90 @@ textarea:-ms-input-placeholder {
     width: 100% !important;
   }
 
-  #PermitScreen {
-    min-width: 100% !important;
-    height: auto !important;
+  /*.InspRow {
+    border-top: solid black 1px !important;
+    border-left: none !important;
+    border-bottom: none !important;
+  }*/
+
+  .CancelRow, .InspRow {
+    border-top: solid black 1px !important;
+    border-left: none;
+    border-bottom: 1px solid black;
+    margin-bottom: 0;
   }
 
-  .no-page-break {
-    page-break-inside: avoid !important;
+  .NoInspRow {
+    border-top: solid black 1px !important;
+    border-left: none;
+    border-bottom: 1px solid black;
+    margin-bottom: 0;
+  }
+
+  .FailRow {
+    border-top: solid black 1px !important;
+    border-left: none;
+    border-bottom: 1px solid black;
+    margin-bottom: 0;
+  }
+
+  .PassRow {
+    border-top: solid black 1px !important;
+    border-left: none;
+    border-bottom: 1px solid black;
+    margin-bottom: 0;
+  }
+
+  #PermitScreen,
+  #InspSchedBody,
+  #InspectionTable,
+  #InspSched,
+  #InspectionView,
+  #scroll-tab {
+    min-width: 100% !important;
+    height: auto !important;
+    display: block !important;
   }
 
   .tabs-content {
-    border: none !important;
+  }
+
+  .infoDiv {
+    display: block !important;
   }
 
   a {
     text-decoration: none !important;
   }
 
+  .ButtonContainer,
+  .Comment-Textarea {
+    display: none !important;
+  }
+
     a[href]:after {
       content: none !important;
     }
-}
+
+  body {
+    font-size: 10px !important;
+  }
+
+  .no-page-break {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  #InspListData {
+    display:block !important;
+
+  }
+
+  label {
+  display: none !important;
+  }
+  .inspection-Table,
+  .completed-comments-textarea {
+    max-height: unset;
+    display: block !important;
+  }
+
