@@ -650,9 +650,9 @@ textarea:-ms-input-placeholder {
     display: none !important;
   }
 
-    a[href]:after {
-      content: none !important;
-    }
+  a[href]:after {
+    content: none !important;
+  }
 
   body {
     font-size: 10px !important;
@@ -662,17 +662,19 @@ textarea:-ms-input-placeholder {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
   }
-  #InspListData {
-    display:block !important;
 
+  #InspListData {
+    display: block !important;
   }
 
   label {
-  display: none !important;
+    display: none !important;
   }
+
   .inspection-Table,
   .completed-comments-textarea {
     max-height: unset;
     display: block !important;
   }
+}
 
