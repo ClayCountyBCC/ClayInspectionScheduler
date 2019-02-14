@@ -41,6 +41,8 @@ namespace ClayInspectionScheduler.Models
     public int TotalFinalInspections { get; set; } // Count the total final inspections for this permit
     private string ContractorStatus { get; set; } // check if Contractor is active
     private string PrivateProvider { get; set; } = "";
+    public bool CorrectImpactFeeCount { get; set; } = true;
+    public decimal TotalImpactFeesDue { get; set; }
 
     public List<Charge> Charges { get; set; } = new List<Charge>();
 
@@ -86,110 +88,15 @@ namespace ClayInspectionScheduler.Models
       dbArgs.Add("@PermitNo", PermitNumber);
       string sql = @"
       USE WATSC;
-      DECLARE @MPermitNo CHAR(8) = (SELECT MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = @PermitNo);
-      
-      WITH TotalCharges(PermitNo, TotalCharges) AS (
-        Select 
-          AssocKey PermitNo,
-          SUM(Total) AS TotalCharges
-        FROM ccCashierItem 
-        WHERE 
-          AssocKey IS NOT NULL 
-          AND Total > 0			    -- CHECKS IF TOTAL (owed) IS GREATER THAN ZERO
-          AND CashierId IS NULL	-- CHECK IF CASHIER HAS SIGNED OFF ON CHARGE (IF NULL, THEN CHARGE IS STILL VALID)
-          AND UnCollectable = 0
-        GROUP BY AssocKey
-      ), PassedFinal (PermitNo, TotalFinalInspections) AS (
-        SELECT 
-          PermitNo,
-          COUNT(InspReqID) AS TotalFinalInspections
-        FROM bpINS_REQUEST I
-        INNER JOIN bpINS_REF IR ON I.InspectionCode = IR.InspCd AND Final = 1
-        WHERE ResultADC IN ('A', 'P')
-        GROUP BY I.PermitNo
-      )
-      
-      SELECT 
-        distinct M.PermitNo PermitNo,
-        M.PermitNo MPermitNo,
-        B.PropUseCode,
-        M.CreatedDt CreatedDate,
-        M.IssueDate,
-        ISNULL(B.ProjAddrNumber, '') +
-          CASE WHEN LEN(LTRIM(RTRIM(B.ProjPreDir))) > 0 THEN LTRIM(RTRIM(B.ProjPreDir)) ELSE '' END + 
-          ISNULL(B.ProjStreet, '') + 
-          CASE WHEN LEN(LTRIM(RTRIM(B.ProjPostDir))) > 0 THEN LTRIM(RTRIM(B.ProjPostDir)) ELSE '' END StreetAddress,
-        B.ProjAddrCombined,
-        B.ProjCity,
-        C.LiabInsExpDt ContractorLiabilityInsuranceExpDate, 
-        CASE WHEN C.WC_Exempt = 1 THEN NULL ELSE C.WC_ExpDt END WC_ExpDt,
-        CASE WHEN YEAR(C.StRegExpDt) = 1900 THEN NULL ELSE C.StRegExpDt END StRegExpDt,
-        CASE WHEN YEAR(C.CertExpDt) = 1900 THEN NULL ELSE C.CertExpDt END ContractorStateCertExpDate,
-        CASE WHEN YEAR(C.ExpDt) = 1900 THEN NULL ELSE C.ExpDt END ContractorCountyLicenseExpDate,
-        CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) ContractorSuspendGraceDate,
-        Inspection_Notice,
-        B.Confidential,
-        B.ContractorId,
-        CAST(CASE WHEN M.CoClosed = 1 THEN 1 ELSE 0 END AS INT) CoClosed,
-        DATEADD(dd,-1,C.WC_ExpDt) WorkersCompExpirationDate,
-        DATEADD(dd,-1,C.LiabInsExpDt) LiabilityExpirationDate,
-        ISNULL(C.Status, '') ContractorStatus,
-        ISNULL(TC.TotalCharges, 0) TotalCharges,
-        ISNULL(PF.TotalFinalInspections, 0) TotalFinalInspections, 
+      DECLARE @MPermitNo CHAR(8) = (SELECT TOP 1 MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = @PermitNo);      
 
-        CASE WHEN M.PrivProvBL = 1 THEN '1' ELSE '' END PrivateProvider
-
-      FROM bpMASTER_PERMIT M
-      LEFT OUTER JOIN bpBASE_PERMIT B ON M.BaseID = B.BaseID
-      LEFT OUTER JOIN clContractor C ON B.ContractorId = C.ContractorCd 
-		  LEFT OUTER JOIN TotalCharges TC ON M.PermitNo = TC.PermitNo
-      LEFT OUTER JOIN PassedFinal PF ON M.PermitNo = PF.PermitNo 
-		  WHERE 
-        (M.PermitNo = @MPermitNo 
-		      OR M.PermitNo = @PermitNo)
-		    AND M.VoidDate is NULL
-
-      UNION ALL
-
-      SELECT 
-        distinct A.PermitNo PermitNo,
-        ISNULL(A.MPermitNo, '') MPermitNo,
-        '' PropUseCode,
-        A.IssueDate,
-        A.CreatedDt CreatedDate,
-        ISNULL(B.ProjAddrNumber, '') +
-          CASE WHEN LEN(LTRIM(RTRIM(B.ProjPreDir))) > 0 THEN LTRIM(RTRIM(B.ProjPreDir)) ELSE '' END + 
-          ISNULL(B.ProjStreet, '') + 
-          CASE WHEN LEN(LTRIM(RTRIM(B.ProjPostDir))) > 0 THEN LTRIM(RTRIM(B.ProjPostDir)) ELSE '' END StreetAddress,
-        B.ProjAddrCombined,
-        B.ProjCity,
-        C.LiabInsExpDt ContractorLiabilityInsuranceExpDate, 
-        CASE WHEN C.WC_Exempt = 1 THEN NULL ELSE C.WC_ExpDt END ContractorWorkmansCompInsuranceExpDate,
-        CASE WHEN YEAR(C.StRegExpDt) = 1900 THEN NULL ELSE C.StRegExpDt END ContractorStateRegistrationExpDate,
-        CASE WHEN YEAR(C.CertExpDt) = 1900 THEN NULL ELSE C.CertExpDt END ContractorStateCertExpDate,
-        CASE WHEN YEAR(C.ExpDt) = 1900 THEN NULL ELSE C.ExpDt END ContractorCountyLicenseExpDate,
-        CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) ContractorSuspendGraceDate,
-        Inspection_Notice,
-        B.Confidential,
-        A.ContractorId,
-        CAST(-1 AS INT) AS CoClosed,
-        DATEADD(dd,-1,C.WC_ExpDt) WorkersCompExpirationDate,
-        DATEADD(dd,-1,C.LiabInsExpDt) LiabilityExpirationDate,
-        ISNULL(C.Status, '') ContractorStatus,
-        ISNULL(TC.TotalCharges, 0) TotalCharges,
-        ISNULL(PF.TotalFinalInspections, 0) TotalFinalInspections,
-        '' PrivateProvider
-      FROM 
-        bpASSOC_PERMIT A
-      LEFT OUTER JOIN bpBASE_PERMIT B ON A.BaseID = B.BaseID
-      LEFT OUTER JOIN clContractor C ON A.ContractorId = C.ContractorCd 
-      LEFT OUTER JOIN TotalCharges TC ON A.PermitNo = TC.PermitNo
-      LEFT OUTER JOIN PassedFinal PF ON A.PermitNo = PF.PermitNo 
-		  WHERE
-        (A.PermitNo = @PermitNo 
-		        OR MPermitNo = @MPermitNo
-		        OR A.mPermitNo = @PermitNo)
-   		    AND A.VoidDate IS NULL";
+      SELECT
+      *
+      FROM vwInspectionPermit          
+                WHERE PermitNo = @PermitNo
+                OR MPermitNo = @PermitNo
+                OR MPermitNo = @MPermitNo
+      ";
 
       var permitlist = Constants.Get_Data<Permit>(sql, dbArgs);
       foreach(Permit p in permitlist)
@@ -269,8 +176,7 @@ namespace ClayInspectionScheduler.Models
         {
           return new List<Permit>();
         }
-
-
+        
         return permits;
       }
       catch (Exception ex)

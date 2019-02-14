@@ -118,7 +118,7 @@ namespace ClayInspectionScheduler.Models
           var mp = (from p in Permits
                     where p.CoClosed == 0
                     select p).DefaultIfEmpty(new Permit()).First();
-          var canSchedule = Charge.UserCannotScheduleTempPowerEquipmentCheck(mp.PermitNo, mp.PropUseCode, mp.CreatedDate);
+          var canSchedule =  mp.CorrectImpactFeeCount && mp.TotalImpactFeesDue == 0;
 
           if (!canSchedule && (currentInspectionType.InspCd == "205" || currentInspectionType.InspCd == "123"))
            {
