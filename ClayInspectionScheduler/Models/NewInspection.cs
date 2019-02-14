@@ -162,7 +162,7 @@ namespace ClayInspectionScheduler.Models
           }
 
           var inspections = Inspection.Get(CurrentPermit.PermitNo);
-          CurrentPermit.Holds = Hold.GetThisPermitsHolds(CurrentPermit.PermitNo);
+          CurrentPermit.Holds = Hold.Get(new List<string>() { CurrentPermit.PermitNo});
 
           var needsFireInspection = (from h in CurrentPermit.Holds
                                      where h.HldCd == "FD05"
