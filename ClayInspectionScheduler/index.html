@@ -41,8 +41,8 @@
   <!--Inspection Scheduler Application container-->
   <div class="row expanded App-Container large-12 medium-12 small-12 columns align-center" style="padding-top:1rem;">
     <div class="flex-container small-12 align-center hide-for-print">
-      <div class="large-4 medium-6 input-group">
-        <input id="PermitSearch" type="search" class="input-group-field columns" placeholder="   Permit Number" />
+      <div class="large-4 medium-6 input-group" style="border-radius:3px; overflow:hidden;">
+        <input id="PermitSearch" type="search" class="input-group-field columns"  placeholder="   Permit Number" />
         <span class="input-group-button" id="button">
           <button id="PermitSearchButton"
                   onclick="InspSched.updateHash(document.getElementById('PermitSearch').value);"
@@ -110,8 +110,11 @@
                   </div>
                 </div>
               </div>
-            </div>
 
+            </div>
+            <!--<textarea wrap="soft" style="word-wrap:break-word;overflow-wrap:break-word; height: 40px; width:1276px;" class="input-group-field">
+
+              </textarea>-->
             <!-- Tab 2 : Scheduler -->
             <div class="tabs-panel tab-no-border" id="Scheduler">
               <div class="row align-justify" id="PermitInfoDiv">
@@ -160,18 +163,30 @@
                       </div>
                     </div>
                     <!--Scheduling Inspection Type Selector / Save button-->
-                    <div class="large-6 medium-6 small-12 row flex-container align-center align-self-middle">
-                      <div class="large-10 medium-10 small-10" style="text-align:center;">
-                        <label style="text-align:left;" for="scheduler_comment">Comments for the Inspector</label>
-                        <textarea class="large-12 medium-12 small-12" placeholder="Please enter gate or lock box code here.  All other requests are to be made to your inspector directly by phone." 
-                              rows=3 maxlength=200 style="resize: none;" id="scheduler_comment"></textarea>
+                    <div class="small-6 row flex-container flex-dir-column align-center align-self-middle">
+                      <div class="large-4 medium-7 small-9 input-group flex-container row align-self-middle" style="margin-bottom: 5em;">
+                        <span class="input-group-label " id="">
+                          <label for="gate_code">Gate Code</label>
+                        </span>
+                        <input id="gate_code"
+                               type="search"
+                               class="input-group-field small-12"
+                               maxlength="9"
+                               style="border-top-right-radius:3px; border-bottom-right-radius:3px"
+                               placeholder=" Enter Gate Code" />
+                      </div>
+
+                      <div class="small-6 row flex-container align-center align-self-middle">
                         <select class="large-12 medium-12 small-12" id="InspTypeSelect"></select>
                         <button class="button " id="SaveSchedule" type="button" onclick="">Save Inspection</button>
                       </div>
-                      <div class="large-10 medium-10 small-10 text-center align-center" id="SaveConfirmed">
 
+                      <div class="small-10 text-center align-self-middle" id="SaveConfirmed">
                       </div>
-                    </div>  <!-- End Scheduling Inspection Type Selector / Save button-->
+                    </div>
+
+
+                    <!-- End Scheduling Inspection Type Selector / Save button-->
 
                   </div>
                 </div>
@@ -273,16 +288,16 @@
                   </div>
                   <!--<div class="flex-container row align-center align-middle">
 
-                  </div>-->
+        </div>-->
                 </div>
               </div>
 
               <!-- The menu for the inspector view will go here
-              they will use this to pick today/tomorrow
-              and choose an inspector
-              and refresh the data
-              open/closed
-              -->
+    they will use this to pick today/tomorrow
+    and choose an inspector
+    and refresh the data
+    open/closed
+    -->
 
 
               <div style="margin-top: .5em;"
@@ -298,7 +313,7 @@
     </div>     <!--End Permit Information-->
   </div>     <!--End Inspection Scheduler-->
 
-  <script src="Scripts/app/bundle.min.js?201902131610"></script>
+  <script src="Scripts/app/bundle.min.js?201902211338"></script>
 
   <!--<script src="Scripts/jquery-3.1.1.js"></script>
     <script src="Scripts/moment.js"></script>

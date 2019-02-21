@@ -526,6 +526,7 @@ namespace ClayInspectionScheduler.Models
       return false;
 
     }
+
     private bool ContractorIssues()
     {
       // Contractor Owners do not have any valid data for these fields
@@ -533,6 +534,7 @@ namespace ClayInspectionScheduler.Models
       {
         return false;
       }
+
 
       if (PermitNo[0] == '6')
       {
@@ -547,7 +549,7 @@ namespace ClayInspectionScheduler.Models
       
 
 
-      if (this.ContractorStatus != "A" && (this.PermitNo[0] != '6'))
+      if (!this.PassedFinal() && (this.PermitNo[0] != '6') && this.ContractorStatus != "A" )
       {
         // TODO: if bldg, stop all inspections, if trade, stop that permit and bldg permit inspection.
         ErrorText = "There is an issue with the contractor's status";

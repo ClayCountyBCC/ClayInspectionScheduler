@@ -157,8 +157,8 @@ var InspSched;
         var thisInspCd = SaveInspectionButton.getAttribute("value");
         var thisInspDesc = document.getElementById("InspTypeSelect");
         var inspDesc = thisInspDesc.options[thisInspDesc.selectedIndex].textContent;
-        var comment = document.getElementById("scheduler_comment");
-        InspSched.newInsp = new InspSched.NewInspection(thisPermit, thisInspCd, $(dpCalendar).data('datepicker').getDate(), comment.value);
+        var comment = document.getElementById("gate_code");
+        InspSched.newInsp = new InspSched.NewInspection(thisPermit, thisInspCd, $(dpCalendar).data('datepicker').getDate(), "Gate Code: " + comment.value);
         comment.value = "";
         var e = InspSched.transport.SaveInspection(InspSched.newInsp).then(function (issues) {
             var thisHeading = document.getElementById('ErrorHeading');

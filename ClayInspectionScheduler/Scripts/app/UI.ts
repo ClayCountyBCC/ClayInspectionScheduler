@@ -386,7 +386,7 @@ namespace InspSched.UI
       let addRemarkLabel: HTMLLabelElement = (<HTMLLabelElement>document.createElement("label"));
       let addRemarkTextDiv: HTMLDivElement = (<HTMLDivElement>document.createElement("div"));
       let addRemarkInputGroup: HTMLDivElement = document.createElement("div");
-      let remarkInput: HTMLInputElement = (<HTMLInputElement>document.createElement("input"));
+    let remarkInput: HTMLTextAreaElement = (<HTMLTextAreaElement>document.createElement("textarea"));
       let containerSpan: HTMLSpanElement = document.createElement("span");
       let quickRemarkButton: HTMLButtonElement = (<HTMLButtonElement>document.createElement("button"));
       let eventTarget = document.getElementById("ScrollTab");
@@ -429,21 +429,28 @@ namespace InspSched.UI
       addRemarkInputGroup.classList.add("small-12");
       addRemarkInputGroup.style.margin = "0";
 
-      remarkInput.type = "text";
       remarkInput.setAttribute("onkeyup", "InspSched.disableSaveCommentButton(" + inspection.InspReqID + ")");
       remarkInput.id = inspection.InspReqID + "_remark_textarea";
+      remarkInput.setAttribute("wrap", "soft");
       remarkInput.style.margin = "0";
+      remarkInput.style.minHeight = "80px";
+      remarkInput.style.resize = "vertical";
+
+      remarkInput.setAttribute("overflow-wrap", "break-word");
+      remarkInput.setAttribute("word-wrap", "break-word");
       if (inspection.Remarks) {
         remarkInput.value = inspection.Remarks;
       }
-      remarkInput.classList.add("input-group-field");
+      //remarkInput.classList.add("input-group-field");
       remarkInput.classList.add("columns");
-      containerSpan.classList.add("input-group-button")
-
+      remarkInput.classList.add("word-wrap");
+      containerSpan.classList.add("input-group-button");
       quickRemarkButton.classList.add("button");
+
       quickRemarkButton.classList.add("dropdown");
       quickRemarkButton.classList.add("arrow-only");
       quickRemarkButton.style.borderLeftWidth = "0";
+     
       quickRemarkButton.classList.add("end");
       let handler = function handleScrollForRealThisTime() {
         quickRemarkUL.style.display = "none";
@@ -1269,7 +1276,9 @@ namespace InspSched.UI
   {
     let ul: HTMLUListElement = (<HTMLUListElement>document.getElementById("drop" + InspectionId.toString()));
     let input = (<HTMLInputElement>document.getElementById(InspectionId.toString() + "_remark_textarea"));
-    input.value = Remark;
+    let button = (<HTMLButtonElement>document.getElementById(InspectionId.toString() + "_save_remark_button"));
+    input.value += Remark + "\n";
+    button.disabled = false;
     ul.style.display = "none";
     return true;
   }

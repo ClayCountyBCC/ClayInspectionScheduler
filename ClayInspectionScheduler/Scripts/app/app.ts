@@ -219,11 +219,11 @@ namespace InspSched
     let thisInspCd: string = SaveInspectionButton.getAttribute("value");
     let thisInspDesc: HTMLSelectElement = (<HTMLSelectElement>document.getElementById("InspTypeSelect"));
     let inspDesc: string = thisInspDesc.options[thisInspDesc.selectedIndex].textContent;
-    let comment: HTMLTextAreaElement = (<HTMLTextAreaElement>document.getElementById("scheduler_comment"));
+    let comment: HTMLTextAreaElement = (<HTMLTextAreaElement>document.getElementById("gate_code"));
 
 
 
-    newInsp = new NewInspection(thisPermit, thisInspCd, $(dpCalendar).data('datepicker').getDate(), comment.value);
+    newInsp = new NewInspection(thisPermit, thisInspCd, $(dpCalendar).data('datepicker').getDate(), "Gate Code: " + comment.value);
     comment.value = "";
 
     var e = transport.SaveInspection(newInsp).then(function (issues: Array<string>)

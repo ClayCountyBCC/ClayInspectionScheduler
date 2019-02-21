@@ -532,37 +532,38 @@ h5 {
 tabs-content{
   border: none !important;
 }
-
-textarea::-webkit-input-placeholder {
-  color: rgba(175, 0, 0, 0.80);
-  font-weight:bold;
-}
-
-textarea:-moz-placeholder { /* Firefox 18- */
+#gate_code::-webkit-input-placeholder {
   color: rgba(175, 0, 0, 0.80);
   font-weight: bold;
 }
 
-textarea::-moz-placeholder { /* Firefox 19+ */
+#gate_code:-moz-placeholder { /* Firefox 18- */
   color: rgba(175, 0, 0, 0.80);
   font-weight: bold;
 }
 
-textarea:-ms-input-placeholder {
+#gate_code::-moz-placeholder { /* Firefox 19+ */
   color: rgba(175, 0, 0, 0.80);
-  font-weight:bold;
+  font-weight: bold;
 }
+
+#gate_code:-ms-input-placeholder {
+  color: rgba(175, 0, 0, 0.80);
+  font-weight: bold;
+}
+
+word-wrap {
+  height: auto;
+  word-wrap: break-word !important;
+}
+
 @media print {
 
   @page {
     font-size: 10px !important;
   }
   /* All your print styles go here */
-  #header,
-  #footer,
-  #nav,
-  #InspectionSchedulerTabs,
-  #inspection_filter_container {
+  #header, #footer, #nav, #InspectionSchedulerTabs, #inspection_filter_container {
     display: none !important;
   }
 
@@ -634,8 +635,7 @@ textarea:-ms-input-placeholder {
     display: block !important;
   }
 
-  .tabs-content {
-  }
+
 
   .infoDiv {
     display: block !important;
@@ -671,8 +671,8 @@ textarea:-ms-input-placeholder {
     display: none !important;
   }
 
-  .inspection-Table,
-  .completed-comments-textarea {
+  .inspection-Table
+  {
     max-height: unset;
     display: block !important;
   }

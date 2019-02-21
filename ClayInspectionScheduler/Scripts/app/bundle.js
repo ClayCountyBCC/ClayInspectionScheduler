@@ -964,7 +964,7 @@ var InspSched;
             var addRemarkLabel = document.createElement("label");
             var addRemarkTextDiv = document.createElement("div");
             var addRemarkInputGroup = document.createElement("div");
-            var remarkInput = document.createElement("input");
+            var remarkInput = document.createElement("textarea");
             var containerSpan = document.createElement("span");
             var quickRemarkButton = document.createElement("button");
             var eventTarget = document.getElementById("ScrollTab");
@@ -997,15 +997,20 @@ var InspSched;
                 addRemarkInputGroup.classList.add("input-group");
                 addRemarkInputGroup.classList.add("small-12");
                 addRemarkInputGroup.style.margin = "0";
-                remarkInput.type = "text";
                 remarkInput.setAttribute("onkeyup", "InspSched.disableSaveCommentButton(" + inspection.InspReqID + ")");
                 remarkInput.id = inspection.InspReqID + "_remark_textarea";
+                remarkInput.setAttribute("wrap", "soft");
                 remarkInput.style.margin = "0";
+                remarkInput.style.minHeight = "80px";
+                remarkInput.style.resize = "vertical";
+                remarkInput.setAttribute("overflow-wrap", "break-word");
+                remarkInput.setAttribute("word-wrap", "break-word");
                 if (inspection.Remarks) {
                     remarkInput.value = inspection.Remarks;
                 }
-                remarkInput.classList.add("input-group-field");
+                //remarkInput.classList.add("input-group-field");
                 remarkInput.classList.add("columns");
+                remarkInput.classList.add("word-wrap");
                 containerSpan.classList.add("input-group-button");
                 quickRemarkButton.classList.add("button");
                 quickRemarkButton.classList.add("dropdown");
@@ -1613,7 +1618,9 @@ var InspSched;
         function SetRemarkText(InspectionId, Remark) {
             var ul = document.getElementById("drop" + InspectionId.toString());
             var input = document.getElementById(InspectionId.toString() + "_remark_textarea");
-            input.value = Remark;
+            var button = document.getElementById(InspectionId.toString() + "_save_remark_button");
+            input.value += Remark + "\n";
+            button.disabled = false;
             ul.style.display = "none";
             return true;
         }
@@ -2051,8 +2058,8 @@ var InspSched;
         var thisInspCd = SaveInspectionButton.getAttribute("value");
         var thisInspDesc = document.getElementById("InspTypeSelect");
         var inspDesc = thisInspDesc.options[thisInspDesc.selectedIndex].textContent;
-        var comment = document.getElementById("scheduler_comment");
-        InspSched.newInsp = new InspSched.NewInspection(thisPermit, thisInspCd, $(dpCalendar).data('datepicker').getDate(), comment.value);
+        var comment = document.getElementById("gate_code");
+        InspSched.newInsp = new InspSched.NewInspection(thisPermit, thisInspCd, $(dpCalendar).data('datepicker').getDate(), "Gate Code: " + comment.value);
         comment.value = "";
         var e = InspSched.transport.SaveInspection(InspSched.newInsp).then(function (issues) {
             var thisHeading = document.getElementById('ErrorHeading');
