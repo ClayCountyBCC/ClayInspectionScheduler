@@ -405,6 +405,15 @@ namespace ClayInspectionScheduler.Models
             case "N":
             case "C":
             case "":
+              if(current.ResultADC == "D")
+              {
+                if(IsREIPaid(current.InspReqID))
+                {
+                  current.Errors.Add("The REI has already been paid, you cannot change the result of this inspection.");
+                  break;
+                }
+              }
+
               if (!UpdateStatus(InspectionId, ResultCode, current.ResultADC, Remarks, Comments, current.PrivateProviderInspectionRequestId, User))
               {
                 current.Errors.Add("Error saving your changes, please try again. If this message recurs, please contact the helpdesk.");
@@ -420,7 +429,9 @@ namespace ClayInspectionScheduler.Models
               break;
           }
         }
-        return Inspection.Get(InspectionId);
+
+        var i = Inspection.Get(InspectionId);
+        return i;
       }
       catch (Exception ex)
       {
@@ -668,15 +679,19 @@ namespace ClayInspectionScheduler.Models
     private static string GetNotDeniedQueries()
     {
       return @"
+
         DELETE C
         FROM ccCashierItem C
         INNER JOIN bpHold B ON C.HoldId = B.HoldID
-        WHERE B.InspReqID = @InspectionId;
+        WHERE B.InspReqID = @InspectionId
+          AND C.CashierId IS NULL;
 
-        DELETE
-        FROM bpHold 
-        WHERE 
-          InspReqID = @InspectionId;";
+        DELETE H
+        FROM bpHold H
+        INNER JOIN ccCashierItem C ON C.HoldID = H.HoldID
+        WHERE InspReqID = @InspectionId 
+          AND C.CashierId IS NULL;
+";
     }
 
     public static bool PassedElectricalEquipmentCheck(string permitNumber)
@@ -696,6 +711,25 @@ namespace ClayInspectionScheduler.Models
   ";
       l.AddRange(Constants.Get_Data<int>(sql, dbArgs));
       return l.Count() > 0;
+    }
+
+    public static bool IsREIPaid(int InspectionId)
+    {
+      var dbArgs = new DynamicParameters();
+      dbArgs.Add("@InspectionId", InspectionId);
+
+      string sql = @"
+        USE WATSC;
+        SELECT itemId
+        FROM ccCashierItem CI
+          INNER JOIN bpHOLD H ON H.HoldID = CI.HoldID
+          INNER JOIN bpINS_REQUEST IR ON H.InspReqID = IR.InspReqID      
+        WHERE
+          IR.InspReqId=@InspectionId
+          AND CI.CashierId IS NULL";
+
+      return Constants.Get_Data<string>(sql, dbArgs).Count() > 0;
+
     }
   }
 }
