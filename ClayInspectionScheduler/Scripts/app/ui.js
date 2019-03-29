@@ -94,7 +94,9 @@ var InspSched;
             clearElement(city);
             var permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === key; })[0];
             street.appendChild(document.createTextNode(permit.ProjAddrCombined != null ? permit.ProjAddrCombined.trim() : "UNKNOWN"));
-            city.appendChild(document.createTextNode(permit.ProjCity.trim()));
+            if (permit.ProjCity != null) {
+                city.appendChild(document.createTextNode(permit.ProjCity.trim()));
+            }
             Show('PermitSelectContainer');
         }
         UI.UpdatePermitData = UpdatePermitData;
@@ -463,6 +465,7 @@ var InspSched;
             if (permit.access !== InspSched.access_type.public_access && permit.access !== InspSched.access_type.contract_access) {
                 var link = document.createElement("a");
                 link.href = permit.Permit_URL;
+                link.target = "_blank";
                 link.classList.add('no-underline-for-print');
                 link.appendChild(document.createTextNode(inspection.PermitNo));
                 permitNumber.appendChild(link);
@@ -512,12 +515,12 @@ var InspSched;
                         inspection.InspectorName.toLocaleLowerCase().substr(0, InspSched.Inspectors[0].Name.length) ==
                             InspSched.Inspectors[0].Name.toLowerCase());
             }
-            var newButtonExists = document.getElementById(inspection.InspReqID + "_newButton");
+            var newButtonExists = document.getElementById((inspection.InspReqID == 0 ? inspection.PermitNo : inspection.InspReqID) + "_newButton");
             //Create function to make New/Cancel/Details Button
             if (permit.ErrorText.length === 0) {
                 if (newButtonExists == null && (!InspSched.UserIsContractInspector || DoesInspectorCheckOut)) {
                     var newButton = BuildButton("", "New", "InspSched.UpdatePermitSelectList('" + inspection.PermitNo + "');");
-                    newButton.id = inspection.InspReqID + "_newButton";
+                    newButton.id = (inspection.InspReqID == 0 ? inspection.PermitNo : inspection.InspReqID) + "_newButton";
                     buttonDiv.appendChild(newButton);
                 }
             }

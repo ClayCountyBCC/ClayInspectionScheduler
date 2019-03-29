@@ -726,7 +726,7 @@ namespace ClayInspectionScheduler.Models
           INNER JOIN bpINS_REQUEST IR ON H.InspReqID = IR.InspReqID      
         WHERE
           IR.InspReqId=@InspectionId
-          AND CI.CashierId IS NULL";
+          AND CI.CashierId IS NOT NULL";
 
       return Constants.Get_Data<string>(sql, dbArgs).Count() > 0;
 

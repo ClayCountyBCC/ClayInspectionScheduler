@@ -156,7 +156,22 @@ namespace ClayInspectionScheduler.Models
         else
         {
           // Does the inspection type match the permit type
-          if (InspectionCd[0] != PermitNo[0])
+          var permitType = ' ';
+
+          switch (PermitNo[0])
+          {
+            case '1':
+            case '9':
+            case '0':
+              permitType = '1';
+              break;
+            default:
+              permitType = PermitNo[0];
+              break;
+           }
+
+
+          if (InspectionCd[0] != permitType)
           {
             Errors.Add("Invalid Inspection for this permit type");
           }

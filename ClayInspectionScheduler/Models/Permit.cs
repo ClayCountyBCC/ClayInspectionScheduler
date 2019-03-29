@@ -564,28 +564,30 @@ namespace ClayInspectionScheduler.Models
         return true;
       }
       if (ContractorWorkmansCompInsuranceExpDate != DateTime.MinValue && 
-          ContractorWorkmansCompInsuranceExpDate <= DateTime.Today )
+          ContractorWorkmansCompInsuranceExpDate < DateTime.Today )
       {
         ErrorText = "The Contractor's Workman's Compensation Insurance expiration date has passed";
         return true;
       }
 
-      if (ContractorStateCertExpDate < DateTime.Today && 
-          ContractorCountyLicenseExpDate < DateTime.Today && 
-          ContractorSuspendGraceDate >= DateTime.Today  )
+      
+      if (ContractorStateCertExpDate < DateTime.Today ||
+          ContractorCountyLicenseExpDate < DateTime.Today)
       {
-        ErrorText = "The following dates have expired:\n";
-        if (ContractorStateCertExpDate > DateTime.MinValue)
+        
+        if (ContractorStateCertExpDate < DateTime.Today  && ContractorStateCertExpDate != DateTime.MinValue)
         {
-          ErrorText += "State Certification: " + ContractorStateCertExpDate.ToShortDateString() + System.Environment.NewLine;
+          ErrorText += "\nState Certification expired on: " + ContractorStateCertExpDate.ToShortDateString() + System.Environment.NewLine;
+          ErrorText += "Please reach out to the Building Department for assistance or if this is in error.";
         }
 
-        if (ContractorCountyLicenseExpDate > DateTime.MinValue)
+        if (ContractorCountyLicenseExpDate < DateTime.Today && ContractorCountyLicenseExpDate != DateTime.MinValue && ContractorStateCertExpDate < DateTime.Today && ContractorStateCertExpDate != DateTime.MinValue)
         {
-          ErrorText += "County License: " + ContractorCountyLicenseExpDate.ToShortDateString() + System.Environment.NewLine;
+          ErrorText += "County License expired on: " + ContractorCountyLicenseExpDate.ToShortDateString() + System.Environment.NewLine;
+          ErrorText += "Please reach out to the Building Department for assistance or if this is in error.";
         }
 
-        ErrorText += "Please reach out to the Building Department for assistance or if this is in error.";
+        
 
         return true;
       }
