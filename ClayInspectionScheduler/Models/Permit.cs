@@ -165,10 +165,10 @@ namespace ClayInspectionScheduler.Models
                 l.ProjCity = "Confidential";
               }
             }
-            if (l.ErrorText.Length == 0)
-            {
-              l.Validate(PrivProvCheck);
-            }
+            //if (l.ErrorText.Length == 0)
+            //{
+            //  l.Validate(PrivProvCheck);
+            //}
 
           }
         }
