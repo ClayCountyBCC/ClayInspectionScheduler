@@ -144,71 +144,11 @@ namespace ClayInspectionScheduler.Models
       dp.Add("@Tomorrow", tomorrow.Date);
 
       string sql = @"
-          USE WATSC;
-        WITH BaseFloodZone AS (
-          SELECT DISTINCT
-            LTRIM(RTRIM(FloodZone)) FloodZone,
-            F.BaseID
-          FROM bpFLOOD_ZONE F
-          INNER JOIN bpINS_REQUEST I ON F.BaseID = I.BaseId
-          WHERE 
-            LEN(LTRIM(RTRIM(F.FloodZone))) > 0 
-            AND (CAST(I.SchecDateTime AS DATE) IN (CAST(@Today AS DATE), CAST(@Tomorrow AS DATE))
-            OR (CAST(SchecDateTime AS DATE) < CAST(@Today AS DATE)
-              AND ResultADC IS NULL))
-        ), FloodZoneData AS (
-          SELECT 
-            F.BaseID,
-            STUFF((
-              SELECT ', ' + FloodZone
-              FROM BaseFloodZone B
-              WHERE F.BaseID = B.BaseId
-              FOR XML PATH (''), TYPE)
-              .value('(./text())[1]','nvarchar(max)')
-              , 
-              1, 
-              2, 
-              N'') AS FloodZone
-          FROM BaseFloodZone F
-          GROUP BY F.BaseId
-        )
+        USE WATSC;
 
-        SELECT
-          B.ProjAddrCombined StreetAddress,
-          I.InspReqID,
-          I.PermitNo,
-          ISNULL(M.Comm, A.Comm) Comm,
-          ISNULL(I.InspectionCode, '') InspectionCode, 
-          ISNULL(IR.InsDesc, 'No Inspections') InsDesc, 
-          I.InspDateTime, 
-          LTRIM(RTRIM(ISNULL(i.ResultADC, ''))) ResultADC,
-          I.SchecDateTime SchedDateTime,
-	        I.Poster,
-          ISNULL(IP.Color, '#FFFFFF') InspectorColor,
-          I.Remarks,
-          I.Comment,
-          CASE WHEN CAST(I.SchecDateTime AS DATE) < @Today THEN ''
-               WHEN CAST(I.SchecDateTime AS DATE) = @Today THEN 'Today'
-               WHEN CAST(I.SchecDateTime AS DATE) = @Tomorrow THEN 'Tomorrow' 
-               WHEN CAST(I.SchecDateTime AS DATE) > @Tomorrow THEN 'Later'  END [Day],
-          LTRIM(RTRIM(IP.name)) as InspectorName,
-          PrivProvIRId PrivateProviderInspectionRequestId,
-          ISNULL(LTRIM(RTRIM(B.GeoZone)), '') GeoZone,
-          ISNULL(F.FloodZone, '') FloodZone
-        FROM bpINS_REQUEST I 
-        LEFT OUTER JOIN bpBASE_PERMIT B ON I.BaseId = B.BaseID
-        LEFT OUTER JOIN bpINS_REF IR ON IR.InspCd = I.InspectionCode
-        LEFT OUTER JOIN bp_INSPECTORS IP ON I.Inspector = IP.Intl 
-        LEFT OUTER JOIN FloodZoneData F ON I.BaseId = F.BaseID
-        LEFT OUTER JOIN bpMASTER_PERMIT M ON M.PermitNo = I.PermitNo
-        LEFT OUTER JOIN bpASSOC_PERMIT A ON A.PermitNo = I.PermitNo
-        WHERE 
-        -- Here we want to see the inspections that were scheduled for today and tomorrow
-          (CAST(SchecDateTime AS DATE) IN (CAST(@Today AS DATE), CAST(@Tomorrow AS DATE))
-        -- and we want to include any from the past that aren't completed.
-          OR (CAST(SchecDateTime AS DATE) < CAST(@Today AS DATE)
-            AND ResultADC IS NULL))
-        ORDER BY B.ProjStreet, B.ProjClass, B.ProjPreDir, B.ProjPostDir, B.ProjAddrNumber";
+        EXEC prc_sel_InspSched_inspection_list @Today, @Tomorrow
+        
+      ";
 
 
       Constants.Get_Data<Inspection>(sql, dp);
@@ -225,90 +165,78 @@ namespace ClayInspectionScheduler.Models
 
     }
 
-    private static List<Inspection> GetRaw(int InspectionId)
+    private static List<Inspection> GetRaw(int InspectionId = 0, string PermitNumber = "")
     {
       var dbArgs = new DynamicParameters();
       dbArgs.Add("@InspectionId", InspectionId);
-
-      string sql = @"
-        USE WATSC;
-        SELECT
-          i.InspReqID,
-          i.PermitNo, 
-          ISNULL(i.InspectionCode, '') InspectionCode, 
-          ISNULL(ir.InsDesc, 'No Inspections') InsDesc, 
-          i.InspDateTime, 
-          LTRIM(RTRIM(ISNULL(i.ResultADC, ''))) ResultADC,
-          i.SchecDateTime SchedDateTime,
-	        i.Poster,
-          ISNULL(IP.Color, '#FFFFFF') InspectorColor,
-          i.Remarks,
-          i.Comment,
-          ip.name as InspectorName,
-          PrivProvIRId PrivateProviderInspectionRequestId
-        FROM bpINS_REQUEST i 
-        LEFT OUTER JOIN bpINS_REF ir ON ir.InspCd = i.InspectionCode
-        LEFT OUTER JOIN bp_INSPECTORS ip ON i.Inspector = ip.Intl 
-        WHERE I.InspReqID = @InspectionId
-        ORDER BY InspReqID DESC";
-      return Constants.Get_Data<Inspection>(sql, dbArgs);
-    }
-
-    private static List<Inspection> GetRaw(string PermitNumber)
-    {
-      var dbArgs = new Dapper.DynamicParameters();
       dbArgs.Add("@PermitNo", PermitNumber);
-
       string sql = @"
         USE WATSC;
-        DECLARE @MPermitNo CHAR(8) = (SELECT MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = @PermitNo);
+        
+        EXEC prc_sel_InspSched_get_raw_inspections @PermitNo, @InspectionId;
+          
+      ";
 
-        DECLARE @Today DATE = Cast(GetDate() as DATE);
+      var inspections = Constants.Get_Data<Inspection>(sql, dbArgs);
 
-        WITH Permits(PermitNo) AS (
-          SELECT M.PermitNo
-          FROM bpMASTER_PERMIT M
-	        WHERE 
-            M.VoidDate IS NULL AND
-            (M.PermitNo = @MPermitNo 
-		        OR M.PermitNo = @PermitNo)
-          UNION ALL
-          SELECT A.PermitNo
-          FROM 
-            bpASSOC_PERMIT A
-          WHERE
-            A.VoidDate IS NULL AND
-            (A.PermitNo = @PermitNo 
-		        OR MPermitNo = @MPermitNo
-		        OR A.mPermitNo = @PermitNo)
-        )
-
-        SELECT 
-          ISNULL(i.InspReqID, 0) InspReqID,
-          P.PermitNo, 
-          ISNULL(i.InspectionCode, '') InspectionCode, 
-          ISNULL(ir.InsDesc, 'No Inspections') InsDesc, 
-          i.InspDateTime, 
-          LTRIM(RTRIM(ISNULL(i.ResultADC, ''))) ResultADC,
-          i.SchecDateTime SchedDateTime,
-	        i.Poster,
-          ISNULL(IP.Color, '#FFFFFF') InspectorColor,
-          i.Remarks,
-          i.Comment,
-          ip.name as InspectorName,
-          PrivProvIRId PrivateProviderInspectionRequestId
-        FROM Permits P
-        LEFT OUTER JOIN bpINS_REQUEST i ON P.PermitNo = i.PermitNo
-        LEFT OUTER JOIN bpINS_REF ir ON ir.InspCd = i.InspectionCode
-        LEFT OUTER JOIN bp_INSPECTORS ip ON i.Inspector = ip.Intl 
-        ORDER BY CASE WHEN ISNULL(LTRIM(RTRIM(ResultADC)), '') = '' THEN 1 ELSE 0 END DESC, 
-          ISNULL(InspDateTime, GETDATE()) DESC, InspReqID ASC";
-      return Constants.Get_Data<Inspection>(sql, dbArgs);
+      return inspections;
     }
 
-    public static Inspection Get(int InspectionId)
+    //private static List<Inspection> GetRaw(string PermitNumber)
+    //{
+    //  var dbArgs = new Dapper.DynamicParameters();
+    //  dbArgs.Add("@PermitNo", PermitNumber);
+
+    //  string sql = @"
+    //    USE WATSC;
+    //    DECLARE @MPermitNo CHAR(8) = (SELECT MPermitNo FROM bpASSOC_PERMIT WHERE PermitNo = @PermitNo);
+
+    //    DECLARE @Today DATE = Cast(GetDate() as DATE);
+
+    //    WITH Permits(PermitNo) AS (
+    //      SELECT M.PermitNo
+    //      FROM bpMASTER_PERMIT M
+	   //     WHERE 
+    //        M.VoidDate IS NULL AND
+    //        (M.PermitNo = @MPermitNo 
+		  //      OR M.PermitNo = @PermitNo)
+    //      UNION ALL
+    //      SELECT A.PermitNo
+    //      FROM 
+    //        bpASSOC_PERMIT A
+    //      WHERE
+    //        A.VoidDate IS NULL AND
+    //        (A.PermitNo = @PermitNo 
+		  //      OR MPermitNo = @MPermitNo
+		  //      OR A.mPermitNo = @PermitNo)
+    //    )
+
+    //    SELECT 
+    //      ISNULL(i.InspReqID, 0) InspReqID,
+    //      P.PermitNo, 
+    //      ISNULL(i.InspectionCode, '') InspectionCode, 
+    //      ISNULL(ir.InsDesc, 'No Inspections') InsDesc, 
+    //      i.InspDateTime, 
+    //      LTRIM(RTRIM(ISNULL(i.ResultADC, ''))) ResultADC,
+    //      i.SchecDateTime SchedDateTime,
+	   //     i.Poster,
+    //      ISNULL(IP.Color, '#FFFFFF') InspectorColor,
+    //      i.Remarks,
+    //      i.Comment,
+    //      ip.name as InspectorName,
+    //      PrivProvIRId PrivateProviderInspectionRequestId
+    //    FROM Permits P
+    //    LEFT OUTER JOIN bpINS_REQUEST i ON P.PermitNo = i.PermitNo 
+    //    LEFT OUTER JOIN bpINS_REF ir ON ir.InspCd = i.InspectionCode
+    //    LEFT OUTER JOIN bp_INSPECTORS ip ON i.Inspector = ip.Intl 
+    //    ORDER BY CASE WHEN ISNULL(LTRIM(RTRIM(ResultADC)), '') = '' THEN 1 ELSE 0 END DESC, 
+    //      ISNULL(InspDateTime, GETDATE()) DESC, InspReqID ASC";
+    //  return Constants.Get_Data<Inspection>(sql, dbArgs);
+    //}
+
+    public static Inspection Get(int InspectionId, string permitNumber = "")
     {
-      var t = GetRaw(InspectionId);
+      var t = GetRaw(InspectionId,permitNumber);
       if (t.Count() == 1)
       {
         return t.First();
@@ -319,9 +247,9 @@ namespace ClayInspectionScheduler.Models
       }
     }
 
-    public static List<Inspection> Get(string PermitNumber)
+    public static List<Inspection> Get(string PermitNumber, int inspectionId = 0)
     {
-      var li = GetRaw(PermitNumber);
+      var li = GetRaw(inspectionId, PermitNumber);
       if (li == null)
       {
         return new List<Inspection>();
@@ -366,7 +294,8 @@ namespace ClayInspectionScheduler.Models
         //int i = Constants.Exec_Query_SP(sp, dp);
         if (i == -1)
         {
-          return Inspection.Get(InspectionId);
+          Inspection isnp = Get(InspectionId);
+          return isnp;
         }
         else
         {
@@ -389,7 +318,7 @@ namespace ClayInspectionScheduler.Models
       Comments = Comments.Trim();
       try
       {
-        var current = Get(InspectionId);
+        Inspection current = Get(InspectionId);
         if (current == null)
         {
           return null;
@@ -430,7 +359,7 @@ namespace ClayInspectionScheduler.Models
           }
         }
 
-        var i = Inspection.Get(InspectionId);
+        Inspection i = Get(InspectionId);
         return i;
       }
       catch (Exception ex)
@@ -469,6 +398,9 @@ namespace ClayInspectionScheduler.Models
 
       string sql = $@"
         USE WATSC;
+
+        DECLARE @InspectionCode VARCHAR(3) = (SELECT InspectionCode FROM bpINS_REQUEST WHERE InspReqId = @InspectionId);
+
         UPDATE bpINS_Request
         SET 
           ResultADC = CASE WHEN @ResultCode = '' THEN NULL
@@ -481,7 +413,12 @@ namespace ClayInspectionScheduler.Models
         WHERE
           InspReqId=@InspectionId
           
-          EXEC add_inspection_comment @User, @InspectionId, @FirstComment, @SecondComment;";
+          EXEC add_inspection_comment @User, @InspectionId, @FirstComment, @SecondComment
+
+          IF @InspectionCode IN ('201', '205', '211', '212')
+            EXEC prc_upd_inspSched_base_permit_passed_electrical @InspectionId, @InspectionCode, @ResultCode
+          
+      ";
 
       if (PrivateProviderInspectionId > 0)
       {

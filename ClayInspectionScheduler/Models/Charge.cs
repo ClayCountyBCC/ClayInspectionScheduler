@@ -78,7 +78,10 @@ namespace ClayInspectionScheduler.Models
       }
       catch (Exception ex)
       {
-        Constants.Log(ex, sql);
+        Constants.Log(ex, $@"Issue in function
+                            Charge.GetCharges(PermitNumber {PermitNumber}, TryingToScheduleFinal {tryingToScheduleFinal.ToString()})
+
+                             " + sql);
         return new List<Charge>();
       }
     }

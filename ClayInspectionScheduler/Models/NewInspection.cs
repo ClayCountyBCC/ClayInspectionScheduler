@@ -176,7 +176,7 @@ namespace ClayInspectionScheduler.Models
             Errors.Add("Invalid Inspection for this permit type");
           }
 
-          var inspections = Inspection.Get(CurrentPermit.PermitNo);
+          List<Inspection> inspections = Inspection.Get(CurrentPermit.PermitNo);
           CurrentPermit.Holds = Hold.Get(new List<string>() { CurrentPermit.PermitNo});
 
           var needsFireInspection = (from h in CurrentPermit.Holds

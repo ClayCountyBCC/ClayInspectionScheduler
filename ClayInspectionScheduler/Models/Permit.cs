@@ -99,7 +99,7 @@ namespace ClayInspectionScheduler.Models
       ";
 
       var permitlist = Constants.Get_Data<Permit>(sql, dbArgs);
-      foreach(Permit p in permitlist)
+      foreach (Permit p in permitlist)
       {
         p.Charges = Charge.GetCharges(p.PermitNo, DoImpactFeesMatter);
       }
@@ -176,7 +176,7 @@ namespace ClayInspectionScheduler.Models
         {
           return new List<Permit>();
         }
-        
+
         return permits;
       }
       catch (Exception ex)
@@ -198,7 +198,7 @@ namespace ClayInspectionScheduler.Models
       };
 
       dates.RemoveAll(d => d == DateTime.MinValue);
-      var newDates  = dates.OrderBy(d => d.Date).ToList();
+      var newDates = dates.OrderBy(d => d.Date).ToList();
       if (newDates != null)
       {
         if (newDates.Count() > 0)
@@ -207,11 +207,11 @@ namespace ClayInspectionScheduler.Models
         }
         else
         {
-          if(ContractorId.ToUpper() == "OWNER")
+          if (ContractorId.ToUpper() == "OWNER")
           {
-            MaxContractorScheduleDate = DateTime.MaxValue; 
+            MaxContractorScheduleDate = DateTime.MaxValue;
           }
-           
+
         }
       }
       Console.Write("breakpoint");
@@ -221,7 +221,7 @@ namespace ClayInspectionScheduler.Models
       List<Permit> permits,
       InspType newInspectionType)
     {
-      
+
       var MasterPermit = (from prmt in permits
                           where prmt.CoClosed != -1
                           select prmt.PermitNo).DefaultIfEmpty("").First();
@@ -229,18 +229,18 @@ namespace ClayInspectionScheduler.Models
       var holds = Hold.Get((from prmt in permits
                             select prmt.PermitNo).ToList<string>());
 
-      foreach(var h in holds)
+      foreach (var h in holds)
       {
-        if(h.PermitNo == null)
+        if (h.PermitNo == null)
         {
           h.PermitNo = MasterPermit;
         }
       }
-      
+
       var CannotInspectPermits = (from h in holds
-                           where h.SatNoInspection == 1 && 
-                           h.PermitNo != MasterPermit 
-                           select h.PermitNo).ToList();
+                                  where h.SatNoInspection == 1 &&
+                                  h.PermitNo != MasterPermit
+                                  select h.PermitNo).ToList();
 
 
       foreach (var prmt in permits)
@@ -273,7 +273,7 @@ namespace ClayInspectionScheduler.Models
 
       // this will only be reached if there are no bulk charge, hold, or master closed errors.
       permits = BulkContractorStatusCheck(p, MasterPermit);
-      
+
       return p;
     }
 
@@ -299,10 +299,10 @@ namespace ClayInspectionScheduler.Models
     }
 
     private static List<Permit> HoldsExist(
-      List<Permit> permits, 
-      List<Hold> holds, 
-      List<string> CannotInspectPermits, 
-      string MasterPermit, 
+      List<Permit> permits,
+      List<Hold> holds,
+      List<string> CannotInspectPermits,
+      string MasterPermit,
       InspType newInspectionType = null)
     {
 
@@ -320,8 +320,8 @@ namespace ClayInspectionScheduler.Models
                                           select h.HldCd).ToList();
 
       var holdsAffectingMaster = (from h in holds
-                                 where (h.PermitNo == null || h.PermitNo == MasterPermit)
-                                 select h).ToList();
+                                  where (h.PermitNo == null || h.PermitNo == MasterPermit)
+                                  select h).ToList();
 
 
       var isBuildingFinal = newInspectionType != null &&
@@ -330,7 +330,7 @@ namespace ClayInspectionScheduler.Models
 
       foreach (var p in permits)
       {
-          p.NoFinalInspections = NoFinals.Contains(p.PermitNo);
+        p.NoFinalInspections = NoFinals.Contains(p.PermitNo);
       }
 
       if (!isBuildingFinal)
@@ -366,15 +366,15 @@ namespace ClayInspectionScheduler.Models
 
           if (p.PermitNo == MasterPermit)
           {
-              if(permits.Count() > 1 && holdsAffectingMaster.Any())
-              { 
-                p.ErrorText = "There is a hold on an associated permit, no inspections can be scheduled";
-              }
+            if (permits.Count() > 1 && holdsAffectingMaster.Any())
+            {
+              p.ErrorText = "There is a hold on an associated permit, no inspections can be scheduled";
+            }
           }
           else
           {
 
-              p.ErrorText = $@"Permit #{p.PermitNo} has existing holds, no inspections can be scheduled.";
+            p.ErrorText = $@"Permit #{p.PermitNo} has existing holds, no inspections can be scheduled.";
           }
         }
       }
@@ -382,8 +382,8 @@ namespace ClayInspectionScheduler.Models
     }
 
     private static List<Permit> ChargesExist(
-      List<Permit> permits, 
-      List<string> chargePermits, 
+      List<Permit> permits,
+      List<string> chargePermits,
       string MasterPermit)
     {
       // Now let's check to see if we have any master permits that have
@@ -489,7 +489,7 @@ namespace ClayInspectionScheduler.Models
         // if (ContractorIssues()) return;
       }
     }
-    
+
     private bool CheckPrivProv(string PrivProvValidate)
     {
 
@@ -501,31 +501,7 @@ namespace ClayInspectionScheduler.Models
       return false;
     }
 
- 
-    private bool CheckSuspendGraceDate(DateTime SuspendGraceDate)
-    {
-      var contractorDateList = new List<DateTime>()
-      {
-        ContractorCountyLicenseExpDate,
-        ContractorLiabilityInsuranceExpDate,
-        ContractorStateRegistrationExpDate,
-        ContractorStateCertExpDate,
-        ContractorWorkmansCompInsuranceExpDate,
-        ContractorSuspendGraceDate
-      };
-
-      contractorDateList.Sort();
-
-      Console.WriteLine("Sorted List Check Spot");
-
-      if (ContractorSuspendGraceDate.ToShortDateString() == DateTime.Today.ToShortDateString() && Inspection_Notice.Trim() == "180+")
-      {
-        ErrorText = "The Grace Date for this contractor has passed. Please contact the Building Department for assistance.";
-        return true;
-      }
-      return false;
-
-    }
+    
 
     private bool ContractorIssues()
     {
@@ -673,7 +649,122 @@ namespace ClayInspectionScheduler.Models
       return false;
     }
 
+    // USED TO GET CONTRACTOR INFO FOR INSPECTIONS
+    class Contractor
+    {
+      private string ContractorCd { get; set; } = "";
+      private DateTime MaxContractorScheduleDate { get; set; } = DateTime.MinValue;
+      private DateTime ContractorLiabilityInsuranceExpDate { get; set; } = DateTime.MinValue;
+      private DateTime ContractorWorkmansCompInsuranceExpDate { get; set; } = DateTime.MinValue;
+      private DateTime ContractorStateRegistrationExpDate { get; set; } = DateTime.MinValue;
+      private DateTime ContractorCountyLicenseExpDate { get; set; } = DateTime.MinValue;
+      private DateTime ContractorStateCertExpDate { get; set; } = DateTime.MinValue;
+      private DateTime ContractorSuspendGraceDate { get; set; } = DateTime.MinValue;
+      private string ContractorStatus { get; set; } = "";
+      private string InspectionNotice { get; set; } = "";
+      private string Notice { get; set; } = "";
 
+      public Contractor()
+      {
+        if (ContractorStatus.ToUpper() != "A")
+        {
+
+          if (Notice.Length == 0 &&
+              ContractorLiabilityInsuranceExpDate < DateTime.Today.Date.AddDays(9))
+          {
+            Notice = "The Contractor's Liability Insurance will expire on " +
+                      ContractorLiabilityInsuranceExpDate.ToShortDateString();
+
+          }
+          if (Notice.Length == 0 &&
+              ContractorWorkmansCompInsuranceExpDate != DateTime.MinValue &&
+              ContractorWorkmansCompInsuranceExpDate < DateTime.Today.Date.AddDays(9))
+          {
+            Notice = "The Contractor's Workman's Compensation Insurance will expire on " +
+                      ContractorWorkmansCompInsuranceExpDate.ToShortDateString();
+          }
+
+          if (Notice.Length == 0 &&
+              InspectionNotice == "180+" && 
+              ContractorSuspendGraceDate < DateTime.Today.Date.AddDays(9))
+          {
+            Notice = @"Contractor is in danger of privileges being suspended based on permit age and could possibly impact
+                       other permit inspections on this job.";
+          }
+
+          if (Notice.Length == 0 &&
+              ContractorStateCertExpDate < DateTime.Today.AddDays(9) ||
+              ContractorCountyLicenseExpDate < DateTime.Today.Date.AddDays(9))
+          {
+
+            if (Notice.Length == 0 &&
+              ContractorStateCertExpDate < DateTime.Today.Date.AddDays(9) &&
+                ContractorStateCertExpDate != DateTime.MinValue)
+            {
+              Notice = @"Contractor's State Certification will expire on: " +
+                         ContractorStateCertExpDate.ToShortDateString();
+            }
+
+            if (Notice.Length == 0 &&
+              ContractorCountyLicenseExpDate < DateTime.Today.Date.AddDays(9) &&
+                ContractorCountyLicenseExpDate != DateTime.MinValue &&
+                ContractorStateCertExpDate < DateTime.Today.Date.AddDays(9) &&
+                ContractorStateCertExpDate != DateTime.MinValue)
+            {
+              Notice = "Contractor's County License will expire on: " +
+                        ContractorCountyLicenseExpDate.ToShortDateString();
+            }
+          }
+
+        }
+      }
+    }
+    public static string CheckSuspendGraceDate(string contractorId)
+    {
+
+      if (contractorId.ToUpper() == "FIRE") return "";
+
+      var param = new DynamicParameters();
+      param.Add("@contractorId", contractorId);
+
+      var query = @"
+        
+        USE WATSC;
+
+        SELECT
+          C.ContractorCd,
+          C.LiabInsExpDt ContractorLiabilityInsuranceExpDate, 
+          CASE WHEN C.WC_Exempt = 1 THEN NULL ELSE C.WC_ExpDt END WC_ExpDt, 
+          CASE WHEN YEAR(C.StRegExpDt) = 1900 
+              THEN NULL 
+              ELSE C.StRegExpDt 
+            END StRegExpDt, 
+          CASE WHEN YEAR(C.CertExpDt) = 1900 
+              THEN NULL 
+              ELSE C.CertExpDt 
+            END ContractorStateCertExpDate, 
+          CASE WHEN YEAR(C.ExpDt) = 1900 
+              THEN NULL 
+              ELSE C.ExpDt 
+            END ContractorCountyLicenseExpDate, 
+          CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) ContractorSuspendGraceDate, 
+          Inspection_Notice, 
+          DATEADD(dd, - 1, C.WC_ExpDt) WorkersCompExpirationDate, 
+          DATEADD(dd, - 1, C.LiabInsExpDt) LiabilityExpirationDate, 
+          ISNULL(C.Status, '') ContractorStatus
+        FROM cLCONTRACTOR C
+        WHERE ContractorCd = @contractorId
+
+
+      ";
+      var contractor = Constants.Get_Data<Contractor>(query, param);
+
+
+
+
+      return "";
+
+    }
   }
 
 }
