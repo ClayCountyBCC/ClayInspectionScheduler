@@ -414,9 +414,6 @@ namespace ClayInspectionScheduler.Models
           InspReqId=@InspectionId
           
           EXEC add_inspection_comment @User, @InspectionId, @FirstComment, @SecondComment
-
-          IF @InspectionCode IN ('201', '205', '211', '212')
-            EXEC prc_upd_inspSched_base_permit_passed_electrical @InspectionId, @InspectionCode, @ResultCode
           
       ";
 
