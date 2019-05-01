@@ -399,8 +399,6 @@ namespace ClayInspectionScheduler.Models
       string sql = $@"
         USE WATSC;
 
-        DECLARE @InspectionCode VARCHAR(3) = (SELECT InspectionCode FROM bpINS_REQUEST WHERE InspReqId = @InspectionId);
-
         UPDATE bpINS_Request
         SET 
           ResultADC = CASE WHEN @ResultCode = '' THEN NULL
