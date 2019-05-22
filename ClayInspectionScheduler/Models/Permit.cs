@@ -40,6 +40,8 @@ namespace ClayInspectionScheduler.Models
     public int CoClosed { get; set; } // check if master is Co'd
     public int TotalFinalInspections { get; set; } // Count the total final inspections for this permit
     private string ContractorStatus { get; set; } // check if Contractor is active
+
+    public string ContractorWarning { get; set; } = "";
     private string PrivateProvider { get; set; } = "";
     public bool CorrectImpactFeeCount { get; set; } = true;
     public decimal TotalImpactFeesDue { get; set; }
@@ -165,10 +167,10 @@ namespace ClayInspectionScheduler.Models
                 l.ProjCity = "Confidential";
               }
             }
-            //if (l.ErrorText.Length == 0)
-            //{
-            //  l.Validate(PrivProvCheck);
-            //}
+            if (l.ErrorText.Length == 0)
+            {
+              l.Validate(PrivProvCheck);
+            }
 
           }
         }
@@ -201,6 +203,8 @@ namespace ClayInspectionScheduler.Models
       var newDates = dates.OrderBy(d => d.Date).ToList();
       if (newDates != null)
       {
+        SetContractorSuspensionNotice();
+
         if (newDates.Count() > 0)
         {
           MaxContractorScheduleDate = newDates.First();
@@ -213,8 +217,65 @@ namespace ClayInspectionScheduler.Models
           }
 
         }
+
       }
       Console.Write("breakpoint");
+    }
+
+    private void SetContractorSuspensionNotice()
+    {
+    
+      if (ContractorStatus.ToUpper() != "A")
+      {
+
+        if (ContractorWarning.Length == 0 &&
+            ContractorLiabilityInsuranceExpDate < DateTime.Today.Date.AddDays(9))
+        {
+          ContractorWarning = "The Contractor's Liability Insurance will expire on " +
+                    ContractorLiabilityInsuranceExpDate.ToShortDateString();
+
+        }
+        if (ContractorWarning.Length == 0 &&
+            ContractorWorkmansCompInsuranceExpDate != DateTime.MinValue &&
+            ContractorWorkmansCompInsuranceExpDate < DateTime.Today.Date.AddDays(9))
+        {
+          ContractorWarning = "The Contractor's Workman's Compensation Insurance will expire on " +
+                    ContractorWorkmansCompInsuranceExpDate.ToShortDateString();
+        }
+
+        if (ContractorWarning.Length == 0 &&
+            Inspection_Notice == "180+" &&
+            ContractorSuspendGraceDate < DateTime.Today.Date.AddDays(9))
+        {
+          ContractorWarning = @"Contractor is in danger of privileges being suspended based on permit age and could possibly impact
+                       other permit inspections on this job.";
+        }
+
+        if (ContractorWarning.Length == 0 &&
+            ContractorStateCertExpDate < DateTime.Today.AddDays(9) ||
+            ContractorCountyLicenseExpDate < DateTime.Today.Date.AddDays(9))
+        {
+
+          if (ContractorWarning.Length == 0 &&
+            ContractorStateCertExpDate < DateTime.Today.Date.AddDays(9) &&
+              ContractorStateCertExpDate != DateTime.MinValue)
+          {
+            ContractorWarning = @"Contractor's State Certification will expire on: " +
+                       ContractorStateCertExpDate.ToShortDateString();
+          }
+
+          if (ContractorWarning.Length == 0 &&
+            ContractorCountyLicenseExpDate < DateTime.Today.Date.AddDays(9) &&
+              ContractorCountyLicenseExpDate != DateTime.MinValue &&
+              ContractorStateCertExpDate < DateTime.Today.Date.AddDays(9) &&
+              ContractorStateCertExpDate != DateTime.MinValue)
+          {
+            ContractorWarning = "Contractor's County License will expire on: " +
+                      ContractorCountyLicenseExpDate.ToShortDateString();
+          }
+        }
+
+      }
     }
 
     public static List<Permit> BulkValidate(
@@ -649,122 +710,8 @@ namespace ClayInspectionScheduler.Models
       return false;
     }
 
-    // USED TO GET CONTRACTOR INFO FOR INSPECTIONS
-    class Contractor
-    {
-      private string ContractorCd { get; set; } = "";
-      private DateTime MaxContractorScheduleDate { get; set; } = DateTime.MinValue;
-      private DateTime ContractorLiabilityInsuranceExpDate { get; set; } = DateTime.MinValue;
-      private DateTime ContractorWorkmansCompInsuranceExpDate { get; set; } = DateTime.MinValue;
-      private DateTime ContractorStateRegistrationExpDate { get; set; } = DateTime.MinValue;
-      private DateTime ContractorCountyLicenseExpDate { get; set; } = DateTime.MinValue;
-      private DateTime ContractorStateCertExpDate { get; set; } = DateTime.MinValue;
-      private DateTime ContractorSuspendGraceDate { get; set; } = DateTime.MinValue;
-      private string ContractorStatus { get; set; } = "";
-      private string InspectionNotice { get; set; } = "";
-      private string Notice { get; set; } = "";
-
-      public Contractor()
-      {
-        if (ContractorStatus.ToUpper() != "A")
-        {
-
-          if (Notice.Length == 0 &&
-              ContractorLiabilityInsuranceExpDate < DateTime.Today.Date.AddDays(9))
-          {
-            Notice = "The Contractor's Liability Insurance will expire on " +
-                      ContractorLiabilityInsuranceExpDate.ToShortDateString();
-
-          }
-          if (Notice.Length == 0 &&
-              ContractorWorkmansCompInsuranceExpDate != DateTime.MinValue &&
-              ContractorWorkmansCompInsuranceExpDate < DateTime.Today.Date.AddDays(9))
-          {
-            Notice = "The Contractor's Workman's Compensation Insurance will expire on " +
-                      ContractorWorkmansCompInsuranceExpDate.ToShortDateString();
-          }
-
-          if (Notice.Length == 0 &&
-              InspectionNotice == "180+" && 
-              ContractorSuspendGraceDate < DateTime.Today.Date.AddDays(9))
-          {
-            Notice = @"Contractor is in danger of privileges being suspended based on permit age and could possibly impact
-                       other permit inspections on this job.";
-          }
-
-          if (Notice.Length == 0 &&
-              ContractorStateCertExpDate < DateTime.Today.AddDays(9) ||
-              ContractorCountyLicenseExpDate < DateTime.Today.Date.AddDays(9))
-          {
-
-            if (Notice.Length == 0 &&
-              ContractorStateCertExpDate < DateTime.Today.Date.AddDays(9) &&
-                ContractorStateCertExpDate != DateTime.MinValue)
-            {
-              Notice = @"Contractor's State Certification will expire on: " +
-                         ContractorStateCertExpDate.ToShortDateString();
-            }
-
-            if (Notice.Length == 0 &&
-              ContractorCountyLicenseExpDate < DateTime.Today.Date.AddDays(9) &&
-                ContractorCountyLicenseExpDate != DateTime.MinValue &&
-                ContractorStateCertExpDate < DateTime.Today.Date.AddDays(9) &&
-                ContractorStateCertExpDate != DateTime.MinValue)
-            {
-              Notice = "Contractor's County License will expire on: " +
-                        ContractorCountyLicenseExpDate.ToShortDateString();
-            }
-          }
-
-        }
-      }
-    }
-    public static string CheckSuspendGraceDate(string contractorId)
-    {
-
-      if (contractorId.ToUpper() == "FIRE") return "";
-
-      var param = new DynamicParameters();
-      param.Add("@contractorId", contractorId);
-
-      var query = @"
-        
-        USE WATSC;
-
-        SELECT
-          C.ContractorCd,
-          C.LiabInsExpDt ContractorLiabilityInsuranceExpDate, 
-          CASE WHEN C.WC_Exempt = 1 THEN NULL ELSE C.WC_ExpDt END WC_ExpDt, 
-          CASE WHEN YEAR(C.StRegExpDt) = 1900 
-              THEN NULL 
-              ELSE C.StRegExpDt 
-            END StRegExpDt, 
-          CASE WHEN YEAR(C.CertExpDt) = 1900 
-              THEN NULL 
-              ELSE C.CertExpDt 
-            END ContractorStateCertExpDate, 
-          CASE WHEN YEAR(C.ExpDt) = 1900 
-              THEN NULL 
-              ELSE C.ExpDt 
-            END ContractorCountyLicenseExpDate, 
-          CAST(DATEADD(dd, 15, C.SuspendGraceDt) AS DATE) ContractorSuspendGraceDate, 
-          Inspection_Notice, 
-          DATEADD(dd, - 1, C.WC_ExpDt) WorkersCompExpirationDate, 
-          DATEADD(dd, - 1, C.LiabInsExpDt) LiabilityExpirationDate, 
-          ISNULL(C.Status, '') ContractorStatus
-        FROM cLCONTRACTOR C
-        WHERE ContractorCd = @contractorId
 
 
-      ";
-      var contractor = Constants.Get_Data<Contractor>(query, param);
-
-
-
-
-      return "";
-
-    }
   }
 
 }
