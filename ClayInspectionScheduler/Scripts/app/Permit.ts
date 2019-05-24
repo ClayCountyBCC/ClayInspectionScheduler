@@ -21,6 +21,8 @@ namespace InspSched
     ProjCity: string;
     Confidential: number;
     ErrorText: string;
+    ContractorId: string;
+    ContractorWarning: string;
     NoFinalInspections: boolean;
     ScheduleDates: string[];
     Permit_URL: string;
@@ -36,6 +38,8 @@ namespace InspSched
     public ProjCity: string;
     public Confidential: number;
     public ErrorText: string;
+    public ContractorId: string;
+    public ContractorWarning: string;
     public NoFinalInspections: boolean;
     public ScheduleDates: string[];
     public Permit_URL: string;

@@ -266,6 +266,7 @@ var InspSched;
             }
             return e;
         }
+        InspectorUI.CreateAndSet = CreateAndSet;
         function CreateAndSetSmaller(v) {
             var c = [];
             for (var _i = 1; _i < arguments.length; _i++) {
@@ -302,15 +303,18 @@ var InspSched;
             }
             return a;
         }
-        function CreateTargettedLink(v, l, target) {
+        function CreateTargetedLink(v, l, target, rel) {
             var c = [];
-            for (var _i = 3; _i < arguments.length; _i++) {
-                c[_i - 3] = arguments[_i];
+            for (var _i = 4; _i < arguments.length; _i++) {
+                c[_i - 4] = arguments[_i];
             }
             var a = document.createElement("a");
             a.href = l;
             a.appendChild(document.createTextNode(v));
             a.target = target;
+            if (rel.length > 0) {
+                a.rel = rel;
+            }
             if (c.length > 0) {
                 for (var _a = 0, c_4 = c; _a < c_4.length; _a++) {
                     var i = c_4[_a];
@@ -319,6 +323,7 @@ var InspSched;
             }
             return a;
         }
+        InspectorUI.CreateTargetedLink = CreateTargetedLink;
         function ProcessIVInspectionsByPermit(inspections, inspector, day, open, isOpen) {
             var ivList = [];
             // if we have a day or inspector set to filter on
@@ -469,7 +474,7 @@ var InspSched;
             row.style.marginTop = ".5em";
             ch.Permit = i.Address;
             ch.InspectionId = 0;
-            var address = CreateTargettedLink(i.Address, "/inspectionview/#inspectionid=" + i.Inspections[0].InspectionId.toString(), "inspectionview");
+            var address = CreateTargetedLink(i.Address, "/inspectionview/#inspectionid=" + i.Inspections[0].InspectionId.toString(), "inspectionview", "");
             var addressContainer = document.createElement("div");
             var addressContainerContainer = document.createElement("div");
             addressContainerContainer.classList.add("row");
@@ -1013,12 +1018,12 @@ var InspSched;
             var filteredRemarks = InspSched.FilterQuickRemarks(inspection.PermitNo[0], inspection.PrivateProviderInspectionRequestId > 0);
             var _loop_1 = function (qr) {
                 var quickRemarkLi = document.createElement("LI");
-                var link = document.createElement("a");
-                link.onclick = function (e) {
+                var link_1 = document.createElement("a");
+                link_1.onclick = function (e) {
                     return InspSched.UI.SetRemarkText(inspection.InspReqID, qr.Remark);
                 };
-                link.appendChild(document.createTextNode(qr.Remark));
-                quickRemarkLi.appendChild(link);
+                link_1.appendChild(document.createTextNode(qr.Remark));
+                quickRemarkLi.appendChild(link_1);
                 quickRemarkUL.appendChild(quickRemarkLi);
             };
             for (var _i = 0, filteredRemarks_1 = filteredRemarks; _i < filteredRemarks_1.length; _i++) {
@@ -1095,12 +1100,12 @@ var InspSched;
                 var filteredRemarks_3 = InspSched.FilterQuickRemarks(inspection.PermitNo[0], inspection.PrivateProviderInspectionRequestId > 0);
                 var _loop_2 = function (qr) {
                     var quickRemarkLi = document.createElement("LI");
-                    var link = document.createElement("a");
-                    link.onclick = function (e) {
+                    var link_2 = document.createElement("a");
+                    link_2.onclick = function (e) {
                         return InspSched.UI.SetRemarkText(inspection.InspReqID, qr.Remark);
                     };
-                    link.appendChild(document.createTextNode(qr.Remark));
-                    quickRemarkLi.appendChild(link);
+                    link_2.appendChild(document.createTextNode(qr.Remark));
+                    quickRemarkLi.appendChild(link_2);
                     quickRemarkUL.appendChild(quickRemarkLi);
                 };
                 for (var _a = 0, filteredRemarks_2 = filteredRemarks_3; _a < filteredRemarks_2.length; _a++) {
@@ -1176,19 +1181,20 @@ var InspSched;
             }
             // #endregion Comment Secion
             //*********************************************
-            // Set permit number as link if internal user: not contract_access or public_access
+            // Set permit number as link to IMS if internal user and public permit search
+            var link = document.createElement("a");
             if (permit.access !== InspSched.access_type.public_access && permit.access !== InspSched.access_type.contract_access) {
-                var link = document.createElement("a");
                 link.href = permit.Permit_URL;
-                link.target = "_blank";
-                link.classList.add('no-underline-for-print');
-                link.appendChild(document.createTextNode(inspection.PermitNo));
-                permitNumber.appendChild(link);
                 //permit.Permit_URL.substring()
             }
             else {
-                permitNumber.appendChild(document.createTextNode(inspection.PermitNo));
+                link.href = "//public.claycountygov.com/permitsearch/#tab=permit&sortfield=issuedate&sortdirection=D&permitnumber=" + permit.PermitNo + "&status=all&page=1&v=0";
             }
+            link.target = "_blank";
+            link.rel = "noopen";
+            link.classList.add('no-underline-for-print');
+            link.appendChild(document.createTextNode(inspection.PermitNo));
+            permitNumber.appendChild(link);
             // if inspection is incomplete, set date to InspSched, else InspDate
             if (inspection.DisplayInspDateTime.toLowerCase() === 'scheduled') {
                 inspDateTime.appendChild(document.createTextNode(inspection.DisplaySchedDateTime));
@@ -1439,6 +1445,7 @@ var InspSched;
             // Populate Inspection Type Select list
             LoadInspTypeSelect(key);
             InspSched.BuildCalendar(InspSched.ThisPermit.ScheduleDates, InspSched.ThisPermit.ErrorText);
+            InspSched.UI.SetAndShowContractorWarning();
             document.getElementById('InspectionScheduler').setAttribute("value", key);
         }
         UI.BuildScheduler = BuildScheduler;
@@ -1481,6 +1488,34 @@ var InspSched;
             }
         }
         UI.LoadInspTypeSelect = LoadInspTypeSelect;
+        function SetAndShowContractorWarning() {
+            var NoticeArea = document.getElementById("contractor_notice");
+            var warningArea = document.getElementById("contractor_notice_list");
+            console.log("Inside SetAndShowContractorWarning();", UI.CurrentPermits);
+            clearElement(warningArea);
+            var isNotice = false;
+            for (var _i = 0, _a = InspSched.CurrentPermits; _i < _a.length; _i++) {
+                var p = _a[_i];
+                if (p.ContractorWarning.length > 0 && p.ErrorText.length == 0) {
+                    var row = InspSched.InspectorUI.CreateAndSet("", "small-12", "align-center", "warning-row");
+                    row.appendChild(InspSched.InspectorUI.CreateTargetedLink(p.ContractorId, "//public.claycountygov.com/permitSearch/#tab=Contractor&sortfield=issuedate&sortdirection=D&contractorid=" + p.ContractorId + "&status=all&page=1&v=0", "_blank", "noopener", "column", "large-2", "small-12", "contractor-link"));
+                    var warningText = document.createElement("p");
+                    warningText.textContent = p.ContractorWarning;
+                    warningText.classList.add("column");
+                    warningText.classList.add("large-10");
+                    warningText.classList.add("small-12");
+                    warningText.classList.add("contractor-warning");
+                    warningText.classList.add("end");
+                    row.appendChild(warningText);
+                    warningArea.appendChild(row);
+                    isNotice = true;
+                }
+            }
+            if (isNotice) {
+                Show("contractor_notice");
+            }
+        }
+        UI.SetAndShowContractorWarning = SetAndShowContractorWarning;
         /**********************************
         
           Do Somethings
@@ -1967,6 +2002,7 @@ var InspSched;
 /// <reference path="inspectorui.ts" />
 /// <reference path="inspector.ts" />
 /// <reference path="quickremark.ts" />
+/// <reference path="../foundation.d.ts" />
 var InspSched;
 (function (InspSched) {
     "use strict";
@@ -2333,6 +2369,11 @@ var InspSched;
                 remarkButton.disabled = false;
                 window.setTimeout(function (j) { remarkButton.textContent = "Save Result"; }, 5000);
                 break;
+            case "error":
+                remarkButton.textContent = "Error";
+                remarkButton.disabled = false;
+                window.setTimeout(function (j) { remarkButton.textContent = "Save Result"; }, 5000);
+                break;
         }
     }
     function UpdateInspection(permitNumber, InspectionRequestId) {
@@ -2352,16 +2393,29 @@ var InspSched;
         InspSched.transport.UpdateInspection(permitNumber, inspReqIdAsNum, value, remarkText, commentText).then(function (updatedInspection) {
             //Instead of SearchPermit(), The current open Inspection data should change while expanded, much like the save comment.
             //SearchPermit();
-            remarkTextarea.value = updatedInspection.Remarks;
-            completedComments.textContent = "";
-            completedComments.textContent = updatedInspection.Comment;
-            InspSched.UI.clearElement(updatedResultADC);
-            updatedResultADC.appendChild(document.createTextNode(updatedInspection.ResultDescription));
-            commentTextarea.value = "";
-            InspSched.UI.clearElement(inspDateTime);
-            inspDateTime.appendChild(document.createTextNode(updatedInspection.DisplayInspDateTime));
-            completedRemark.innerText = updatedInspection.Remarks;
-            UpdateResultButton(InspectionRequestId, "saved");
+            if (updatedInspection.Errors.length == 0) {
+                remarkTextarea.value = updatedInspection.Remarks;
+                completedComments.textContent = "";
+                completedComments.textContent = updatedInspection.Comment;
+                InspSched.UI.clearElement(updatedResultADC);
+                updatedResultADC.appendChild(document.createTextNode(updatedInspection.ResultDescription));
+                commentTextarea.value = "";
+                InspSched.UI.clearElement(inspDateTime);
+                inspDateTime.appendChild(document.createTextNode(updatedInspection.DisplayInspDateTime));
+                completedRemark.innerText = updatedInspection.Remarks;
+                UpdateResultButton(InspectionRequestId, "saved");
+            }
+            else {
+                var errorSpot = document.getElementById("ResultErrorMessage");
+                InspSched.UI.clearElement(errorSpot);
+                errorSpot.appendChild(document.createTextNode("Permit number " + updatedInspection.PermitNo));
+                errorSpot.appendChild(document.createElement("br"));
+                errorSpot.appendChild(document.createTextNode("Attempt to update result on " + updatedInspection.InsDesc + " inspection\r"));
+                errorSpot.appendChild(document.createElement("br"));
+                errorSpot.appendChild(document.createTextNode(updatedInspection.UpdateError));
+                $('#updateResultErrorModal').foundation('open');
+                UpdateResultButton(InspectionRequestId, "error");
+            }
         }, function () {
             console.log('error in UpdateInspection');
             // do something with the error here

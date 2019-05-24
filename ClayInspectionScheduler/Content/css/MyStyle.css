@@ -27,8 +27,8 @@ body {
 #Searching,
 #SearchFailed,
 #NoPermit,
-#SearchFailed
-{
+#SearchFailed,
+#contractor_notice {
   display: none;
 }
 
@@ -557,6 +557,20 @@ word-wrap {
   word-wrap: break-word !important;
 }
 
+.contractor-warning {
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.contractor-link {
+  background-color: lightpink;
+  text-align: center;
+}
+
+.warning-row {
+  padding-bottom: 0;
+  margin: auto;
+}
 @media print {
 
   @page {

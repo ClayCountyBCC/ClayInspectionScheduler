@@ -24,7 +24,7 @@ namespace ClayInspectionScheduler.Models
     public bool NoFinalInspections { get; set; } // If this is true, then cannot schedule a final inspection.
     public string Permit_URL { get; set; } = "";
     public string PropUseCode { get; set; } = "";
-    private string ContractorId { get; set; } = "";
+    public string ContractorId { get; set; } = "";
     private int Confidential { get; set; }
     private DateTime MaxContractorScheduleDate { get; set; }
     private DateTime ContractorLiabilityInsuranceExpDate { get; set; } = DateTime.MinValue;
@@ -224,59 +224,62 @@ namespace ClayInspectionScheduler.Models
 
     private void SetContractorSuspensionNotice()
     {
-    
-      if (ContractorStatus.ToUpper() != "A")
+      if (ContractorStatus.ToUpper() != "A" || ContractorId.ToUpper() == "OWNER" || PermitTypeString == "FR")
       {
+        return;
+      }
 
-        if (ContractorWarning.Length == 0 &&
-            ContractorLiabilityInsuranceExpDate < DateTime.Today.Date.AddDays(9))
-        {
-          ContractorWarning = "The Contractor's Liability Insurance will expire on " +
-                    ContractorLiabilityInsuranceExpDate.ToShortDateString();
 
-        }
-        if (ContractorWarning.Length == 0 &&
-            ContractorWorkmansCompInsuranceExpDate != DateTime.MinValue &&
-            ContractorWorkmansCompInsuranceExpDate < DateTime.Today.Date.AddDays(9))
-        {
-          ContractorWarning = "The Contractor's Workman's Compensation Insurance will expire on " +
-                    ContractorWorkmansCompInsuranceExpDate.ToShortDateString();
-        }
 
-        if (ContractorWarning.Length == 0 &&
-            Inspection_Notice == "180+" &&
-            ContractorSuspendGraceDate < DateTime.Today.Date.AddDays(9))
-        {
-          ContractorWarning = @"Contractor is in danger of privileges being suspended based on permit age and could possibly impact
-                       other permit inspections on this job.";
-        }
-
-        if (ContractorWarning.Length == 0 &&
-            ContractorStateCertExpDate < DateTime.Today.AddDays(9) ||
-            ContractorCountyLicenseExpDate < DateTime.Today.Date.AddDays(9))
-        {
-
-          if (ContractorWarning.Length == 0 &&
-            ContractorStateCertExpDate < DateTime.Today.Date.AddDays(9) &&
-              ContractorStateCertExpDate != DateTime.MinValue)
-          {
-            ContractorWarning = @"Contractor's State Certification will expire on: " +
-                       ContractorStateCertExpDate.ToShortDateString();
-          }
-
-          if (ContractorWarning.Length == 0 &&
-            ContractorCountyLicenseExpDate < DateTime.Today.Date.AddDays(9) &&
-              ContractorCountyLicenseExpDate != DateTime.MinValue &&
-              ContractorStateCertExpDate < DateTime.Today.Date.AddDays(9) &&
-              ContractorStateCertExpDate != DateTime.MinValue)
-          {
-            ContractorWarning = "Contractor's County License will expire on: " +
-                      ContractorCountyLicenseExpDate.ToShortDateString();
-          }
-        }
+      if (ContractorLiabilityInsuranceExpDate < DateTime.Today.Date.AddDays(9))
+      {
+        ContractorWarning = "The Contractor's Liability Insurance will expire on " +
+                  ContractorLiabilityInsuranceExpDate.ToShortDateString();
+        return;
 
       }
+      if (ContractorWorkmansCompInsuranceExpDate != DateTime.MinValue &&
+          ContractorWorkmansCompInsuranceExpDate < DateTime.Today.Date.AddDays(9))
+      {
+        ContractorWarning = "The Contractor's Workman's Compensation Insurance will expire on " +
+                  ContractorWorkmansCompInsuranceExpDate.ToShortDateString();
+        return;
+      }
+
+      if ((Inspection_Notice == "180+" &&
+          ContractorSuspendGraceDate < DateTime.Today.Date.AddDays(9)) ||
+          (ContractorWarning.Length == 0 && Inspection_Notice == "151-180")
+          )
+      {
+        ContractorWarning = @"In danger of privilege suspension based on permit age.";
+        return;
+      }
+
+      if (ContractorStateCertExpDate < DateTime.Today.AddDays(9) ||
+          ContractorCountyLicenseExpDate < DateTime.Today.Date.AddDays(9))
+      {
+
+        if (ContractorStateCertExpDate < DateTime.Today.Date.AddDays(9) &&
+            ContractorStateCertExpDate != DateTime.MinValue)
+        {
+          ContractorWarning = @"Contractor's State Certification will expire on: " +
+                     ContractorStateCertExpDate.ToShortDateString();
+          return;
+        }
+
+        if (ContractorCountyLicenseExpDate < DateTime.Today.Date.AddDays(9) &&
+            ContractorCountyLicenseExpDate != DateTime.MinValue &&
+            ContractorStateCertExpDate < DateTime.Today.Date.AddDays(9) &&
+            ContractorStateCertExpDate != DateTime.MinValue)
+        {
+          ContractorWarning = "Contractor's County License will expire on: " +
+                    ContractorCountyLicenseExpDate.ToShortDateString();
+          return;
+        }
+      }
+
     }
+
 
     public static List<Permit> BulkValidate(
       List<Permit> permits,

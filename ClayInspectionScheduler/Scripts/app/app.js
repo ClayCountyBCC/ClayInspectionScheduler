@@ -10,6 +10,7 @@
 /// <reference path="inspectorui.ts" />
 /// <reference path="inspector.ts" />
 /// <reference path="quickremark.ts" />
+/// <reference path="../foundation.d.ts" />
 var InspSched;
 (function (InspSched) {
     "use strict";
@@ -376,6 +377,11 @@ var InspSched;
                 remarkButton.disabled = false;
                 window.setTimeout(function (j) { remarkButton.textContent = "Save Result"; }, 5000);
                 break;
+            case "error":
+                remarkButton.textContent = "Error";
+                remarkButton.disabled = false;
+                window.setTimeout(function (j) { remarkButton.textContent = "Save Result"; }, 5000);
+                break;
         }
     }
     function UpdateInspection(permitNumber, InspectionRequestId) {
@@ -395,16 +401,29 @@ var InspSched;
         InspSched.transport.UpdateInspection(permitNumber, inspReqIdAsNum, value, remarkText, commentText).then(function (updatedInspection) {
             //Instead of SearchPermit(), The current open Inspection data should change while expanded, much like the save comment.
             //SearchPermit();
-            remarkTextarea.value = updatedInspection.Remarks;
-            completedComments.textContent = "";
-            completedComments.textContent = updatedInspection.Comment;
-            InspSched.UI.clearElement(updatedResultADC);
-            updatedResultADC.appendChild(document.createTextNode(updatedInspection.ResultDescription));
-            commentTextarea.value = "";
-            InspSched.UI.clearElement(inspDateTime);
-            inspDateTime.appendChild(document.createTextNode(updatedInspection.DisplayInspDateTime));
-            completedRemark.innerText = updatedInspection.Remarks;
-            UpdateResultButton(InspectionRequestId, "saved");
+            if (updatedInspection.Errors.length == 0) {
+                remarkTextarea.value = updatedInspection.Remarks;
+                completedComments.textContent = "";
+                completedComments.textContent = updatedInspection.Comment;
+                InspSched.UI.clearElement(updatedResultADC);
+                updatedResultADC.appendChild(document.createTextNode(updatedInspection.ResultDescription));
+                commentTextarea.value = "";
+                InspSched.UI.clearElement(inspDateTime);
+                inspDateTime.appendChild(document.createTextNode(updatedInspection.DisplayInspDateTime));
+                completedRemark.innerText = updatedInspection.Remarks;
+                UpdateResultButton(InspectionRequestId, "saved");
+            }
+            else {
+                var errorSpot = document.getElementById("ResultErrorMessage");
+                InspSched.UI.clearElement(errorSpot);
+                errorSpot.appendChild(document.createTextNode("Permit number " + updatedInspection.PermitNo));
+                errorSpot.appendChild(document.createElement("br"));
+                errorSpot.appendChild(document.createTextNode("Attempt to update result on " + updatedInspection.InsDesc + " inspection\r"));
+                errorSpot.appendChild(document.createElement("br"));
+                errorSpot.appendChild(document.createTextNode(updatedInspection.UpdateError));
+                $('#updateResultErrorModal').foundation('open');
+                UpdateResultButton(InspectionRequestId, "error");
+            }
         }, function () {
             console.log('error in UpdateInspection');
             // do something with the error here

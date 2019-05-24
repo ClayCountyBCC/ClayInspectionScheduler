@@ -232,6 +232,7 @@ var InspSched;
             }
             return e;
         }
+        InspectorUI.CreateAndSet = CreateAndSet;
         function CreateAndSetSmaller(v) {
             var c = [];
             for (var _i = 1; _i < arguments.length; _i++) {
@@ -268,15 +269,18 @@ var InspSched;
             }
             return a;
         }
-        function CreateTargettedLink(v, l, target) {
+        function CreateTargetedLink(v, l, target, rel) {
             var c = [];
-            for (var _i = 3; _i < arguments.length; _i++) {
-                c[_i - 3] = arguments[_i];
+            for (var _i = 4; _i < arguments.length; _i++) {
+                c[_i - 4] = arguments[_i];
             }
             var a = document.createElement("a");
             a.href = l;
             a.appendChild(document.createTextNode(v));
             a.target = target;
+            if (rel.length > 0) {
+                a.rel = rel;
+            }
             if (c.length > 0) {
                 for (var _a = 0, c_4 = c; _a < c_4.length; _a++) {
                     var i = c_4[_a];
@@ -285,6 +289,7 @@ var InspSched;
             }
             return a;
         }
+        InspectorUI.CreateTargetedLink = CreateTargetedLink;
         function ProcessIVInspectionsByPermit(inspections, inspector, day, open, isOpen) {
             var ivList = [];
             // if we have a day or inspector set to filter on
@@ -435,7 +440,7 @@ var InspSched;
             row.style.marginTop = ".5em";
             ch.Permit = i.Address;
             ch.InspectionId = 0;
-            var address = CreateTargettedLink(i.Address, "/inspectionview/#inspectionid=" + i.Inspections[0].InspectionId.toString(), "inspectionview");
+            var address = CreateTargetedLink(i.Address, "/inspectionview/#inspectionid=" + i.Inspections[0].InspectionId.toString(), "inspectionview", "");
             var addressContainer = document.createElement("div");
             var addressContainerContainer = document.createElement("div");
             addressContainerContainer.classList.add("row");

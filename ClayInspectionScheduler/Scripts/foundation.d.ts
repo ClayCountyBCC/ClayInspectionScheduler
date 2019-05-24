@@ -400,7 +400,7 @@ declare module FoundationSites {
     // TODO :extension on jQuery
   }
 
-  interface FoundationSitesStatic {
+  interface FoundationStatic {
     version: string;
 
     rtl(): boolean;
@@ -489,7 +489,8 @@ interface JQuery {
   foundation(method?: string|Array<any>, $element?: JQuery): JQuery;
 }
 
-declare var Foundation: FoundationSites.FoundationSitesStatic;
+declare var Foundation: FoundationSites.FoundationStatic;
+
 
 declare module "Foundation" {
   export = Foundation;

@@ -192,6 +192,35 @@
                 </div>
               </div><!-- End Inspection Shceduler Container -->
 
+              <!-- Begin Error Modal-->
+              <div id="contractor_notice" class="small-12 row" style="padding:1rem 0 0 0;">
+                <div class="row small-12 flex-container align-center">
+                  <h4>
+                    Possible impact to scheduled inspections on this job.
+                  </h4>
+                </div>
+                <div id="contractor_notice_list" class="expanded large-6 medium-12 small-12 row flex-container align-center ">
+                  <div class="small-12 align-center warning-row">
+                    <a href="" class="column contractor-link large-2 small-12">CL-59437</a>
+                    <p class="column contractor-warning large-10 small-12 end">
+                      In danger of privilege suspension based on permit age. Possible impact to other inspections on this job.
+                    </p>
+                  </div>
+                  <div class="small-12 align-center warning-row">
+                    <a href="" class="column contractor-link large-2 small-12">CL-59437</a>
+                    <p class="column contractor-warning large-10 small-12 end">
+                      In danger of privilege suspension based on permit age. Possible impact to other inspections on this job.
+                    </p>
+                  </div>
+                  <div class="small-12 align-center warning-row">
+                    <a href="" class="column contractor-link large-2 small-12">CL-59437</a>
+                    <p class="column contractor-warning large-10 small-12 end">
+                      In danger of privilege suspension based on permit age. Possible impact to other inspections on this job.
+                    </p>
+                  </div>
+
+                </div>
+              </div> <!-- End Error Modal -->
             </div><!-- End Tab 2 : Scheduler -->
             <!-- Tab 3 : Inspector View-->
             <div class="tabs-panel tabs-content" id="Inspector">
@@ -313,7 +342,14 @@
     </div>     <!--End Permit Information-->
   </div>     <!--End Inspection Scheduler-->
 
-  <script src="Scripts/app/bundle.min.js?201904111110"></script>
+  <div class="reveal large hide-for-print" id="updateResultErrorModal" data-reveal>
+    <h3>Could not update inspection</h3>
+    <p id="ResultErrorMessage"class="lead"></p>
+    <button class="close-button" data-close aria-label="Close modal" style="width: 40px;height:40px;"type="button" onclick="$('#updateResultErrorModal').foundation('_destroy');">
+      <span aria-hidden="true" style="color: white;font-weight: 400">&times;</span>
+    </button>
+  </div>
+  <script src="Scripts/app/bundle.min.js?201905211940"></script>
 
   <!--<script src="Scripts/jquery-3.1.1.js"></script>
   <script src="Scripts/moment.js"></script>

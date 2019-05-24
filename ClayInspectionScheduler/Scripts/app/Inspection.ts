@@ -29,6 +29,7 @@ namespace InspSched
     StreetAddress: string;
     InspectorColor: string;
     Errors: string[];
+    UpdateError: string;
   }
 
   export class Inspection implements IInspection
@@ -56,6 +57,8 @@ namespace InspSched
     public StreetAddress: string;
     public InspectorColor: string;
     public Errors: string[];
+    public UpdateError: string;
+
 
     constructor()
     {

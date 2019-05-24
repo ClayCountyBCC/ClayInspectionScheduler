@@ -329,12 +329,12 @@ var InspSched;
             var filteredRemarks = InspSched.FilterQuickRemarks(inspection.PermitNo[0], inspection.PrivateProviderInspectionRequestId > 0);
             var _loop_1 = function (qr) {
                 var quickRemarkLi = document.createElement("LI");
-                var link = document.createElement("a");
-                link.onclick = function (e) {
+                var link_1 = document.createElement("a");
+                link_1.onclick = function (e) {
                     return InspSched.UI.SetRemarkText(inspection.InspReqID, qr.Remark);
                 };
-                link.appendChild(document.createTextNode(qr.Remark));
-                quickRemarkLi.appendChild(link);
+                link_1.appendChild(document.createTextNode(qr.Remark));
+                quickRemarkLi.appendChild(link_1);
                 quickRemarkUL.appendChild(quickRemarkLi);
             };
             for (var _i = 0, filteredRemarks_1 = filteredRemarks; _i < filteredRemarks_1.length; _i++) {
@@ -411,12 +411,12 @@ var InspSched;
                 var filteredRemarks_3 = InspSched.FilterQuickRemarks(inspection.PermitNo[0], inspection.PrivateProviderInspectionRequestId > 0);
                 var _loop_2 = function (qr) {
                     var quickRemarkLi = document.createElement("LI");
-                    var link = document.createElement("a");
-                    link.onclick = function (e) {
+                    var link_2 = document.createElement("a");
+                    link_2.onclick = function (e) {
                         return InspSched.UI.SetRemarkText(inspection.InspReqID, qr.Remark);
                     };
-                    link.appendChild(document.createTextNode(qr.Remark));
-                    quickRemarkLi.appendChild(link);
+                    link_2.appendChild(document.createTextNode(qr.Remark));
+                    quickRemarkLi.appendChild(link_2);
                     quickRemarkUL.appendChild(quickRemarkLi);
                 };
                 for (var _a = 0, filteredRemarks_2 = filteredRemarks_3; _a < filteredRemarks_2.length; _a++) {
@@ -492,19 +492,20 @@ var InspSched;
             }
             // #endregion Comment Secion
             //*********************************************
-            // Set permit number as link if internal user: not contract_access or public_access
+            // Set permit number as link to IMS if internal user and public permit search
+            var link = document.createElement("a");
             if (permit.access !== InspSched.access_type.public_access && permit.access !== InspSched.access_type.contract_access) {
-                var link = document.createElement("a");
                 link.href = permit.Permit_URL;
-                link.target = "_blank";
-                link.classList.add('no-underline-for-print');
-                link.appendChild(document.createTextNode(inspection.PermitNo));
-                permitNumber.appendChild(link);
                 //permit.Permit_URL.substring()
             }
             else {
-                permitNumber.appendChild(document.createTextNode(inspection.PermitNo));
+                link.href = "//public.claycountygov.com/permitsearch/#tab=permit&sortfield=issuedate&sortdirection=D&permitnumber=" + permit.PermitNo + "&status=all&page=1&v=0";
             }
+            link.target = "_blank";
+            link.rel = "noopen";
+            link.classList.add('no-underline-for-print');
+            link.appendChild(document.createTextNode(inspection.PermitNo));
+            permitNumber.appendChild(link);
             // if inspection is incomplete, set date to InspSched, else InspDate
             if (inspection.DisplayInspDateTime.toLowerCase() === 'scheduled') {
                 inspDateTime.appendChild(document.createTextNode(inspection.DisplaySchedDateTime));
@@ -621,29 +622,35 @@ var InspSched;
             inspRow.appendChild(DetailsContainer);
             return inspRow;
         }
-        function CheckBrowser() {
-            var browser = "";
-            if ((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1) {
-                browser = 'Opera';
-            }
-            else if (navigator.userAgent.indexOf("Chrome") != -1) {
-                browser = 'Chrome';
-            }
-            else if (navigator.userAgent.indexOf("Safari") != -1) {
-                browser = 'Safari';
-            }
-            else if (navigator.userAgent.indexOf("Firefox") != -1) {
-                browser = 'Firefox';
-            }
-            else if ((navigator.userAgent.indexOf("MSIE") != -1) || (!!document.DOCUMENT_NODE == true)) //IF IE > 10
-             {
-                browser = 'IE';
-            }
-            else {
-                browser = 'unknown';
-            }
-            return browser;
-        }
+        //function CheckBrowser()
+        //{
+        //  let browser: string = "";
+        //  if ((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1) 
+        //  {
+        //    browser = 'Opera';
+        //  }
+        //  else if (navigator.userAgent.indexOf("Chrome") != -1)
+        //  {
+        //    browser = 'Chrome';
+        //  }
+        //  else if (navigator.userAgent.indexOf("Safari") != -1)
+        //  {
+        //    browser = 'Safari';
+        //  }
+        //  else if (navigator.userAgent.indexOf("Firefox") != -1) 
+        //  {
+        //    browser = 'Firefox';
+        //  }
+        //  else if ((navigator.userAgent.indexOf("MSIE") != -1) || (!!document.DOCUMENT_NODE == true)) //IF IE > 10
+        //  {
+        //    browser = 'IE';
+        //  }
+        //  else 
+        //  {
+        //    browser = 'unknown';
+        //  }
+        //  return browser;
+        //}
         function CreateNewHTMLElement(element, classList) {
             var newElement = document.createElement(element);
             if (classList != undefined)
@@ -655,15 +662,12 @@ var InspSched;
                 case 'A':
                 case 'P':
                     return "PassRow";
-                    break;
                 case 'C':
                     return "CancelRow";
-                    break;
                 case 'F':
                 case 'D':
                 case 'N':
                     return "FailRow";
-                    break;
             }
         }
         function BuildButton(buttonId, label, functionCall, value) {
@@ -755,6 +759,7 @@ var InspSched;
             // Populate Inspection Type Select list
             LoadInspTypeSelect(key);
             InspSched.BuildCalendar(InspSched.ThisPermit.ScheduleDates, InspSched.ThisPermit.ErrorText);
+            InspSched.UI.SetAndShowContractorWarning();
             document.getElementById('InspectionScheduler').setAttribute("value", key);
         }
         UI.BuildScheduler = BuildScheduler;
@@ -797,6 +802,34 @@ var InspSched;
             }
         }
         UI.LoadInspTypeSelect = LoadInspTypeSelect;
+        function SetAndShowContractorWarning() {
+            var NoticeArea = document.getElementById("contractor_notice");
+            var warningArea = document.getElementById("contractor_notice_list");
+            console.log("Inside SetAndShowContractorWarning();", UI.CurrentPermits);
+            clearElement(warningArea);
+            var isNotice = false;
+            for (var _i = 0, _a = InspSched.CurrentPermits; _i < _a.length; _i++) {
+                var p = _a[_i];
+                if (p.ContractorWarning.length > 0 && p.ErrorText.length == 0) {
+                    var row = InspSched.InspectorUI.CreateAndSet("", "small-12", "align-center", "warning-row");
+                    row.appendChild(InspSched.InspectorUI.CreateTargetedLink(p.ContractorId, "//public.claycountygov.com/permitSearch/#tab=Contractor&sortfield=issuedate&sortdirection=D&contractorid=" + p.ContractorId + "&status=all&page=1&v=0", "_blank", "noopener", "column", "large-2", "small-12", "contractor-link"));
+                    var warningText = document.createElement("p");
+                    warningText.textContent = p.ContractorWarning;
+                    warningText.classList.add("column");
+                    warningText.classList.add("large-10");
+                    warningText.classList.add("small-12");
+                    warningText.classList.add("contractor-warning");
+                    warningText.classList.add("end");
+                    row.appendChild(warningText);
+                    warningArea.appendChild(row);
+                    isNotice = true;
+                }
+            }
+            if (isNotice) {
+                Show("contractor_notice");
+            }
+        }
+        UI.SetAndShowContractorWarning = SetAndShowContractorWarning;
         /**********************************
         
           Do Somethings

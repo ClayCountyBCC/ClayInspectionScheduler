@@ -116,7 +116,7 @@ namespace ClayInspectionScheduler.Models
     }
 
     public List<string> Errors { get; set; } = new List<string>();
-
+    public string UpdateError { get; set; } = "";
     public string GeoZone { get; set; } = "";
     public string FloodZone { get; set; } = "";
     public string StreetAddress { get; set; } = "";
@@ -338,14 +338,14 @@ namespace ClayInspectionScheduler.Models
               {
                 if(IsREIPaid(current.InspReqID))
                 {
-                  current.Errors.Add("The REI has already been paid, you cannot change the result of this inspection.");
+                  current.UpdateError = ("The REI has already been paid, you cannot change the result of this inspection.");
                   break;
                 }
               }
 
               if (!UpdateStatus(InspectionId, ResultCode, current.ResultADC, Remarks, Comments, current.PrivateProviderInspectionRequestId, User))
               {
-                current.Errors.Add("Error saving your changes, please try again. If this message recurs, please contact the helpdesk.");
+                current.UpdateError = ("Error saving your changes, please try again. If this message recurs, please contact the helpdesk.");
               }
               break;
 
@@ -353,7 +353,7 @@ namespace ClayInspectionScheduler.Models
               string HoldInput = current.PermitNo + " " + current.InspectionCode + " $35";
               if (!UpdateStatus(InspectionId, ResultCode, current.ResultADC, Remarks, Comments, current.PrivateProviderInspectionRequestId, User, PermitNumber, HoldInput))
               {
-                current.Errors.Add("Error saving your changes, please try again. If this message recurs, please contact the helpdesk.");
+                current.UpdateError = ("Error saving your changes, please try again. If this message recurs, please contact the helpdesk.");
               }
               break;
           }

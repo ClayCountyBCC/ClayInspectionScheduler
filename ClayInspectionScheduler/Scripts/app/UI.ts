@@ -698,22 +698,27 @@ namespace InspSched.UI
     // #endregion Comment Secion
 
     //*********************************************
-    // Set permit number as link if internal user: not contract_access or public_access
+    // Set permit number as link to IMS if internal user and public permit search
+
+    let link = <HTMLAnchorElement>document.createElement("a");
+
     if (permit.access !== InspSched.access_type.public_access && permit.access !== InspSched.access_type.contract_access)
     {
-      let link = <HTMLAnchorElement>document.createElement("a");
       link.href = permit.Permit_URL;
-      link.target = "_blank";
-      link.classList.add('no-underline-for-print');
-      link.appendChild(document.createTextNode(inspection.PermitNo));
-      permitNumber.appendChild(link);
+
       //permit.Permit_URL.substring()
     }
     else
     {
-      permitNumber.appendChild(document.createTextNode(inspection.PermitNo));
+      link.href = "//public.claycountygov.com/permitsearch/#tab=permit&sortfield=issuedate&sortdirection=D&permitnumber=" + permit.PermitNo + "&status=all&page=1&v=0";
     }
 
+    
+    link.target = "_blank";
+    link.rel = "noopen";
+    link.classList.add('no-underline-for-print');
+    link.appendChild(document.createTextNode(inspection.PermitNo));
+    permitNumber.appendChild(link);
     // if inspection is incomplete, set date to InspSched, else InspDate
     if (inspection.DisplayInspDateTime.toLowerCase() === 'scheduled') 
     {
@@ -895,37 +900,37 @@ namespace InspSched.UI
     return inspRow;
   }
 
-  function CheckBrowser()
-  {
+  //function CheckBrowser()
+  //{
 
 
-    let browser: string = "";
-    if ((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1) 
-    {
-      browser = 'Opera';
-    }
-    else if (navigator.userAgent.indexOf("Chrome") != -1)
-    {
-      browser = 'Chrome';
-    }
-    else if (navigator.userAgent.indexOf("Safari") != -1)
-    {
-      browser = 'Safari';
-    }
-    else if (navigator.userAgent.indexOf("Firefox") != -1) 
-    {
-      browser = 'Firefox';
-    }
-    else if ((navigator.userAgent.indexOf("MSIE") != -1) || (!!document.DOCUMENT_NODE == true)) //IF IE > 10
-    {
-      browser = 'IE';
-    }
-    else 
-    {
-      browser = 'unknown';
-    }
-    return browser;
-  }
+  //  let browser: string = "";
+  //  if ((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1) 
+  //  {
+  //    browser = 'Opera';
+  //  }
+  //  else if (navigator.userAgent.indexOf("Chrome") != -1)
+  //  {
+  //    browser = 'Chrome';
+  //  }
+  //  else if (navigator.userAgent.indexOf("Safari") != -1)
+  //  {
+  //    browser = 'Safari';
+  //  }
+  //  else if (navigator.userAgent.indexOf("Firefox") != -1) 
+  //  {
+  //    browser = 'Firefox';
+  //  }
+  //  else if ((navigator.userAgent.indexOf("MSIE") != -1) || (!!document.DOCUMENT_NODE == true)) //IF IE > 10
+  //  {
+  //    browser = 'IE';
+  //  }
+  //  else 
+  //  {
+  //    browser = 'unknown';
+  //  }
+  //  return browser;
+  //}
 
   function CreateNewHTMLElement(element: string, classList?: string): HTMLElement
   {
@@ -943,15 +948,13 @@ namespace InspSched.UI
       case 'A':
       case 'P':
         return "PassRow";
-        break;
+
       case 'C':
         return "CancelRow";
-        break;
       case 'F':
       case 'D':
       case 'N':
         return "FailRow";
-        break;
     }
   }
 
@@ -1065,6 +1068,7 @@ namespace InspSched.UI
     return RadioButtonSubrow;
   }
 
+
   /**********************************************
    *
    * Build Scheduler
@@ -1079,8 +1083,9 @@ namespace InspSched.UI
     LoadInspTypeSelect(key);
     InspSched.BuildCalendar(InspSched.ThisPermit.ScheduleDates, InspSched.ThisPermit.ErrorText);
 
-    document.getElementById('InspectionScheduler').setAttribute("value", key);
+    InspSched.UI.SetAndShowContractorWarning();
 
+    document.getElementById('InspectionScheduler').setAttribute("value", key);
   }
 
   export function LoadInspTypeSelect(key: string)
@@ -1134,6 +1139,52 @@ namespace InspSched.UI
         InspTypeList.appendChild(option);
       }
     }
+  }
+
+  export function SetAndShowContractorWarning(): void
+  {
+    let NoticeArea = <HTMLDivElement>document.getElementById("contractor_notice");
+    let warningArea = <HTMLDivElement>document.getElementById("contractor_notice_list");
+    console.log("Inside SetAndShowContractorWarning();", CurrentPermits);
+    clearElement(warningArea);
+    let isNotice = false;
+
+    for (let p of InspSched.CurrentPermits )
+    {
+      if (p.ContractorWarning.length > 0 && p.ErrorText.length == 0)
+      {
+
+        let row = InspSched.InspectorUI.CreateAndSet("", "small-12", "align-center", "warning-row");
+        row.appendChild(InspSched.InspectorUI.CreateTargetedLink(
+          p.ContractorId,
+          "//public.claycountygov.com/permitSearch/#tab=Contractor&sortfield=issuedate&sortdirection=D&contractorid=" + p.ContractorId + "&status=all&page=1&v=0",
+          "_blank",
+          "noopener",
+          "column",
+          "large-2",
+          "small-12",
+          "contractor-link"));
+
+        let warningText =  <HTMLParagraphElement>document.createElement("p");
+        warningText.textContent = p.ContractorWarning;
+        warningText.classList.add("column");
+        warningText.classList.add("large-10");
+        warningText.classList.add("small-12");
+        warningText.classList.add("contractor-warning");
+        warningText.classList.add("end");
+
+        row.appendChild(warningText);
+
+        warningArea.appendChild(row);
+        isNotice = true;
+      }
+    }
+
+    if (isNotice)
+    {
+      Show("contractor_notice");
+    }
+
   }
 
   /**********************************

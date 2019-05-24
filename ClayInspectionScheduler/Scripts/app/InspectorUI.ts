@@ -258,7 +258,7 @@ namespace InspSched.InspectorUI
     return df;
   }
 
-  function CreateAndSet(v: string, ...c: string[]): HTMLDivElement
+  export function CreateAndSet(v: string, ...c: string[]): HTMLDivElement
   {
     let e = document.createElement("div");
     e.appendChild(document.createTextNode(v));
@@ -306,12 +306,18 @@ namespace InspSched.InspectorUI
     return a;
   }
 
-  function CreateTargettedLink(v: string, l: string, target: string, ...c: string[]): HTMLAnchorElement
+  export function CreateTargetedLink(v: string, l: string, target: string, rel: string, ...c: string[]): HTMLAnchorElement
   {
     let a = document.createElement("a");
     a.href = l;
     a.appendChild(document.createTextNode(v));
     a.target = target;
+
+    if (rel.length > 0)
+    {
+      a.rel = rel;
+    }
+
     if (c.length > 0)
     {
       for (let i of c)
@@ -510,7 +516,7 @@ namespace InspSched.InspectorUI
     row.style.marginTop = ".5em";
     ch.Permit = i.Address;
     ch.InspectionId = 0;
-    let address = CreateTargettedLink(i.Address, "/inspectionview/#inspectionid=" + i.Inspections[0].InspectionId.toString(), "inspectionview");
+    let address = CreateTargetedLink(i.Address, "/inspectionview/#inspectionid=" + i.Inspections[0].InspectionId.toString(), "inspectionview", "");
     let addressContainer = document.createElement("div");
     let addressContainerContainer = document.createElement("div");
     addressContainerContainer.classList.add("row");
