@@ -541,16 +541,21 @@ namespace ClayInspectionScheduler.Models
         }
 
         if (PassedFinal()) return;
-        if (this.access == UserAccess.access_type.public_access)
-        {
 
-          if (PrivateProvider.Length > 0)
-          {
-            if (CheckPrivProv(PrivateProvider)) return;
-          }
-        }
+        if (ContractorIssues()) return;
 
-        // if (ContractorIssues()) return;
+        // AS OF 5/30/2019 THE EXTERNAL USERS CAN NOW SCHEDULE PRIVATE PROVIDER AUDIT
+        // THIS CHECK IS NO LONGER NECESSARY. CODE REMAINS, JUST IN CASE.
+        //if (this.access == UserAccess.access_type.public_access)
+        //{
+
+        //  if (PrivateProvider.Length > 0)
+        //  {
+        //    if (CheckPrivProv(PrivateProvider)) return;
+        //  }
+        //}
+
+        
       }
     }
 

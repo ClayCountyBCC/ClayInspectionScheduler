@@ -1311,29 +1311,35 @@ var InspSched;
             inspRow.appendChild(DetailsContainer);
             return inspRow;
         }
-        function CheckBrowser() {
-            var browser = "";
-            if ((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1) {
-                browser = 'Opera';
-            }
-            else if (navigator.userAgent.indexOf("Chrome") != -1) {
-                browser = 'Chrome';
-            }
-            else if (navigator.userAgent.indexOf("Safari") != -1) {
-                browser = 'Safari';
-            }
-            else if (navigator.userAgent.indexOf("Firefox") != -1) {
-                browser = 'Firefox';
-            }
-            else if ((navigator.userAgent.indexOf("MSIE") != -1) || (!!document.DOCUMENT_NODE == true)) //IF IE > 10
-             {
-                browser = 'IE';
-            }
-            else {
-                browser = 'unknown';
-            }
-            return browser;
-        }
+        //function CheckBrowser()
+        //{
+        //  let browser: string = "";
+        //  if ((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1) 
+        //  {
+        //    browser = 'Opera';
+        //  }
+        //  else if (navigator.userAgent.indexOf("Chrome") != -1)
+        //  {
+        //    browser = 'Chrome';
+        //  }
+        //  else if (navigator.userAgent.indexOf("Safari") != -1)
+        //  {
+        //    browser = 'Safari';
+        //  }
+        //  else if (navigator.userAgent.indexOf("Firefox") != -1) 
+        //  {
+        //    browser = 'Firefox';
+        //  }
+        //  else if ((navigator.userAgent.indexOf("MSIE") != -1) || (!!document.DOCUMENT_NODE == true)) //IF IE > 10
+        //  {
+        //    browser = 'IE';
+        //  }
+        //  else 
+        //  {
+        //    browser = 'unknown';
+        //  }
+        //  return browser;
+        //}
         function CreateNewHTMLElement(element, classList) {
             var newElement = document.createElement(element);
             if (classList != undefined)
@@ -1345,15 +1351,12 @@ var InspSched;
                 case 'A':
                 case 'P':
                     return "PassRow";
-                    break;
                 case 'C':
                     return "CancelRow";
-                    break;
                 case 'F':
                 case 'D':
                 case 'N':
                     return "FailRow";
-                    break;
             }
         }
         function BuildButton(buttonId, label, functionCall, value) {

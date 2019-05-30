@@ -307,17 +307,17 @@ namespace ClayInspectionScheduler.Models
       if (this.PrivProvFieldName.Length == 0) return -1;
 
       string sqlPP = $@"
-        INSERT INTO bpPrivateProviderInsp (BaseId, PermitNo, InspCd, SchedDt)
+        INSERT INTO bpPrivateProviderInsp (BaseId, PermitNo, InspCd, SchedDt, InspCLId)
         SELECT TOP 1
           B.BaseId,
-          @PermitNo,
-          @InspCd,
-          CAST(@SelectedDate AS DATE)
+          @PermitNo PermitNo,
+          @InspCd InspCd,
+          CAST(@SelectedDate AS DATE) SchedDt,
+          B.PrivProvider InspCLId
         FROM bpBASE_PERMIT B
-        INNER JOIN bpMASTER_PERMIT M ON B.BaseID = M.BaseID
+        INNER JOIN bpMASTER_PERMIT M ON B.BaseID = M.BaseID AND M.PrivProvBL = 1
         LEFT OUTER JOIN bpASSOC_PERMIT A ON B.BaseID = A.BaseID AND M.PermitNo = A.MPermitNo
-        WHERE M.{this.PrivProvFieldName} = 1
-        AND (A.PermitNo = @PermitNo OR M.PermitNo = @PermitNo)
+        WHERE (A.PermitNo = @PermitNo OR M.PermitNo = @PermitNo)
 
         SET @IRID = SCOPE_IDENTITY();";
       try
