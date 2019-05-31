@@ -526,7 +526,7 @@ var InspSched;
                 row_1.classList.add("large-12");
                 ch.Permit = insp.PermitNumber;
                 ch.InspectionId = insp.InspectionId;
-                row_1.appendChild(CreateAndSet(insp.PermitNumber, "columns", "small-4"));
+                row_1.appendChild(CreateTargetedLink(insp.PermitNumber, "//public.claycountygov.com/permitsearch/#tab=permit&sortfield=issuedate&sortdirection=D&permitnumber=" + insp.PermitNumber + "&status=all&page=1&v=0", "_blank", "noopen", "small-4", "columns", "no-underline-for-print"));
                 row_1.appendChild(CreateLink(insp.InspectionDesc, ch.ToHash(), "medium-6", "columns"));
                 row_1.appendChild(CreateAndSet(insp.ResultADC, "columns", "small-2"));
                 var secondRow = document.createElement("div");
@@ -2154,7 +2154,7 @@ var InspSched;
         var thisInspDesc = document.getElementById("InspTypeSelect");
         var inspDesc = thisInspDesc.options[thisInspDesc.selectedIndex].textContent;
         var comment = document.getElementById("gate_code");
-        InspSched.newInsp = new InspSched.NewInspection(thisPermit, thisInspCd, $(dpCalendar).data('datepicker').getDate(), "Gate Code: " + comment.value);
+        InspSched.newInsp = new InspSched.NewInspection(thisPermit, thisInspCd, $(dpCalendar).data('datepicker').getDate(), comment.value.length > 0 ? "Gate Code: " + comment.value : "");
         comment.value = "";
         var e = InspSched.transport.SaveInspection(InspSched.newInsp).then(function (issues) {
             var thisHeading = document.getElementById('ErrorHeading');

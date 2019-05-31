@@ -225,7 +225,7 @@ namespace InspSched
 
 
 
-    newInsp = new NewInspection(thisPermit, thisInspCd, $(dpCalendar).data('datepicker').getDate(), "Gate Code: " + comment.value);
+    newInsp = new NewInspection(thisPermit, thisInspCd, $(dpCalendar).data('datepicker').getDate(), comment.value.length > 0 ? "Gate Code: " + comment.value : "");
     comment.value = "";
 
     var e = transport.SaveInspection(newInsp).then(function (issues: Array<string>)

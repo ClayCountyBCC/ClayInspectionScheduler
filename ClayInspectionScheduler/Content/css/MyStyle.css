@@ -677,6 +677,10 @@ word-wrap {
     break-inside: avoid !important;
   }
 
+  .page-break-before {
+    page-break-before:always !important;
+  }
+
   #InspListData {
     display: block !important;
   }

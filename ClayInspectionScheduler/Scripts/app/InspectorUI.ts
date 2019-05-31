@@ -575,7 +575,16 @@ namespace InspSched.InspectorUI
       row.classList.add("large-12");
       ch.Permit = insp.PermitNumber;
       ch.InspectionId = insp.InspectionId;
-      row.appendChild(CreateAndSet(insp.PermitNumber, "columns", "small-4"));
+      row.appendChild
+        (CreateTargetedLink(
+          insp.PermitNumber,
+          "//public.claycountygov.com/permitsearch/#tab=permit&sortfield=issuedate&sortdirection=D&permitnumber=" + insp.PermitNumber + "&status=all&page=1&v=0",
+          "_blank",
+          "noopen",
+          "small-4", "columns", "no-underline-for-print")
+        ); 
+
+
       row.appendChild(CreateLink(insp.InspectionDesc, ch.ToHash(), "medium-6", "columns"));
       row.appendChild(CreateAndSet(insp.ResultADC, "columns", "small-2"));
       let secondRow = document.createElement("div");
