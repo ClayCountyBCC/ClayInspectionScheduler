@@ -23,9 +23,10 @@ namespace ClayInspectionScheduler.Controllers
       }
       else
       {
+
         foreach(var i in li)
         {
-          if(i.ResultADC == "")
+          if(i.ResultADC == "" && i.InspReqID > 0)
           {
             Inspection.AddIRID(i);
           }
