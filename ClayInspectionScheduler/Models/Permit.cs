@@ -130,7 +130,6 @@ namespace ClayInspectionScheduler.Models
        *        - If hold allows pre-Inspections, only pre-Inspections can be scheduled for that hold only.
        *        - If other holds exist, then those controls still apply.
        *        
-       *        TODO: update UI to only include inspections eligble for scheduling.
        *      b. does hold stop final? (bool HoldStopFinal) -- This may be unecessary
        *      c. does hold stop all?  (bool HoldStopAll)
        *   
@@ -160,7 +159,7 @@ namespace ClayInspectionScheduler.Models
             l.access = CurrentAccess;
             if (l.access == UserAccess.access_type.public_access)
             {
-              l.Permit_URL = "";
+              // l.Permit_URL = "";
               if (l.Confidential == 1)
               {
                 l.ProjAddrCombined = "Confidential";
@@ -596,12 +595,10 @@ namespace ClayInspectionScheduler.Models
 
       if (!this.PassedFinal() && (this.PermitNo[0] != '6') && this.ContractorStatus != "A" )
       {
-        // TODO: if bldg, stop all inspections, if trade, stop that permit and bldg permit inspection.
         ErrorText = "There is an issue with the contractor's status";
         return true;
       }
 
-      // TODO: update for new contractor status checks. do not allow any permit if bldg contractor suspended, do not allow trade or bldg insection if trade contractor is suspended.
       //var maxDate = ExpirationDates;
       if (ContractorLiabilityInsuranceExpDate < DateTime.Today && (this.PermitNo[0] != '6'))
       {
@@ -670,7 +667,6 @@ namespace ClayInspectionScheduler.Models
       {
         if (suspendedContractorPermits.Contains(masterPermit))
         {
-          // TODO: add code to check if master permit. if yes, bulk update error for all
           var Error = $@"Building permit #{masterPermit} has an issue with the contractor's status, no new inspections can be scheduled.";
           BulkUpdateError(permits, Error);
         }

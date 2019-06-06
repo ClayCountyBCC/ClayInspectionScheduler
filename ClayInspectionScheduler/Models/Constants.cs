@@ -32,7 +32,6 @@ namespace ClayInspectionScheduler.Models
         case "MISSL01":
         case "CLAYBCCIIS01":
         case "CLAYBCCDMZIIS01":
-          // TODO: will need to add the DMZ machine name(s) here.
           return true;
 
         default:
@@ -72,7 +71,6 @@ namespace ClayInspectionScheduler.Models
       }
       catch (Exception ex)
       {
-        // TODO: no connection alert
         Log(ex, query);
         return null;
       }

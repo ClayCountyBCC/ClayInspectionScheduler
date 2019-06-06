@@ -65,8 +65,14 @@ var InspSched;
         function LoadInspectors() {
             InspSched.transport.Inspectors().then(function (inspectors) {
                 var developmentcheck = document.getElementById("isDevelopment");
-                if (inspectors.length > 0 && inspectors[0].InDevelopment) {
-                    developmentcheck.textContent = "Dev Environment";
+                if (inspectors.length > 0) {
+                    InspSched.InDevelopment = inspectors[0].InDevelopment;
+                    if (inspectors.length == 1 && inspectors[0].Name == "") {
+                        inspectors.pop();
+                    }
+                    if (InspSched.InDevelopment == true) {
+                        developmentcheck.textContent = "Dev Environment";
+                    }
                 }
                 InspSched.Inspectors = inspectors;
                 InspSched.UserIsContractInspector = inspectors.length == 1;
@@ -854,7 +860,7 @@ var InspSched;
                     BuildInspectionList(InspSched.CurrentInspections, permit);
                 }
                 else {
-                    // TODO: add 'NO INSPECTIONS ERROR'
+                    // 'NO INSPECTIONS ERROR'
                     document.getElementById('NoInspections').style.display = "flex";
                     document.getElementById("InspSched").style.display = "flex";
                     document.getElementById('InspectionTable').style.display = "flex";
@@ -879,7 +885,6 @@ var InspSched;
             // Initialize element variable for list container 'InspListData'
             var InspList = document.getElementById('InspListData');
             var empty = document.createElement("tr");
-            // TODO: add Try/Catch
             // create (call BuildInspectioN()) and add inspection row to container InspList
             console.log('inspections', inspections);
             for (var _i = 0, inspections_1 = inspections; _i < inspections_1.length; _i++) {
@@ -902,7 +907,6 @@ var InspSched;
             var permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === inspection.PermitNo; })[0];
             var inspRow = CreateNewHTMLElement("div", "InspRow large-12 medium-12 small-12 row flex-container align-middle");
             inspRow.classList.add(AddRowClass(inspection.ResultADC));
-            // TODO: create function CreateNewDivRow(elementType: string, classList: string){   }
             // #region DataRows
             //*******************************************************************************************
             var DataRow = CreateNewHTMLElement("div", "large-12 medium-12 small-12 row flex-container align-middle");
@@ -1620,8 +1624,7 @@ var InspSched;
             IssueList.appendChild(thisIssue);
             reasons.appendChild(IssueList);
             var permitCheck = error.substr(8, 8);
-            if (InspSched.ThisPermit.access != InspSched.access_type.public_access &&
-                permitCheck == permitno &&
+            if (permitCheck == permitno &&
                 (error.substr(30, 5) == 'holds' || error.substr(30, 5) == 'charg')) {
                 IssueList.classList.remove('small-12');
                 IssueList.classList.add('small-9');
@@ -1632,7 +1635,6 @@ var InspSched;
         UI.InformUserOfError = InformUserOfError;
         function CreateButtonToIMS(permitNumber, error) {
             var label = "";
-            var imsLink = "";
             var isHold = true;
             var buttonDiv = document.createElement('div');
             buttonDiv.classList.add('column');
@@ -1641,11 +1643,11 @@ var InspSched;
             buttonDiv.classList.add('align-center');
             switch (error.substr(30, 6)) {
                 case "holds,":
-                    label = "IMS Holds";
+                    label = "Permit Search";
                     isHold = true;
                     break;
                 case "charge":
-                    label = "IMS Charges";
+                    label = "Pay Charges";
                     isHold = false;
                     break;
                 default:
@@ -2005,7 +2007,6 @@ var InspSched;
 /// <reference path="inspectorui.ts" />
 /// <reference path="inspector.ts" />
 /// <reference path="quickremark.ts" />
-/// <reference path="../foundation.d.ts" />
 var InspSched;
 (function (InspSched) {
     "use strict";
@@ -2020,6 +2021,7 @@ var InspSched;
     InspSched.Inspectors = [];
     InspSched.InspectorViewByPermit = []; // this is going to be the processed array of Inspection data.
     InspSched.InspectorViewByAddress = [];
+    InspSched.InDevelopment = false;
     InspSched.HideTheseComments = []; // comments that contain these phrases will be hidden
     var InspectionTable = document.getElementById('InspectionTable');
     var InspectionTypeSelect = document.getElementById("InspTypeSelect");
@@ -2069,16 +2071,24 @@ var InspSched;
         }
     };
     function SendToIMS(permitNumber, type) {
+        var isInternal = InspSched.Inspectors.length > 0;
+        var linkStart = "";
         if (type == 'hold') {
-            window.open(InspSched.Inspectors[0].AppAddressStart +
-                "Holds.aspx?PermitNo=" +
-                permitNumber + "&OperId=&Nav=PL");
+            window.open(isInternal ?
+                (InspSched.Inspectors[0].AppAddressStart +
+                    "Holds.aspx?PermitNo=" + permitNumber + "&OperId=&Nav=PL") :
+                ("//public.claycountygov.com/permitsearch/#tab=permit&permitdisplay=" + permitNumber +
+                    "&sortfield=issuedate&sortdirection=D&permitnumber=" + permitNumber + "&status=all&page=1&v=0"));
         }
         else {
-            window.open(InspSched.Inspectors[0].AppAddressStart +
-                (permitNumber[0] == '1' ? "MChrg" : "AChrg") +
-                ".aspx?PermitNo=" +
-                permitNumber + "&OperId=&Nav=PL");
+            if (InspSched.InDevelopment == true) {
+                linkStart = "qa";
+            }
+            else {
+                linkStart = isInternal ? "apps" : "public";
+            }
+            window.open("//" + linkStart +
+                ".claycountygov.com/claypay/#Permit=" + permitNumber, "_blank");
         }
     }
     InspSched.SendToIMS = SendToIMS;
@@ -2121,7 +2131,6 @@ var InspSched;
         IssueContainer.style.display = 'none';
         confirmed.style.display = "none";
         var permits = InspSched.CurrentPermits;
-        // TODO: Add code to check if there is a selected date;
         SaveInspectionButton.setAttribute("disabled", "disabled");
         for (var _i = 0, permits_2 = permits; _i < permits_2.length; _i++) {
             var permit = permits_2[_i];
@@ -2432,10 +2441,7 @@ var InspSched;
     function CancelInspection(InspID, PermitNo) {
         document.getElementById('NotScheduled').style.display = "none";
         if (InspID != null && PermitNo != null) {
-            //Hide( 'FutureInspRow' );
-            // TODO: Add function to not allow cancel if scheduled date of insp is current date 
             var isDeleted = InspSched.transport.CancelInspection(InspID, PermitNo);
-            // TODO: ADD code to inform user if the inspection has been deleted 
             // Reload inspection list after delete
             if (isDeleted) {
                 InspSched.UI.GetInspList(PermitNo);

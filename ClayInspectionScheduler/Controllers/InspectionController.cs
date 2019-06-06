@@ -16,14 +16,22 @@ namespace ClayInspectionScheduler.Controllers
     [Route("Permit/{PermitNumber}")]
     public IHttpActionResult Permit(string PermitNumber)
     {
-      List<Inspection> lp = Inspection.Get(PermitNumber);
-      if (lp == null)
+      List<Inspection> li = Inspection.Get(PermitNumber);
+      if (li == null)
       {
         return InternalServerError();
       }
       else
       {
-        return Ok(lp);
+        foreach(var i in li)
+        {
+          if(i.ResultADC == "")
+          {
+            Inspection.AddIRID(i);
+          }
+        }
+        
+        return Ok(li);
       }
     }
 
@@ -120,22 +128,23 @@ namespace ClayInspectionScheduler.Controllers
     public IHttpActionResult Inspectors()
     {
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
-      if (ua.current_access != UserAccess.access_type.public_access)
+      var inspectors = new List<Inspector>();
+
+      if (ua.current_access == UserAccess.access_type.public_access)
       {
+        inspectors.Add(new Inspector());
+      }
+      else 
+      {
+        inspectors.AddRange(Inspector.GetCached());
+
         if(ua.current_access == UserAccess.access_type.contract_access)
         {
-          var inspectors = (from i in Inspector.GetCached()
-                            where i.NTUsername == ua.user_name
-                            select i).ToList();
-          return Ok(inspectors);
+          inspectors.RemoveAll(i => i.NTUsername.ToLower() != ua.user_name.ToLower());
         }
-        return Ok(Inspector.GetCached());
+      }
 
-      }
-      else
-      {
-        return Ok(new List<Inspector>());
-      }
+      return Ok(inspectors);
     }
 
     [HttpGet]

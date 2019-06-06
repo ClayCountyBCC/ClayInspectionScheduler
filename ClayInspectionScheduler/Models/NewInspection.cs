@@ -118,13 +118,15 @@ namespace ClayInspectionScheduler.Models
           var mp = (from p in Permits
                     where p.CoClosed == 0
                     select p).DefaultIfEmpty(new Permit()).First();
-          var canSchedule =  mp.CorrectImpactFeeCount && mp.TotalImpactFeesDue == 0;
+          var canSchedule = mp.CorrectImpactFeeCount && mp.TotalImpactFeesDue == 0;
 
           if (!canSchedule && (currentInspectionType.InspCd == "205" || currentInspectionType.InspCd == "123"))
-           {
-            Errors.Add($@"A Temporary Power/Equipment Check cannot be scheduled if there are unpaid impact or solid waste fees.
+          {
+            Errors.Add($@"A Temporary Power/Equipment Check cannot be scheduled if there are unpaid impact fees.
                           Please contact the building department for assistance.");
-           }
+
+            // TODO: add call to function here that will assess the Solid Waste Fee 
+          }
         }
         // validate user selected date
         var start = DateTime.Parse(CurrentPermit.Dates.minDate_string);
@@ -295,7 +297,7 @@ namespace ClayInspectionScheduler.Models
     public int AddIRID()
     {
       // assign string DB fieldname to variable based on permit type;
-      var dbArgs = new Dapper.DynamicParameters();
+      var dbArgs = new DynamicParameters();
       dbArgs.Add("@PermitNo", this.PermitNo);
       dbArgs.Add("@InspCd", this.InspectionCd);
       dbArgs.Add("@SelectedDate", this.SchecDateTime.Date);
@@ -315,11 +317,14 @@ namespace ClayInspectionScheduler.Models
           CAST(@SelectedDate AS DATE) SchedDt,
           B.PrivProvider InspCLId
         FROM bpBASE_PERMIT B
-        INNER JOIN bpMASTER_PERMIT M ON B.BaseID = M.BaseID AND M.PrivProvBL = 1
+        INNER JOIN bpMASTER_PERMIT M ON B.BaseID = M.BaseID
         LEFT OUTER JOIN bpASSOC_PERMIT A ON B.BaseID = A.BaseID AND M.PermitNo = A.MPermitNo
-        WHERE (A.PermitNo = @PermitNo OR M.PermitNo = @PermitNo)
-
+        WHERE 1=1
+          AND (B.PrivProvider IS NOT NULL OR M.PrivProvBL = 1)
+          AND (A.PermitNo = @PermitNo OR M.PermitNo = @PermitNo)
+          
         SET @IRID = SCOPE_IDENTITY();";
+
       try
       {
         var i = Constants.Exec_Query(sqlPP, dbArgs);
@@ -409,7 +414,10 @@ namespace ClayInspectionScheduler.Models
         var i = Constants.Exec_Query(sql, dbArgs);
         if (i > -1)
         {
+          
           int SavedInspectionId = dbArgs.Get<int>("@SavedInspectionID");
+
+
           string inspDesc = (from it in inspTypes
                              where it.InspCd == this.InspectionCd
                              select it.InsDesc).First();
@@ -430,6 +438,8 @@ namespace ClayInspectionScheduler.Models
 
 
     }
+
+
 
 
   }

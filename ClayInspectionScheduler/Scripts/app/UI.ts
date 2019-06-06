@@ -235,7 +235,7 @@ namespace InspSched.UI
       }
       else
       {
-        // TODO: add 'NO INSPECTIONS ERROR'
+        // 'NO INSPECTIONS ERROR'
         document.getElementById('NoInspections').style.display = "flex";
         document.getElementById("InspSched").style.display = "flex";
         document.getElementById('InspectionTable').style.display = "flex";
@@ -268,7 +268,6 @@ namespace InspSched.UI
     let InspList: HTMLTableElement = (<HTMLTableElement>document.getElementById('InspListData'));
     let empty: HTMLElement = (<HTMLElement>document.createElement("tr"));
 
-    // TODO: add Try/Catch
 
     // create (call BuildInspectioN()) and add inspection row to container InspList
     console.log('inspections', inspections);
@@ -293,7 +292,6 @@ namespace InspSched.UI
     document.getElementById('InspectionTable').style.display = "flex";
 
   }
-
   // update BuildInspectionRow
   function BuildInspectionRow(inspection: Inspection)
   {
@@ -304,7 +302,6 @@ namespace InspSched.UI
     let inspRow: HTMLElement = CreateNewHTMLElement("div", "InspRow large-12 medium-12 small-12 row flex-container align-middle");
     inspRow.classList.add(AddRowClass(inspection.ResultADC));
 
-    // TODO: create function CreateNewDivRow(elementType: string, classList: string){   }
     // #region DataRows
     //*******************************************************************************************
     let DataRow: HTMLElement = CreateNewHTMLElement("div", "large-12 medium-12 small-12 row flex-container align-middle");
@@ -1327,8 +1324,7 @@ namespace InspSched.UI
     reasons.appendChild(IssueList);
 
     var permitCheck = error.substr(8, 8);
-    if (InspSched.ThisPermit.access != InspSched.access_type.public_access &&
-      permitCheck == permitno &&
+    if (permitCheck == permitno &&
       (error.substr(30, 5) == 'holds' || error.substr(30, 5) == 'charg'))
     {
       IssueList.classList.remove('small-12');
@@ -1344,7 +1340,6 @@ namespace InspSched.UI
   {
 
     var label: string = "";
-    var imsLink: string = "";
     var isHold: boolean = true;
 
     let buttonDiv: HTMLDivElement = (<HTMLDivElement>document.createElement('div'));
@@ -1356,11 +1351,11 @@ namespace InspSched.UI
     switch (error.substr(30, 6))
     {
       case "holds,":
-        label = "IMS Holds";
+        label = "Permit Search";
         isHold = true;
         break;
       case "charge":
-        label = "IMS Charges";
+        label = "Pay Charges";
         isHold = false;
         break;
       default:

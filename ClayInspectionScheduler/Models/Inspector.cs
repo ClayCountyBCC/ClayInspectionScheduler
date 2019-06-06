@@ -9,20 +9,20 @@ namespace ClayInspectionScheduler.Models
 {
   public class Inspector
   {
-    public int Id { get; set; }
-    public string Name { get; set; }
-    public string Color { get; set; }
-    public bool CommercialPermit { get; set; }
-    public bool BuildingPermit { get; set; }
-    public bool ElectricalPermit { get; set; }
-    public bool MechanicalPermit { get; set; }
-    public bool PlumbingPermit { get; set; }
-    public bool PrivateProvider { get; set; }
-    public bool ResidentialPermit { get; set; }
-    public string Initials { get; set; }
-    public bool InDevelopment { get; set; }
-    public string AppAddressStart { get; set; }
-    public string NTUsername { get; set; }
+    public int Id { get; set; } = -1;
+    public string Name { get; set; } = "";
+    public string Color { get; set; } = "";
+    public bool CommercialPermit { get; set; } = false;
+    public bool BuildingPermit { get; set; } = false;
+    public bool ElectricalPermit { get; set; } = false;
+    public bool MechanicalPermit { get; set; } = false;
+    public bool PlumbingPermit { get; set; } = false;
+    public bool PrivateProvider { get; set; } = false;
+    public bool ResidentialPermit { get; set; } = false;
+    public string Initials { get; set; } = "";
+    public bool InDevelopment { get; set; } = true;
+    public string AppAddressStart { get; set; } = "";
+    public string NTUsername { get; set; } = "";
 
     public Inspector()
     {

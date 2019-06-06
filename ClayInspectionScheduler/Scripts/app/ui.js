@@ -165,7 +165,7 @@ var InspSched;
                     BuildInspectionList(InspSched.CurrentInspections, permit);
                 }
                 else {
-                    // TODO: add 'NO INSPECTIONS ERROR'
+                    // 'NO INSPECTIONS ERROR'
                     document.getElementById('NoInspections').style.display = "flex";
                     document.getElementById("InspSched").style.display = "flex";
                     document.getElementById('InspectionTable').style.display = "flex";
@@ -190,7 +190,6 @@ var InspSched;
             // Initialize element variable for list container 'InspListData'
             var InspList = document.getElementById('InspListData');
             var empty = document.createElement("tr");
-            // TODO: add Try/Catch
             // create (call BuildInspectioN()) and add inspection row to container InspList
             console.log('inspections', inspections);
             for (var _i = 0, inspections_1 = inspections; _i < inspections_1.length; _i++) {
@@ -213,7 +212,6 @@ var InspSched;
             var permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === inspection.PermitNo; })[0];
             var inspRow = CreateNewHTMLElement("div", "InspRow large-12 medium-12 small-12 row flex-container align-middle");
             inspRow.classList.add(AddRowClass(inspection.ResultADC));
-            // TODO: create function CreateNewDivRow(elementType: string, classList: string){   }
             // #region DataRows
             //*******************************************************************************************
             var DataRow = CreateNewHTMLElement("div", "large-12 medium-12 small-12 row flex-container align-middle");
@@ -931,8 +929,7 @@ var InspSched;
             IssueList.appendChild(thisIssue);
             reasons.appendChild(IssueList);
             var permitCheck = error.substr(8, 8);
-            if (InspSched.ThisPermit.access != InspSched.access_type.public_access &&
-                permitCheck == permitno &&
+            if (permitCheck == permitno &&
                 (error.substr(30, 5) == 'holds' || error.substr(30, 5) == 'charg')) {
                 IssueList.classList.remove('small-12');
                 IssueList.classList.add('small-9');
@@ -943,7 +940,6 @@ var InspSched;
         UI.InformUserOfError = InformUserOfError;
         function CreateButtonToIMS(permitNumber, error) {
             var label = "";
-            var imsLink = "";
             var isHold = true;
             var buttonDiv = document.createElement('div');
             buttonDiv.classList.add('column');
@@ -952,11 +948,11 @@ var InspSched;
             buttonDiv.classList.add('align-center');
             switch (error.substr(30, 6)) {
                 case "holds,":
-                    label = "IMS Holds";
+                    label = "Permit Search";
                     isHold = true;
                     break;
                 case "charge":
-                    label = "IMS Charges";
+                    label = "Pay Charges";
                     isHold = false;
                     break;
                 default:

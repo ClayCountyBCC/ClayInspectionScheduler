@@ -31,8 +31,14 @@ var InspSched;
         function LoadInspectors() {
             InspSched.transport.Inspectors().then(function (inspectors) {
                 var developmentcheck = document.getElementById("isDevelopment");
-                if (inspectors.length > 0 && inspectors[0].InDevelopment) {
-                    developmentcheck.textContent = "Dev Environment";
+                if (inspectors.length > 0) {
+                    InspSched.InDevelopment = inspectors[0].InDevelopment;
+                    if (inspectors.length == 1 && inspectors[0].Name == "") {
+                        inspectors.pop();
+                    }
+                    if (InspSched.InDevelopment == true) {
+                        developmentcheck.textContent = "Dev Environment";
+                    }
                 }
                 InspSched.Inspectors = inspectors;
                 InspSched.UserIsContractInspector = inspectors.length == 1;

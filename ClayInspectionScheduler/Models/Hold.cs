@@ -65,7 +65,6 @@ namespace ClayInspectionScheduler.Models
       }
       catch (Exception ex)
       {
-        // TODO: no connection alert
         Constants.Log(ex, sql);
         return null;
       }

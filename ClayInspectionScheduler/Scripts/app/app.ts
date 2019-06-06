@@ -10,7 +10,6 @@
 /// <reference path="inspectorui.ts" />
 /// <reference path="inspector.ts" />
 /// <reference path="quickremark.ts" />
-/// <reference path="../foundation.d.ts" />
 
 
 namespace InspSched
@@ -31,6 +30,7 @@ namespace InspSched
   export let UserIsContractInspector: boolean;
   export let InspectorViewByPermit: Array<InspectionViewByPermit> = [];  // this is going to be the processed array of Inspection data.
   export let InspectorViewByAddress: Array<InspectionViewByAddress> = [];
+  export let InDevelopment: boolean = false;
   export let HideTheseComments: Array<string> = []; // comments that contain these phrases will be hidden
 
   let InspectionTable = <HTMLDivElement>document.getElementById('InspectionTable');
@@ -44,6 +44,7 @@ namespace InspSched
   let IssuesDiv: HTMLDivElement = (<HTMLDivElement>document.getElementById('Reasons'));
   let SaveInspectionButton = document.getElementById("SaveSchedule");
   let confirmed = document.getElementById('SaveConfirmed');
+
 
   export function start(): void
   {
@@ -94,22 +95,36 @@ namespace InspSched
   };
 
   export function SendToIMS(permitNumber: string, type: string): void
-  {
+  { 
+    var isInternal = InspSched.Inspectors.length > 0;
+
+    var linkStart = "";
 
     if (type == 'hold')
     {
       window.open(
-        InspSched.Inspectors[0].AppAddressStart +
-        "Holds.aspx?PermitNo=" +
-        permitNumber + "&OperId=&Nav=PL");
+        isInternal ?
+
+          (InspSched.Inspectors[0].AppAddressStart +
+            "Holds.aspx?PermitNo=" + permitNumber + "&OperId=&Nav=PL") :
+
+          ("//public.claycountygov.com/permitsearch/#tab=permit&permitdisplay=" + permitNumber +
+            "&sortfield=issuedate&sortdirection=D&permitnumber=" + permitNumber + "&status=all&page=1&v=0")
+      );
     }
     else
     {
-      window.open(
-        InspSched.Inspectors[0].AppAddressStart +
-        (permitNumber[0] == '1' ? "MChrg" : "AChrg") +
-        ".aspx?PermitNo=" +
-        permitNumber + "&OperId=&Nav=PL");
+      if (InspSched.InDevelopment == true)
+      {
+        linkStart = "qa";
+      }
+      else
+      {
+        linkStart = isInternal ? "apps" : "public";
+      }
+
+      window.open("//" + linkStart +
+        ".claycountygov.com/claypay/#Permit=" + permitNumber, "_blank");
     }
 
   }
@@ -174,7 +189,7 @@ namespace InspSched
     IssueContainer.style.display = 'none';
     confirmed.style.display = "none";
     let permits = InspSched.CurrentPermits;
-    // TODO: Add code to check if there is a selected date;
+
     SaveInspectionButton.setAttribute("disabled", "disabled");
 
     for (let permit of permits)
@@ -631,12 +646,8 @@ namespace InspSched
 
     if (InspID != null && PermitNo != null)
     {
-      //Hide( 'FutureInspRow' );
-      // TODO: Add function to not allow cancel if scheduled date of insp is current date 
 
       var isDeleted = transport.CancelInspection(InspID, PermitNo);
-
-      // TODO: ADD code to inform user if the inspection has been deleted 
 
       // Reload inspection list after delete
       if (isDeleted)
