@@ -699,7 +699,7 @@ namespace InspSched.UI
 
     let link = <HTMLAnchorElement>document.createElement("a");
 
-    if (permit.access !== InspSched.access_type.public_access && permit.access !== InspSched.access_type.contract_access)
+    if (permit.access !== InspSched.access_type.public_access && permit.access !== InspSched.access_type.contract_access && !eeInPublic)
     {
       link.href = permit.Permit_URL;
 

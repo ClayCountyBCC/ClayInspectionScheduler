@@ -31,8 +31,9 @@ namespace InspSched
   export let InspectorViewByPermit: Array<InspectionViewByPermit> = [];  // this is going to be the processed array of Inspection data.
   export let InspectorViewByAddress: Array<InspectionViewByAddress> = [];
   export let InDevelopment: boolean = false;
+  export let eeInPublic: boolean = false;
   export let HideTheseComments: Array<string> = []; // comments that contain these phrases will be hidden
-
+ 
   let InspectionTable = <HTMLDivElement>document.getElementById('InspectionTable');
   let InspectionTypeSelect = <HTMLSelectElement>document.getElementById("InspTypeSelect");
   let PermitSearchButton = <HTMLButtonElement>document.getElementById("PermitSearchButton");
@@ -53,6 +54,7 @@ namespace InspSched
     window.onhashchange = HandleHash;
     if (location.hash.length > 0)
     {
+
       if (location.hash && location.hash.substring(1).length > 0)
       {
         HandleHash(); // if they pass something in the URL
@@ -103,7 +105,7 @@ namespace InspSched
     if (type == 'hold')
     {
       window.open(
-        isInternal ?
+        isInternal && !eeInPublic ?
 
           (InspSched.Inspectors[0].AppAddressStart +
             "Holds.aspx?PermitNo=" + permitNumber + "&OperId=&Nav=PL") :
@@ -120,7 +122,7 @@ namespace InspSched
       }
       else
       {
-        linkStart = isInternal ? "apps" : "public";
+        linkStart = isInternal && !eeInPublic ? "apps" : "public";
       }
 
       window.open("//" + linkStart +
@@ -301,6 +303,12 @@ namespace InspSched
 
   function LoadData()
   {
+
+    if (location.hostname.substr(0,3).toLowerCase() == "web")
+    {
+      eeInPublic = true;
+    }
+
     SaveInspectionButton.setAttribute("disabled", "disabled");
     IssueContainer.style.display = "none";
     LoadInspectionTypes();

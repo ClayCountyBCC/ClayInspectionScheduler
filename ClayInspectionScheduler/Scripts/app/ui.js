@@ -492,7 +492,7 @@ var InspSched;
             //*********************************************
             // Set permit number as link to IMS if internal user and public permit search
             var link = document.createElement("a");
-            if (permit.access !== InspSched.access_type.public_access && permit.access !== InspSched.access_type.contract_access) {
+            if (permit.access !== InspSched.access_type.public_access && permit.access !== InspSched.access_type.contract_access && !InspSched.eeInPublic) {
                 link.href = permit.Permit_URL;
                 //permit.Permit_URL.substring()
             }

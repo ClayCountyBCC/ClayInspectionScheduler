@@ -25,6 +25,7 @@ var InspSched;
     InspSched.InspectorViewByPermit = []; // this is going to be the processed array of Inspection data.
     InspSched.InspectorViewByAddress = [];
     InspSched.InDevelopment = false;
+    InspSched.eeInPublic = false;
     InspSched.HideTheseComments = []; // comments that contain these phrases will be hidden
     var InspectionTable = document.getElementById('InspectionTable');
     var InspectionTypeSelect = document.getElementById("InspTypeSelect");
@@ -77,7 +78,7 @@ var InspSched;
         var isInternal = InspSched.Inspectors.length > 0;
         var linkStart = "";
         if (type == 'hold') {
-            window.open(isInternal ?
+            window.open(isInternal && !InspSched.eeInPublic ?
                 (InspSched.Inspectors[0].AppAddressStart +
                     "Holds.aspx?PermitNo=" + permitNumber + "&OperId=&Nav=PL") :
                 ("//public.claycountygov.com/permitsearch/#tab=permit&permitdisplay=" + permitNumber +
@@ -88,7 +89,7 @@ var InspSched;
                 linkStart = "qa";
             }
             else {
-                linkStart = isInternal ? "apps" : "public";
+                linkStart = isInternal && !InspSched.eeInPublic ? "apps" : "public";
             }
             window.open("//" + linkStart +
                 ".claycountygov.com/claypay/#Permit=" + permitNumber, "_blank");
@@ -206,6 +207,9 @@ var InspSched;
         IssueContainer.style.display = "none";
     };
     function LoadData() {
+        if (location.hostname.substr(0, 3).toLowerCase() == "web") {
+            InspSched.eeInPublic = true;
+        }
         SaveInspectionButton.setAttribute("disabled", "disabled");
         IssueContainer.style.display = "none";
         LoadInspectionTypes();

@@ -9,6 +9,7 @@ using System.Data;
 using System.Runtime.Caching;
 using System.Security.Policy;
 using Dapper;
+using System.Net;
 
 namespace ClayInspectionScheduler.Models
 {
@@ -149,10 +150,12 @@ namespace ClayInspectionScheduler.Models
                                where prmt.CoClosed != -1
                                select prmt.PrivateProvider).DefaultIfEmpty("").First();
 
+          
+          /// NEED TO BE ABLE TO DETECT THAT A PROXY IS IN USE BEFORE CHECKING FOR PROD HOST. NEED TO BE ABLE TO CREATE LINK TO 
           string host = Constants.UseProduction() ? "claybccims" : "claybccimstrn";
           foreach (Permit l in permits)
           {
-
+            
             l.Permit_URL = l.PermitTypeString == "BL" ?
               $@"http://{host}/WATSWeb/Permit/MainBL.aspx?PermitNo={l.PermitNo}&Nav=PL&OperId=&PopUp=" :
               $@"http://{host}/WATSWeb/Permit/APermit{l.PermitTypeString}.aspx?PermitNo={l.PermitNo}";
@@ -186,7 +189,6 @@ namespace ClayInspectionScheduler.Models
         return null;
       }
     }
-
     private void SetMaxContractorScheduleDate()
     {
       var dates = new List<DateTime>(){
