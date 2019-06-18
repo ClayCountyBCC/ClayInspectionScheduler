@@ -378,6 +378,17 @@ namespace ClayInspectionScheduler.Models
 
       string sql = $@"
       USE WATSC;     
+      WITH last_completed_inspection_of_this_type AS (
+  
+        SELECT TOP 1
+          inspreqid,
+          ResultADC
+        FROM bpINS_REQUEST
+        where inspectionCode = @inspection_code
+          AND PermitNo = @permit_number
+        order by inspreqid desc
+
+      )
 
       INSERT INTO bpINS_REQUEST
           (PermitNo,
@@ -386,7 +397,8 @@ namespace ClayInspectionScheduler.Models
           ReqDateTime,
           BaseId,
           ReceivedBy,
-          PrivProvIRId)
+          PrivProvIRId,
+          ReinspectionId)
       SELECT TOP 1
           @PermitNo,
           @InspCd,
@@ -394,10 +406,12 @@ namespace ClayInspectionScheduler.Models
           GETDATE(),
           B.BaseId,
           @Username,
-          @IRID
+          @IRID,
+          CASE WHEN L.ResultADC IN ('D','N') THEN L.InspReqID ELSE NULL END reinspectionId
       FROM bpBASE_PERMIT B
       LEFT OUTER JOIN bpMASTER_PERMIT M ON M.BaseID = B.BaseID
       LEFT OUTER JOIN bpASSOC_PERMIT A ON B.BaseID = A.BaseID
+      LEFT OUTER JOIN last_completed_inspection_of_this_type L ON L.BaseId = B.BaseID
       WHERE (A.PermitNo = @PermitNo OR M.PermitNo = @PermitNo)
 
       SET @SavedInspectionID = SCOPE_IDENTITY();
