@@ -207,7 +207,7 @@ var InspSched;
         IssueContainer.style.display = "none";
     };
     function LoadData() {
-        if (location.hostname.substr(0, 3).toLowerCase() == "web") {
+        if (location.hostname.substr(0, 3).toLowerCase() === "web" || location.hostname.substr(0, 6).toLowerCase() === "public") {
             InspSched.eeInPublic = true;
         }
         SaveInspectionButton.setAttribute("disabled", "disabled");

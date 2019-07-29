@@ -41,27 +41,25 @@ namespace InspSched.InspectorUI
   }
 
   function LoadInspectors(): void
-  {    
+  {
     transport.Inspectors().then(function (inspectors: Array<Inspector>)
     {
 
       let developmentcheck = (<HTMLSpanElement>document.getElementById("isDevelopment"));
 
-      
-      if (inspectors.length > 0)
+      InspSched.InDevelopment = inspectors[0].InDevelopment;
+
+      if (inspectors.length == 1 && inspectors[0].Name == "")
       {
-        InspSched.InDevelopment = inspectors[0].InDevelopment;
-        if (inspectors.length == 1 && inspectors[0].Name == "")
-        {
-          inspectors.pop();
-        }
-
-        if (InspSched.InDevelopment == true)
-        {
-          developmentcheck.textContent = "Dev Environment";
-        }
-
+        inspectors.pop();
       }
+
+      if (InspSched.InDevelopment == true)
+      {
+        developmentcheck.textContent = "Dev Environment";
+      }
+
+
 
 
 

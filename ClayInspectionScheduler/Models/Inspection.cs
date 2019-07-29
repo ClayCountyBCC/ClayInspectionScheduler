@@ -147,9 +147,8 @@ namespace ClayInspectionScheduler.Models
         USE WATSC;
 
         EXEC prc_sel_InspSched_inspection_list @Today, @Tomorrow
-        
-      ";
-
+      
+        ";
 
       Constants.Get_Data<Inspection>(sql, dp);
       try
@@ -612,18 +611,23 @@ namespace ClayInspectionScheduler.Models
     {
       return @"
 
-        DELETE C
-        FROM ccCashierItem C
-        INNER JOIN bpHold B ON C.HoldId = B.HoldID
-        WHERE B.InspReqID = @InspectionId
-          AND C.CashierId IS NULL;
+          UPDATE H
+          SET Deleted = GETDATE(), DeletedBy = 'InspSched', HldNarr = 'InspSched deleted charge, reversed failed inspection result'
+          FROM bpHOLD H
+          INNER JOIN ccCashierItem C ON C.HoldID = H.HoldID
+          WHERE 1=1
+            AND H.Deleted IS NULL
+            AND H.InspReqID = @InspectionId 
+            AND C.CashierId IS NULL;
 
-        DELETE H
-        FROM bpHold H
-        INNER JOIN ccCashierItem C ON C.HoldID = H.HoldID
-        WHERE InspReqID = @InspectionId 
-          AND C.CashierId IS NULL;
-";
+          DELETE C
+          FROM ccCashierItem C
+          INNER JOIN bpHold H ON C.HoldId = H.HoldID
+          WHERE 1=1
+            AND H.InspReqID = @InspectionId
+            AND C.CashierId IS NULL;
+            
+            ";
     }
 
     public static bool PassedElectricalEquipmentCheck(string permitNumber)
@@ -654,11 +658,13 @@ namespace ClayInspectionScheduler.Models
         USE WATSC;
         SELECT itemId
         FROM ccCashierItem CI
-          INNER JOIN bpHOLD H ON H.HoldID = CI.HoldID
+          INNER JOIN bpHOLD H ON H.HoldID = CI.HoldID 
           INNER JOIN bpINS_REQUEST IR ON H.InspReqID = IR.InspReqID      
         WHERE
           IR.InspReqId=@InspectionId
-          AND CI.CashierId IS NOT NULL";
+          AND CI.CashierId IS NOT NULL
+          
+          ";
 
       return Constants.Get_Data<string>(sql, dbArgs).Count() > 0;
 

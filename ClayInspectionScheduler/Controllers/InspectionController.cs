@@ -134,6 +134,7 @@ namespace ClayInspectionScheduler.Controllers
       if (ua.current_access == UserAccess.access_type.public_access)
       {
         inspectors.Add(new Inspector());
+        
       }
       else 
       {

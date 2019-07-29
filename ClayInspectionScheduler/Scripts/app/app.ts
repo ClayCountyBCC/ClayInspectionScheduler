@@ -304,7 +304,7 @@ namespace InspSched
   function LoadData()
   {
 
-    if (location.hostname.substr(0,3).toLowerCase() == "web")
+    if (location.hostname.substr(0, 3).toLowerCase() === "web" || location.hostname.substr(0, 6).toLowerCase() === "public")
     {
       eeInPublic = true;
     }

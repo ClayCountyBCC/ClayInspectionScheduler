@@ -20,7 +20,13 @@ namespace ClayInspectionScheduler.Models
     public bool PrivateProvider { get; set; } = false;
     public bool ResidentialPermit { get; set; } = false;
     public string Initials { get; set; } = "";
-    public bool InDevelopment { get; set; } = true;
+    public bool InDevelopment 
+    { 
+      get 
+      {
+        return !Constants.UseProduction();
+      }
+    }
     public string AppAddressStart { get; set; } = "";
     public string NTUsername { get; set; } = "";
 
@@ -45,7 +51,6 @@ namespace ClayInspectionScheduler.Models
           Residential ResidentialPermit,
           PrivateProvider,
           Intl Initials,
-          {(Constants.UseProduction() == false ? 1 : 0).ToString()} InDevelopment,
           LOWER(NTUsername) NTUserName
         FROM bp_INSPECTORS
         WHERE 

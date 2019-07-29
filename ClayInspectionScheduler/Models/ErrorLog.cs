@@ -25,16 +25,16 @@ namespace ClayInspectionScheduler.Models
       ErrorMessage = message;
       ErrorStacktrace = stacktrace;
       ErrorSource = source;
-      Query = errorQuery;
+      Query = (Constants.UseProduction() ? "PRODUCTION;\n\n" : "DEVELOPMENT;\n\n") + errorQuery;
     }
 
     public ErrorLog(Exception ex, string errorQuery = "")
     {
-      ErrorText = ex.ToString();
+      ErrorText =ex.ToString();
       ErrorMessage = ex.Message;
       ErrorStacktrace = ex.StackTrace;
       ErrorSource = ex.Source;
-      Query = errorQuery;
+      Query = (Constants.UseProduction() ? "PRODUCTION;\n\n" : "DEVELOPMENT;\n\n") + errorQuery;
     }
 
   }

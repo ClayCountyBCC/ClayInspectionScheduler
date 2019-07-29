@@ -65,14 +65,12 @@ var InspSched;
         function LoadInspectors() {
             InspSched.transport.Inspectors().then(function (inspectors) {
                 var developmentcheck = document.getElementById("isDevelopment");
-                if (inspectors.length > 0) {
-                    InspSched.InDevelopment = inspectors[0].InDevelopment;
-                    if (inspectors.length == 1 && inspectors[0].Name == "") {
-                        inspectors.pop();
-                    }
-                    if (InspSched.InDevelopment == true) {
-                        developmentcheck.textContent = "Dev Environment";
-                    }
+                InspSched.InDevelopment = inspectors[0].InDevelopment;
+                if (inspectors.length == 1 && inspectors[0].Name == "") {
+                    inspectors.pop();
+                }
+                if (InspSched.InDevelopment == true) {
+                    developmentcheck.textContent = "Dev Environment";
                 }
                 InspSched.Inspectors = inspectors;
                 InspSched.UserIsContractInspector = inspectors.length == 1;
@@ -1187,7 +1185,7 @@ var InspSched;
             //*********************************************
             // Set permit number as link to IMS if internal user and public permit search
             var link = document.createElement("a");
-            if (permit.access !== InspSched.access_type.public_access && permit.access !== InspSched.access_type.contract_access) {
+            if (permit.access !== InspSched.access_type.public_access && permit.access !== InspSched.access_type.contract_access && !InspSched.eeInPublic) {
                 link.href = permit.Permit_URL;
                 //permit.Permit_URL.substring()
             }
@@ -2039,9 +2037,6 @@ var InspSched;
         LoadData();
         window.onhashchange = HandleHash;
         if (location.hash.length > 0) {
-            if (location.hostname.substr(0, 9) === "localhost") {
-                InspSched.eeInPublic = true;
-            }
             if (location.hash && location.hash.substring(1).length > 0) {
                 HandleHash(); // if they pass something in the URL
             }
@@ -2207,7 +2202,7 @@ var InspSched;
         IssueContainer.style.display = "none";
     };
     function LoadData() {
-        if (location.hostname.toLowerCase() == "localhost") {
+        if (location.hostname.substr(0, 3).toLowerCase() === "web" || location.hostname.substr(0, 6).toLowerCase() === "public") {
             InspSched.eeInPublic = true;
         }
         SaveInspectionButton.setAttribute("disabled", "disabled");
