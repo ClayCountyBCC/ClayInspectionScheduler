@@ -363,7 +363,7 @@ namespace ClayInspectionScheduler.Models
         return errors;
 
       int IRID = this.AddIRID();
-      string InitialComment = $"Inspection Request sheduled for {this.SchecDateTime.Date.ToShortDateString()}.";
+      string InitialComment = $"Inspection Request scheduled for {this.SchecDateTime.Date.ToShortDateString()}.";
 
       var dbArgs = new Dapper.DynamicParameters();
       dbArgs.Add("@PermitNo", this.PermitNo);
