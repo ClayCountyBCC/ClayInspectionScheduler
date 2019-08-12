@@ -171,10 +171,12 @@ namespace ClayInspectionScheduler.Models
       dbArgs.Add("@PermitNo", PermitNumber);
 
       string sql = $@"
-        
-        Permit number: {PermitNumber}
-        InspectionId: {InspectionId} 
-      
+        /*
+        -- Permit number: {PermitNumber}
+        -- InspectionId: {InspectionId} 
+        */
+
+
       ";
        sql += @"
 
