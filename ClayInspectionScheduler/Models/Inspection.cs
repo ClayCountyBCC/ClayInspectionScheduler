@@ -169,7 +169,15 @@ namespace ClayInspectionScheduler.Models
       var dbArgs = new DynamicParameters();
       dbArgs.Add("@InspectionId", InspectionId);
       dbArgs.Add("@PermitNo", PermitNumber);
-      string sql = @"
+
+      string sql = $@"
+        
+        Permit number: {PermitNumber}
+        InspectionId: {InspectionId} 
+      
+      ";
+       sql += @"
+
         USE WATSC;
         
         EXEC prc_sel_InspSched_get_raw_inspections @PermitNo, @InspectionId;
