@@ -614,6 +614,7 @@ namespace ClayInspectionScheduler.Models
 		    
         INSERT INTO ccCashierItem (NTUser, CatCode, Assoc, AssocKey, BaseFee, Total, Variable, Narrative, HoldID) 
         VALUES (@Poster,'REI',@PermitType,@PermitNumber,@Amount,@Amount,1, @HoldInput, @HoldId)";
+
       return sql;
     }
 
@@ -693,8 +694,14 @@ namespace ClayInspectionScheduler.Models
       long? IRID = -1;
 
       string sqlPP = $@"
-        -- Inspection.AddIRID()
 
+        /*
+          Function: Inspection.AddIRID()
+          Permit Number: {inspection.PermitNo}
+          Inspection code: {inspection.InspectionCode}
+          Inspection Request Id: {inspection.InspReqID}
+
+        */
         INSERT INTO bpPrivateProviderInsp (BaseId, PermitNo, InspCd, SchedDt, InspCLId)
         SELECT TOP 1
           B.BaseId,
