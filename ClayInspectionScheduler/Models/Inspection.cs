@@ -176,10 +176,6 @@ namespace ClayInspectionScheduler.Models
         -- InspectionId: {InspectionId} 
         */
 
-
-      ";
-       sql += @"
-
         USE WATSC;
         
         EXEC prc_sel_InspSched_get_raw_inspections @PermitNo, @InspectionId;

@@ -46,6 +46,7 @@ namespace ClayInspectionScheduler.Models
     private string PrivateProvider { get; set; } = "";
     public bool CorrectImpactFeeCount { get; set; } = true;
     public decimal TotalImpactFeesDue { get; set; }
+    private bool IsVoided { get; set; }
 
     public List<Charge> Charges { get; set; } = new List<Charge>();
 
@@ -155,7 +156,7 @@ namespace ClayInspectionScheduler.Models
           string host = Constants.UseProduction() ? "claybccims" : "claybccimstrn";
           foreach (Permit l in permits)
           {
-            
+
             l.Permit_URL = l.PermitTypeString == "BL" ?
               $@"http://{host}/WATSWeb/Permit/MainBL.aspx?PermitNo={l.PermitNo}&Nav=PL&OperId=&PopUp=" :
               $@"http://{host}/WATSWeb/Permit/APermit{l.PermitTypeString}.aspx?PermitNo={l.PermitNo}";
@@ -173,7 +174,11 @@ namespace ClayInspectionScheduler.Models
             {
               l.Validate(PrivProvCheck);
             }
+            if (l.ErrorText.Length == 0 && l.IsVoided)
+            {
+              l.ErrorText = "This permit or the master permit have been voided. Please contact the building department for assistance.";
 
+            }
           }
         }
         else
@@ -528,8 +533,15 @@ namespace ClayInspectionScheduler.Models
         As of 2/12, an inspection cannot be scheduled if the address is blank, because it hasn't been properly addressed yet.
 
       */
+      
       if (this.ErrorText.Length == 0)
       {
+
+        //if(IsVoided)
+        //{
+        //  this.ErrorText = "This permit or the master permit have been voided. Please contact the building department for assistance.";
+        //}
+
         if (this.IssueDate == DateTime.MinValue)
         {
           this.ErrorText = $"Permit #{this.PermitNo} has not yet been issued. Please contact the building department for assistance.";
