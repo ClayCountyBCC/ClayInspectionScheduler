@@ -9,12 +9,35 @@ namespace ClayInspectionScheduler.Models
 {
   public class MyCache
   {
-    private static MemoryCache _cache = new MemoryCache("myCache");
+    private static readonly MemoryCache _cache = new MemoryCache("myCache");
 
     public static object GetItem(string key)
     {
       var CIP = new CacheItemPolicy();
-      CIP.AbsoluteExpiration = DateTime.Now.AddHours(4);
+      string[] s = key.Split(new[] { "," }, StringSplitOptions.None);
+
+      switch (s[0].ToLower())
+      {
+        case "quickremarks":
+          CIP.AbsoluteExpiration = DateTime.Now.AddHours(4);
+          break;
+        case "inspector":
+          CIP.AbsoluteExpiration = DateTime.Now.AddHours(4);
+          break;
+        //case "useraccess":
+        //  CIP.AbsoluteExpiration = DateTime.Now.AddDays(1);
+        //  break;
+        case "inspectiontypes":
+          CIP.AbsoluteExpiration = DateTime.Now.AddHours(12);
+          break;
+        case "datecache":
+          CIP.AbsoluteExpiration = DateTime.Now.AddDays(1);
+          break;
+        default:
+          CIP.AbsoluteExpiration = DateTime.Now.AddHours(4);
+          break;
+      }
+      
       return GetOrAddExisting(key, () => InitItem(key), CIP);
     }
 
@@ -43,6 +66,7 @@ namespace ClayInspectionScheduler.Models
 
     private static object InitItem(string key)
     {
+
       string[] s = key.Split(new[] { "," }, StringSplitOptions.None);
 
       switch (s[0].ToLower())
@@ -51,8 +75,8 @@ namespace ClayInspectionScheduler.Models
           return QuickRemark.GetInspectionQuickRemarks();
         case "inspector":
           return Inspector.Get();
-        case "useraccess":
-          return UserAccess.GetAllUserAccess();
+        //case "useraccess":
+        //  return UserAccess.GetAllUserAccess();
         case "inspectiontypes":
           return InspType.Get();
         case "datecache":

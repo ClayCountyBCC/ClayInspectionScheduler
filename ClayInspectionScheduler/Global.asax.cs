@@ -17,6 +17,7 @@ namespace ClayInspectionScheduler
       try
       {
         GlobalConfiguration.Configure(WebApiConfig.Register);
+        //Models.UserAccess.GetAllUserAccess();
         Models.InspType.GetCachedInspectionTypes();
         Models.Inspector.GetCached();
         switch (Environment.MachineName.ToUpper())
@@ -25,7 +26,7 @@ namespace ClayInspectionScheduler
           case "MISHL05":
             break;
           default:
-            Models.UserAccess.GetCachedAllUserAccess();
+           // Models.UserAccess.GetCachedAllUserAccess();
             break;
         }
         

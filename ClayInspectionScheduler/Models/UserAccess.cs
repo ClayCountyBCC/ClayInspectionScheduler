@@ -56,6 +56,8 @@ namespace ClayInspectionScheduler.Models
     public UserAccess(UserPrincipal up)
     {
       ParseUser(up);
+
+
     }
 
     private void ParseUser(UserPrincipal up)
@@ -67,28 +69,59 @@ namespace ClayInspectionScheduler.Models
           user_name = up.SamAccountName.ToLower();
           authenticated = true;
           display_name = up.DisplayName;
+
           if (int.TryParse(up.EmployeeId, out int eid))
           {
             employee_id = eid;
           }
-          var groups = (from g in up.GetAuthorizationGroups()
-                        select g.Name).ToList();
-          if(groups.Contains(mis_access_group) || groups.Contains(inspector_access_group))
+          if (IsMember(user_name, mis_access_group))
           {
             current_access = access_type.inspector_access;
+            return;
           }
-          else
+          if (IsMember(user_name, inspector_access_group))
           {
-            if (groups.Contains(basic_access_group))
-            {
-              current_access = access_type.basic_access;
-              return;
-            }
-            if(groups.Contains(contract_inspection_access_group))
-            {
-              current_access = access_type.contract_access;
-            }
+            current_access = access_type.inspector_access;
+            return;
           }
+          if (IsMember(user_name, basic_access_group))
+          {
+            current_access = access_type.basic_access;
+            return;
+          }
+          if (IsMember(user_name, contract_inspection_access_group))
+          {
+            current_access = access_type.contract_access;
+            return;
+          }
+
+
+
+          //  if (int.TryParse(up.EmployeeId, out int eid))
+          //  {
+          //    employee_id = eid;
+          //  }
+          //  var groups = (from g in up.GetAuthorizationGroups()
+          //                select g.Name).ToList();
+          //  if (groups.Contains(mis_access_group) || groups.Contains(inspector_access_group))
+          //  {
+          //    current_access = access_type.inspector_access;
+          //    return;
+          //  }
+          //  else
+          //  {
+          //    if (groups.Contains(basic_access_group))
+          //    {
+          //      current_access = access_type.basic_access;
+          //      return;
+          //    }
+          //    if (groups.Contains(contract_inspection_access_group))
+          //    {
+          //      current_access = access_type.contract_access;
+          //      return;
+          //    }
+
+          //}
         }
       }
       catch (Exception ex)
@@ -97,93 +130,122 @@ namespace ClayInspectionScheduler.Models
       }
     }
 
-    private static void ParseGroup(string group, ref Dictionary<string, UserAccess> d)
-    {
-      using (PrincipalContext pc = new PrincipalContext(ContextType.Domain))
-      {
-        using (GroupPrincipal gp = GroupPrincipal.FindByIdentity(pc, group))
-        {
-          if (gp != null)
-          {
-            foreach (UserPrincipal up in gp.GetMembers())
-            {
-              if (up != null)
-              {
-                if (!d.ContainsKey(up.SamAccountName.ToLower()))
-                {
-                  d.Add(up.SamAccountName.ToLower(), new UserAccess(up));
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+    //private static bool ParseGroup(string group, ref Dictionary<string, UserAccess> d)
+    //{
+    //  using (PrincipalContext pc = new PrincipalContext(ContextType.Domain))
+    //  {
+    //    using (GroupPrincipal gp = GroupPrincipal.FindByIdentity(pc, group))
+    //    {
+    //      if (gp != null)
+    //      {
+    //        foreach (UserPrincipal up in gp.GetMembers())
+    //        {
+    //          if (up != null)
+    //          {
+    //            if (!d.ContainsKey(up.SamAccountName.ToLower()))
+    //            {
+    //              d.Add(up.SamAccountName.ToLower(), new UserAccess(up));
+    //              return true;
+    //            }
 
-    public static Dictionary<string, UserAccess> GetAllUserAccess()
-    {
-      var d = new Dictionary<string, UserAccess>();
 
+    //          }
+    //        }
+    //      }
+
+    //      return false;
+    //    }
+    //  }
+    //}
+
+    //public static Dictionary<string, UserAccess> GetAllUserAccess()
+    //{
+    //  var d = new Dictionary<string, UserAccess>();
+
+    //  try
+    //  {
+    //    switch (Environment.MachineName.ToUpper())
+    //    {
+
+    //      case "CLAYBCCDMZIIS01":
+    //        d[""] = new UserAccess("");
+    //        break;
+    //      default:
+    //        ParseGroup(mis_access_group, ref d);
+    //        ParseGroup(inspector_access_group, ref d);
+    //        ParseGroup(basic_access_group, ref d);
+    //        ParseGroup(contract_inspection_access_group, ref d);
+    //        d[""] = new UserAccess("");
+    //        break;
+
+    //    }
+    //      return d;
+    //  }
+    //  catch (Exception ex)
+    //  {
+    //    Constants.Log(ex);
+    //    return null;
+    //  }
+    //}
+
+    //public static UserAccess GetUserAccess(string Username)
+    //{
+    //  try
+    //  {
+    //    string un = Username.Replace(@"CLAYBCC\", "").ToLower();
+    //    un = "universalengineering"; /* change "" to user_name you wish to test */
+    //    switch (Environment.MachineName.ToUpper())
+    //    {
+    //      case "MISSL01":
+    //      case "MISHL05":
+    //      default:
+
+    //        //var my_access = new UserAccess(un);
+    //        //return my_access;
+
+    //        var d = GetCachedAllUserAccess();
+
+    //        if (d.ContainsKey(un))
+    //        {
+    //          return d[un]; // we're dun
+    //        }
+    //        else
+    //        {
+    //          return d[""];
+    //        }
+    //    }
+    //  }
+    //  catch(Exception ex)
+    //  {
+    //    Constants.Log(ex, "");
+    //    return null;
+    //  }
+    //}
+
+    //public static Dictionary<string, UserAccess> GetCachedAllUserAccess()
+    //{
+    //  return (Dictionary<string, UserAccess>)MyCache.GetItem("useraccess");
+    //}
+
+    public static bool IsMember(string UserName, string GroupName)
+    {
       try
       {
-        switch (Environment.MachineName.ToUpper())
+        UserPrincipal user = UserPrincipal.FindByIdentity(
+            new PrincipalContext(ContextType.Domain),
+            UserName);
+
+        foreach (Principal result in user.GetAuthorizationGroups())
         {
-
-          case "CLAYBCCDMZIIS01":
-            d[""] = new UserAccess("");
-            break;
-          default:            
-            ParseGroup(inspector_access_group, ref d);
-            ParseGroup(mis_access_group, ref d);
-            ParseGroup(basic_access_group, ref d);
-            ParseGroup(contract_inspection_access_group, ref d);
-            d[""] = new UserAccess("");
-            break;
-
+          if (string.Compare(result.Name, GroupName, true) == 0)
+            return true;
         }
-          return d;
+        return false;
       }
-      catch (Exception ex)
+      catch (Exception E)
       {
-        Constants.Log(ex);
-        return null;
+        throw E;
       }
-    }
-
-    public static UserAccess GetUserAccess(string Username)
-    {
-      try
-      {
-        string un = Username.Replace(@"CLAYBCC\", "").ToLower();
-        //un = "universalengineering"; /* change "" to user_name you wish to test */
-        switch (Environment.MachineName.ToUpper())
-        {
-          //case "MISSL01":
-          case "MISHL05":
-            return new UserAccess(un);
-          default:
-            var d = GetCachedAllUserAccess();
-
-            if (d.ContainsKey(un))
-            {
-              return d[un]; // we're dun
-            }
-            else
-            {
-              return d[""];
-            }
-        }
-      }
-      catch(Exception ex)
-      {
-        Constants.Log(ex, "");
-        return null;
-      }
-    }
-
-    public static Dictionary<string, UserAccess> GetCachedAllUserAccess()
-    {
-      return (Dictionary<string, UserAccess>)MyCache.GetItem("useraccess");
     }
   }
 }

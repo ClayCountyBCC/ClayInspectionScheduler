@@ -23,7 +23,7 @@ namespace ClayInspectionScheduler.Models
     public int OTid { get; set; } = -1;
     public string PmtType { get; set; } = "";
     public string PropUseCode { get; set; } = "";
-
+    public bool ImpactFee_Relevant { get; set; } = false;
 
 
     public Charge()
@@ -45,7 +45,8 @@ namespace ClayInspectionScheduler.Models
         C.CashierId,
         LTRIM(RTRIM(C.CatCode)) CatCode,
         CC.[Description] Description,
-        C.Total 
+        C.Total,
+        CC.ImpactFee_Relevant
       FROM ccCashierItem C
       INNER JOIN ccCatCd CC ON C.CatCode = CC.CatCode
       WHERE TOTAL > 0

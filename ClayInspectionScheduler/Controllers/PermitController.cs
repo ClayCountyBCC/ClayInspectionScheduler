@@ -16,7 +16,7 @@ namespace ClayInspectionScheduler.Controllers
     public IHttpActionResult Get(string PermitNumber)
     {
       if (PermitNumber == null) return Ok(); // Let's just not do anything if they post a null.
-      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+      var ua = new UserAccess(User.Identity.Name);
       List<Permit> lp = Permit.Get(PermitNumber, ua.current_access);
 
       if( lp == null)

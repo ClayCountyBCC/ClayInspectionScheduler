@@ -23,15 +23,17 @@ namespace ClayInspectionScheduler.Controllers
       }
       else
       {
-
-        foreach(var i in li)
+        if (Models.Permit.CheckPrivProv(PermitNumber))
         {
-          if(i.ResultADC == "" && i.InspReqID > 0)
+          foreach (var i in li)
           {
-            Inspection.AddIRID(i);
+            if (i.ResultADC == "" && i.InspReqID > 0)
+            {
+              Inspection.AddIRID(i);
+            }
           }
         }
-        
+
         return Ok(li);
       }
     }
@@ -41,7 +43,7 @@ namespace ClayInspectionScheduler.Controllers
     [Route("Comment")]
     public IHttpActionResult Comment(dynamic CommentData)
     {
-      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+      var ua = new UserAccess(User.Identity.Name);
       var i = Inspection.AddComment((int)CommentData.InspectionId, (string)CommentData.Comment, ua);
 
       if (i != null)
@@ -65,7 +67,7 @@ namespace ClayInspectionScheduler.Controllers
       //string resultCode,
       //string remark,
       //string comment
-      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+      var ua = new UserAccess(User.Identity.Name);
 
       var sr = Inspection.UpdateInspectionResult(
         (string)InspectionData.permitNumber,
@@ -82,7 +84,7 @@ namespace ClayInspectionScheduler.Controllers
     [Route("PublicCancel/{permitNumber}/{inspectionId}")]
     public IHttpActionResult PublicCancel(string permitNumber, int inspectionId)
     {
-      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+      var ua = new UserAccess(User.Identity.Name);
 
       var sr = Inspection.UpdateInspectionResult(
         permitNumber.Trim(),
@@ -99,7 +101,7 @@ namespace ClayInspectionScheduler.Controllers
     [Route("List")]
     public IHttpActionResult List()
     {
-      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+      var ua = new UserAccess(User.Identity.Name);
       if (ua.current_access != UserAccess.access_type.public_access)
       {
         var il = Inspection.GetInspectionList();
@@ -128,7 +130,7 @@ namespace ClayInspectionScheduler.Controllers
     [Route("Inspectors")]
     public IHttpActionResult Inspectors()
     {
-      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+      var ua = new UserAccess(User.Identity.Name);
       var inspectors = new List<Inspector>();
 
       if (ua.current_access == UserAccess.access_type.public_access)
@@ -153,7 +155,7 @@ namespace ClayInspectionScheduler.Controllers
     [Route("QuickRemarks")]
     public IHttpActionResult QuickRemarks()
     {
-      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+      var ua = new UserAccess(User.Identity.Name);
       if (ua.current_access != UserAccess.access_type.public_access)
       {
         return Ok(QuickRemark.GetCachedInspectionQuickRemarks());

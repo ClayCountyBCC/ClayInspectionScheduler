@@ -686,9 +686,6 @@ namespace ClayInspectionScheduler.Models
       dbArgs.Add("@SelectedDate", inspection.SchedDateTime.Date);
       dbArgs.Add("@InspectionRequestId", inspection.InspReqID);
       dbArgs.Add("@IRID", dbType: DbType.Int64, direction: ParameterDirection.Output);
-
-      long? IRID = -1;
-
       string sqlPP = $@"
 
         /*
@@ -706,10 +703,10 @@ namespace ClayInspectionScheduler.Models
           CAST(@SelectedDate AS DATE) SchedDt,
           B.PrivProvider InspCLId
         FROM bpBASE_PERMIT B
-        INNER JOIN bpMASTER_PERMIT M ON B.BaseID = M.BaseID
+        INNER JOIN bpMASTER_PERMIT M ON B.BaseID = M.BaseID AND M.PrivProvBL = 1
         LEFT OUTER JOIN bpASSOC_PERMIT A ON B.BaseID = A.BaseID AND M.PermitNo = A.MPermitNo
         WHERE 1=1
-          AND (B.PrivProvider IS NOT NULL OR M.PrivProvBL = 1)
+          AND B.PrivProvider IS NOT NULL 
           AND (A.PermitNo = @PermitNo OR M.PermitNo = @PermitNo)
           
         SET @IRID = SCOPE_IDENTITY();
@@ -721,10 +718,10 @@ namespace ClayInspectionScheduler.Models
         ";
 
       var i = Constants.Exec_Query(sqlPP, dbArgs);
+
       if (i > -1)
       {
-        IRID = dbArgs.Get<long?>("@IRID");
-
+        long? IRID = dbArgs.Get<long?>("@IRID");
         if (IRID != null)
         {
           inspection.PrivateProviderInspectionRequestId = (int)IRID.Value;

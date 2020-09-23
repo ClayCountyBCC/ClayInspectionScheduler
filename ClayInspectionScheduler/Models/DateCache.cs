@@ -12,7 +12,7 @@ namespace ClayInspectionScheduler.Models
   public class DateCache
   {
     private DateTime baseMinDate { get; set; }
-    private DateTime baseMaxDate { get; set; }
+    private DateTime baseMaxDate { get;  set; }
     private DateTime maxDate { get; set; }
 
     public string minDate_string

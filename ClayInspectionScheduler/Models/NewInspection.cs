@@ -78,6 +78,10 @@ namespace ClayInspectionScheduler.Models
 
       // DoImpactFeesMatter is how we indicate to the permit that the impact fees matter.      
       this.DoImpactFeesMatter = finals.Any(f => f.InspCd == InspectionCd);
+      if(currentInspectionType.InspCd == "205")
+      {
+        this.DoImpactFeesMatter = true;
+      }
       //foreach (var f in finals)
       //{
       //  if (f.InspCd == this.InspectionCd)
@@ -112,22 +116,25 @@ namespace ClayInspectionScheduler.Models
           Errors.Add(CurrentPermit.ErrorText);
         }
 
-        if (CurrentPermit.PermitNo[0] == '2')
+        bool canSchedule = false;
+
+
+        var mp = (from p in Permits
+                  where p.CoClosed == 0
+                  select p).DefaultIfEmpty(new Permit()).First();
+        canSchedule = this.DoImpactFeesMatter && mp.CorrectImpactFeeCount && mp.TotalImpactFeesDue == 0;
+
+
+
+        if (!canSchedule)
         {
-
-          var mp = (from p in Permits
-                    where p.CoClosed == 0
-                    select p).DefaultIfEmpty(new Permit()).First();
-          var canSchedule = mp.CorrectImpactFeeCount && mp.TotalImpactFeesDue == 0;
-
-          if (!canSchedule && (currentInspectionType.InspCd == "205" || currentInspectionType.InspCd == "123"))
-          {
-            Errors.Add($@"A Temporary Power/Equipment Check cannot be scheduled if there are unpaid impact fees.
+          List<string> newList = new List<string>();
+          newList.Add($@"A {currentInspectionType.InsDesc} cannot be scheduled if there are unpaid impact fees.
                           Please contact the building department for assistance.");
-
-            // TODO: add call to function here that will assess the Solid Waste Fee 
-          }
+          Errors = newList;
+          // TODO: add call to function here that will assess the Solid Waste Fee 
         }
+
         // validate user selected date
         var start = DateTime.Parse(CurrentPermit.Dates.minDate_string);
         var end = DateTime.Parse(CurrentPermit.Dates.maxDate_string);
@@ -303,8 +310,6 @@ namespace ClayInspectionScheduler.Models
       dbArgs.Add("@SelectedDate", this.SchecDateTime.Date);
       dbArgs.Add("@IRID", dbType: DbType.Int64, direction: ParameterDirection.Output);
 
-      long? IRID = -1;
-
       // this function will save the inspection request.
       if (this.PrivProvFieldName.Length == 0) return -1;
 
@@ -330,7 +335,7 @@ namespace ClayInspectionScheduler.Models
         var i = Constants.Exec_Query(sqlPP, dbArgs);
         if (i > -1)
         {
-          IRID = dbArgs.Get<long?>("@IRID");
+          long? IRID = dbArgs.Get<long?>("@IRID");
           if (IRID != null)
           {
             return (int)IRID.Value;

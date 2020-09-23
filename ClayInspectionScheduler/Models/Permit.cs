@@ -86,6 +86,11 @@ namespace ClayInspectionScheduler.Models
 
     }
 
+    public bool GetIsVoided()
+    {
+      return IsVoided;
+    }
+
     private static List<Permit> GetRaw(string PermitNumber, bool DoImpactFeesMatter)
     {
       var dbArgs = new DynamicParameters();
@@ -172,7 +177,7 @@ namespace ClayInspectionScheduler.Models
             }
             if (l.ErrorText.Length == 0)
             {
-              l.Validate(PrivProvCheck);
+              l.Validate();
             }
             if (l.ErrorText.Length == 0 && l.IsVoided)
             {
@@ -317,12 +322,7 @@ namespace ClayInspectionScheduler.Models
       {
         if (prmt.PermitNo == MasterPermit && (newInspectionType == null || newInspectionType.InspCd != "205"))
         {
-          prmt.Charges.RemoveAll(c => c.CatCode == "IFSF" ||
-                                      c.CatCode == "IFMH" ||
-                                      c.CatCode == "IFMF" ||
-                                      c.CatCode == "IFSCH" ||
-                                      c.CatCode == "IFRD2" ||
-                                      c.CatCode == "IFRD3");
+          prmt.Charges.RemoveAll(c => c.ImpactFee_Relevant);
         }
       }
       var ChargePermits = (from prmt in permits
@@ -459,7 +459,7 @@ namespace ClayInspectionScheduler.Models
       // Now let's check to see if we have any master permits that have
       // any holds or charges
 
-
+      if (!chargePermits.Any()) return permits;
       if (MasterPermit.Length > 0)
       {
         var masterPermit = (from p in permits
@@ -509,7 +509,7 @@ namespace ClayInspectionScheduler.Models
       return permits;
     }
 
-    public void Validate(string PrivateProvider)
+    public void Validate()
     {
 
       /* They cannot schedule an inspection if:
@@ -533,14 +533,14 @@ namespace ClayInspectionScheduler.Models
         As of 2/12, an inspection cannot be scheduled if the address is blank, because it hasn't been properly addressed yet.
 
       */
-      
+
       if (this.ErrorText.Length == 0)
       {
 
-        //if(IsVoided)
-        //{
-        //  this.ErrorText = "This permit or the master permit have been voided. Please contact the building department for assistance.";
-        //}
+        if (IsVoided)
+        {
+          this.ErrorText = "This permit or the master permit have been voided. Please contact the building department for assistance.";
+        }
 
         if (this.IssueDate == DateTime.MinValue)
         {
@@ -568,19 +568,42 @@ namespace ClayInspectionScheduler.Models
         //  }
         //}
 
-        
+
       }
     }
 
-    private bool CheckPrivProv(string PrivProvValidate)
+    public static bool CheckPrivProv(string permitNo)
     {
+      var param = new DynamicParameters();
+      param.Add("@PermitNo", permitNo);
 
-      if (PrivProvValidate.Contains("1"))
-      {
-        this.ErrorText = $"A private Provider is being used to complete inspections on this permit. Please contact the Building Department if you would like to schedule an inspection.";
-        return true;
-      }
-      return false;
+      var query = @"
+
+        DECLARE @BaseId INT = 
+  
+  
+          (SELECT TOP 1 BaseId 
+          FROM bpMASTER_PERMIT WHERE PermitNo = @PermitNo 
+          UNION 
+          SELECT TOP 1 
+          BaseId FROM 
+          bpASSOC_PERMIT 
+          WHERE PermitNo = @PermitNo);
+
+        SELECT
+          CASE WHEN PrivProvBL = 1 AND B.PrivProvider IS NOT NULL THEN 1 ELSE 0 END 
+        FROM bpMASTER_PERMIT M
+        INNER JOIN bpBASE_PERMIT B ON B.BaseID = M.BaseID
+        WHERE M.BaseId = @BaseId
+          AND M.VoidDate IS NULL;
+
+      ";
+
+      var isPrivProv = Constants.Execute_Scalar<bool>(query, param);
+
+      return isPrivProv;
+
+
     }
 
     
