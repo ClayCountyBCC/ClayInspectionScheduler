@@ -242,9 +242,10 @@ namespace ClayInspectionScheduler.Models
         }
         return false;
       }
-      catch (Exception E)
+      catch (Exception ex)
       {
-        throw E;
+        Constants.Log(ex, "");
+        return false;
       }
     }
   }

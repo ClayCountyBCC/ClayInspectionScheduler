@@ -126,7 +126,7 @@ namespace ClayInspectionScheduler.Models
 
 
 
-        if (!canSchedule)
+        if (!canSchedule && this.DoImpactFeesMatter)
         {
           List<string> newList = new List<string>();
           newList.Add($@"A {currentInspectionType.InsDesc} cannot be scheduled if there are unpaid impact fees.
