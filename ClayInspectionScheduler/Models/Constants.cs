@@ -28,7 +28,7 @@ namespace ClayInspectionScheduler.Models
         //  return false;
 
         
-       //case "MISHL17":
+       case "MISHL17":
        //case "MISSL01":
         case "CLAYBCCIIS01":
         case "CLAYBCCDMZIIS01":

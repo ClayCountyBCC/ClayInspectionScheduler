@@ -540,6 +540,7 @@ namespace ClayInspectionScheduler.Models
         if (IsVoided)
         {
           this.ErrorText = "This permit or the master permit have been voided. Please contact the building department for assistance.";
+          return;
         }
 
         if (this.IssueDate == DateTime.MinValue)
@@ -611,7 +612,7 @@ namespace ClayInspectionScheduler.Models
     private bool ContractorIssues()
     {
       // Contractor Owners do not have any valid data for these fields
-      if (this.ContractorId.ToUpper() == "OWNER")
+      if (this.ContractorId.ToUpper() == "OWNER" || IsVoided)
       {
         return false;
       }
@@ -627,8 +628,6 @@ namespace ClayInspectionScheduler.Models
       {
         ErrorText = "There is no contractor selected on this permit. Please contact the Building Department if you would like to schedule an inspection.";
       }
-      
-
 
       if (!this.PassedFinal() && (this.PermitNo[0] != '6') && this.ContractorStatus != "A" )
       {
@@ -689,14 +688,18 @@ namespace ClayInspectionScheduler.Models
       
       foreach (var permit in permits)
       {
-        permit.ContractorIssues();
+        if (!permit.IsVoided && permit.PermitNo != masterPermit)
+        {
+          permit.ContractorIssues();
+        }
       }
 
       var suspendedContractorPermits = new List<string>();
       suspendedContractorPermits = (from permit in permits
                                     where permit.ContractorStatus != "A" &&
                                     permit.ContractorId.ToUpper() != "OWNER" &&
-                                    permit.PermitNo[0] != '6'
+                                    permit.PermitNo[0] != '6' &&
+                                    !permit.IsVoided
 
                                     select permit.PermitNo).ToList();
 

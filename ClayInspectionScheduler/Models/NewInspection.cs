@@ -245,6 +245,7 @@ namespace ClayInspectionScheduler.Models
 
           foreach (var p in Permits)
           {
+            if (p.GetIsVoided()) continue;
             if (p.CoClosed != -1)
             {
               masterPermit = p.PermitNo;
