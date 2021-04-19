@@ -29,7 +29,7 @@ namespace ClayInspectionScheduler.Models
     private int Confidential { get; set; }
     private DateTime MaxContractorScheduleDate { get; set; }
     private DateTime ContractorLiabilityInsuranceExpDate { get; set; } = DateTime.MinValue;
-    private DateTime ContractorWorkmansCompInsuranceExpDate { get; set; } = DateTime.MinValue;
+    private DateTime WorkersCompExpirationDate { get; set; } = DateTime.MinValue;
     private DateTime ContractorStateRegistrationExpDate { get; set; } = DateTime.MinValue;
     private DateTime ContractorCountyLicenseExpDate { get; set; } = DateTime.MinValue;
     private DateTime ContractorStateCertExpDate { get; set; } = DateTime.MinValue;
@@ -119,6 +119,7 @@ namespace ClayInspectionScheduler.Models
     public static List<Permit> Get(
       string AssocKey,
       UserAccess.access_type CurrentAccess,
+      string callingFunction,
       InspType newInspectionType = null,
       bool DoImpactFeesMatter = false
       )
@@ -156,7 +157,7 @@ namespace ClayInspectionScheduler.Models
                                where prmt.CoClosed != -1
                                select prmt.PrivateProvider).DefaultIfEmpty("").First();
 
-          
+
           /// NEED TO BE ABLE TO DETECT THAT A PROXY IS IN USE BEFORE CHECKING FOR PROD HOST. NEED TO BE ABLE TO CREATE LINK TO 
           string host = Constants.UseProduction() ? "claybccims" : "claybccimstrn";
           foreach (Permit l in permits)
@@ -195,7 +196,14 @@ namespace ClayInspectionScheduler.Models
       }
       catch (Exception ex)
       {
-        Constants.Log(ex);
+        Constants.Log(
+                ex.StackTrace.Contains("line 151") ? (@"GetRaw(" + AssocKey + "); returned with " + ex.Message):
+                                                     ("Error on Permit: " + AssocKey + ",returned with" + ex.Message),
+                ex.StackTrace.Contains("line 151") ? @"Error in GetRaw":"",
+                ex.StackTrace,
+                @"Error Function: Permit.Get(...",
+                "Query from Permit.GetRaw, line 99");
+
         return null;
       }
     }
@@ -203,7 +211,7 @@ namespace ClayInspectionScheduler.Models
     {
       var dates = new List<DateTime>(){
           ContractorLiabilityInsuranceExpDate,
-          ContractorWorkmansCompInsuranceExpDate,
+          WorkersCompExpirationDate,
           ContractorStateRegistrationExpDate,
           ContractorCountyLicenseExpDate,
           ContractorStateCertExpDate,
@@ -249,11 +257,11 @@ namespace ClayInspectionScheduler.Models
         return;
 
       }
-      if (ContractorWorkmansCompInsuranceExpDate != DateTime.MinValue &&
-          ContractorWorkmansCompInsuranceExpDate < DateTime.Today.Date.AddDays(9))
+      if (WorkersCompExpirationDate != DateTime.MinValue &&
+          WorkersCompExpirationDate < DateTime.Today.Date.AddDays(9))
       {
         ContractorWarning = "The Contractor's Workman's Compensation Insurance will expire on " +
-                  ContractorWorkmansCompInsuranceExpDate.ToShortDateString();
+                  WorkersCompExpirationDate.ToShortDateString();
         return;
       }
 
@@ -641,8 +649,8 @@ namespace ClayInspectionScheduler.Models
         ErrorText = "The Contractor's Liability Insurance expiration date has passed";
         return true;
       }
-      if (ContractorWorkmansCompInsuranceExpDate != DateTime.MinValue && 
-          ContractorWorkmansCompInsuranceExpDate < DateTime.Today )
+      if (WorkersCompExpirationDate != DateTime.MinValue && 
+          WorkersCompExpirationDate < DateTime.Today )
       {
         ErrorText = "The Contractor's Workman's Compensation Insurance expiration date has passed";
         return true;
@@ -670,8 +678,9 @@ namespace ClayInspectionScheduler.Models
         return true;
       }
 
+
       //"The grace period for this permit has passed."
-      
+
       //if(ContractorSuspendGraceDate < DateTime.Today && )
       //{
       //  ErrorText += @"Contractor's Grace Period has passed, 

@@ -1379,7 +1379,7 @@ var InspSched;
                 RadioButtonSubrow.className = "small-12 flex-container flex-child-grow row";
                 RadioButtonSubrow.id = InspectionId + "_radio_list";
                 var approveradio = document.createElement("input");
-                approveradio.id = (privateProvidercheck > 0 ? "perform" : "approve") + "_selection";
+                approveradio.id = ("approve") + "_selection";
                 approveradio.type = "radio";
                 approveradio.setAttribute("onclick", "InspSched.disableSaveCommentButton(" + InspectionId + ")");
                 if (checked == "A" || checked == "P") {
@@ -1390,9 +1390,9 @@ var InspSched;
                 var approve = document.createElement("label");
                 approve.className = "column large-2 small-6 ";
                 approve.appendChild(approveradio);
-                approve.appendChild(document.createTextNode(privateProvidercheck > 0 ? "Performed" : "Approved"));
+                approve.appendChild(document.createTextNode("Approved"));
                 var disapproveradio = document.createElement("input");
-                disapproveradio.id = (privateProvidercheck > 0 ? "not_performed" : "disapprove") + "_selection";
+                disapproveradio.id = ("disapprove") + "_selection";
                 disapproveradio.type = "radio";
                 disapproveradio.setAttribute("onclick", "InspSched.disableSaveCommentButton(" + InspectionId + ")");
                 if (checked == "D" || checked == "N") {
@@ -1403,7 +1403,7 @@ var InspSched;
                 var disapprove = document.createElement("label");
                 disapprove.className = "column large-2 small-6 ";
                 disapprove.appendChild(disapproveradio);
-                disapprove.appendChild(document.createTextNode(privateProvidercheck > 0 ? "Not Performed" : "Disapproved"));
+                disapprove.appendChild(document.createTextNode("Disapproved"));
                 RadioButtonSubrow.appendChild(approve);
                 RadioButtonSubrow.appendChild(disapprove);
             }

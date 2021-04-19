@@ -984,7 +984,7 @@ namespace InspSched.UI
       RadioButtonSubrow.id = InspectionId + "_radio_list";
 
       let approveradio: HTMLInputElement = (<HTMLInputElement>document.createElement("input"));
-      approveradio.id = (privateProvidercheck > 0 ? "perform" : "approve") + "_selection";
+      approveradio.id = ("approve") + "_selection";
       approveradio.type = "radio";
       approveradio.setAttribute("onclick", "InspSched.disableSaveCommentButton(" + InspectionId + ")");
       if (checked == "A" || checked == "P")
@@ -997,10 +997,10 @@ namespace InspSched.UI
       let approve: HTMLLabelElement = (<HTMLLabelElement>document.createElement("label"));
       approve.className = "column large-2 small-6 ";
       approve.appendChild(approveradio);
-      approve.appendChild(document.createTextNode(privateProvidercheck > 0 ? "Performed" : "Approved"));
+      approve.appendChild(document.createTextNode("Approved"));
 
       let disapproveradio: HTMLInputElement = (<HTMLInputElement>document.createElement("input"));
-      disapproveradio.id = (privateProvidercheck > 0 ? "not_performed" : "disapprove") + "_selection";
+      disapproveradio.id = ("disapprove") + "_selection";
       disapproveradio.type = "radio";
       disapproveradio.setAttribute("onclick", "InspSched.disableSaveCommentButton(" + InspectionId + ")");
       if (checked == "D" || checked == "N")
@@ -1009,12 +1009,12 @@ namespace InspSched.UI
       }
       disapproveradio.name = InspectionId + "_results";
 
-      disapproveradio.value = (privateProvidercheck > 0 ? "N" : "D");
+      disapproveradio.value = ("D");
 
       let disapprove: HTMLLabelElement = (<HTMLLabelElement>document.createElement("label"));
       disapprove.className = "column large-2 small-6 ";
       disapprove.appendChild(disapproveradio);
-      disapprove.appendChild(document.createTextNode(privateProvidercheck > 0 ? "Not Performed" : "Disapproved"));
+      disapprove.appendChild(document.createTextNode("Disapproved"));
 
 
       RadioButtonSubrow.appendChild(approve);

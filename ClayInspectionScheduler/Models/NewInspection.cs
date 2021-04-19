@@ -91,8 +91,16 @@ namespace ClayInspectionScheduler.Models
 
       //= (List<InspType>)MyCache.GetItem("inspectiontypes,"+IsExternalUser.ToString());
 
-      var Permits = (from p in Permit.Get(this.PermitNo, CurrentAccess, currentInspectionType, DoImpactFeesMatter)
-                     select p).ToList();
+      var Permits = 
+          (from p in Permit.Get(
+              this.PermitNo, 
+              CurrentAccess,
+              $@"NewInspection.Validate();
+                 User Access Level: {CurrentAccess};
+                 PermitNo: {this.PermitNo}",
+              currentInspectionType, 
+              DoImpactFeesMatter)
+            select p).ToList();
 
 
       Permit CurrentPermit = (from p in Permits

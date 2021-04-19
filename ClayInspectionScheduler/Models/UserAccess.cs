@@ -18,6 +18,10 @@ namespace ClayInspectionScheduler.Models
     public int employee_id { get; set; } = 0;
     public string display_name { get; set; } = "";
 
+
+    // set to false for production
+    private bool testingPublicUser { get; } = true;
+
   public enum access_type : int
     {
       public_access = 1, // They get treated like public users.
@@ -70,6 +74,13 @@ namespace ClayInspectionScheduler.Models
           authenticated = true;
           display_name = up.DisplayName;
 
+          
+          
+          if (testingPublicUser && !Constants.UseProduction())
+          {
+            current_access = access_type.public_access;
+            return;
+          }
           if (int.TryParse(up.EmployeeId, out int eid))
           {
             employee_id = eid;
