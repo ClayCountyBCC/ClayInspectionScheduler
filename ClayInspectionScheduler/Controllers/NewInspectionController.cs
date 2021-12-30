@@ -22,6 +22,7 @@ namespace ClayInspectionScheduler.Controllers
       {
         var ua = new UserAccess(User.Identity.Name);
         var e = thisInspection.Save(ua);
+
         return Ok(e);
       }
     }

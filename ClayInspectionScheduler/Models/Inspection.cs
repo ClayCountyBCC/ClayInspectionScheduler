@@ -354,6 +354,7 @@ namespace ClayInspectionScheduler.Models
               }
               break;
 
+
             case "D":
               string HoldInput = current.PermitNo + " " + current.InspectionCode + " $35";
               if (!UpdateStatus(InspectionId, ResultCode, current.ResultADC, Remarks, Comments, current.PrivateProviderInspectionRequestId, User, PermitNumber, HoldInput))
@@ -440,6 +441,7 @@ namespace ClayInspectionScheduler.Models
         sql += GetNotDeniedQueries();
         dp.Add("@ChargeCode", null);
       }
+
       int i = Constants.Exec_Query(sql, dp);
       return i > 0;
 
@@ -712,7 +714,7 @@ namespace ClayInspectionScheduler.Models
         SET @IRID = SCOPE_IDENTITY();
         
         update bpINS_REQUEST
-        set PrivProvIRId = @IRID
+        set PrivProvIRId = @IRID, Inspector = 'PPI'
         where InspReqId = @InspectionRequestId;
 
         ";

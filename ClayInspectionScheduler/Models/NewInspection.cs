@@ -323,6 +323,7 @@ namespace ClayInspectionScheduler.Models
       if (this.PrivProvFieldName.Length == 0) return -1;
 
       string sqlPP = $@"
+
         INSERT INTO bpPrivateProviderInsp (BaseId, PermitNo, InspCd, SchedDt, InspCLId)
         SELECT TOP 1
           B.BaseId,
@@ -337,7 +338,13 @@ namespace ClayInspectionScheduler.Models
           AND (B.PrivProvider IS NOT NULL OR M.PrivProvBL = 1)
           AND (A.PermitNo = @PermitNo OR M.PermitNo = @PermitNo)
           
-        SET @IRID = SCOPE_IDENTITY();";
+        SET @IRID = SCOPE_IDENTITY();
+
+        UPDATE bpINS_REQUEST
+        Inspector = 'PPI'
+        WHERE  PrivProvIRId = @IRID;
+
+      ";
 
       try
       {

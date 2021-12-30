@@ -706,7 +706,7 @@ var InspSched;
                     disapproveradio.checked = true;
                 }
                 disapproveradio.name = InspectionId + "_results";
-                disapproveradio.value = (privateProvidercheck > 0 ? "N" : "D");
+                disapproveradio.value = ("D");
                 var disapprove = document.createElement("label");
                 disapprove.className = "column large-2 small-6 ";
                 disapprove.appendChild(disapproveradio);

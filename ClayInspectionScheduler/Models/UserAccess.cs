@@ -20,7 +20,7 @@ namespace ClayInspectionScheduler.Models
 
 
     // set to false for production
-    private bool testingPublicUser { get; } = true;
+    private bool testingPublicUser { get; } = false;
 
   public enum access_type : int
     {
@@ -74,8 +74,11 @@ namespace ClayInspectionScheduler.Models
           authenticated = true;
           display_name = up.DisplayName;
 
-          
-          
+#if DEBUG
+          current_access = access_type.basic_access;
+          return;
+#endif
+
           if (testingPublicUser && !Constants.UseProduction())
           {
             current_access = access_type.public_access;
