@@ -340,10 +340,6 @@ namespace ClayInspectionScheduler.Models
           
         SET @IRID = SCOPE_IDENTITY();
 
-        UPDATE bpINS_REQUEST
-        Inspector = 'PPI'
-        WHERE  PrivProvIRId = @IRID;
-
       ";
 
       try
@@ -416,6 +412,7 @@ namespace ClayInspectionScheduler.Models
       INSERT INTO bpINS_REQUEST
           (PermitNo,
           InspectionCode,
+          Inspector,
           SchecDateTime,
           ReqDateTime,
           BaseId,
@@ -425,6 +422,7 @@ namespace ClayInspectionScheduler.Models
       SELECT TOP 1
           @PermitNo,
           @InspCd,
+          CASE WHEN @IRId IS NOT NULL THEN 'PPI' ELSE NULL END inspector,
           CAST(@SelectedDate AS DATE), 
           GETDATE(),
           B.BaseId,
