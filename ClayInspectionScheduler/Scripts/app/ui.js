@@ -693,7 +693,7 @@ var InspSched;
                     approveradio.checked = true;
                 }
                 approveradio.name = InspectionId + "_results";
-                approveradio.value = (privateProvidercheck > 0 ? "P" : "A");
+                approveradio.value = "A";
                 var approve = document.createElement("label");
                 approve.className = "column large-2 small-6 ";
                 approve.appendChild(approveradio);

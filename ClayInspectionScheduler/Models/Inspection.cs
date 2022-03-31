@@ -427,7 +427,7 @@ namespace ClayInspectionScheduler.Models
         dp.Add("@PrivateProviderInspectionId", PrivateProviderInspectionId);
       }
 
-      if (ResultCode == "D")
+      if (ResultCode == "D" && PrivateProviderInspectionId == 0)
       {
         dp.Add("@ChargeCode", "T");
         sql += GetDenialQueries();
@@ -484,14 +484,14 @@ namespace ClayInspectionScheduler.Models
             return false;
           }
 
-          if (ResultCode == "A" || ResultCode == "D")
-          {
-            if (PrivateProviderInspectionRequestId > 0)
-            {
-              Errors.Add("Private provider inspections must be marked as Not Performed or Performed.");
-              return false;
-            }
-          }
+          //if (ResultCode == "A" || ResultCode == "D")
+          //{
+          //  if (PrivateProviderInspectionRequestId > 0)
+          //  {
+          //    Errors.Add("Private provider inspections must be marked as Not Performed or Performed.");
+          //    return false;
+          //  }
+          //}
 
           // If they are trying to change something that was completed before today.
           if (currentInspection.ResultADC != "" &&

@@ -992,7 +992,7 @@ namespace InspSched.UI
         approveradio.checked = true;
       }
       approveradio.name = InspectionId + "_results";
-      approveradio.value = (privateProvidercheck > 0 ? "P" : "A");
+      approveradio.value = "A";
 
       let approve: HTMLLabelElement = (<HTMLLabelElement>document.createElement("label"));
       approve.className = "column large-2 small-6 ";

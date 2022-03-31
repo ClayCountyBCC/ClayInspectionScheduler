@@ -75,8 +75,11 @@ namespace ClayInspectionScheduler.Models
           display_name = up.DisplayName;
 
 #if DEBUG
-          current_access = access_type.basic_access;
-          return;
+          if (testingPublicUser)
+          {
+            current_access = access_type.basic_access;
+            return;
+          }
 #endif
 
           if (testingPublicUser && !Constants.UseProduction())
