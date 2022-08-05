@@ -15,6 +15,8 @@ namespace ClayInspectionScheduler.Models
 
     public string InspCd { get; set; }
 
+    public string SubType { get; set; }
+
     public bool Final { get; set; }
 
     public bool PreInspection { get; set; }
@@ -34,6 +36,7 @@ namespace ClayInspectionScheduler.Models
         SELECT
           DISTINCT I.InsDesc,
           LTRIM(RTRIM(I.InspCd)) InspCd,
+          SubType,
           Final,
           PreInspection
         FROM

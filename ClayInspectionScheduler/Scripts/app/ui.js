@@ -117,7 +117,7 @@ var InspSched;
             return og;
         }
         function buildPermitSelectOption(permit, key) {
-            var label = getInspTypeString(permit.PermitNo[0]);
+            var label = getInspTypeString(permit.PermitNo[0], permit.PermitTypeString);
             var option = document.createElement("option");
             option.setAttribute("value", permit.PermitNo.trim());
             option.setAttribute("label", permit.PermitNo + "  (" + label + ")");
@@ -763,7 +763,8 @@ var InspSched;
         UI.BuildScheduler = BuildScheduler;
         function LoadInspTypeSelect(key) {
             var permitType = key[0];
-            var label = getInspTypeString(permitType);
+            var permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === key; })[0];
+            var label = getInspTypeString(permitType, permit.PermitTypeString);
             var InspTypeList = document.getElementById('InspTypeSelect');
             var optionLabel = document.createElement("option");
             clearElement(InspTypeList);
@@ -772,7 +773,6 @@ var InspSched;
             optionLabel.selected;
             optionLabel.value = "";
             InspTypeList.appendChild(optionLabel);
-            var permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === key; })[0];
             var filteredInspectionTypes = InspSched.InspectionTypes.filter(function (inspectionType) {
                 if (permitType == "9" || permitType == "0") {
                     permitType = "1";
@@ -789,7 +789,11 @@ var InspSched;
             //for (let type of InspSched.InspectionTypes)
             for (var _i = 0, filteredInspectionTypes_1 = filteredInspectionTypes; _i < filteredInspectionTypes_1.length; _i++) {
                 var type = filteredInspectionTypes_1[_i];
-                if (type.InspCd[0] == permitType) {
+                var thisInspType = type.SubType;
+                if (type.SubType == "IR") {
+                    var typeAgain = type.SubType;
+                }
+                if (type.SubType == permit.PermitTypeString) {
                     var option = document.createElement("option");
                     option.label = type.InsDesc;
                     option.value = type.InspCd;
@@ -833,7 +837,8 @@ var InspSched;
           Do Somethings
         
         ***********************************/
-        function getInspTypeString(InspType) {
+        function getInspTypeString(InspType, typeString) {
+            if (typeString === void 0) { typeString = ""; }
             switch (InspType) {
                 case "1":
                 case "0":
@@ -842,6 +847,9 @@ var InspSched;
                 case "2":
                     return "Electrical";
                 case "3":
+                    if (typeString == "IR") {
+                        return "Irrigation";
+                    }
                     return "Plumbing";
                 case "4":
                     return "Mechanical";

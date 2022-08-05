@@ -171,7 +171,7 @@ namespace InspSched.UI
   function buildPermitSelectOption(permit: Permit, key: string): HTMLElement
   {
 
-    let label: string = getInspTypeString(permit.PermitNo[0]);
+    let label: string = getInspTypeString(permit.PermitNo[0], permit.PermitTypeString);
     let option: HTMLOptionElement = (<HTMLOptionElement>document.createElement("option"));
 
     option.setAttribute("value", permit.PermitNo.trim());
@@ -1089,7 +1089,9 @@ namespace InspSched.UI
   {
 
     let permitType: string = key[0];
-    var label: string = getInspTypeString(permitType);
+
+    let permit: Permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === key })[0];
+    var label: string = getInspTypeString(permitType,permit.PermitTypeString);
 
     let InspTypeList: HTMLSelectElement = (<HTMLSelectElement>document.getElementById('InspTypeSelect'));
     let optionLabel: HTMLOptionElement = (<HTMLOptionElement>document.createElement("option"));
@@ -1102,7 +1104,7 @@ namespace InspSched.UI
     optionLabel.value = "";
     InspTypeList.appendChild(optionLabel);
 
-    let permit: Permit = InspSched.CurrentPermits.filter(function (p) { return p.PermitNo === key })[0];
+    
     let filteredInspectionTypes = InspSched.InspectionTypes.filter(
       function (inspectionType)
       {
@@ -1110,6 +1112,7 @@ namespace InspSched.UI
         {
           permitType = "1";
         }
+
         if (inspectionType.InspCd[0] == permitType)
         {
           if (permit.NoFinalInspections)
@@ -1126,7 +1129,14 @@ namespace InspSched.UI
     //for (let type of InspSched.InspectionTypes)
     for (let type of filteredInspectionTypes)
     {
-      if (type.InspCd[0] == permitType)
+      var thisInspType = type.SubType;
+
+      if (type.SubType == "IR")
+      {
+        var typeAgain = type.SubType;
+      }
+
+      if (type.SubType == permit.PermitTypeString)
       {
         let option: HTMLOptionElement = <HTMLOptionElement>document.createElement("option");
         option.label = type.InsDesc;
@@ -1189,8 +1199,9 @@ namespace InspSched.UI
     Do Somethings
   
   ***********************************/
-  function getInspTypeString(InspType: string)
+  function getInspTypeString(InspType: string, typeString: string = "")
   {
+
     switch (InspType)
     {
       case "1":
@@ -1200,6 +1211,9 @@ namespace InspSched.UI
       case "2":
         return "Electrical";
       case "3":
+        if (typeString == "IR") {
+          return "Irrigation";
+        }
         return "Plumbing";
       case "4":
         return "Mechanical";

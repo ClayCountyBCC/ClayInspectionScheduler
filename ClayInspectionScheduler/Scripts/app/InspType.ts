@@ -7,6 +7,7 @@ namespace InspSched
   {
     InsDesc: string;
     InspCd: string;
+    SubType: string;
     Final: boolean;
 
 
@@ -17,6 +18,7 @@ namespace InspSched
 
     public InsDesc: string;
     public InspCd: string;
+    public SubType: string;
     public Final: boolean;
 
     constructor()

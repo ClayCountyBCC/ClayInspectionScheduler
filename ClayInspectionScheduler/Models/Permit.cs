@@ -51,24 +51,9 @@ namespace ClayInspectionScheduler.Models
     public List<Charge> Charges { get; set; } = new List<Charge>();
 
     public List<Hold> Holds { get; set; }
-    private string PermitTypeString
+    public string PermitTypeString
     {
-      get
-      {
-        switch (this.PermitNo[0].ToString())
-        {
-          case "2":
-            return "EL";
-          case "3":
-            return "PL";
-          case "4":
-            return "ME";
-          case "6":
-            return "FR";
-          default:
-            return "BL";
-        }
-      }
+      get; set;
     }
 
     public DateCache Dates
@@ -111,9 +96,58 @@ namespace ClayInspectionScheduler.Models
       foreach (Permit p in permitlist)
       {
         p.Charges = Charge.GetCharges(p.PermitNo, DoImpactFeesMatter);
+        
+        p.SetIrrigationPermitTypeString();
       }
 
       return permitlist;
+    }
+
+    private void SetIrrigationPermitTypeString()
+    {
+
+
+
+      switch (this.PermitNo[0])
+      {
+        case '1':
+          this.PermitTypeString = "BL";
+          break;
+        case '2':
+          this.PermitTypeString = "EL";
+          break;
+        case '3':
+          var dbArgs = new DynamicParameters();
+          dbArgs.Add("@PermitNo", this.PermitNo);
+          string sql = @"
+        
+              USE WATSC;
+        
+              SELECT
+                PermitNo
+              FROM bpAssocChrg
+              WHERE PermitNo = @PermitNo
+                AND ChrgCd = 'IRR12'
+
+            ";
+
+          var isIrrigationPermit = Constants.Get_Data<string>(sql, dbArgs);
+          if (isIrrigationPermit.Count() > 0)
+          {
+            this.PermitTypeString = "IR";
+            break;
+          }
+          this.PermitTypeString = "PL";
+          break;
+        case '4':
+          this.PermitTypeString = "ME";
+          break;
+        case '6':
+          this.PermitTypeString = "FR";
+          break;
+
+      }
+
     }
 
     public static List<Permit> Get(
@@ -162,10 +196,13 @@ namespace ClayInspectionScheduler.Models
           string host = Constants.UseProduction() ? "claybccims" : "claybccimstrn";
           foreach (Permit l in permits)
           {
+            string permitType = l.PermitTypeString == "IR" ? "PL" : l.PermitTypeString;
+            
 
-            l.Permit_URL = l.PermitTypeString == "BL" ?
+            l.Permit_URL = permitType == "BL" ?
+
               $@"http://{host}/WATSWeb/Permit/MainBL.aspx?PermitNo={l.PermitNo}&Nav=PL&OperId=&PopUp=" :
-              $@"http://{host}/WATSWeb/Permit/APermit{l.PermitTypeString}.aspx?PermitNo={l.PermitNo}";
+              $@"http://{host}/WATSWeb/Permit/APermit{permitType}.aspx?PermitNo={l.PermitNo}";
             l.access = CurrentAccess;
             if (l.access == UserAccess.access_type.public_access)
             {

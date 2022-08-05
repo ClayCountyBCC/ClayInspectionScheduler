@@ -17,6 +17,7 @@ namespace InspSched
   {
     access: access_type;
     PermitNo: string;
+    PermitTypeString: string;
     ProjAddrCombined: string;
     ProjCity: string;
     Confidential: number;
@@ -34,6 +35,7 @@ namespace InspSched
   {
     public access: access_type;
     public PermitNo: string;
+    public PermitTypeString: string;
     public ProjAddrCombined: string;
     public ProjCity: string;
     public Confidential: number;
